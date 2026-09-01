@@ -301,21 +301,25 @@
         <!-- SVG Architectural Blueprint (Left 8 Cols) -->
         <div class="lg:col-span-8 bg-white p-4 sm:p-6 rounded-3xl border border-slate-200 shadow-sm relative">
           
-          <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3 border-b border-slate-100 pb-3">
             <div class="flex items-center gap-2 text-xs text-slate-500 font-medium">
               <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
               <span>Planta Vetorial Oficial • Clique em qualquer sala para ver os detalhes</span>
             </div>
-            <div class="flex items-center gap-3 text-xs text-slate-400">
-              <span class="flex items-center gap-1"><span class="w-3 h-3 bg-amber-100 border border-[#d4a94f] rounded"></span> Salas</span>
-              <span class="flex items-center gap-1"><span class="w-3 h-3 bg-pink-100 border border-pink-400 rounded"></span> Costura</span>
-              <span class="flex items-center gap-1"><span class="w-3 h-3 bg-purple-100 border border-purple-400 rounded"></span> Carlo Acutis (Ext.)</span>
+            
+            <!-- Zoom Toolbar -->
+            <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-2xs self-start sm:self-auto">
+              <span class="text-[11px] font-bold text-slate-500 px-1.5 flex items-center gap-1">🔍 Zoom:</span>
+              <button onclick="changeBlueprintZoom('catequetico', -0.2)" class="w-6 h-6 bg-white hover:bg-slate-200 rounded-lg text-xs font-bold text-slate-700 transition flex items-center justify-center shadow-2xs" title="Diminuir Zoom">➖</button>
+              <span id="zoom-val-catequetico" class="text-xs font-black text-slate-800 w-11 text-center select-none">100%</span>
+              <button onclick="changeBlueprintZoom('catequetico', 0.2)" class="w-6 h-6 bg-white hover:bg-slate-200 rounded-lg text-xs font-bold text-slate-700 transition flex items-center justify-center shadow-2xs" title="Aumentar Zoom">➕</button>
+              <button onclick="resetBlueprintZoom('catequetico')" class="px-2 h-6 bg-white hover:bg-slate-200 rounded-lg text-[10px] font-bold text-slate-700 transition flex items-center justify-center shadow-2xs" title="Redefinir para 100%">↺ 100%</button>
             </div>
           </div>
 
           <!-- Interactive SVG Floor Plan -->
-          <div class="w-full flex justify-center overflow-x-auto py-2">
-            <svg viewBox="0 0 940 1740" class="w-full max-w-[650px] h-auto drop-shadow-sm select-none" xmlns="http://www.w3.org/2000/svg">
+          <div id="svg-container-catequetico" class="w-full flex justify-center overflow-x-auto overflow-y-hidden py-2" style="touch-action: pan-x pan-y;">
+            <svg id="svg-blueprint-catequetico" viewBox="0 -30 940 1800" class="w-full max-w-[650px] h-auto drop-shadow-sm select-none" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <linearGradient id="wallGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stop-color="#1e293b"/>
@@ -799,20 +803,25 @@
         <!-- SVG Architectural Blueprint (Left 8 Cols) -->
         <div class="lg:col-span-8 bg-white p-4 sm:p-6 rounded-3xl border border-slate-200 shadow-sm relative">
           
-          <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3 border-b border-slate-100 pb-3">
             <div class="flex items-center gap-2 text-xs text-slate-500 font-medium">
               <span class="inline-block w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse"></span>
               <span>Planta Vetorial Oficial do Salão Paroquial &amp; Sala 17</span>
             </div>
-            <div class="flex items-center gap-3 text-xs text-slate-400">
-              <span class="flex items-center gap-1"><span class="w-3 h-3 bg-blue-100 border border-blue-500 rounded"></span> Salas</span>
-              <span class="flex items-center gap-1"><span class="w-3 h-3 bg-amber-100 border border-[#d4a94f] rounded"></span> Portas de Acesso</span>
+            
+            <!-- Zoom Toolbar -->
+            <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-2xs self-start sm:self-auto">
+              <span class="text-[11px] font-bold text-slate-500 px-1.5 flex items-center gap-1">🔍 Zoom:</span>
+              <button onclick="changeBlueprintZoom('paroquial', -0.2)" class="w-6 h-6 bg-white hover:bg-slate-200 rounded-lg text-xs font-bold text-slate-700 transition flex items-center justify-center shadow-2xs" title="Diminuir Zoom">➖</button>
+              <span id="zoom-val-paroquial" class="text-xs font-black text-slate-800 w-11 text-center select-none">100%</span>
+              <button onclick="changeBlueprintZoom('paroquial', 0.2)" class="w-6 h-6 bg-white hover:bg-slate-200 rounded-lg text-xs font-bold text-slate-700 transition flex items-center justify-center shadow-2xs" title="Aumentar Zoom">➕</button>
+              <button onclick="resetBlueprintZoom('paroquial')" class="px-2 h-6 bg-white hover:bg-slate-200 rounded-lg text-[10px] font-bold text-slate-700 transition flex items-center justify-center shadow-2xs" title="Redefinir para 100%">↺ 100%</button>
             </div>
           </div>
 
           <!-- Interactive SVG Floor Plan for Paroquial Hall -->
-          <div class="w-full flex justify-center overflow-x-auto py-2">
-            <svg viewBox="0 0 1260 840" class="w-full max-w-[900px] h-auto drop-shadow-sm select-none" xmlns="http://www.w3.org/2000/svg">
+          <div id="svg-container-paroquial" class="w-full flex justify-center overflow-x-auto overflow-y-hidden py-2" style="touch-action: pan-x pan-y;">
+            <svg id="svg-blueprint-paroquial" viewBox="0 -140 1280 1020" class="w-full max-w-[900px] h-auto drop-shadow-sm select-none" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <linearGradient id="wallGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stop-color="#1e293b"/>
@@ -858,15 +867,15 @@
               <!-- ============================================================ -->
               <g transform="translate(390, 50)">
                 <!-- Abertura na parede -->
-                <rect x="-40" y="-10" width="80" height="20" fill="#ffffff"/>
+                <rect x="-50" y="-10" width="100" height="20" fill="#ffffff"/>
                 <!-- Arco de porta abrindo para cima -->
-                <path d="M -20 0 A 45 45 0 0 1 25 -45" fill="none" stroke="#d4a94f" stroke-width="2.5" class="door-arc"/>
-                <line x1="-20" y1="0" x2="-20" y2="-45" stroke="#b45309" stroke-width="3"/>
+                <path d="M -25 0 A 50 50 0 0 1 25 -50" fill="none" stroke="#d4a94f" stroke-width="3" class="door-arc"/>
+                <line x1="-25" y1="0" x2="-25" y2="-50" stroke="#b45309" stroke-width="3.5"/>
                 <!-- Seta indicativa para cima -->
-                <path d="M 3 -54 L 3 -76 M -4 -68 L 3 -78 L 10 -68" stroke="#d4a94f" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                <!-- Badge Dourado -->
-                <rect x="-105" y="-102" width="215" height="26" rx="8" fill="#d4a94f" stroke="#b45309" stroke-width="1.5" filter="url(#cardShadow)"/>
-                <text x="3" y="-85" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="10.5" font-weight="900" fill="#1e293b">🏫 SAÍDA → CENTRO CATEQUÉTICO</text>
+                <path d="M 0 -58 L 0 -84 M -8 -74 L 0 -86 L 8 -74" stroke="#b45309" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <!-- Badge Dourado Grande -->
+                <rect x="-160" y="-126" width="320" height="38" rx="12" fill="#d4a94f" stroke="#92400e" stroke-width="2.5" filter="url(#cardShadow)"/>
+                <text x="0" y="-102" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="13.5" font-weight="900" fill="#0f172a">🏫 SAÍDA → CENTRO CATEQUÉTICO</text>
               </g>
 
               <!-- ============================================================ -->
@@ -874,15 +883,15 @@
               <!-- ============================================================ -->
               <g transform="translate(390, 710)">
                 <!-- Abertura na parede -->
-                <rect x="-40" y="-10" width="80" height="20" fill="#ffffff"/>
+                <rect x="-50" y="-10" width="100" height="20" fill="#ffffff"/>
                 <!-- Arco de porta abrindo para baixo -->
-                <path d="M -20 0 A 45 45 0 0 0 25 45" fill="none" stroke="#3b82f6" stroke-width="2.5" class="door-arc"/>
-                <line x1="-20" y1="0" x2="-20" y2="45" stroke="#1d4ed8" stroke-width="3"/>
+                <path d="M -25 0 A 50 50 0 0 0 25 50" fill="none" stroke="#3b82f6" stroke-width="3" class="door-arc"/>
+                <line x1="-25" y1="0" x2="-25" y2="50" stroke="#1d4ed8" stroke-width="3.5"/>
                 <!-- Seta indicativa para baixo -->
-                <path d="M 3 54 L 3 76 M -4 68 L 3 78 L 10 68" stroke="#3b82f6" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                <!-- Badge Azul Escuro -->
-                <rect x="-120" y="78" width="245" height="26" rx="8" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5" filter="url(#cardShadow)"/>
-                <text x="3" y="95" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="10" font-weight="800" fill="#93c5fd">🚗 SAÍDA → ESTACIONAMENTO DA PARÓQUIA</text>
+                <path d="M 0 58 L 0 84 M -8 74 L 0 86 L 8 74" stroke="#0284c7" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <!-- Badge Azul Escuro Grande -->
+                <rect x="-210" y="90" width="420" height="42" rx="12" fill="#0f172a" stroke="#38bdf8" stroke-width="2.5" filter="url(#cardShadow)"/>
+                <text x="0" y="116" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="13.5" font-weight="900" fill="#38bdf8">🚗 SAÍDA → ESTACIONAMENTO DA PARÓQUIA</text>
               </g>
 
               <!-- Cozinha (Top Right) -->
@@ -2707,6 +2716,39 @@
         }
       } catch (e) {
         console.error('Erro ao carregar organograma salvo:', e);
+      }
+    }
+
+    // =============================================
+    // ZOOM INTERATIVO DAS PLANTAS
+    // Centro Catequético e Salão Paroquial
+    // =============================================
+    const blueprintZoom = {
+      catequetico: 1.0,
+      paroquial: 1.0
+    };
+
+    function changeBlueprintZoom(blueprintId, delta) {
+      blueprintZoom[blueprintId] = Math.min(Math.max(0.6, +(blueprintZoom[blueprintId] + delta).toFixed(1)), 2.5);
+      applyBlueprintZoom(blueprintId);
+    }
+
+    function resetBlueprintZoom(blueprintId) {
+      blueprintZoom[blueprintId] = 1.0;
+      applyBlueprintZoom(blueprintId);
+    }
+
+    function applyBlueprintZoom(blueprintId) {
+      const svg = document.getElementById(`svg-blueprint-${blueprintId}`);
+      const label = document.getElementById(`zoom-val-${blueprintId}`);
+      const zoom = blueprintZoom[blueprintId];
+      if (svg) {
+        svg.style.transform = `scale(${zoom})`;
+        svg.style.transformOrigin = blueprintId === 'catequetico' ? 'top center' : 'center center';
+        svg.style.transition = 'transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1)';
+      }
+      if (label) {
+        label.textContent = `${Math.round(zoom * 100)}%`;
       }
     }
 
