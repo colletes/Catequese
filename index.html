@@ -3,34 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Plantas Oficiais e Guia de Salas • Santuário Imaculado Coração de Maria</title>
+  <title>Catequese Paroquial 2026 • Santuário Imaculado Coração de Maria</title>
+  
+  <!-- Favicon Oficial do Santuário -->
+  <link rel="icon" href="https://imaculadocoracaodf.com.br/wp-content/uploads/2024/01/cropped-PICM-BrasAo-para-impressos-32x32.png" sizes="32x32">
+  <link rel="icon" href="https://imaculadocoracaodf.com.br/wp-content/uploads/2024/01/cropped-PICM-BrasAo-para-impressos-192x192.png" sizes="192x192">
+  <link rel="apple-touch-icon" href="https://imaculadocoracaodf.com.br/wp-content/uploads/2024/01/cropped-PICM-BrasAo-para-impressos-180x180.png">
+
+  <!-- Tailwind CSS & html2canvas -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  
+  <!-- Tipografia Oficial do Santuário (Questrial, Nunito, Marcellus, Outfit, Roboto) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Questrial&family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Nunito:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,400;1,600&family=Outfit:wght@300;400;500;600;700;800;900&family=Questrial&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+  
   <style>
     :root {
-      --gold-primary: #d4a94f;
-      --gold-dark: #b88d36;
-      --gold-light: #f5e4b7;
-      --navy-main: #0f172a;
-      --navy-card: #1e293b;
+      --color-gold: #d4a94f;
+      --color-gold-hover: #facf75;
+      --color-gold-dark: #b88d36;
+      --color-charcoal: #3b3d42;
+      --color-navy: #1e293b;
+      --color-marian: #0284c7;
+      --color-cream: #fdfbf7;
     }
     body {
       font-family: 'Nunito', sans-serif;
       background-color: #f8fafc;
-      color: #1e293b;
+      color: #3b3d42;
     }
-    h1, h2, h3, h4, .font-heading {
+    h1, h2, h3, h4, .font-heading, .font-questrial {
       font-family: 'Questrial', sans-serif;
+    }
+    .font-marcellus {
+      font-family: 'Marcellus', serif;
     }
     .room-card {
       transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .room-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 10px 25px -5px rgba(212, 169, 79, 0.22), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 12px 28px -5px rgba(212, 169, 79, 0.25), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
     }
     .svg-room {
       cursor: pointer;
@@ -80,38 +95,36 @@
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col antialiased">
+<body class="min-h-screen flex flex-col antialiased bg-[#fdfbf7]/60">
 
   <!-- ========================================== -->
   <!-- AUTHENTICATION GATE (Lock Screen)           -->
   <!-- ========================================== -->
   <div id="auth-gate" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 transition-opacity duration-300">
-    <div class="bg-slate-900 border-2 border-[#d4a94f]/50 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl text-center relative overflow-hidden">
+    <div class="bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border-2 border-[#d4a94f]/60 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl text-center relative overflow-hidden">
       <!-- Glow background -->
-      <div class="absolute -top-24 -right-24 w-48 h-48 bg-[#d4a94f]/15 rounded-full blur-3xl pointer-events-none"></div>
-      <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -top-24 -right-24 w-48 h-48 bg-[#d4a94f]/20 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-sky-500/15 rounded-full blur-3xl pointer-events-none"></div>
 
-      <!-- Icon & Badges -->
-      <div class="relative mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-[#d4a94f] p-0.5 shadow-lg shadow-amber-500/20 mb-4 flex items-center justify-center">
-        <div class="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center">
-          <span class="text-2xl">⛪</span>
-        </div>
+      <!-- Brasão Oficial do Santuário -->
+      <div class="relative mx-auto w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-400/30 to-[#d4a94f]/10 p-1.5 shadow-lg shadow-amber-500/10 mb-4 flex items-center justify-center border border-[#d4a94f]/40 backdrop-blur-sm">
+        <img src="https://imaculadocoracaodf.com.br/wp-content/uploads/2024/01/PICM-BrasAo-para-impressos.png" alt="Brasão Santuário" class="w-full h-full object-contain drop-shadow-md">
       </div>
 
-      <span class="inline-block text-[11px] font-bold tracking-widest text-[#d4a94f] uppercase bg-amber-950/80 px-3 py-1 rounded-full border border-amber-500/40 mb-2">
+      <span class="inline-block text-[10.5px] font-bold tracking-widest text-[#d4a94f] uppercase bg-amber-950/80 px-3.5 py-1 rounded-full border border-amber-500/40 mb-2 font-heading">
         Santuário Imaculado Coração de Maria
       </span>
-      <h2 class="text-xl sm:text-2xl font-black font-heading text-white mb-1">
-        Portal da Catequese
+      <h2 class="text-2xl sm:text-3xl font-bold font-heading text-white mb-1">
+        Portal da Catequese 2026
       </h2>
-      <p class="text-xs text-slate-400 mb-6">
-        Área de acesso restrito a catequistas, coordenadores e paroquianos autorizados.
+      <p class="text-xs text-slate-400 mb-6 font-medium">
+        Área oficial de consulta para catequistas, coordenação e paroquianos.
       </p>
 
       <!-- Form -->
       <form id="auth-form" onsubmit="handleSiteLogin(event)" class="space-y-4 text-left">
         <div>
-          <label for="auth-password-input" class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+          <label for="auth-password-input" class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5 font-heading">
             Senha de Acesso
           </label>
           <div class="relative">
@@ -146,51 +159,51 @@
 
         <button
           type="submit"
-          class="w-full bg-gradient-to-r from-[#d4a94f] to-[#b88d36] hover:from-[#e6c27a] hover:to-[#d4a94f] text-slate-950 font-black py-3 rounded-xl text-sm shadow-lg shadow-amber-500/20 transition transform active:scale-98 flex items-center justify-center gap-2"
+          class="w-full bg-gradient-to-r from-[#d4a94f] to-[#b88d36] hover:from-[#facf75] hover:to-[#d4a94f] text-slate-950 font-black py-3 rounded-xl text-sm shadow-lg shadow-amber-500/25 transition transform active:scale-98 flex items-center justify-center gap-2 font-heading tracking-wide"
         >
           <span>🔓 Entrar no Portal</span>
         </button>
       </form>
 
-      <div class="mt-6 pt-4 border-t border-slate-800 text-[11px] text-slate-500">
-        Pastoral da Catequese • Park Way / DF
+      <div class="mt-6 pt-4 border-t border-slate-800/80 text-[11px] text-slate-500 flex items-center justify-center gap-1.5">
+        <span>⛪</span> <span>Arquidiocese de Brasília • Santuário ICM</span>
       </div>
     </div>
   </div>
 
   <!-- TOP BRANDING BAR (Parish Header) -->
-  <header class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white border-b-4 border-[#d4a94f] shadow-lg sticky top-0 z-40">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
+  <header class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 text-white border-b-2 border-[#d4a94f]/80 shadow-xl sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
       
-      <!-- Logo & Title -->
-      <div class="flex items-center gap-4">
-        <div class="relative bg-white/10 p-1.5 rounded-xl border border-amber-400/30 backdrop-blur-sm shadow-inner flex-shrink-0">
-          <img src="https://imaculadocoracaodf.com.br/wp-content/uploads/2024/01/foto-jubileu.png" alt="Logotipo Santuário" class="h-12 w-auto object-contain rounded-lg drop-shadow">
-        </div>
+      <!-- Logo & Title with Official Parish Crest -->
+      <div class="flex items-center gap-3.5">
+        <a href="https://imaculadocoracaodf.com.br/" target="_blank" rel="noopener" class="relative bg-white/10 hover:bg-white/15 p-1 rounded-xl border border-[#d4a94f]/40 backdrop-blur-sm shadow-inner flex-shrink-0 transition group" title="Visitar Site Oficial do Santuário">
+          <img src="https://imaculadocoracaodf.com.br/wp-content/uploads/2024/01/PICM-BrasAo-para-impressos.png" alt="Brasão Santuário ICM" class="h-12 w-auto object-contain drop-shadow group-hover:scale-105 transition">
+        </a>
         <div>
           <div class="flex items-center gap-2">
-            <span class="text-xs font-bold tracking-widest text-[#d4a94f] uppercase bg-amber-950/60 px-2 py-0.5 rounded border border-amber-500/30">Pastoral da Catequese Oficial</span>
-            <span class="text-xs text-slate-300 hidden sm:inline">• Park Way / Brasília - DF</span>
+            <span class="text-[10px] sm:text-[11px] font-bold tracking-widest text-[#d4a94f] uppercase bg-amber-950/80 px-2 py-0.5 rounded-md border border-amber-500/30 font-heading">Catequese Paroquial • 2026</span>
+            <span class="text-[11px] text-slate-300 hidden sm:inline font-medium">• Arquidiocese de Brasília</span>
           </div>
-          <h1 class="text-lg sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2 font-heading">
+          <h1 class="text-base sm:text-xl md:text-2xl font-bold tracking-tight text-white flex items-center gap-2 font-heading">
             Santuário Imaculado Coração de Maria
           </h1>
-          <p class="text-xs text-slate-300">Guia e Plantas das Salas de Catequese e Salão Paroquial</p>
+          <p class="text-[11px] sm:text-xs text-slate-300 font-medium">Guia Oficial de Salas, Plantas Baixas e Cronograma de Formação</p>
         </div>
       </div>
 
       <!-- Action Buttons -->
-      <div class="flex items-center gap-2.5 no-print w-full md:w-auto justify-end">
-        <button onclick="window.print()" class="inline-flex items-center gap-2 bg-[#d4a94f] hover:bg-[#e6c27a] text-slate-950 font-bold px-4 py-2 rounded-xl text-xs sm:text-sm shadow-md transition transform active:scale-95">
+      <div class="flex items-center gap-2 no-print w-full md:w-auto justify-end">
+        <button onclick="window.print()" class="inline-flex items-center gap-1.5 bg-gradient-to-r from-[#d4a94f] to-[#b88d36] hover:from-[#facf75] hover:to-[#d4a94f] text-slate-950 font-black px-3.5 py-2 rounded-xl text-xs sm:text-sm shadow-md shadow-amber-500/15 transition transform active:scale-95 font-heading">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
           <span>Imprimir / PDF</span>
         </button>
-        <button onclick="logoutSite()" class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-rose-900/40 text-slate-300 hover:text-rose-300 border border-slate-700 hover:border-rose-500/50 px-3 py-2 rounded-xl text-xs sm:text-sm transition" title="Bloquear acesso e exigir senha novamente">
+        <button onclick="logoutSite()" class="inline-flex items-center gap-1.5 bg-slate-800/90 hover:bg-rose-950/50 text-slate-300 hover:text-rose-200 border border-slate-700 hover:border-rose-500/50 px-3 py-2 rounded-xl text-xs sm:text-sm transition font-medium" title="Bloquear acesso e exigir senha novamente">
           <span>🔒 Bloquear</span>
         </button>
-        <a href="https://imaculadocoracaodf.com.br/" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-600 px-3 py-2 rounded-xl text-xs sm:text-sm transition">
+        <a href="https://imaculadocoracaodf.com.br/" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-2 rounded-xl text-xs sm:text-sm transition font-medium" title="Ir para o portal da Paróquia">
           <svg class="w-4 h-4 text-[#d4a94f]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-          <span class="hidden sm:inline">Site Oficial</span>
+          <span class="hidden sm:inline">Site Paroquial</span>
         </a>
       </div>
 
@@ -198,34 +211,34 @@
   </header>
 
   <!-- NAVIGATION TABS & FILTER BAR -->
-  <section class="bg-white border-b border-slate-200 shadow-sm sticky top-[73px] z-30 no-print">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
+  <section class="bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-xs sticky top-[71px] z-30 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
       <div class="flex flex-col lg:flex-row items-center justify-between gap-3">
         
         <!-- Tabs -->
-        <nav class="flex items-center gap-1.5 p-1 bg-slate-100/90 rounded-2xl border border-slate-200 w-full lg:w-auto overflow-x-auto">
-          <button id="tab-btn-catequetico" onclick="switchTab('catequetico')" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition whitespace-nowrap bg-white text-slate-900 shadow-sm border border-slate-200/80">
+        <nav class="flex items-center gap-1.5 p-1 bg-slate-100/90 rounded-2xl border border-slate-200/80 w-full lg:w-auto overflow-x-auto">
+          <button id="tab-btn-catequetico" onclick="switchTab('catequetico')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition whitespace-nowrap bg-slate-900 text-white shadow-xs border border-slate-800">
             <span class="w-2.5 h-2.5 rounded-full bg-[#d4a94f]"></span>
             <span>Centro Catequético</span>
-            <span class="bg-amber-100 text-amber-900 text-[11px] font-bold px-2 py-0.5 rounded-full">Salas 01 a 08, Auditório & Costura</span>
+            <span class="bg-amber-950 text-[#d4a94f] border border-amber-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">Salas 01 a 08</span>
           </button>
-          <button id="tab-btn-paroquial" onclick="switchTab('paroquial')" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/60">
+          <button id="tab-btn-paroquial" onclick="switchTab('paroquial')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/70">
             <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
             <span>Salão Paroquial (Subsolo)</span>
-            <span class="bg-blue-100 text-blue-900 text-[11px] font-bold px-2 py-0.5 rounded-full">Salas 11 a 17 & Anexo</span>
+            <span class="bg-blue-100 text-blue-900 text-[10px] font-bold px-2 py-0.5 rounded-full">Salas 11 a 17</span>
           </button>
-          <button id="tab-btn-guia" onclick="switchTab('guia')" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/60">
-            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-            <span>Organograma & Turmas</span>
+          <button id="tab-btn-guia" onclick="switchTab('guia')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/70">
+            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+            <span>Organograma &amp; Turmas</span>
           </button>
-          <button id="tab-btn-campus" onclick="switchTab('campus')" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/60">
+          <button id="tab-btn-campus" onclick="switchTab('campus')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/70">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
             <span>Complexo Paroquial</span>
           </button>
-          <button id="tab-btn-eventos" onclick="switchTab('eventos')" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/60">
+          <button id="tab-btn-eventos" onclick="switchTab('eventos')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/70">
             <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-            <span>Eventos & Retiros</span>
-            <span class="bg-rose-100 text-rose-900 text-[11px] font-bold px-2 py-0.5 rounded-full">Cronograma 2026</span>
+            <span>Eventos &amp; Retiros</span>
+            <span class="bg-rose-100 text-rose-900 text-[10px] font-bold px-2 py-0.5 rounded-full">2026</span>
           </button>
         </nav>
 
@@ -236,7 +249,7 @@
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
-            <input type="text" id="global-search" oninput="handleSearch(this.value)" placeholder="Buscar catequista, turma, etapa ou sala..." class="w-full pl-9 pr-8 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#d4a94f] focus:ring-2 focus:ring-amber-200/50 outline-none transition">
+            <input type="text" id="global-search" oninput="handleSearch(this.value)" placeholder="Buscar catequista, turma, etapa ou sala..." class="w-full pl-9 pr-8 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200/90 rounded-xl focus:bg-white focus:border-[#d4a94f] focus:ring-2 focus:ring-amber-200/50 outline-none transition placeholder:text-slate-400">
             <button id="clear-search-btn" onclick="clearSearch()" class="hidden absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
@@ -245,7 +258,7 @@
           <!-- Quick Day / Period Filter -->
           <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 flex-shrink-0 text-xs overflow-x-auto">
             <button onclick="filterByPeriod('all')" class="period-filter-btn px-2 py-1 rounded-lg font-bold bg-white text-slate-800 shadow-xs" data-period="all">Todos</button>
-            <button onclick="filterByPeriod('sab-manha')" class="period-filter-btn px-2 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="sab-manha">Sáb 8h30-12h</button>
+            <button onclick="filterByPeriod('sab-manha')" class="period-filter-btn px-2 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="sab-manha">Sáb 8h30</button>
             <button onclick="filterByPeriod('sab-tarde')" class="period-filter-btn px-2 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="sab-tarde">Sáb 15h</button>
             <button onclick="filterByPeriod('seg-noite')" class="period-filter-btn px-2 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="seg-noite">Seg 20h</button>
             <button onclick="filterByPeriod('quarta')" class="period-filter-btn px-2 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="quarta">Qua 16h</button>
@@ -1167,10 +1180,15 @@
             
             <!-- 1. Top Header Box (Raiz do Organograma) -->
             <div class="flex flex-col items-center mb-2">
-              <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 text-white border-2 border-[#d4a94f] px-8 py-3.5 rounded-2xl shadow-lg text-center max-w-lg w-full">
-                <span class="inline-block text-[11px] font-bold tracking-widest text-[#d4a94f] uppercase">Santuário Imaculado Coração de Maria</span>
-                <h1 class="text-lg font-black font-heading tracking-wide text-white">Catequese Paroquial</h1>
-                <p class="text-xs font-medium text-slate-300">Organograma Geral das Etapas e Turmas • 2026</p>
+              <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 text-white border-2 border-[#d4a94f] px-8 py-3.5 rounded-2xl shadow-xl text-center max-w-xl w-full flex items-center justify-center gap-4">
+                <div class="bg-white/10 p-1 rounded-xl border border-[#d4a94f]/40 backdrop-blur-sm shadow-inner flex-shrink-0">
+                  <img src="https://imaculadocoracaodf.com.br/wp-content/uploads/2024/01/PICM-BrasAo-para-impressos.png" alt="Brasão Santuário" class="h-11 w-auto object-contain drop-shadow">
+                </div>
+                <div class="text-center sm:text-left">
+                  <span class="inline-block text-[10px] font-bold tracking-widest text-[#d4a94f] uppercase font-heading">Santuário Imaculado Coração de Maria</span>
+                  <h1 class="text-lg sm:text-xl font-bold font-heading tracking-wide text-white">Catequese Paroquial • 2026</h1>
+                  <p class="text-[11px] font-medium text-slate-300">Organograma Geral das Etapas, Turmas e Salas de Encontro</p>
+                </div>
               </div>
 
               <!-- Tronco Vertical Central -->
@@ -1765,15 +1783,95 @@
 
   </main>
 
-  <!-- FOOTER -->
-  <footer class="bg-slate-900 text-slate-400 border-t border-slate-800 py-6 mt-12 no-print text-xs">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <span class="font-bold text-white font-heading text-sm">Santuário Imaculado Coração de Maria</span>
-        <span>•</span>
-        <span>Pastoral da Catequese Oficial • Park Way / DF</span>
+  <!-- OFFICIAL PARISH FOOTER -->
+  <footer class="bg-gradient-to-b from-slate-900 to-slate-950 text-slate-400 border-t-2 border-[#d4a94f]/60 py-10 mt-14 no-print text-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-8 pb-8 border-b border-slate-800/80">
+        
+        <!-- Col 1: Brasão & Identificação -->
+        <div class="md:col-span-5 space-y-3">
+          <div class="flex items-center gap-3">
+            <div class="bg-white/10 p-1.5 rounded-xl border border-[#d4a94f]/40 backdrop-blur-sm shadow-inner flex-shrink-0">
+              <img src="https://imaculadocoracaodf.com.br/wp-content/uploads/2024/01/PICM-BrasAo-para-impressos.png" alt="Brasão Santuário ICM" class="h-12 w-auto object-contain drop-shadow">
+            </div>
+            <div>
+              <h3 class="text-base font-bold text-white font-heading">Santuário Imaculado Coração de Maria</h3>
+              <p class="text-xs text-[#d4a94f] font-semibold">Arquidiocese de Brasília • Distrito Federal</p>
+            </div>
+          </div>
+          <p class="text-slate-400 text-xs leading-relaxed max-w-md">
+            Portal oficial da <strong>Pastoral da Catequese</strong> para organização de turmas, escala de salas, mapa dos complexos pastorais e cronograma formativo de 2026.
+          </p>
+          <div class="flex items-center gap-2 pt-1 text-[11px] text-slate-400">
+            <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>Ambiente seguro e atualizado para o ano catequético 2026</span>
+          </div>
+        </div>
+
+        <!-- Col 2: Endereço e Atendimento -->
+        <div class="md:col-span-4 space-y-2">
+          <h4 class="text-xs font-bold text-white uppercase tracking-wider font-heading flex items-center gap-2 text-[#d4a94f]">
+            <span>📍</span> Localização &amp; Contato
+          </h4>
+          <ul class="space-y-1.5 text-slate-300 text-xs">
+            <li class="flex items-start gap-2">
+              <span class="text-slate-500">🏢</span>
+              <span>QNM 27, Módulo Especial 01, Ceilândia Norte / Park Way • Brasília - DF</span>
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="text-slate-500">📞</span>
+              <span>Secretaria Paroquial: (61) 3373-3000</span>
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="text-slate-500">💬</span>
+              <span>WhatsApp Atendimento: (61) 99826-9733</span>
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="text-slate-500">✉️</span>
+              <span>contato@imaculadocoracaodf.com.br</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Col 3: Links Oficiais & Redes -->
+        <div class="md:col-span-3 space-y-2">
+          <h4 class="text-xs font-bold text-white uppercase tracking-wider font-heading flex items-center gap-2 text-[#d4a94f]">
+            <span>🌐</span> Canais Oficiais
+          </h4>
+          <ul class="space-y-2 text-xs">
+            <li>
+              <a href="https://imaculadocoracaodf.com.br/" target="_blank" rel="noopener" class="flex items-center gap-2 text-slate-300 hover:text-[#d4a94f] transition group">
+                <span class="w-6 h-6 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-xs group-hover:border-amber-400/50">🔗</span>
+                <span>Portal da Paróquia</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://instagram.com/imaculadocoracaodf" target="_blank" rel="noopener" class="flex items-center gap-2 text-slate-300 hover:text-pink-400 transition group">
+                <span class="w-6 h-6 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-xs group-hover:border-pink-400/50">📸</span>
+                <span>@imaculadocoracaodf</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://wa.me/556199826973?text=Ola!%20Gostaria%20de%20informacoes%20sobre%20a%20Catequese" target="_blank" rel="noopener" class="flex items-center gap-2 text-slate-300 hover:text-emerald-400 transition group">
+                <span class="w-6 h-6 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-xs group-hover:border-emerald-400/50">🟢</span>
+                <span>WhatsApp Catequese</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
       </div>
-      <p class="text-slate-500">Dados cruzados com o Organograma Geral Oficial • UI Guide oficial</p>
+
+      <!-- Sub-footer -->
+      <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-500">
+        <p>© 2026 Santuário Imaculado Coração de Maria • Todos os direitos reservados.</p>
+        <p class="flex items-center gap-2">
+          <span>Identidade Visual sincronizada com</span>
+          <a href="https://imaculadocoracaodf.com.br/" target="_blank" rel="noopener" class="text-[#d4a94f] hover:underline">imaculadocoracaodf.com.br</a>
+        </p>
+      </div>
+
     </div>
   </footer>
 
