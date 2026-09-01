@@ -370,19 +370,28 @@
               
               <!-- Internal Left Wall of Corridor (x=390) -->
               <line x1="390" y1="580" x2="390" y2="700" stroke="#1e293b" stroke-width="8"/>
-              <line x1="390" y1="760" x2="390" y2="940" stroke="#1e293b" stroke-width="8"/>
-              <line x1="390" y1="1000" x2="390" y2="1170" stroke="#1e293b" stroke-width="8"/>
-              <line x1="390" y1="1230" x2="390" y2="1400" stroke="#1e293b" stroke-width="8"/>
-              <line x1="390" y1="1460" x2="390" y2="1550" stroke="#1e293b" stroke-width="8"/>
+              <!-- Door gap for Sala 07 São Rafael (700..750) -->
+              <line x1="390" y1="750" x2="390" y2="940" stroke="#1e293b" stroke-width="8"/>
+              <!-- Door gap for Sala 06 São Miguel (940..990) -->
+              <line x1="390" y1="990" x2="390" y2="1170" stroke="#1e293b" stroke-width="8"/>
+              <!-- Door gap for Sala 04 São Gabriel (1170..1220) -->
+              <line x1="390" y1="1220" x2="390" y2="1425" stroke="#1e293b" stroke-width="8"/>
+              <!-- Door gap for Sala 02 Anjo da Guarda (1425..1475) -->
+              <line x1="390" y1="1475" x2="390" y2="1550" stroke="#1e293b" stroke-width="8"/>
 
               <!-- Internal Right Wall of Corridor (x=550) -->
               <!-- Solid wall separating Sala 08 from corridor/Costura -->
               <line x1="550" y1="450" x2="550" y2="580" stroke="#0f172a" stroke-width="10"/>
-              <!-- Door gap for Auditório -->
-              <line x1="550" y1="580" x2="550" y2="840" stroke="#1e293b" stroke-width="8"/>
-              <line x1="550" y1="900" x2="550" y2="1070" stroke="#1e293b" stroke-width="8"/>
-              <line x1="550" y1="1130" x2="550" y2="1300" stroke="#1e293b" stroke-width="8"/>
-              <line x1="550" y1="1360" x2="550" y2="1550" stroke="#1e293b" stroke-width="8"/>
+              <!-- Wall behind corridor closets (580..745) -->
+              <line x1="550" y1="580" x2="550" y2="745" stroke="#1e293b" stroke-width="8"/>
+              <!-- Door gap for Auditório (745..795) -->
+              <line x1="550" y1="795" x2="550" y2="1075" stroke="#1e293b" stroke-width="8"/>
+              <!-- Door gap for Sala 05 Sta. Jacinta (1075..1125) -->
+              <line x1="550" y1="1125" x2="550" y2="1265" stroke="#1e293b" stroke-width="8"/>
+              <!-- Door gap for Sala 03 São Francisco (1265..1315) -->
+              <line x1="550" y1="1315" x2="550" y2="1425" stroke="#1e293b" stroke-width="8"/>
+              <!-- Door gap for Sala 01 Protomártires (1425..1475) [ABERTA / ALINHADA] -->
+              <line x1="550" y1="1475" x2="550" y2="1550" stroke="#1e293b" stroke-width="8"/>
 
               <!-- ================================================== -->
               <!-- EXTENSÃO SUPERIOR: BANHEIROS, SECRETARIA E SALAS   -->
@@ -552,20 +561,30 @@
               </g>
 
               <!-- ============================================== -->
+              <!-- ARMÁRIOS NO CORREDOR                           -->
+              <!-- (Ficam no corredor, da porta do Auditório      -->
+              <!-- até a parede da Pastoral da Costura)           -->
+              <!-- ============================================== -->
+              <g id="corridor-armarios">
+                <rect x="522" y="180" width="28" height="162" rx="4" fill="#cbd5e1" stroke="#475569" stroke-width="1.5" filter="url(#cardShadow)"/>
+                <!-- Divisões do armário no corredor -->
+                <line x1="522" y1="220" x2="550" y2="220" stroke="#94a3b8" stroke-width="1"/>
+                <line x1="522" y1="260" x2="550" y2="260" stroke="#94a3b8" stroke-width="1"/>
+                <line x1="522" y1="300" x2="550" y2="300" stroke="#94a3b8" stroke-width="1"/>
+                <text x="536" y="260" font-family="'Nunito', sans-serif" font-size="8.5" font-weight="800" fill="#1e293b" transform="rotate(-90 536 260)">ARMÁRIOS NO CORREDOR</text>
+                
+                <!-- Badge indicativo de armários no corredor -->
+                <rect x="425" y="200" width="90" height="18" rx="4" fill="#1e293b" stroke="#cbd5e1" stroke-width="1" filter="url(#cardShadow)"/>
+                <text x="470" y="212" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="8" font-weight="800" fill="#fde047">🗄️ ARMÁRIOS</text>
+              </g>
+
+              <!-- ============================================== -->
               <!-- AUDITÓRIO (BELOW SALA 08 / WITH EXTERNAL DOOR) -->
               <!-- ============================================== -->
               <g id="svg-room-auditorio" class="svg-room" onclick="selectRoom('auditorio')">
                 <rect class="room-bg" x="555" y="185" width="305" height="410" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
-                
-                <!-- Armários do Auditório: acima da porta, estendendo-se até a parede da costura (y=180 a y=340) -->
-                <rect x="555" y="182" width="28" height="158" rx="4" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
-                <!-- Linhas de prateleiras/divisões do armário -->
-                <line x1="555" y1="220" x2="583" y2="220" stroke="#94a3b8" stroke-width="1"/>
-                <line x1="555" y1="260" x2="583" y2="260" stroke="#94a3b8" stroke-width="1"/>
-                <line x1="555" y1="300" x2="583" y2="300" stroke="#94a3b8" stroke-width="1"/>
-                <text x="569" y="260" font-family="'Nunito', sans-serif" font-size="8" font-weight="800" fill="#334155" transform="rotate(-90 569 260)">ARMÁRIOS</text>
 
-                <!-- Internal Door to Corridor (Logo abaixo dos armários) -->
+                <!-- Internal Door to Corridor (Logo abaixo dos armários do corredor) -->
                 <path d="M 550 345 A 45 45 0 0 0 595 390" fill="none" stroke="#d4a94f" stroke-width="1.5" class="door-arc"/>
                 <line x1="550" y1="345" x2="595" y2="345" stroke="#94a3b8" stroke-width="2.5"/>
 
@@ -578,18 +597,18 @@
                 <text x="797" y="584" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="8.5" font-weight="800" fill="#93c5fd">🚪 SAÍDA EXTERNA</text>
 
                 <!-- Badge & Title -->
-                <rect x="590" y="210" width="85" height="26" rx="6" fill="#0f172a"/>
-                <text x="632" y="228" text-anchor="middle" font-family="'Outfit', sans-serif" font-size="12" font-weight="800" fill="#d4a94f">AUDITÓRIO</text>
-                <text x="685" y="229" font-family="'Questrial', sans-serif" font-size="18" font-weight="700" fill="#0f172a">Auditório</text>
+                <rect x="575" y="210" width="85" height="26" rx="6" fill="#0f172a"/>
+                <text x="617" y="228" text-anchor="middle" font-family="'Outfit', sans-serif" font-size="12" font-weight="800" fill="#d4a94f">AUDITÓRIO</text>
+                <text x="670" y="229" font-family="'Questrial', sans-serif" font-size="18" font-weight="700" fill="#0f172a">Auditório</text>
                 
                 <!-- Schedules -->
-                <g transform="translate(590, 255)">
-                  <rect x="0" y="0" width="245" height="72" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+                <g transform="translate(575, 255)">
+                  <rect x="0" y="0" width="260" height="72" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
                   <text x="8" y="18" font-family="'Nunito', sans-serif" font-size="10" font-weight="800" fill="#334155">Sáb 8h30 • Letícia, Eduardo, Cauã, Danilo</text>
                   <text x="8" y="36" font-family="'Nunito', sans-serif" font-size="10" font-weight="800" fill="#047857">Sáb 10h15 • Fábio, Marcelo, Otávio, Patrícia</text>
                   <text x="8" y="54" font-family="'Nunito', sans-serif" font-size="10" font-weight="800" fill="#6d28d9">Seg 20h • Lorena e Natanai (Adultos)</text>
                 </g>
-                <text x="590" y="350" font-family="'Nunito', sans-serif" font-size="10" font-weight="600" fill="#64748b">Crisma de Adultos • Acesso duplo (corredor + externo)</text>
+                <text x="575" y="350" font-family="'Nunito', sans-serif" font-size="10" font-weight="600" fill="#64748b">Crisma de Adultos • Acesso duplo (corredor + externo)</text>
               </g>
 
               <!-- Sala 05 - Santa Jacinta Marto -->
