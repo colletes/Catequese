@@ -395,33 +395,33 @@
                 <rect x="225" y="50" width="55" height="12" fill="#ffffff"/>
                 <path d="M 225 58 A 38 38 0 0 1 263 20" fill="none" stroke="#2563eb" stroke-width="2.5" class="door-arc"/>
                 <line x1="225" y1="58" x2="225" y2="20" stroke="#1d4ed8" stroke-width="3"/>
-                <rect x="220" y="32" width="70" height="16" rx="4" fill="#1e293b"/>
-                <text x="255" y="43" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="8" font-weight="800" fill="#93c5fd">🚪 PORTA ⇧</text>
+                <rect x="218" y="28" width="70" height="16" rx="4" fill="#1e293b"/>
+                <text x="253" y="39" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="8" font-weight="800" fill="#93c5fd">🚪 PORTA ⇧</text>
                 <!-- Conteúdo -->
                 <text x="277" y="160" text-anchor="middle" font-size="34">♂</text>
                 <text x="277" y="195" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="12" font-weight="800" fill="#1d4ed8">MASCULINO</text>
                 <text x="277" y="215" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="10" font-weight="600" fill="#1e40af">Banheiro</text>
               </g>
 
-              <!-- Parede divisória entre Banheiro Masculino e Área Central -->
+              <!-- Parede divisória contínua entre Banheiro Masculino e Feminino -->
               <line x1="365" y1="55" x2="365" y2="322" stroke="#334155" stroke-width="6"/>
 
-              <!-- === 2. BEBEDOURO (Entre os dois banheiros) === -->
-              <g transform="translate(365, 185)">
-                <rect x="-18" y="-26" width="36" height="52" rx="8" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="2" filter="url(#cardShadow)"/>
-                <text x="0" y="2" text-anchor="middle" font-size="18">💧</text>
-                <text x="0" y="18" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="7" font-weight="800" fill="#0369a1">BEBEDOURO</text>
+              <!-- === 2. BEBEDOURO (Localizado entre as duas portas de entrada dos banheiros) === -->
+              <g transform="translate(365, 40)">
+                <rect x="-24" y="-24" width="48" height="42" rx="8" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="2" filter="url(#cardShadow)"/>
+                <text x="0" y="-3" text-anchor="middle" font-size="16">💧</text>
+                <text x="0" y="12" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="7.5" font-weight="900" fill="#0369a1">BEBEDOURO</text>
               </g>
 
               <!-- === 3. BANHEIRO FEMININO (Encostado na Secretaria, y=55 a y=320) === -->
               <g>
                 <rect x="375" y="58" width="165" height="260" rx="8" fill="#fce7f3" stroke="#ec4899" stroke-width="2"/>
                 <!-- Porta voltada para CIMA (abre para cima/exterior) -->
-                <rect x="405" y="50" width="55" height="12" fill="#ffffff"/>
-                <path d="M 405 58 A 38 38 0 0 1 443 20" fill="none" stroke="#db2777" stroke-width="2.5" class="door-arc"/>
-                <line x1="405" y1="58" x2="405" y2="20" stroke="#be185d" stroke-width="3"/>
-                <rect x="400" y="32" width="70" height="16" rx="4" fill="#1e293b"/>
-                <text x="435" y="43" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="8" font-weight="800" fill="#fbcfe8">🚪 PORTA ⇧</text>
+                <rect x="445" y="50" width="55" height="12" fill="#ffffff"/>
+                <path d="M 445 58 A 38 38 0 0 1 483 20" fill="none" stroke="#db2777" stroke-width="2.5" class="door-arc"/>
+                <line x1="445" y1="58" x2="445" y2="20" stroke="#be185d" stroke-width="3"/>
+                <rect x="438" y="28" width="70" height="16" rx="4" fill="#1e293b"/>
+                <text x="473" y="39" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="8" font-weight="800" fill="#fbcfe8">🚪 PORTA ⇧</text>
                 <!-- Conteúdo -->
                 <text x="457" y="160" text-anchor="middle" font-size="34">♀</text>
                 <text x="457" y="195" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="12" font-weight="800" fill="#be185d">FEMININO</text>
@@ -557,9 +557,17 @@
               <g id="svg-room-auditorio" class="svg-room" onclick="selectRoom('auditorio')">
                 <rect class="room-bg" x="555" y="185" width="305" height="410" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
                 
-                <!-- Internal Door to Corridor -->
-                <path d="M 550 445 A 50 50 0 0 0 600 495" fill="none" stroke="#d4a94f" stroke-width="1.5" class="door-arc"/>
-                <line x1="550" y1="445" x2="600" y2="445" stroke="#94a3b8" stroke-width="2.5"/>
+                <!-- Armários do Auditório: acima da porta, estendendo-se até a parede da costura (y=180 a y=340) -->
+                <rect x="555" y="182" width="28" height="158" rx="4" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
+                <!-- Linhas de prateleiras/divisões do armário -->
+                <line x1="555" y1="220" x2="583" y2="220" stroke="#94a3b8" stroke-width="1"/>
+                <line x1="555" y1="260" x2="583" y2="260" stroke="#94a3b8" stroke-width="1"/>
+                <line x1="555" y1="300" x2="583" y2="300" stroke="#94a3b8" stroke-width="1"/>
+                <text x="569" y="260" font-family="'Nunito', sans-serif" font-size="8" font-weight="800" fill="#334155" transform="rotate(-90 569 260)">ARMÁRIOS</text>
+
+                <!-- Internal Door to Corridor (Logo abaixo dos armários) -->
+                <path d="M 550 345 A 45 45 0 0 0 595 390" fill="none" stroke="#d4a94f" stroke-width="1.5" class="door-arc"/>
+                <line x1="550" y1="345" x2="595" y2="345" stroke="#94a3b8" stroke-width="2.5"/>
 
                 <!-- Additional External Door at Bottom Right Corner (Canto Inferior Direito) -->
                 <rect x="855" y="540" width="20" height="50" fill="#ffffff"/>
@@ -570,24 +578,18 @@
                 <text x="797" y="584" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="8.5" font-weight="800" fill="#93c5fd">🚪 SAÍDA EXTERNA</text>
 
                 <!-- Badge & Title -->
-                <rect x="575" y="210" width="85" height="26" rx="6" fill="#0f172a"/>
-                <text x="617" y="228" text-anchor="middle" font-family="'Outfit', sans-serif" font-size="12" font-weight="800" fill="#d4a94f">AUDITÓRIO</text>
-                <text x="670" y="229" font-family="'Questrial', sans-serif" font-size="18" font-weight="700" fill="#0f172a">Auditório</text>
+                <rect x="590" y="210" width="85" height="26" rx="6" fill="#0f172a"/>
+                <text x="632" y="228" text-anchor="middle" font-family="'Outfit', sans-serif" font-size="12" font-weight="800" fill="#d4a94f">AUDITÓRIO</text>
+                <text x="685" y="229" font-family="'Questrial', sans-serif" font-size="18" font-weight="700" fill="#0f172a">Auditório</text>
                 
                 <!-- Schedules -->
-                <g transform="translate(575, 255)">
-                  <rect x="0" y="0" width="260" height="72" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+                <g transform="translate(590, 255)">
+                  <rect x="0" y="0" width="245" height="72" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
                   <text x="8" y="18" font-family="'Nunito', sans-serif" font-size="10" font-weight="800" fill="#334155">Sáb 8h30 • Letícia, Eduardo, Cauã, Danilo</text>
                   <text x="8" y="36" font-family="'Nunito', sans-serif" font-size="10" font-weight="800" fill="#047857">Sáb 10h15 • Fábio, Marcelo, Otávio, Patrícia</text>
                   <text x="8" y="54" font-family="'Nunito', sans-serif" font-size="10" font-weight="800" fill="#6d28d9">Seg 20h • Lorena e Natanai (Adultos)</text>
                 </g>
-                <text x="575" y="350" font-family="'Nunito', sans-serif" font-size="10" font-weight="600" fill="#64748b">Crisma de Adultos • Acesso duplo (corredor + externo)</text>
-              </g>
-
-              <!-- Armários -->
-              <g transform="translate(545, 530)">
-                <rect x="-8" y="0" width="16" height="50" rx="3" fill="#cbd5e1" stroke="#64748b" stroke-width="1"/>
-                <text x="-15" y="28" font-family="'Nunito', sans-serif" font-size="8" font-weight="700" fill="#64748b" transform="rotate(-90 -15 28)">ARMÁRIOS</text>
+                <text x="590" y="350" font-family="'Nunito', sans-serif" font-size="10" font-weight="600" fill="#64748b">Crisma de Adultos • Acesso duplo (corredor + externo)</text>
               </g>
 
               <!-- Sala 05 - Santa Jacinta Marto -->
@@ -623,12 +625,32 @@
                 </g>
               </g>
 
-              <!-- Sala 01 - Protomártires do Brasil (Entrada Direita) -->
+              <!-- ======================================================= -->
+              <!-- PAREDE TRANSVERSAL DO CORREDOR COM PORTA DUPLA          -->
+              <!-- (Logo acima das portas de Protomártires e Anjo da Guarda)-->
+              <!-- ======================================================= -->
+              <g id="corridor-double-door">
+                <!-- Parede esquerda até a porta dupla -->
+                <line x1="390" y1="975" x2="425" y2="975" stroke="#0f172a" stroke-width="8"/>
+                <!-- Parede direita até a porta dupla -->
+                <line x1="515" y1="975" x2="550" y2="975" stroke="#0f172a" stroke-width="8"/>
+                <!-- Folha esquerda da porta dupla -->
+                <path d="M 425 975 A 45 45 0 0 1 470 930" fill="none" stroke="#d4a94f" stroke-width="2.5" class="door-arc"/>
+                <line x1="425" y1="975" x2="425" y2="930" stroke="#b45309" stroke-width="3"/>
+                <!-- Folha direita da porta dupla -->
+                <path d="M 515 975 A 45 45 0 0 0 470 930" fill="none" stroke="#d4a94f" stroke-width="2.5" class="door-arc"/>
+                <line x1="515" y1="975" x2="515" y2="930" stroke="#b45309" stroke-width="3"/>
+                <!-- Badge de identificação -->
+                <rect x="415" y="985" width="110" height="18" rx="5" fill="#1e293b" stroke="#d4a94f" stroke-width="1.5" filter="url(#cardShadow)"/>
+                <text x="470" y="997" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="8.5" font-weight="800" fill="#fde047">🚪 PORTA DUPLA</text>
+              </g>
+
+              <!-- Sala 01 - Protomártires do Brasil (Entrada Direita • Porta Alinhada com Sala 02) -->
               <g id="svg-room-01" class="svg-room" onclick="selectRoom('sala-01')">
                 <rect class="room-bg" x="555" y="995" width="305" height="150" rx="8" fill="#fdfbf7" stroke="#e2e8f0" stroke-width="1.5"/>
-                <!-- Door Swing -->
-                <path d="M 550 1045 A 50 50 0 0 0 600 1095" fill="none" stroke="#d4a94f" stroke-width="1.5" class="door-arc"/>
-                <line x1="550" y1="1045" x2="600" y2="1045" stroke="#94a3b8" stroke-width="2.5"/>
+                <!-- Door Swing (Alinhada a y=1025 com Sala 02) -->
+                <path d="M 550 1025 A 50 50 0 0 0 600 1075" fill="none" stroke="#d4a94f" stroke-width="1.5" class="door-arc"/>
+                <line x1="550" y1="1025" x2="600" y2="1025" stroke="#94a3b8" stroke-width="2.5"/>
                 <rect x="575" y="1010" width="44" height="26" rx="6" fill="#1e293b"/>
                 <text x="597" y="1028" text-anchor="middle" font-family="'Outfit', sans-serif" font-size="13" font-weight="800" fill="#d4a94f">01</text>
                 <text x="630" y="1029" font-family="'Questrial', sans-serif" font-size="17" font-weight="700" fill="#0f172a">Protomártires do Brasil</text>
@@ -693,12 +715,12 @@
                 </g>
               </g>
 
-              <!-- Sala 02 - Anjo da Guarda (Entrada Esquerda) -->
+              <!-- Sala 02 - Anjo da Guarda (Entrada Esquerda • Porta Alinhada com Sala 01) -->
               <g id="svg-room-02" class="svg-room" onclick="selectRoom('sala-02')">
                 <rect class="room-bg" x="80" y="915" width="305" height="230" rx="8" fill="#fdfbf7" stroke="#e2e8f0" stroke-width="1.5"/>
-                <!-- Door Swing -->
-                <path d="M 390 1000 A 50 50 0 0 1 340 1050" fill="none" stroke="#d4a94f" stroke-width="1.5" class="door-arc"/>
-                <line x1="390" y1="1000" x2="340" y2="1000" stroke="#94a3b8" stroke-width="2.5"/>
+                <!-- Door Swing (Alinhada a y=1025 com Sala 01) -->
+                <path d="M 390 1025 A 50 50 0 0 1 340 1075" fill="none" stroke="#d4a94f" stroke-width="1.5" class="door-arc"/>
+                <line x1="390" y1="1025" x2="340" y2="1025" stroke="#94a3b8" stroke-width="2.5"/>
                 <rect x="105" y="935" width="44" height="26" rx="6" fill="#1e293b"/>
                 <text x="127" y="953" text-anchor="middle" font-family="'Outfit', sans-serif" font-size="13" font-weight="800" fill="#d4a94f">02</text>
                 <text x="160" y="954" font-family="'Questrial', sans-serif" font-size="17" font-weight="700" fill="#0f172a">Anjo da Guarda</text>
@@ -708,7 +730,7 @@
                   <text x="8" y="35" font-family="'Nunito', sans-serif" font-size="10.5" font-weight="700" fill="#0284c7">Sáb 15h • Alessandra e Mônica</text>
                   <text x="8" y="53" font-family="'Nunito', sans-serif" font-size="10.5" font-weight="700" fill="#6d28d9">Seg 20h • Tiago Artur e Ricardo</text>
                 </g>
-                <text x="105" y="1080" font-family="'Nunito', sans-serif" font-size="10" font-weight="600" fill="#94a3b8">📍 Primeira sala à esquerda ao entrar</text>
+                <text x="105" y="1110" font-family="'Nunito', sans-serif" font-size="10" font-weight="600" fill="#94a3b8">📍 Primeira sala à esquerda ao entrar</text>
               </g>
 
               <!-- Entrance Portal & Gruta -->
@@ -719,14 +741,14 @@
                 <path d="M 50 -18 L 50 -35 M 44 -26 L 50 -35 L 56 -26" stroke="#d4a94f" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
               </g>
 
-              <!-- Gruta de Nossa Senhora -->
-              <g id="svg-gruta" transform="translate(350, 1630)">
-                <rect x="0" y="0" width="240" height="90" rx="18" fill="#f0fdf4" stroke="#86efac" stroke-width="2" filter="url(#cardShadow)"/>
-                <circle cx="45" cy="45" r="28" fill="#dcfce7" stroke="#22c55e" stroke-width="1.5"/>
-                <text x="45" y="52" text-anchor="middle" font-size="22">🌹</text>
-                <text x="90" y="38" font-family="'Questrial', sans-serif" font-size="16" font-weight="700" fill="#166534">Gruta de N. Senhora</text>
-                <text x="90" y="56" font-family="'Nunito', sans-serif" font-size="11" font-weight="600" fill="#15803d">Ponto Central dos Jardins</text>
-                <text x="90" y="72" font-family="'Nunito', sans-serif" font-size="10" fill="#4ade80">Em frente ao Centro Catequético</text>
+              <!-- Gruta de Nossa Senhora (Localizada em frente à entrada principal) -->
+              <g id="svg-gruta" transform="translate(350, 1220)">
+                <rect x="0" y="0" width="240" height="85" rx="18" fill="#f0fdf4" stroke="#86efac" stroke-width="2" filter="url(#cardShadow)"/>
+                <circle cx="45" cy="42" r="26" fill="#dcfce7" stroke="#22c55e" stroke-width="1.5"/>
+                <text x="45" y="49" text-anchor="middle" font-size="22">🌹</text>
+                <text x="90" y="34" font-family="'Questrial', sans-serif" font-size="15" font-weight="700" fill="#166534">Gruta de N. Senhora</text>
+                <text x="90" y="52" font-family="'Nunito', sans-serif" font-size="11" font-weight="600" fill="#15803d">Ponto Central dos Jardins</text>
+                <text x="90" y="68" font-family="'Nunito', sans-serif" font-size="9.5" fill="#4ade80">Em frente ao Centro Catequético</text>
               </g>
 
               </g><!-- fim do grupo translate(0,400) -->
