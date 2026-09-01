@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Plantas Oficiais e Guia de Salas • Santuário Imaculado Coração de Maria</title>
-  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Questrial&family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
@@ -81,6 +81,82 @@
 </head>
 <body class="min-h-screen flex flex-col antialiased">
 
+  <!-- ========================================== -->
+  <!-- AUTHENTICATION GATE (Lock Screen)           -->
+  <!-- ========================================== -->
+  <div id="auth-gate" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 transition-opacity duration-300">
+    <div class="bg-slate-900 border-2 border-[#d4a94f]/50 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl text-center relative overflow-hidden">
+      <!-- Glow background -->
+      <div class="absolute -top-24 -right-24 w-48 h-48 bg-[#d4a94f]/15 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <!-- Icon & Badges -->
+      <div class="relative mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-[#d4a94f] p-0.5 shadow-lg shadow-amber-500/20 mb-4 flex items-center justify-center">
+        <div class="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center">
+          <span class="text-2xl">⛪</span>
+        </div>
+      </div>
+
+      <span class="inline-block text-[11px] font-bold tracking-widest text-[#d4a94f] uppercase bg-amber-950/80 px-3 py-1 rounded-full border border-amber-500/40 mb-2">
+        Santuário Imaculado Coração de Maria
+      </span>
+      <h2 class="text-xl sm:text-2xl font-black font-heading text-white mb-1">
+        Portal da Catequese
+      </h2>
+      <p class="text-xs text-slate-400 mb-6">
+        Área de acesso restrito a catequistas, coordenadores e paroquianos autorizados.
+      </p>
+
+      <!-- Form -->
+      <form id="auth-form" onsubmit="handleSiteLogin(event)" class="space-y-4 text-left">
+        <div>
+          <label for="auth-password-input" class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+            Senha de Acesso
+          </label>
+          <div class="relative">
+            <input
+              id="auth-password-input"
+              type="password"
+              placeholder="Digite a senha..."
+              autocomplete="current-password"
+              required
+              class="w-full bg-slate-800/90 border border-slate-700 focus:border-[#d4a94f] focus:ring-2 focus:ring-[#d4a94f]/40 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 outline-none transition"
+            />
+            <button
+              type="button"
+              onclick="togglePasswordVisibility('auth-password-input')"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-1 text-xs transition"
+              title="Mostrar/Ocultar Senha"
+            >
+              👁️
+            </button>
+          </div>
+          <p id="auth-error-msg" class="text-xs font-semibold text-rose-400 mt-2 hidden flex items-center gap-1.5">
+            <span>⚠️</span> <span>Senha incorreta. Verifique e tente novamente.</span>
+          </p>
+        </div>
+
+        <div class="flex items-center justify-between text-xs text-slate-400">
+          <label class="flex items-center gap-2 cursor-pointer select-none hover:text-slate-300">
+            <input id="auth-remember-check" type="checkbox" checked class="rounded bg-slate-800 border-slate-700 text-[#d4a94f] focus:ring-0 cursor-pointer" />
+            <span>Lembrar neste navegador</span>
+          </label>
+        </div>
+
+        <button
+          type="submit"
+          class="w-full bg-gradient-to-r from-[#d4a94f] to-[#b88d36] hover:from-[#e6c27a] hover:to-[#d4a94f] text-slate-950 font-black py-3 rounded-xl text-sm shadow-lg shadow-amber-500/20 transition transform active:scale-98 flex items-center justify-center gap-2"
+        >
+          <span>🔓 Entrar no Portal</span>
+        </button>
+      </form>
+
+      <div class="mt-6 pt-4 border-t border-slate-800 text-[11px] text-slate-500">
+        Pastoral da Catequese • Park Way / DF
+      </div>
+    </div>
+  </div>
+
   <!-- TOP BRANDING BAR (Parish Header) -->
   <header class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white border-b-4 border-[#d4a94f] shadow-lg sticky top-0 z-40">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
@@ -106,7 +182,10 @@
       <div class="flex items-center gap-2.5 no-print w-full md:w-auto justify-end">
         <button onclick="window.print()" class="inline-flex items-center gap-2 bg-[#d4a94f] hover:bg-[#e6c27a] text-slate-950 font-bold px-4 py-2 rounded-xl text-xs sm:text-sm shadow-md transition transform active:scale-95">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-          <span>Imprimir / Gerar PDF</span>
+          <span>Imprimir / PDF</span>
+        </button>
+        <button onclick="logoutSite()" class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-rose-900/40 text-slate-300 hover:text-rose-300 border border-slate-700 hover:border-rose-500/50 px-3 py-2 rounded-xl text-xs sm:text-sm transition" title="Bloquear acesso e exigir senha novamente">
+          <span>🔒 Bloquear</span>
         </button>
         <a href="https://imaculadocoracaodf.com.br/" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-600 px-3 py-2 rounded-xl text-xs sm:text-sm transition">
           <svg class="w-4 h-4 text-[#d4a94f]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
@@ -132,7 +211,7 @@
           <button id="tab-btn-paroquial" onclick="switchTab('paroquial')" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/60">
             <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
             <span>Salão Paroquial (Subsolo)</span>
-            <span class="bg-blue-100 text-blue-900 text-[11px] font-bold px-2 py-0.5 rounded-full">Salas 10 a 16 & Anexo</span>
+            <span class="bg-blue-100 text-blue-900 text-[11px] font-bold px-2 py-0.5 rounded-full">Salas 11 a 17 & Anexo</span>
           </button>
           <button id="tab-btn-guia" onclick="switchTab('guia')" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/60">
             <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
@@ -141,6 +220,11 @@
           <button id="tab-btn-campus" onclick="switchTab('campus')" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/60">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
             <span>Complexo Paroquial</span>
+          </button>
+          <button id="tab-btn-eventos" onclick="switchTab('eventos')" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/60">
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+            <span>Eventos & Retiros</span>
+            <span class="bg-rose-100 text-rose-900 text-[11px] font-bold px-2 py-0.5 rounded-full">Cronograma 2026</span>
           </button>
         </nav>
 
@@ -230,7 +314,7 @@
 
           <!-- Interactive SVG Floor Plan -->
           <div class="w-full flex justify-center overflow-x-auto py-2">
-            <svg viewBox="0 0 940 1340" class="w-full max-w-[650px] h-auto drop-shadow-sm select-none" xmlns="http://www.w3.org/2000/svg">
+            <svg viewBox="0 0 940 1740" class="w-full max-w-[650px] h-auto drop-shadow-sm select-none" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <linearGradient id="wallGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stop-color="#1e293b"/>
@@ -246,46 +330,136 @@
                 <pattern id="tilePattern" width="30" height="30" patternUnits="userSpaceOnUse">
                   <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#e2e8f0" stroke-width="0.8"/>
                 </pattern>
+                <!-- Padrão de hachura para sala sem identificação -->
+                <pattern id="hatchPattern" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                  <line x1="0" y1="0" x2="0" y2="12" stroke="#94a3b8" stroke-width="2.5"/>
+                </pattern>
               </defs>
 
-              <!-- Single Integrated Building Footprint & Floor -->
-              <rect x="70" y="50" width="800" height="1100" rx="20" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#cardShadow)"/>
+              <!-- Single Integrated Building Footprint & Floor (Main Body) -->
+              <rect x="70" y="450" width="800" height="1100" rx="20" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#cardShadow)"/>
+              <!-- Extension block: right-wing upper section (above Carlo Acutis / new rooms) -->
+              <rect x="550" y="50" width="320" height="400" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#cardShadow)"/>
               
-              <!-- Corridor Floor with subtle tiles (From bottom entrance up to Pastoral da Costura door) -->
-              <rect x="390" y="180" width="160" height="970" fill="url(#corridorGrad)"/>
-              <rect x="390" y="180" width="160" height="970" fill="url(#tilePattern)"/>
+              <!-- Corridor Floor with subtle tiles -->
+              <rect x="390" y="580" width="160" height="970" fill="url(#corridorGrad)"/>
+              <rect x="390" y="580" width="160" height="970" fill="url(#tilePattern)"/>
 
               <!-- Central Axis Dashed Line -->
-              <line x1="470" y1="190" x2="470" y2="1110" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6 6"/>
+              <line x1="470" y1="590" x2="470" y2="1510" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6 6"/>
               
               <!-- Corridor Label -->
-              <g transform="translate(470, 680)">
+              <g transform="translate(470, 1080)">
                 <circle cx="0" cy="0" r="28" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" filter="url(#cardShadow)"/>
                 <path d="M0 -16 L8 4 L0 0 L-8 4 Z" fill="#d4a94f"/>
                 <text x="0" y="16" text-anchor="middle" font-size="9" font-family="'Nunito', sans-serif" font-weight="800" fill="#64748b">CORREDOR</text>
               </g>
 
               <!-- Solid External Structural Walls of Main Integrated Building -->
-              <rect x="70" y="50" width="800" height="1100" rx="20" fill="none" stroke="url(#wallGrad)" stroke-width="12"/>
+              <rect x="70" y="450" width="800" height="1100" rx="20" fill="none" stroke="url(#wallGrad)" stroke-width="12"/>
+              <!-- Extension block walls -->
+              <rect x="550" y="50" width="320" height="400" rx="12" fill="none" stroke="url(#wallGrad)" stroke-width="10"/>
               
               <!-- Internal Left Wall of Corridor (x=390) -->
-              <line x1="390" y1="180" x2="390" y2="300" stroke="#1e293b" stroke-width="8"/>
-              <line x1="390" y1="360" x2="390" y2="540" stroke="#1e293b" stroke-width="8"/>
-              <line x1="390" y1="600" x2="390" y2="770" stroke="#1e293b" stroke-width="8"/>
-              <line x1="390" y1="830" x2="390" y2="1000" stroke="#1e293b" stroke-width="8"/>
-              <line x1="390" y1="1060" x2="390" y2="1150" stroke="#1e293b" stroke-width="8"/>
+              <line x1="390" y1="580" x2="390" y2="700" stroke="#1e293b" stroke-width="8"/>
+              <line x1="390" y1="760" x2="390" y2="940" stroke="#1e293b" stroke-width="8"/>
+              <line x1="390" y1="1000" x2="390" y2="1170" stroke="#1e293b" stroke-width="8"/>
+              <line x1="390" y1="1230" x2="390" y2="1400" stroke="#1e293b" stroke-width="8"/>
+              <line x1="390" y1="1460" x2="390" y2="1550" stroke="#1e293b" stroke-width="8"/>
 
               <!-- Internal Right Wall of Corridor (x=550) -->
-              <!-- Solid wall separating Sala 08 from corridor/Costura (y=50 to y=180) -->
-              <line x1="550" y1="50" x2="550" y2="180" stroke="#0f172a" stroke-width="10"/>
+              <!-- Solid wall separating Sala 08 from corridor/Costura -->
+              <line x1="550" y1="450" x2="550" y2="580" stroke="#0f172a" stroke-width="10"/>
               <!-- Door gap for Auditório -->
-              <line x1="550" y1="180" x2="550" y2="440" stroke="#1e293b" stroke-width="8"/>
-              <line x1="550" y1="500" x2="550" y2="670" stroke="#1e293b" stroke-width="8"/>
-              <line x1="550" y1="730" x2="550" y2="900" stroke="#1e293b" stroke-width="8"/>
-              <line x1="550" y1="960" x2="550" y2="1150" stroke="#1e293b" stroke-width="8"/>
+              <line x1="550" y1="580" x2="550" y2="840" stroke="#1e293b" stroke-width="8"/>
+              <line x1="550" y1="900" x2="550" y2="1070" stroke="#1e293b" stroke-width="8"/>
+              <line x1="550" y1="1130" x2="550" y2="1300" stroke="#1e293b" stroke-width="8"/>
+              <line x1="550" y1="1360" x2="550" y2="1550" stroke="#1e293b" stroke-width="8"/>
+
+              <!-- ================================================== -->
+              <!-- EXTENSÃO SUPERIOR DIREITA: NOVAS SALAS              -->
+              <!-- (Acima da Sala Carlo Acutis, y=50 a y=450)          -->
+              <!-- ================================================== -->
+
+              <!-- === BANHEIROS FEMININO E MASCULINO (topo, y=55 a y=185) === -->
+              <!-- Parede de fundo dos banheiros (topo do bloco) -->
+              <line x1="555" y1="55" x2="865" y2="55" stroke="#0f172a" stroke-width="8"/>
+              <!-- Parede divisória central (entre feminino e masculino) -->
+              <line x1="710" y1="55" x2="710" y2="195" stroke="#334155" stroke-width="5"/>
+
+              <!-- Banheiro Feminino -->
+              <g>
+                <rect x="555" y="58" width="150" height="135" rx="6" fill="#fce7f3" stroke="#ec4899" stroke-width="2"/>
+                <!-- Porta voltada para cima (arco abrindo para cima do bloco = exterior) -->
+                <rect x="575" y="52" width="55" height="10" fill="#ffffff"/>
+                <path d="M 575 58 A 40 40 0 0 1 615 18" fill="none" stroke="#db2777" stroke-width="2.5" class="door-arc"/>
+                <line x1="575" y1="58" x2="575" y2="18" stroke="#be185d" stroke-width="3"/>
+                <!-- Conteúdo -->
+                <text x="628" y="100" text-anchor="middle" font-size="26">♀</text>
+                <text x="628" y="126" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="11" font-weight="800" fill="#be185d">FEMININO</text>
+                <text x="628" y="143" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="9" font-weight="600" fill="#9d174d">Banheiro</text>
+              </g>
+
+              <!-- Banheiro Masculino -->
+              <g>
+                <rect x="715" y="58" width="145" height="135" rx="6" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+                <!-- Porta voltada para cima -->
+                <rect x="740" y="52" width="55" height="10" fill="#ffffff"/>
+                <path d="M 740 58 A 40 40 0 0 1 780 18" fill="none" stroke="#2563eb" stroke-width="2.5" class="door-arc"/>
+                <line x1="740" y1="58" x2="740" y2="18" stroke="#1d4ed8" stroke-width="3"/>
+                <!-- Conteúdo -->
+                <text x="787" y="100" text-anchor="middle" font-size="26">♂</text>
+                <text x="787" y="126" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="11" font-weight="800" fill="#1d4ed8">MASCULINO</text>
+                <text x="787" y="143" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="9" font-weight="600" fill="#1e40af">Banheiro</text>
+              </g>
+
+              <!-- === BEBEDOURO (entre os banheiros, na parede divisória) === -->
+              <g transform="translate(710, 130)">
+                <rect x="-20" y="-22" width="40" height="44" rx="8" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="2"/>
+                <text x="0" y="5" text-anchor="middle" font-size="16">💧</text>
+                <text x="0" y="30" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="7.5" font-weight="800" fill="#0369a1">BEBED.</text>
+              </g>
+
+              <!-- Parede separando banheiros da Secretaria -->
+              <line x1="555" y1="195" x2="865" y2="195" stroke="#334155" stroke-width="6"/>
+
+              <!-- === SECRETARIA DA CATEQUESE (y=198 a y=325) === -->
+              <g id="svg-room-secretaria" class="svg-room" onclick="selectRoom('sala-secretaria')">
+                <rect class="room-bg" x="555" y="198" width="305" height="127" rx="8" fill="#fefce8" stroke="#d4a94f" stroke-width="2.5"/>
+                <!-- Badge -->
+                <rect x="570" y="212" width="95" height="24" rx="6" fill="#1e293b"/>
+                <text x="617" y="228" text-anchor="middle" font-family="'Outfit', sans-serif" font-size="10" font-weight="800" fill="#d4a94f">SECRETARIA</text>
+                <text x="675" y="229" font-family="'Questrial', sans-serif" font-size="15" font-weight="700" fill="#0f172a">Secretaria da Catequese</text>
+                <text x="570" y="262" font-family="'Nunito', sans-serif" font-size="10" font-weight="600" fill="#92400e">📋 Atendimento e suporte administrativo à Pastoral da Catequese</text>
+                <text x="570" y="278" font-family="'Nunito', sans-serif" font-size="9.5" font-weight="600" fill="#78350f">📍 Acima da Sala Carlo Acutis • Acesso pelo bloco superior direito</text>
+              </g>
+
+              <!-- Parede separando Secretaria da Sala Anônima -->
+              <line x1="555" y1="328" x2="865" y2="328" stroke="#334155" stroke-width="6"/>
+
+              <!-- === SALA SEM IDENTIFICAÇÃO (não catequética, y=331 a y=447) === -->
+              <g>
+                <!-- Fundo cinza -->
+                <rect x="555" y="331" width="305" height="116" rx="8" fill="#e2e8f0" stroke="#94a3b8" stroke-width="2"/>
+                <!-- Hachura sobreposta -->
+                <rect x="555" y="331" width="305" height="116" rx="8" fill="url(#hatchPattern)" opacity="0.4"/>
+                <!-- Label discreto -->
+                <text x="707" y="388" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="11" font-weight="700" fill="#64748b">Sala não utilizada pela catequese</text>
+                <text x="707" y="407" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="9.5" font-weight="600" fill="#94a3b8">Área de uso externo</text>
+              </g>
+
+              <!-- Parede separando Sala Anônima da Sala Carlo Acutis (linha de ligação) -->
+              <line x1="555" y1="450" x2="865" y2="450" stroke="#0f172a" stroke-width="8"/>
+
+              <!-- ============================================== -->
+              <!-- ELEMENTOS ORIGINAIS DO EDIFÍCIO (deslocados    -->
+              <!-- +400px para dar espaço às novas salas acima)   -->
+              <!-- ============================================== -->
+              <g transform="translate(0, 400)">
 
               <!-- ============================================== -->
               <!-- SALA SUPERIOR: PASTORAL DA COSTURA             -->
+              <!-- ============================================== -->
               <!-- (Extends behind Sala 07 to Carlo Acutis wall)  -->
               <!-- ============================================== -->
               <g id="svg-room-costura" class="svg-room" onclick="selectRoom('sala-costura')">
@@ -524,7 +698,7 @@
               </g>
 
               <!-- Gruta de Nossa Senhora -->
-              <g id="svg-gruta" transform="translate(350, 1230)">
+              <g id="svg-gruta" transform="translate(350, 1630)">
                 <rect x="0" y="0" width="240" height="90" rx="18" fill="#f0fdf4" stroke="#86efac" stroke-width="2" filter="url(#cardShadow)"/>
                 <circle cx="45" cy="45" r="28" fill="#dcfce7" stroke="#22c55e" stroke-width="1.5"/>
                 <text x="45" y="52" text-anchor="middle" font-size="22">🌹</text>
@@ -532,6 +706,8 @@
                 <text x="90" y="56" font-family="'Nunito', sans-serif" font-size="11" font-weight="600" fill="#15803d">Ponto Central dos Jardins</text>
                 <text x="90" y="72" font-family="'Nunito', sans-serif" font-size="10" fill="#4ade80">Em frente ao Centro Catequético</text>
               </g>
+
+              </g><!-- fim do grupo translate(0,400) -->
 
             </svg>
           </div>
@@ -668,6 +844,20 @@
                 <text x="27" y="-23" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="9.5" font-weight="800" fill="#ffffff">🚪 ACESSO SUPERIOR</text>
               </g>
 
+              <!-- SAÍDA SUPERIOR → CENTRO CATEQUÉTICO -->
+              <g transform="translate(200, 50)">
+                <!-- Gap na parede superior -->
+                <rect x="-10" y="-8" width="90" height="16" fill="#ffffff"/>
+                <!-- Arco de porta apontando para cima -->
+                <path d="M 0 0 A 45 45 0 0 1 55 -45" fill="none" stroke="#d4a94f" stroke-width="2.5" class="door-arc"/>
+                <line x1="0" y1="0" x2="0" y2="-45" stroke="#b45309" stroke-width="3"/>
+                <!-- Seta direcional para cima -->
+                <path d="M 27 -52 L 27 -72 M 20 -64 L 27 -74 L 34 -64" stroke="#d4a94f" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <!-- Badge -->
+                <rect x="-45" y="-96" width="175" height="24" rx="7" fill="#d4a94f" stroke="#b45309" stroke-width="1.5" filter="url(#cardShadow)"/>
+                <text x="42" y="-80" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="9.5" font-weight="800" fill="#1e293b">🏫 → CENTRO CATEQUÉTICO</text>
+              </g>
+
               <!-- 2. PORTA DE ACESSO: À ESQUERDA DA SALA SÃO MATEUS (Bottom Wall) -->
               <g transform="translate(480, 710)">
                 <rect x="-10" y="-10" width="60" height="20" fill="#ffffff"/>
@@ -709,8 +899,8 @@
               <text x="985" y="375" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="11" font-weight="700" fill="#64748b">Corredor de Saída</text>
               <line x1="985" y1="390" x2="1070" y2="390" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4 4"/>
 
-              <!-- Sala 10 - São João Bosco (Anexo) -->
-              <g id="svg-room-10" class="svg-room" onclick="selectRoom('sala-10')">
+              <!-- Sala 17 - São João Bosco (Anexo) -->
+              <g id="svg-room-17" class="svg-room" onclick="selectRoom('sala-17')">
                 <rect class="room-bg" x="1090" y="450" width="150" height="250" rx="6" fill="#fef3c7" stroke="#d4a94f" stroke-width="2.5"/>
                 
                 <!-- Door on the Top Face -->
@@ -723,7 +913,7 @@
 
                 <!-- Room Content -->
                 <rect x="1105" y="465" width="50" height="22" rx="6" fill="#1e293b"/>
-                <text x="1130" y="480" text-anchor="middle" font-family="'Outfit', sans-serif" font-size="10.5" font-weight="800" fill="#d4a94f">SALA 10</text>
+                <text x="1130" y="480" text-anchor="middle" font-family="'Outfit', sans-serif" font-size="10.5" font-weight="800" fill="#d4a94f">SALA 17</text>
                 <text x="1165" y="515" text-anchor="middle" font-family="'Questrial', sans-serif" font-size="15" font-weight="700" fill="#0f172a">São João Bosco</text>
                 
                 <g transform="translate(1098, 530)">
@@ -866,31 +1056,48 @@
     <section id="view-guia" class="tab-view hidden space-y-6">
       
       <!-- Stage Coordinator Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div class="bg-white p-5 rounded-2xl border-l-4 border-emerald-500 shadow-sm">
+      <!-- Coordenação Geral (topo) -->
+      <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white p-5 rounded-2xl border-l-4 border-[#d4a94f] shadow-md col-span-full" id="card-coord-geral">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <span class="text-[11px] font-bold uppercase text-[#d4a94f] bg-amber-950/60 px-2 py-0.5 rounded border border-amber-500/30">Coordenação Geral da Catequese</span>
+            <h4 class="font-bold font-heading text-white text-lg mt-2" id="coord-geral-nome">Coordenadora: Lorena</h4>
+            <p class="text-sm text-slate-300" id="coord-geral-vice">Vice Coordenador: Andrés</p>
+          </div>
+          <div class="text-xs text-slate-400">Santuário Imaculado Coração de Maria • Park Way</div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 col-span-full">
+        <div class="bg-white p-5 rounded-2xl border-l-4 border-emerald-500 shadow-sm" id="card-pre-eucaristia">
           <span class="text-[11px] font-bold uppercase text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">Pré-Eucaristia (7 a 8 anos)</span>
-          <h4 class="font-bold font-heading text-slate-900 text-base mt-2">Coord: Patrícia Guimarães</h4>
-          <p class="text-xs text-slate-500">Vice: Ana Luísa Chaves • 3 Turmas</p>
+          <h4 class="font-bold font-heading text-slate-900 text-base mt-2" id="coord-pre-nome">Coord: Patrícia Guimarães</h4>
+          <p class="text-xs text-slate-500" id="coord-pre-vice">Vice: Ana Luísa Chaves • 3 Turmas</p>
         </div>
-        <div class="bg-white p-5 rounded-2xl border-l-4 border-sky-500 shadow-sm">
-          <span class="text-[11px] font-bold uppercase text-sky-700 bg-sky-50 px-2 py-0.5 rounded">Eucaristia I (9 a 10 anos) & Eucaristia II</span>
-          <h4 class="font-bold font-heading text-slate-900 text-base mt-2">Coord: Marilian</h4>
-          <p class="text-xs text-slate-500">Vice: Priscila Ayres • 11 + 9 Turmas</p>
+        <div class="bg-white p-5 rounded-2xl border-l-4 border-sky-400 shadow-sm" id="card-euc1">
+          <span class="text-[11px] font-bold uppercase text-sky-700 bg-sky-50 px-2 py-0.5 rounded">Eucaristia I (9 a 10 anos)</span>
+          <h4 class="font-bold font-heading text-slate-900 text-base mt-2" id="coord-euc1-nome">Coord: Marilian</h4>
+          <p class="text-xs text-slate-500" id="coord-euc1-vice">Vice: Lara • 11 Turmas</p>
         </div>
-        <div class="bg-white p-5 rounded-2xl border-l-4 border-amber-500 shadow-sm">
+        <div class="bg-white p-5 rounded-2xl border-l-4 border-sky-600 shadow-sm" id="card-euc2">
+          <span class="text-[11px] font-bold uppercase text-sky-800 bg-sky-50 px-2 py-0.5 rounded">Eucaristia II (11 a 12 anos)</span>
+          <h4 class="font-bold font-heading text-slate-900 text-base mt-2" id="coord-euc2-nome">Coord: Marilian</h4>
+          <p class="text-xs text-slate-500" id="coord-euc2-vice">Vice: Priscila Ayres • 9 Turmas</p>
+        </div>
+        <div class="bg-white p-5 rounded-2xl border-l-4 border-amber-500 shadow-sm" id="card-perseveranca">
           <span class="text-[11px] font-bold uppercase text-amber-700 bg-amber-50 px-2 py-0.5 rounded">Perseverança (Menores de 13 anos)</span>
-          <h4 class="font-bold font-heading text-slate-900 text-base mt-2">Coord: Andrés</h4>
-          <p class="text-xs text-slate-500">Vice: Kéllibe • 2 Turmas (Sala 10 São João Bosco)</p>
+          <h4 class="font-bold font-heading text-slate-900 text-base mt-2" id="coord-perv-nome">Coord: Lanuzia</h4>
+          <p class="text-xs text-slate-500" id="coord-perv-vice">Vice: Beatriz • 2 Turmas (Sala 17 São João Bosco)</p>
         </div>
-        <div class="bg-white p-5 rounded-2xl border-l-4 border-purple-500 shadow-sm">
+        <div class="bg-white p-5 rounded-2xl border-l-4 border-purple-500 shadow-sm" id="card-crisma-jovem">
           <span class="text-[11px] font-bold uppercase text-purple-700 bg-purple-50 px-2 py-0.5 rounded">Crisma Jovem (13 a 17 anos)</span>
-          <h4 class="font-bold font-heading text-slate-900 text-base mt-2">Coord: Tiago Artur</h4>
-          <p class="text-xs text-slate-500">Vice: Ricardo • 11 Turmas</p>
+          <h4 class="font-bold font-heading text-slate-900 text-base mt-2" id="coord-cj-nome">Coord: Tiago</h4>
+          <p class="text-xs text-slate-500" id="coord-cj-vice">Vice: Piante • 11 Turmas</p>
         </div>
-        <div class="bg-white p-5 rounded-2xl border-l-4 border-indigo-500 shadow-sm">
+        <div class="bg-white p-5 rounded-2xl border-l-4 border-indigo-500 shadow-sm" id="card-crisma-adultos">
           <span class="text-[11px] font-bold uppercase text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded">Crisma Adultos (+18 anos)</span>
-          <h4 class="font-bold font-heading text-slate-900 text-base mt-2">Coord: Daniel</h4>
-          <p class="text-xs text-slate-500">Vice: Patrícia Gomes • 8 Turmas</p>
+          <h4 class="font-bold font-heading text-slate-900 text-base mt-2" id="coord-ca-nome">Coord: Daniel</h4>
+          <p class="text-xs text-slate-500" id="coord-ca-vice">Vice: Patrícia Gomes • 8 Turmas</p>
         </div>
       </div>
 
@@ -946,7 +1153,7 @@
               <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-lg mb-3">🏛️</div>
               <h3 class="text-lg font-bold font-heading text-slate-900 mb-1">Igreja Matriz & Subsolo</h3>
               <p class="text-xs text-slate-600 leading-relaxed mb-3">
-                No piso térreo superior acontecem as Santas Missas. No <strong>subsolo (Salão Paroquial)</strong> ficam as <strong>Salas 11 a 16</strong> e a <strong>Sala 10 (São João Bosco)</strong> como anexo à direita dos banheiros.
+                No piso térreo superior acontecem as Santas Missas. No <strong>subsolo (Salão Paroquial)</strong> ficam as <strong>Salas 11 a 16</strong> e a <strong>Sala 17 (São João Bosco)</strong> como anexo à direita dos banheiros.
               </p>
             </div>
             <button onclick="switchTab('paroquial')" class="text-xs font-bold text-blue-700 bg-white border border-blue-200 hover:bg-blue-50 py-2 rounded-xl text-center transition">
@@ -986,6 +1193,60 @@
       </div>
     </section>
 
+    <!-- ========================================== -->
+    <!-- TAB 5: EVENTOS & RETIROS                   -->
+    <!-- ========================================== -->
+    <section id="view-eventos" class="tab-view hidden space-y-6">
+
+      <!-- Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-gradient-to-r from-rose-900 to-slate-900 text-white p-6 rounded-3xl shadow-lg">
+        <div>
+          <div class="flex items-center gap-2 mb-2">
+            <span class="w-3 h-3 rounded-full bg-rose-400"></span>
+            <span class="text-xs font-bold uppercase tracking-wider text-rose-300">Pastoral da Catequese 2026</span>
+          </div>
+          <h2 class="text-2xl font-black font-heading">Eventos &amp; Retiros</h2>
+          <p class="text-sm text-slate-300 mt-1">Cronograma oficial de eventos pastorais • Santuário ICM Park Way</p>
+        </div>
+        <button id="btn-edit-mode" onclick="toggleEditMode()" class="text-xs font-bold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-xl transition">
+          ✏️ Editar
+        </button>
+      </div>
+
+      <!-- Formulário de adição (visível apenas no modo edição) -->
+      <div id="form-add-evento" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-5 space-y-3">
+        <h3 class="font-bold text-amber-900 font-heading">➕ Adicionar Novo Evento</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <input id="ev-nome" type="text" placeholder="Nome do evento (ex: Retiro Eucaristia I)" class="border border-amber-300 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-400" />
+          <input id="ev-data" type="date" class="border border-amber-300 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-400" />
+          <input id="ev-hora" type="text" placeholder="Horário (ex: 19h30) — opcional" class="border border-amber-300 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-400" />
+          <input id="ev-turmas" type="text" placeholder="Turmas (ex: T1, T2, T5 e T6)" class="border border-amber-300 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-400" />
+        </div>
+        <div class="flex items-center gap-3">
+          <label class="flex items-center gap-2 text-sm text-amber-800 cursor-pointer">
+            <input id="ev-externo" type="checkbox" class="rounded" />
+            🌍 Evento Externo
+          </label>
+          <button onclick="adicionarEvento()" class="ml-auto bg-[#d4a94f] hover:bg-amber-600 text-white font-bold text-sm px-5 py-2 rounded-xl transition shadow">
+            Salvar Evento
+          </button>
+        </div>
+      </div>
+
+      <!-- Timeline de Eventos -->
+      <div class="max-w-2xl mx-auto w-full">
+        <div id="eventos-timeline" class="space-y-1">
+          <!-- Preenchido pelo JS renderEventos() -->
+        </div>
+      </div>
+
+      <!-- Nota sobre persistência -->
+      <p class="text-center text-xs text-slate-400 pb-4">
+        🔒 Para adicionar ou excluir eventos deste cronograma, utilize o botão <strong>"Editar Eventos"</strong> com a senha de coordenação (<strong>Sicm@2026</strong>).
+      </p>
+
+    </section>
+
   </main>
 
   <!-- FOOTER -->
@@ -1003,40 +1264,43 @@
   <!-- SCRIPT: COMPLETE PARISH DATABASE -->
   <script>
     const roomsData = {
-      'sala-01': {
-        id: 'sala-01',
-        number: '01',
-        name: 'Protomártires do Brasil',
+      'sala-secretaria': {
+        id: 'sala-secretaria',
+        number: 'SECRETARIA',
+        name: 'Secretaria da Catequese',
         hall: 'catequetico',
-        wing: 'Centro Catequético • Ala Direita / Entrada',
+        wing: 'Centro Catequético • Bloco Superior Direito',
+        location: 'Localizada no bloco superior direito do Centro Catequético, acima da Sala Carlo Acutis. Acesso pelo exterior do bloco.',
+        desc: 'Atendimento e suporte administrativo à Pastoral da Catequese.',
+        schedules: [
+          { stage: 'Secretaria', turma: 'Administrativo', day: 'Conforme horário', time: 'Atendimento Pastoral', catechists: 'Equipe da Secretaria', period: 'all' }
+        ]
+      },
+      'sala-01': {
+        id: 'sala-01', number: '01', name: 'Protomártires do Brasil',
+        hall: 'catequetico', wing: 'Centro Catequético • Ala Direita / Entrada',
         location: 'Primeira sala à direita após a entrada principal em frente à Gruta de Nossa Senhora.',
         desc: 'Sala na entrada da ala direita do Centro Catequético.',
         schedules: [
           { stage: 'Eucaristia I', turma: 'Turma 01', day: 'Sábado', time: '08:30 às 10:00', catechists: 'Polyana', period: 'sab-manha' },
           { stage: 'Eucaristia I', turma: 'Turma 06', day: 'Sábado', time: '10:30 às 12:00', catechists: 'Andréia, Fernanda e Marina de Oliveira', period: 'sab-manha' },
-          { stage: 'Crisma Jovem', turma: 'Turma 06', day: 'Segunda-feira', time: '20:00 às 21:30', catechists: 'Jonatan e Vinícius Piante', period: 'seg-noite' }
+          { stage: 'Crisma Jovem', turma: 'Turma 06', day: 'Segunda-feira', time: '20:00 às 21:30', catechists: 'Jonatan', auxiliares: ['Davi'], period: 'seg-noite' }
         ]
       },
       'sala-02': {
-        id: 'sala-02',
-        number: '02',
-        name: 'Anjo da Guarda',
-        hall: 'catequetico',
-        wing: 'Centro Catequético • Ala Esquerda / Entrada',
+        id: 'sala-02', number: '02', name: 'Anjo da Guarda',
+        hall: 'catequetico', wing: 'Centro Catequético • Ala Esquerda / Entrada',
         location: 'Primeira porta logo à esquerda no corredor ao entrar pela Gruta.',
         desc: 'Sala na entrada da ala esquerda do Centro Catequético.',
         schedules: [
           { stage: 'Eucaristia I', turma: 'Turma 02', day: 'Sábado', time: '08:30 às 10:00', catechists: 'Shirley e Tatyane', period: 'sab-manha' },
           { stage: 'Crisma Jovem', turma: 'Turma 03', day: 'Sábado', time: '15:00 às 16:30', catechists: 'Alessandra Moraes e Mônica', period: 'sab-tarde' },
-          { stage: 'Crisma Jovem', turma: 'Turma 07', day: 'Segunda-feira', time: '20:00 às 21:30', catechists: 'Tiago Artur e Ricardo', period: 'seg-noite' }
+          { stage: 'Crisma Jovem', turma: 'Turma 07', day: 'Segunda-feira', time: '20:00 às 21:30', catechists: 'Tiago e Piante', period: 'seg-noite' }
         ]
       },
       'sala-03': {
-        id: 'sala-03',
-        number: '03',
-        name: 'São Francisco Marto',
-        hall: 'catequetico',
-        wing: 'Centro Catequético • Ala Direita',
+        id: 'sala-03', number: '03', name: 'São Francisco Marto',
+        hall: 'catequetico', wing: 'Centro Catequético • Ala Direita',
         location: 'Segunda porta à direita no corredor central.',
         desc: 'Sala intermediária da ala direita.',
         schedules: [
@@ -1045,55 +1309,43 @@
         ]
       },
       'sala-04': {
-        id: 'sala-04',
-        number: '04',
-        name: 'São Gabriel',
-        hall: 'catequetico',
-        wing: 'Centro Catequético • Ala Esquerda',
+        id: 'sala-04', number: '04', name: 'São Gabriel',
+        hall: 'catequetico', wing: 'Centro Catequético • Ala Esquerda',
         location: 'Segunda porta à esquerda no corredor central.',
         desc: 'Sala intermediária da ala esquerda.',
         schedules: [
-          { stage: 'Eucaristia I', turma: 'Turma 04', day: 'Sábado', time: '08:30 às 10:00', catechists: 'Brenda e Joyce', period: 'sab-manha' },
+          { stage: 'Eucaristia I', turma: 'Turma 04', day: 'Sábado', time: '08:30 às 10:00', catechists: 'Brenda e Joyce', semCatequista: true, auxiliares: [], period: 'sab-manha' },
           { stage: 'Eucaristia I', turma: 'Turma 07', day: 'Sábado', time: '10:30 às 12:00', catechists: 'Maria Rilda, Nádia e Marina Neiva', period: 'sab-manha' }
         ]
       },
       'sala-05': {
-        id: 'sala-05',
-        number: '05',
-        name: 'Santa Jacinta Marto',
-        hall: 'catequetico',
-        wing: 'Centro Catequético • Ala Direita',
+        id: 'sala-05', number: '05', name: 'Santa Jacinta Marto',
+        hall: 'catequetico', wing: 'Centro Catequético • Ala Direita',
         location: 'Terceira porta à direita no corredor central, antes dos armários.',
         desc: 'Sala da ala direita abaixo do auditório.',
         schedules: [
-          { stage: 'Eucaristia I', turma: 'Turma 05', day: 'Sábado', time: '08:30 às 10:00', catechists: 'Valdir e Mariana Alvarenga', period: 'sab-manha' },
-          { stage: 'Eucaristia I', turma: 'Turma 08', day: 'Sábado', time: '10:30 às 12:00', catechists: 'Elza, Lara e Zairo', period: 'sab-manha' },
+          { stage: 'Eucaristia I', turma: 'Turma 05', day: 'Sábado', time: '08:30 às 10:00', catechists: 'Valdir e Mariana Alvarenga', auxiliares: ['Mariana'], period: 'sab-manha' },
+          { stage: 'Eucaristia I', turma: 'Turma 08', day: 'Sábado', time: '10:30 às 12:00', catechists: 'Elza, Lara e Zairo', auxiliares: ['Zairo'], period: 'sab-manha' },
           { stage: 'Eucaristia II', turma: 'Turma 08', day: 'Quarta-feira', time: '16:00 às 17:30', catechists: 'Eliane e Carlos', period: 'quarta' },
           { stage: 'Crisma Jovem', turma: 'Turma 02', day: 'Sábado', time: '15:00 às 16:30', catechists: 'Artur', period: 'sab-tarde' },
           { stage: 'Crisma Adultos', turma: 'Turma 08', day: 'Sacramento: 03/12/2026', time: '19:30', catechists: 'Victor e Juliana', period: 'sacramento' }
         ]
       },
       'sala-06': {
-        id: 'sala-06',
-        number: '06',
-        name: 'São Miguel',
-        hall: 'catequetico',
-        wing: 'Centro Catequético • Ala Esquerda',
+        id: 'sala-06', number: '06', name: 'São Miguel',
+        hall: 'catequetico', wing: 'Centro Catequético • Ala Esquerda',
         location: 'Terceira porta à esquerda no corredor central.',
         desc: 'Sala intermediária da ala esquerda.',
         schedules: [
-          { stage: 'Eucaristia I', turma: 'Turma 10', day: 'Sábado', time: '08:30 às 10:00', catechists: 'Lanuzia, Mara Rúbia e Mariana Garcia', period: 'sab-manha' },
+          { stage: 'Eucaristia I', turma: 'Turma 10', day: 'Sábado', time: '08:30 às 10:00', catechists: 'Lanuzia, Mara Rúbia e Mariana Garcia', auxiliares: ['Marina'], period: 'sab-manha' },
           { stage: 'Eucaristia I', turma: 'Turma 09', day: 'Sábado', time: '10:30 às 12:00', catechists: 'Danusa e Glenda', period: 'sab-manha' },
           { stage: 'Crisma Jovem', turma: 'Turma 05', day: 'Segunda-feira', time: '20:00 às 21:30', catechists: 'Anderson e Kéllibe', period: 'seg-noite' },
           { stage: 'Crisma Adultos', turma: 'Turma 07', day: 'Sacramento: 03/12/2026', time: '19:30', catechists: 'Thiago e Thais', period: 'sacramento' }
         ]
       },
       'sala-07': {
-        id: 'sala-07',
-        number: '07',
-        name: 'São Rafael',
-        hall: 'catequetico',
-        wing: 'Centro Catequético • Ala Esquerda / Fundo',
+        id: 'sala-07', number: '07', name: 'São Rafael',
+        hall: 'catequetico', wing: 'Centro Catequético • Ala Esquerda / Fundo',
         location: 'Última sala da ala esquerda, logo abaixo da Pastoral da Costura.',
         desc: 'Sala da ala esquerda no fundo.',
         schedules: [
@@ -1102,11 +1354,8 @@
         ]
       },
       'sala-costura': {
-        id: 'sala-costura',
-        number: 'COSTURA',
-        name: 'Pastoral da Costura',
-        hall: 'catequetico',
-        wing: 'Centro Catequético • Sala Superior / Fim do Corredor',
+        id: 'sala-costura', number: 'COSTURA', name: 'Pastoral da Costura',
+        hall: 'catequetico', wing: 'Centro Catequético • Sala Superior / Fim do Corredor',
         location: 'Localizada nos fundos do Centro Catequético, estendendo-se atrás da Sala São Rafael até a parede divisória da Sala Carlo Acutis. A porta de acesso fica exatamente no fim do corredor central.',
         desc: 'Espaço dedicado às oficinas e trabalhos comunitários da Pastoral da Costura.',
         schedules: [
@@ -1114,24 +1363,18 @@
         ]
       },
       'sala-08': {
-        id: 'sala-08',
-        number: '08',
-        name: 'Beato Carlo Acutis',
-        hall: 'catequetico',
-        wing: 'Centro Catequético • Lado Direito / Acima do Auditório',
+        id: 'sala-08', number: '08', name: 'Beato Carlo Acutis',
+        hall: 'catequetico', wing: 'Centro Catequético • Lado Direito / Acima do Auditório',
         location: 'Integrada ao prédio no lado direito, acima do auditório, compartilhando parede com a Pastoral da Costura. Acesso exclusivamente externo com porta voltada para a direita (sem conexão ao corredor).',
         desc: 'Sala dedicada ao Beato Carlo Acutis com entrada externa à direita.',
         schedules: [
-          { stage: 'Eucaristia II', turma: 'Turma 02', day: 'Sábado', time: '08:30 às 10:00', catechists: 'Carla e Eliane', period: 'sab-manha' },
+          { stage: 'Eucaristia II', turma: 'Turma 02', day: 'Sábado', time: '08:30 às 10:00', catechists: 'Elaine e Carla', period: 'sab-manha' },
           { stage: 'Crisma Jovem', turma: 'Turma 04', day: 'Segunda-feira', time: '20:00 às 21:30', catechists: 'Amanda, Gabriela e Flávia', period: 'seg-noite' }
         ]
       },
       'auditorio': {
-        id: 'auditorio',
-        number: 'Auditório',
-        name: 'Auditório',
-        hall: 'catequetico',
-        wing: 'Centro Catequético • Lado Direito / Abaixo da Sala 08',
+        id: 'auditorio', number: 'Auditório', name: 'Auditório',
+        hall: 'catequetico', wing: 'Centro Catequético • Lado Direito / Abaixo da Sala 08',
         location: 'Lado direito do corredor, logo abaixo da Sala 08 Carlo Acutis. Possui duas portas: uma interna para o corredor central e uma saída externa no canto inferior direito.',
         desc: 'Auditório da Catequese com porta interna e saída externa.',
         schedules: [
@@ -1140,12 +1383,9 @@
           { stage: 'Crisma Adultos', turma: 'Turma 03', day: 'Segunda-feira', time: '20:00 às 22:00', catechists: 'Lorena e Natanai', period: 'seg-noite' }
         ]
       },
-      'sala-10': {
-        id: 'sala-10',
-        number: '10',
-        name: 'São João Bosco (Sala 10)',
-        hall: 'paroquial',
-        wing: 'Salão Paroquial • Anexo à Direita dos Banheiros',
+      'sala-17': {
+        id: 'sala-17', number: '17', name: 'São João Bosco (Sala 17)',
+        hall: 'paroquial', wing: 'Salão Paroquial • Anexo à Direita dos Banheiros',
         location: 'Anexo integrado ao Salão Paroquial, à direita dos banheiros, com porta na face superior voltada para fora do salão.',
         desc: 'Espaço oficial dos encontros da etapa de Perseverança.',
         schedules: [
@@ -1154,11 +1394,8 @@
         ]
       },
       'sala-11': {
-        id: 'sala-11',
-        number: 'SALA 11',
-        name: 'São Mateus (Evangelista)',
-        hall: 'paroquial',
-        wing: 'Salão Paroquial • Ala Direita / Inferior',
+        id: 'sala-11', number: 'SALA 11', name: 'São Mateus (Evangelista)',
+        hall: 'paroquial', wing: 'Salão Paroquial • Ala Direita / Inferior',
         location: 'Ao lado da porta de acesso inferior e da Sala 13 (São Lucas).',
         desc: 'Sala do Evangelista São Mateus.',
         schedules: [
@@ -1168,39 +1405,30 @@
         ]
       },
       'sala-12': {
-        id: 'sala-12',
-        number: 'SALA 12',
-        name: 'São Marcos (Evangelista)',
-        hall: 'paroquial',
-        wing: 'Salão Paroquial • Ala Direita / Superior',
+        id: 'sala-12', number: 'SALA 12', name: 'São Marcos (Evangelista)',
+        hall: 'paroquial', wing: 'Salão Paroquial • Ala Direita / Superior',
         location: 'Ao lado da porta de acesso superior e da Sala 14 (São João).',
         desc: 'Sala do Evangelista São Marcos.',
         schedules: [
-          { stage: 'Eucaristia II', turma: 'Turma 04', day: 'Sábado', time: '08:30 às 10:00', catechists: 'Maria Laura, Suelene e Matheus', period: 'sab-manha' },
-          { stage: 'Eucaristia II', turma: 'Turma 06', day: 'Sábado', time: '10:30 às 12:00', catechists: 'Solange, Núbia e Gabriella', period: 'sab-manha' },
+          { stage: 'Eucaristia II', turma: 'Turma 04', day: 'Sábado', time: '08:30 às 10:00', catechists: 'Maria Laura, Suelene e Matheus', auxiliares: ['Matheus'], period: 'sab-manha' },
+          { stage: 'Eucaristia II', turma: 'Turma 06', day: 'Sábado', time: '10:30 às 12:00', catechists: 'Solange, Núbia e Gabriella', auxiliares: ['Gabriella'], period: 'sab-manha' },
           { stage: 'Crisma Adultos', turma: 'Turma 04', day: 'Segunda-feira', time: '20:00 às 22:00', catechists: 'Lourival e Thiago Malaquias', period: 'seg-noite' }
         ]
       },
       'sala-13': {
-        id: 'sala-13',
-        number: 'SALA 13',
-        name: 'São Lucas (Evangelista)',
-        hall: 'paroquial',
-        wing: 'Salão Paroquial • Ala Direita / Próximo aos Banheiros',
+        id: 'sala-13', number: 'SALA 13', name: 'São Lucas (Evangelista)',
+        hall: 'paroquial', wing: 'Salão Paroquial • Ala Direita / Próximo aos Banheiros',
         location: 'Ao lado dos banheiros e da Sala 11 (São Mateus).',
         desc: 'Sala do Evangelista São Lucas.',
         schedules: [
-          { stage: 'Eucaristia II', turma: 'Turma 03', day: 'Sábado', time: '08:30 às 10:00', catechists: 'Marilian, Maria Luísa e Anna Júlia', period: 'sab-manha' },
-          { stage: 'Eucaristia II', turma: 'Turma 07', day: 'Sábado', time: '10:30 às 12:00', catechists: 'Priscila Ayres, Camila e Ana', period: 'sab-manha' },
+          { stage: 'Eucaristia II', turma: 'Turma 03', day: 'Sábado', time: '08:30 às 10:00', catechists: 'Marilian, Maria Luísa e Anna Júlia', auxiliares: ['Ana Julia'], period: 'sab-manha' },
+          { stage: 'Eucaristia II', turma: 'Turma 07', day: 'Sábado', time: '10:30 às 12:00', catechists: 'Priscila Ayres, Camila e Ana', auxiliares: ['Ana'], period: 'sab-manha' },
           { stage: 'Crisma Jovem', turma: 'Turma 09', day: 'Segunda-feira', time: '20:00 às 21:30', catechists: 'Lanuzia', period: 'seg-noite' }
         ]
       },
       'sala-14': {
-        id: 'sala-14',
-        number: 'SALA 14',
-        name: 'São João (Evangelista)',
-        hall: 'paroquial',
-        wing: 'Salão Paroquial • Ala Direita / Ao lado da Cozinha',
+        id: 'sala-14', number: 'SALA 14', name: 'São João (Evangelista)',
+        hall: 'paroquial', wing: 'Salão Paroquial • Ala Direita / Ao lado da Cozinha',
         location: 'Ao lado da Cozinha e da Sala 12 (São Marcos).',
         desc: 'Sala do Evangelista São João.',
         schedules: [
@@ -1208,37 +1436,28 @@
         ]
       },
       'sala-15': {
-        id: 'sala-15',
-        number: 'SALA 15',
-        name: 'Santo André (Apóstolo)',
-        hall: 'paroquial',
-        wing: 'Salão Paroquial • Ala Frontal / Inferior',
+        id: 'sala-15', number: 'SALA 15', name: 'Santo André (Apóstolo)',
+        hall: 'paroquial', wing: 'Salão Paroquial • Ala Frontal / Inferior',
         location: 'Canto inferior esquerdo, ao lado do palco.',
         desc: 'Espaço principal da Pré-Eucaristia no Salão Paroquial.',
         schedules: [
-          { stage: 'Pré Eucaristia', turma: 'Turma 02', day: 'Sábado', time: '08:30 às 10:00', catechists: 'Ana Luísa, Mariana Cavalcante e Clarice', period: 'sab-manha' },
-          { stage: 'Pré Eucaristia', turma: 'Turma 03', day: 'Sábado', time: '10:30 às 12:00', catechists: 'Bruna, Jullia e Beatris', period: 'sab-manha' }
+          { stage: 'Pré Eucaristia', turma: 'Turma 02', day: 'Sábado', time: '08:30 às 10:00', catechists: 'Ana Luísa, Mariana Cavalcante e Clarice', auxiliares: ['Mariana', 'Clarice'], period: 'sab-manha' },
+          { stage: 'Pré Eucaristia', turma: 'Turma 03', day: 'Sábado', time: '10:30 às 12:00', catechists: '—', semCatequista: true, period: 'sab-manha' }
         ]
       },
       'sala-16': {
-        id: 'sala-16',
-        number: 'SALA 16',
-        name: 'Santa Teresa de Calcutá',
-        hall: 'paroquial',
-        wing: 'Salão Paroquial • Ala Frontal / Superior',
+        id: 'sala-16', number: 'SALA 16', name: 'Santa Teresa de Calcutá',
+        hall: 'paroquial', wing: 'Salão Paroquial • Ala Frontal / Superior',
         location: 'Canto superior esquerdo, ao lado do palco.',
         desc: 'Sala dedicada à Santa Teresa de Calcutá.',
         schedules: [
-          { stage: 'Pré Eucaristia', turma: 'Turma 01', day: 'Sábado', time: '08:30 às 10:00', catechists: 'Patrícia e Eliane', period: 'sab-manha' },
+          { stage: 'Pré Eucaristia', turma: 'Turma 01', day: 'Sábado', time: '08:30 às 10:00', catechists: 'Patrícia e Eliane', auxiliares: ['Ane'], period: 'sab-manha' },
           { stage: 'Crisma Jovem', turma: 'Turma 11', day: 'Segunda-feira', time: '20:00 às 21:30', catechists: 'Rosilene e Pierre', period: 'seg-noite' }
         ]
       },
       'sala-cozinha': {
-        id: 'sala-cozinha',
-        number: 'Cozinha',
-        name: 'Cozinha Paroquial',
-        hall: 'paroquial',
-        wing: 'Salão Paroquial • Fundos Direita',
+        id: 'sala-cozinha', number: 'Cozinha', name: 'Cozinha Paroquial',
+        hall: 'paroquial', wing: 'Salão Paroquial • Fundos Direita',
         location: 'Canto superior direito do Salão Paroquial.',
         desc: 'Apoio aos encontros pastorais e cafés comunitários.',
         schedules: [
@@ -1246,23 +1465,17 @@
         ]
       },
       'sala-banheiros': {
-        id: 'sala-banheiros',
-        number: 'Sanitários',
-        name: 'Sanitários Paroquiais',
-        hall: 'paroquial',
-        wing: 'Salão Paroquial • Fundos Direita (Posição Original)',
-        location: 'Canto inferior direito do Salão Paroquial, com a Sala 10 anexada à sua direita.',
+        id: 'sala-banheiros', number: 'Sanitários', name: 'Sanitários Paroquiais',
+        hall: 'paroquial', wing: 'Salão Paroquial • Fundos Direita',
+        location: 'Canto inferior direito do Salão Paroquial, com a Sala 17 anexada à sua direita.',
         desc: 'Sanitários Feminino, Masculino e Acessível (PCD).',
         schedules: [
           { stage: 'Infraestrutura', turma: 'Uso Comum', day: 'Todos os dias', time: 'Permanente', catechists: 'Acolhida', period: 'all' }
         ]
       },
       'palco': {
-        id: 'palco',
-        number: 'Palco',
-        name: 'Palco & Hall de Acolhida',
-        hall: 'paroquial',
-        wing: 'Salão Paroquial • Entrada Frontal',
+        id: 'palco', number: 'Palco', name: 'Palco & Hall de Acolhida',
+        hall: 'paroquial', wing: 'Salão Paroquial • Entrada Frontal',
         location: 'Frente do Salão Paroquial, entre as salas 15 e 16.',
         desc: 'Espaço amplo para apresentações bíblicas e acolhida geral.',
         schedules: [
@@ -1273,37 +1486,37 @@
 
     const masterScheduleList = [
       // Pré Eucaristia
-      { stage: 'Pré Eucaristia', turma: 'Turma 01', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Patrícia e Eliane', room: 'Sala 16 (Santa Teresa de Calcutá)', hall: 'Salão Paroquial' },
-      { stage: 'Pré Eucaristia', turma: 'Turma 02', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Ana Luísa, Mariana Cavalcante e Clarice', room: 'Sala 15 (Santo André)', hall: 'Salão Paroquial' },
-      { stage: 'Pré Eucaristia', turma: 'Turma 03', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Bruna, Jullia e Beatris', room: 'Sala 15 (Santo André)', hall: 'Salão Paroquial' },
+      { stage: 'Pré Eucaristia', turma: 'Turma 01', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Patrícia e Eliane', auxiliares: ['Ane'], room: 'Sala 16 (Santa Teresa de Calcutá)', hall: 'Salão Paroquial' },
+      { stage: 'Pré Eucaristia', turma: 'Turma 02', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Ana Luísa, Mariana Cavalcante e Clarice', auxiliares: ['Mariana', 'Clarice'], room: 'Sala 15 (Santo André)', hall: 'Salão Paroquial' },
+      { stage: 'Pré Eucaristia', turma: 'Turma 03', dayTime: 'Sábado: 10:30 às 12:00', catechists: '—', semCatequista: true, room: 'Sala 15 (Santo André)', hall: 'Salão Paroquial' },
 
       // Eucaristia I
       { stage: 'Eucaristia I', turma: 'Turma 01', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Polyana', room: 'Sala 01 (Protomártires do Brasil)', hall: 'Centro Catequético' },
       { stage: 'Eucaristia I', turma: 'Turma 02', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Shirley e Tatyane', room: 'Sala 02 (Anjo da Guarda)', hall: 'Centro Catequético' },
       { stage: 'Eucaristia I', turma: 'Turma 03', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Joseline e Silene', room: 'Sala 03 (São Francisco Marto)', hall: 'Centro Catequético' },
-      { stage: 'Eucaristia I', turma: 'Turma 04', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Brenda e Joyce', room: 'Sala 04 (São Gabriel)', hall: 'Centro Catequético' },
-      { stage: 'Eucaristia I', turma: 'Turma 05', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Valdir e Mariana Alvarenga', room: 'Sala 05 (Santa Jacinta Marto)', hall: 'Centro Catequético' },
-      { stage: 'Eucaristia I', turma: 'Turma 10', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Lanuzia, Mara Rúbia e Mariana Garcia', room: 'Sala 06 (São Miguel)', hall: 'Centro Catequético' },
+      { stage: 'Eucaristia I', turma: 'Turma 04', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Brenda e Joyce', semCatequista: true, room: 'Sala 04 (São Gabriel)', hall: 'Centro Catequético' },
+      { stage: 'Eucaristia I', turma: 'Turma 05', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Valdir e Mariana Alvarenga', auxiliares: ['Mariana'], room: 'Sala 05 (Santa Jacinta Marto)', hall: 'Centro Catequético' },
+      { stage: 'Eucaristia I', turma: 'Turma 10', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Lanuzia, Mara Rúbia e Mariana Garcia', auxiliares: ['Marina'], room: 'Sala 06 (São Miguel)', hall: 'Centro Catequético' },
       { stage: 'Eucaristia I', turma: 'Turma 11', dayTime: 'Sábado: 10:00 às 11:30', catechists: 'Maria Dulcineide e Elisa', room: 'Capela Nossa Senhora das Graças', hall: 'Capela Externa' },
-      { stage: 'Eucaristia I', turma: 'Turma 06', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Andréia, Fernanda e Marina de Oliveira', room: 'Sala 01 (Protomártires do Brasil)', hall: 'Centro Catequético' },
+      { stage: 'Eucaristia I', turma: 'Turma 06', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Andréia, Fernanda e Marina de Oliveira', auxiliares: ['Marina'], room: 'Sala 01 (Protomártires do Brasil)', hall: 'Centro Catequético' },
       { stage: 'Eucaristia I', turma: 'Turma 07', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Maria Rilda, Nádia e Marina Neiva', room: 'Sala 04 (São Gabriel)', hall: 'Centro Catequético' },
-      { stage: 'Eucaristia I', turma: 'Turma 08', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Elza, Lara e Zairo', room: 'Sala 05 (Santa Jacinta Marto)', hall: 'Centro Catequético' },
+      { stage: 'Eucaristia I', turma: 'Turma 08', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Elza, Lara e Zairo', auxiliares: ['Zairo'], room: 'Sala 05 (Santa Jacinta Marto)', hall: 'Centro Catequético' },
       { stage: 'Eucaristia I', turma: 'Turma 09', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Danusa e Glenda', room: 'Sala 06 (São Miguel)', hall: 'Centro Catequético' },
 
       // Eucaristia II
       { stage: 'Eucaristia II', turma: 'Turma 01', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Bruna Noleto e Ana Luiza Yung', room: 'Sala 11 (São Mateus)', hall: 'Salão Paroquial' },
-      { stage: 'Eucaristia II', turma: 'Turma 02', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Carla e Eliane', room: 'Sala 08 (Carlo Acutis - Acesso Ext.)', hall: 'Centro Catequético' },
-      { stage: 'Eucaristia II', turma: 'Turma 03', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Marilian, Maria Luísa e Anna Júlia', room: 'Sala 13 (São Lucas)', hall: 'Salão Paroquial' },
-      { stage: 'Eucaristia II', turma: 'Turma 04', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Maria Laura, Suelene e Matheus', room: 'Sala 12 (São Marcos)', hall: 'Salão Paroquial' },
+      { stage: 'Eucaristia II', turma: 'Turma 02', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Elaine e Carla', room: 'Sala 08 (Carlo Acutis - Acesso Ext.)', hall: 'Centro Catequético' },
+      { stage: 'Eucaristia II', turma: 'Turma 03', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Marilian, Maria Luísa e Anna Júlia', auxiliares: ['Ana Julia'], room: 'Sala 13 (São Lucas)', hall: 'Salão Paroquial' },
+      { stage: 'Eucaristia II', turma: 'Turma 04', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Maria Laura, Suelene e Matheus', auxiliares: ['Matheus'], room: 'Sala 12 (São Marcos)', hall: 'Salão Paroquial' },
       { stage: 'Eucaristia II', turma: 'Turma 09', dayTime: 'Sábado: 10:00 às 11:30', catechists: 'Carlos', room: 'Capela Nossa Senhora das Graças', hall: 'Capela Externa' },
       { stage: 'Eucaristia II', turma: 'Turma 05', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Bruna Noleto, José Henrique e Heitor', room: 'Sala 11 (São Mateus)', hall: 'Salão Paroquial' },
-      { stage: 'Eucaristia II', turma: 'Turma 06', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Solange, Núbia e Gabriella', room: 'Sala 12 (São Marcos)', hall: 'Salão Paroquial' },
-      { stage: 'Eucaristia II', turma: 'Turma 07', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Priscila Ayres, Camila e Ana', room: 'Sala 13 (São Lucas)', hall: 'Salão Paroquial' },
+      { stage: 'Eucaristia II', turma: 'Turma 06', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Solange, Núbia e Gabriella', auxiliares: ['Gabriella'], room: 'Sala 12 (São Marcos)', hall: 'Salão Paroquial' },
+      { stage: 'Eucaristia II', turma: 'Turma 07', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Priscila Ayres, Camila e Ana', auxiliares: ['Ana'], room: 'Sala 13 (São Lucas)', hall: 'Salão Paroquial' },
       { stage: 'Eucaristia II', turma: 'Turma 08', dayTime: 'Quarta: 16:00 às 17:30', catechists: 'Eliane e Carlos', room: 'Sala 05 (Santa Jacinta Marto)', hall: 'Centro Catequético' },
 
       // Perseverança
-      { stage: 'Perseverança', turma: 'Turma 01', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Marcella, Bruna e Sônia', room: 'Sala 10 (São João Bosco)', hall: 'Salão Paroquial (Anexo à dir. dos banheiros)' },
-      { stage: 'Perseverança', turma: 'Turma 02', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Alda e Rosângela', room: 'Sala 10 (São João Bosco)', hall: 'Salão Paroquial (Anexo à dir. dos banheiros)' },
+      { stage: 'Perseverança', turma: 'Turma 01', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Marcella, Bruna e Sônia', room: 'Sala 17 (São João Bosco)', hall: 'Salão Paroquial (Anexo à dir. dos banheiros)' },
+      { stage: 'Perseverança', turma: 'Turma 02', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Alda e Rosângela', room: 'Sala 17 (São João Bosco)', hall: 'Salão Paroquial (Anexo à dir. dos banheiros)' },
 
       // Crisma Jovem
       { stage: 'Crisma Jovem', turma: 'Turma 01', dayTime: 'Sábado: 15:00 às 16:30', catechists: 'Giovanna Lopes e Heloísa', room: 'Sala 07 (São Rafael)', hall: 'Centro Catequético' },
@@ -1311,8 +1524,8 @@
       { stage: 'Crisma Jovem', turma: 'Turma 03', dayTime: 'Sábado: 15:00 às 16:30', catechists: 'Alessandra Moraes e Mônica', room: 'Sala 02 (Anjo da Guarda)', hall: 'Centro Catequético' },
       { stage: 'Crisma Jovem', turma: 'Turma 04', dayTime: 'Segunda: 20:00 às 21:30', catechists: 'Amanda, Gabriela e Flávia', room: 'Sala 08 (Carlo Acutis)', hall: 'Centro Catequético (Acesso Ext. Direita)' },
       { stage: 'Crisma Jovem', turma: 'Turma 05', dayTime: 'Segunda: 20:00 às 21:30', catechists: 'Anderson e Kéllibe', room: 'Sala 06 (São Miguel)', hall: 'Centro Catequético' },
-      { stage: 'Crisma Jovem', turma: 'Turma 06', dayTime: 'Segunda: 20:00 às 21:30', catechists: 'Jonatan e Vinícius Piante', room: 'Sala 01 (Protomártires do Brasil)', hall: 'Centro Catequético' },
-      { stage: 'Crisma Jovem', turma: 'Turma 07', dayTime: 'Segunda: 20:00 às 21:30', catechists: 'Tiago Artur e Ricardo', room: 'Sala 02 (Anjo da Guarda)', hall: 'Centro Catequético' },
+      { stage: 'Crisma Jovem', turma: 'Turma 06', dayTime: 'Segunda: 20:00 às 21:30', catechists: 'Jonatan', auxiliares: ['Davi'], room: 'Sala 01 (Protomártires do Brasil)', hall: 'Centro Catequético' },
+      { stage: 'Crisma Jovem', turma: 'Turma 07', dayTime: 'Segunda: 20:00 às 21:30', catechists: 'Tiago e Piante', room: 'Sala 02 (Anjo da Guarda)', hall: 'Centro Catequético' },
       { stage: 'Crisma Jovem', turma: 'Turma 08', dayTime: 'Segunda: 20:00 às 21:30', catechists: 'José Bernardo e Priscila Mesquita', room: 'Sala 11 (São Mateus)', hall: 'Salão Paroquial' },
       { stage: 'Crisma Jovem', turma: 'Turma 09', dayTime: 'Segunda: 20:00 às 21:30', catechists: 'Lanuzia', room: 'Sala 13 (São Lucas)', hall: 'Salão Paroquial' },
       { stage: 'Crisma Jovem', turma: 'Turma 10', dayTime: 'Segunda: 20:00 às 21:30', catechists: 'Klebson, Heitor e Beatriz', room: 'Sala 14 (São João)', hall: 'Salão Paroquial' },
@@ -1535,10 +1748,11 @@
       if (!grid) return;
       grid.innerHTML = '';
 
-      const catequeticoRooms = ['sala-01', 'sala-02', 'sala-03', 'sala-04', 'sala-05', 'sala-06', 'sala-07', 'sala-costura', 'sala-08', 'auditorio'];
+      const catequeticoRooms = ['sala-secretaria', 'sala-01', 'sala-02', 'sala-03', 'sala-04', 'sala-05', 'sala-06', 'sala-07', 'sala-costura', 'sala-08', 'auditorio'];
       
       catequeticoRooms.forEach(id => {
         const room = roomsData[id];
+        if (!room) return;
         const card = document.createElement('div');
         card.className = 'room-card bg-slate-50 hover:bg-white p-4 rounded-2xl border border-slate-200 cursor-pointer shadow-xs flex flex-col justify-between';
         card.onclick = () => selectRoom(room.id);
@@ -1568,7 +1782,7 @@
       });
     }
 
-    // POPULATE MASTER SCHEDULE TABLE
+    // POPULATE MASTER SCHEDULE TABLE (com auxiliares em menor destaque)
     function renderScheduleTable() {
       const tbody = document.getElementById('turmas-table-body');
       if (!tbody) return;
@@ -1580,11 +1794,22 @@
         
         let badgeColor = 'bg-slate-100 text-slate-800';
         if (r.stage.includes('Pré')) badgeColor = 'bg-emerald-100 text-emerald-800';
-        else if (r.stage.includes('Eucaristia I')) badgeColor = 'bg-sky-100 text-sky-800';
+        else if (r.stage.includes('Eucaristia I') && !r.stage.includes('II')) badgeColor = 'bg-sky-100 text-sky-800';
         else if (r.stage.includes('Eucaristia II')) badgeColor = 'bg-blue-100 text-blue-800';
         else if (r.stage.includes('Perseverança')) badgeColor = 'bg-amber-100 text-amber-900';
         else if (r.stage.includes('Crisma Jovem')) badgeColor = 'bg-purple-100 text-purple-900';
         else if (r.stage.includes('Crisma Adultos')) badgeColor = 'bg-indigo-100 text-indigo-900';
+
+        // Renderização do campo de catequistas com auxiliares em menor destaque
+        let catechistsHtml = '';
+        if (r.semCatequista) {
+          catechistsHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-yellow-100 text-yellow-800 border border-yellow-300">⚠️ Todos auxiliares em formação</span>`;
+        } else {
+          catechistsHtml = `<span class="font-medium text-slate-900">${r.catechists}</span>`;
+          if (r.auxiliares && r.auxiliares.length > 0) {
+            catechistsHtml += `<div class="text-[11px] text-slate-400 italic mt-0.5">Aux. em formação: ${r.auxiliares.join(', ')}</div>`;
+          }
+        }
 
         tr.innerHTML = `
           <td class="py-3 px-4">
@@ -1592,7 +1817,7 @@
             <div class="text-xs font-bold text-slate-900 mt-1">${r.turma}</div>
           </td>
           <td class="py-3 px-4 font-semibold text-slate-700 whitespace-nowrap">${r.dayTime}</td>
-          <td class="py-3 px-4 font-medium text-slate-900">${r.catechists}</td>
+          <td class="py-3 px-4">${catechistsHtml}</td>
           <td class="py-3 px-4 font-bold text-slate-800">${r.room}</td>
           <td class="py-3 px-4 text-slate-500 text-xs">${r.hall}</td>
         `;
@@ -1600,10 +1825,275 @@
       });
     }
 
-    // INITIALIZATION
+    // =============================================
+    // CONTROLE DE ACESSO AO SITE (Senha: Sicm@2026)
+    // =============================================
+    const SITE_PASSWORD = 'Sicm@2026';
+    const AUTH_STORAGE_KEY = 'catequese_auth_status';
+
+    function checkSiteAuth() {
+      const isAuthSession = sessionStorage.getItem(AUTH_STORAGE_KEY) === 'authenticated';
+      const isAuthLocal = localStorage.getItem(AUTH_STORAGE_KEY) === 'authenticated';
+      const gate = document.getElementById('auth-gate');
+      if (isAuthSession || isAuthLocal) {
+        if (gate) gate.classList.add('hidden');
+        return true;
+      } else {
+        if (gate) {
+          gate.classList.remove('hidden');
+          const input = document.getElementById('auth-password-input');
+          if (input) setTimeout(() => input.focus(), 150);
+        }
+        return false;
+      }
+    }
+
+    function handleSiteLogin(event) {
+      if (event) event.preventDefault();
+      const input = document.getElementById('auth-password-input');
+      const errorMsg = document.getElementById('auth-error-msg');
+      const rememberCheck = document.getElementById('auth-remember-check');
+      const gate = document.getElementById('auth-gate');
+
+      const pass = (input ? input.value : '').trim();
+
+      if (pass === SITE_PASSWORD) {
+        if (errorMsg) errorMsg.classList.add('hidden');
+        sessionStorage.setItem(AUTH_STORAGE_KEY, 'authenticated');
+        if (rememberCheck && rememberCheck.checked) {
+          localStorage.setItem(AUTH_STORAGE_KEY, 'authenticated');
+        } else {
+          localStorage.removeItem(AUTH_STORAGE_KEY);
+        }
+        if (gate) {
+          gate.style.opacity = '0';
+          setTimeout(() => {
+            gate.classList.add('hidden');
+            gate.style.opacity = '1';
+          }, 300);
+        }
+      } else {
+        if (errorMsg) errorMsg.classList.remove('hidden');
+        if (input) {
+          input.classList.add('border-rose-500', 'ring-2', 'ring-rose-400');
+          input.focus();
+          input.select();
+        }
+      }
+    }
+
+    function togglePasswordVisibility(inputId) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    function logoutSite() {
+      sessionStorage.removeItem(AUTH_STORAGE_KEY);
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+      const input = document.getElementById('auth-password-input');
+      const errorMsg = document.getElementById('auth-error-msg');
+      if (input) input.value = '';
+      if (errorMsg) errorMsg.classList.add('hidden');
+      const gate = document.getElementById('auth-gate');
+      if (gate) {
+        gate.classList.remove('hidden');
+        if (input) setTimeout(() => input.focus(), 150);
+      }
+    }
+
+    // =============================================
+    // EVENTOS E RETIROS — LocalStorage Standalone
+    // Suporte total ao GitHub Pages
+    // Modo de edição protegido pelo PIN Sicm@2026
+    // =============================================
+    const EDIT_PIN = 'Sicm@2026';
+    const STORAGE_KEY_EVENTOS = 'catequese_eventos_2026_v1';
+    let editModeActive = false;
+
+    // Dados iniciais padrão (Retiros da Catequese 2026)
+    const SEED_EVENTOS = [
+      { id: 'seed-1', nome: 'Retiro Eucaristia I', data: '2026-09-12', hora: 'Manhã e Tarde', turmas: 'Turmas 01, 02, 05 e 06', externo: false },
+      { id: 'seed-2', nome: 'Retiro Eucaristia I', data: '2026-09-13', hora: 'Manhã e Tarde', turmas: 'Turmas 03, 04, 07 e 08', externo: false },
+      { id: 'seed-3', nome: 'Retiro Crisma Jovem',  data: '2026-10-24', hora: 'Dia Todo',       turmas: 'Todas as Turmas de Crisma Jovem', externo: true },
+      { id: 'seed-4', nome: 'Retiro Crisma Adultos',data: '2026-11-05', hora: '19:30',          turmas: 'Todas as Turmas de Crisma Adultos', externo: false }
+    ];
+
+    function _dataFmt(dataISO) {
+      if (!dataISO) return '';
+      const parts = dataISO.split('-');
+      if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      const d = new Date(dataISO + 'T12:00:00');
+      return d.toLocaleDateString('pt-BR');
+    }
+
+    function _diaSemana(dataISO) {
+      if (!dataISO) return '';
+      const dias = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+      const d = new Date(dataISO + 'T12:00:00');
+      return dias[d.getDay()] || '';
+    }
+
+    function getEventosData() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY_EVENTOS);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (e) {
+        console.error('Erro ao ler localStorage de eventos:', e);
+      }
+      // Se não existir, salva e retorna os dados seed
+      saveEventosData(SEED_EVENTOS);
+      return SEED_EVENTOS;
+    }
+
+    function saveEventosData(list) {
+      try {
+        localStorage.setItem(STORAGE_KEY_EVENTOS, JSON.stringify(list));
+      } catch (e) {
+        console.error('Erro ao salvar eventos no localStorage:', e);
+      }
+      renderEventosTimeline();
+    }
+
+    function renderEventosTimeline() {
+      const container = document.getElementById('eventos-timeline');
+      if (!container) return;
+
+      const eventos = getEventosData();
+
+      if (!eventos || eventos.length === 0) {
+        container.innerHTML = '<p class="text-slate-400 text-sm text-center py-8">Nenhum evento cadastrado no momento.</p>';
+        return;
+      }
+
+      const sorted = [...eventos].sort((a, b) => (a.data || '').localeCompare(b.data || ''));
+
+      container.innerHTML = sorted.map(ev => {
+        const dataFmt = _dataFmt(ev.data);
+        const partes = dataFmt.split('/');
+        const diaMes = partes.length >= 2 ? `${partes[0]}/${partes[1]}` : dataFmt;
+        const ano = partes.length === 3 ? partes[2] : '2026';
+        const diaSem = _diaSemana(ev.data);
+
+        return `
+          <div class="flex gap-4 items-start" data-evento-id="${ev.id}">
+            <div class="flex flex-col items-center">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#d4a94f] to-[#b88d36] text-white flex flex-col items-center justify-center shadow-md shrink-0 border border-amber-300">
+                <span class="text-[11px] font-black leading-none">${diaMes}</span>
+                <span class="text-[9px] leading-none opacity-90 mt-0.5">${ano}</span>
+              </div>
+              <div class="w-0.5 bg-amber-200 flex-1 mt-2 min-h-[30px]"></div>
+            </div>
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 flex-1 shadow-sm mb-4 hover:border-amber-300 transition">
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <div class="flex items-center gap-2 flex-wrap mb-1">
+                    <h3 class="font-bold text-slate-900 font-heading text-base">${ev.nome}</h3>
+                    ${ev.externo ? '<span class="text-[10px] font-extrabold uppercase bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-300">🌍 Externo</span>' : '<span class="text-[10px] font-extrabold uppercase bg-amber-50 text-amber-900 px-2 py-0.5 rounded-full border border-amber-200">⛪ Santuário</span>'}
+                  </div>
+                  <p class="text-xs text-slate-600 font-medium">
+                    📅 <strong>${diaSem}</strong>, ${dataFmt} ${ev.hora ? ' • ⏰ ' + ev.hora : ''}
+                  </p>
+                  ${ev.turmas ? `<p class="text-xs text-slate-500 mt-1">👥 <strong>Turmas:</strong> ${ev.turmas}</p>` : ''}
+                </div>
+                ${editModeActive ? `
+                  <button onclick="removerEvento('${ev.id}')" class="text-xs text-rose-600 hover:text-rose-800 font-bold shrink-0 border border-rose-200 hover:bg-rose-50 px-2.5 py-1 rounded-xl transition flex items-center gap-1 shadow-xs">
+                    <span>🗑</span> <span>Excluir</span>
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function removerEvento(id) {
+      if (!editModeActive) return;
+      if (!confirm('Deseja realmente remover este evento?')) return;
+      const eventos = getEventosData().filter(e => e.id !== id);
+      saveEventosData(eventos);
+    }
+
+    function toggleEditMode() {
+      const btn = document.getElementById('btn-edit-mode');
+      const form = document.getElementById('form-add-evento');
+
+      if (editModeActive) {
+        editModeActive = false;
+        if (btn) {
+          btn.textContent = '✏️ Editar Eventos';
+          btn.className = 'text-xs font-bold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 px-4 py-2 rounded-xl transition shadow-xs';
+        }
+        if (form) form.classList.add('hidden');
+        renderEventosTimeline();
+        return;
+      }
+
+      const pin = prompt('🔒 Digite a senha de administração (Sicm@2026) para editar os eventos:');
+      if (pin === EDIT_PIN) {
+        editModeActive = true;
+        if (btn) {
+          btn.textContent = '🔓 Concluir Edição';
+          btn.className = 'text-xs font-bold text-rose-700 bg-rose-50 border border-rose-300 hover:bg-rose-100 px-4 py-2 rounded-xl transition shadow-xs';
+        }
+        if (form) form.classList.remove('hidden');
+        renderEventosTimeline();
+      } else if (pin !== null) {
+        alert('Senha incorreta.');
+      }
+    }
+
+    function adicionarEvento() {
+      const nomeInput = document.getElementById('ev-nome');
+      const dataInput = document.getElementById('ev-data');
+      const horaInput = document.getElementById('ev-hora');
+      const turmasInput = document.getElementById('ev-turmas');
+      const externoInput = document.getElementById('ev-externo');
+
+      const nome = (nomeInput ? nomeInput.value : '').trim();
+      const data = (dataInput ? dataInput.value : '').trim();
+      const hora = (horaInput ? horaInput.value : '').trim();
+      const turmas = (turmasInput ? turmasInput.value : '').trim();
+      const externo = externoInput ? externoInput.checked : false;
+
+      if (!nome || !data) {
+        alert('Por favor, informe pelo menos o Nome do Evento e a Data.');
+        return;
+      }
+
+      const novoEvento = {
+        id: 'ev-' + Date.now(),
+        nome,
+        data,
+        hora,
+        turmas,
+        externo
+      };
+
+      const eventos = getEventosData();
+      eventos.push(novoEvento);
+      saveEventosData(eventos);
+
+      // Limpar campos
+      if (nomeInput) nomeInput.value = '';
+      if (dataInput) dataInput.value = '';
+      if (horaInput) horaInput.value = '';
+      if (turmasInput) turmasInput.value = '';
+      if (externoInput) externoInput.checked = false;
+    }
+
+    // =============================================
+    // INICIALIZAÇÃO
+    // =============================================
     document.addEventListener('DOMContentLoaded', () => {
+      checkSiteAuth();
       renderRoomCards();
       renderScheduleTable();
+      renderEventosTimeline();
       selectRoom('sala-01');
     });
   </script>
