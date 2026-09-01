@@ -2544,15 +2544,15 @@
     // Modo de edição protegido pelo PIN Sicm@2026
     // =============================================
     const EDIT_PIN = 'Sicm@2026';
-    const STORAGE_KEY_EVENTOS = 'catequese_eventos_2026_v1';
+    const STORAGE_KEY_EVENTOS = 'catequese_eventos_2026_v2';
     let editModeActive = false;
 
-    // Dados iniciais padrão (Retiros da Catequese 2026)
+    // Dados iniciais padrão (Cronograma da Catequese 2026)
     const SEED_EVENTOS = [
       { id: 'seed-1', nome: 'Retiro Eucaristia I', data: '2026-09-12', hora: 'Manhã e Tarde', turmas: 'Turmas 01, 02, 05 e 06', externo: false },
       { id: 'seed-2', nome: 'Retiro Eucaristia I', data: '2026-09-13', hora: 'Manhã e Tarde', turmas: 'Turmas 03, 04, 07 e 08', externo: false },
       { id: 'seed-3', nome: 'Retiro Crisma Jovem',  data: '2026-10-24', hora: 'Dia Todo',       turmas: 'Todas as Turmas de Crisma Jovem', externo: true },
-      { id: 'seed-4', nome: 'Retiro Crisma Adultos',data: '2026-11-05', hora: '19:30',          turmas: 'Todas as Turmas de Crisma Adultos', externo: false }
+      { id: 'seed-4', nome: 'Crisma dos Adultos (Celebração do Sacramento)', data: '2026-11-05', hora: '19:30', turmas: 'Todas as Turmas de Crisma Adultos', externo: false }
     ];
 
     function _dataFmt(dataISO) {
