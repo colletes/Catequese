@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Plantas Oficiais e Guia de Salas • Santuário Imaculado Coração de Maria</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Questrial&family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
@@ -1072,84 +1073,538 @@
     <!-- ========================================== -->
     <section id="view-guia" class="tab-view hidden space-y-6">
       
-      <!-- Stage Coordinator Cards -->
-      <!-- Coordenação Geral (topo) -->
-      <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white p-5 rounded-2xl border-l-4 border-[#d4a94f] shadow-md col-span-full" id="card-coord-geral">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <span class="text-[11px] font-bold uppercase text-[#d4a94f] bg-amber-950/60 px-2 py-0.5 rounded border border-amber-500/30">Coordenação Geral da Catequese</span>
-            <h4 class="font-bold font-heading text-white text-lg mt-2" id="coord-geral-nome">Coordenadora: Lorena</h4>
-            <p class="text-sm text-slate-300" id="coord-geral-vice">Vice Coordenador: Andrés</p>
-          </div>
-          <div class="text-xs text-slate-400">Santuário Imaculado Coração de Maria • Park Way</div>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 col-span-full">
-        <div class="bg-white p-5 rounded-2xl border-l-4 border-emerald-500 shadow-sm" id="card-pre-eucaristia">
-          <span class="text-[11px] font-bold uppercase text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">Pré-Eucaristia (7 a 8 anos)</span>
-          <h4 class="font-bold font-heading text-slate-900 text-base mt-2" id="coord-pre-nome">Coord: Patrícia Guimarães</h4>
-          <p class="text-xs text-slate-500" id="coord-pre-vice">Vice: Ana Luísa Chaves • 3 Turmas</p>
-        </div>
-        <div class="bg-white p-5 rounded-2xl border-l-4 border-sky-400 shadow-sm" id="card-euc1">
-          <span class="text-[11px] font-bold uppercase text-sky-700 bg-sky-50 px-2 py-0.5 rounded">Eucaristia I (9 a 10 anos)</span>
-          <h4 class="font-bold font-heading text-slate-900 text-base mt-2" id="coord-euc1-nome">Coord: Marilian</h4>
-          <p class="text-xs text-slate-500" id="coord-euc1-vice">Vice: Lara • 11 Turmas</p>
-        </div>
-        <div class="bg-white p-5 rounded-2xl border-l-4 border-sky-600 shadow-sm" id="card-euc2">
-          <span class="text-[11px] font-bold uppercase text-sky-800 bg-sky-50 px-2 py-0.5 rounded">Eucaristia II (11 a 12 anos)</span>
-          <h4 class="font-bold font-heading text-slate-900 text-base mt-2" id="coord-euc2-nome">Coord: Marilian</h4>
-          <p class="text-xs text-slate-500" id="coord-euc2-vice">Vice: Priscila Ayres • 9 Turmas</p>
-        </div>
-        <div class="bg-white p-5 rounded-2xl border-l-4 border-amber-500 shadow-sm" id="card-perseveranca">
-          <span class="text-[11px] font-bold uppercase text-amber-700 bg-amber-50 px-2 py-0.5 rounded">Perseverança (Menores de 13 anos)</span>
-          <h4 class="font-bold font-heading text-slate-900 text-base mt-2" id="coord-perv-nome">Coord: Lanuzia</h4>
-          <p class="text-xs text-slate-500" id="coord-perv-vice">Vice: Beatriz • 2 Turmas (Sala 17 São João Bosco)</p>
-        </div>
-        <div class="bg-white p-5 rounded-2xl border-l-4 border-purple-500 shadow-sm" id="card-crisma-jovem">
-          <span class="text-[11px] font-bold uppercase text-purple-700 bg-purple-50 px-2 py-0.5 rounded">Crisma Jovem (13 a 17 anos)</span>
-          <h4 class="font-bold font-heading text-slate-900 text-base mt-2" id="coord-cj-nome">Coord: Tiago</h4>
-          <p class="text-xs text-slate-500" id="coord-cj-vice">Vice: Piante • 11 Turmas</p>
-        </div>
-        <div class="bg-white p-5 rounded-2xl border-l-4 border-indigo-500 shadow-sm" id="card-crisma-adultos">
-          <span class="text-[11px] font-bold uppercase text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded">Crisma Adultos (+18 anos)</span>
-          <h4 class="font-bold font-heading text-slate-900 text-base mt-2" id="coord-ca-nome">Coord: Daniel</h4>
-          <p class="text-xs text-slate-500" id="coord-ca-vice">Vice: Patrícia Gomes • 8 Turmas</p>
-        </div>
-      </div>
-
-      <!-- Main Schedule Table -->
-      <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <div>
-            <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 font-heading flex items-center gap-2">
-              <span class="text-[#d4a94f]">📋</span> Tabela Completa de Todas as Turmas (Fonte da Verdade)
-            </h2>
-            <p class="text-xs sm:text-sm text-slate-500">Total de 44 turmas mapeadas e cruzadas com o Organograma Oficial.</p>
-          </div>
-          <button onclick="window.print()" class="no-print inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2 rounded-xl transition">
-            <svg class="w-4 h-4 text-[#d4a94f]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-            <span>Imprimir Tabela</span>
+      <!-- Sub-Navigation Switcher (Árvore Gráfica vs Tabela) -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <div class="flex items-center gap-2">
+          <button id="btn-subtab-arvore" onclick="switchOrganogramaSubTab('arvore')" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition bg-slate-900 text-white shadow-xs">
+            <span>🌳 Visualização Gráfica em Árvore</span>
+            <span class="bg-[#d4a94f] text-slate-950 text-[10px] font-black px-2 py-0.5 rounded-full">Oficial</span>
+          </button>
+          <button id="btn-subtab-tabela" onclick="switchOrganogramaSubTab('tabela')" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+            <span>📋 Tabela &amp; Cards por Etapa</span>
           </button>
         </div>
 
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs sm:text-sm border-collapse">
-            <thead>
-              <tr class="bg-slate-900 text-white border-b-2 border-[#d4a94f]">
-                <th class="py-3 px-4 rounded-tl-xl font-heading">Etapa & Turma</th>
-                <th class="py-3 px-4 font-heading">Dia e Horário</th>
-                <th class="py-3 px-4 font-heading">Catequistas</th>
-                <th class="py-3 px-4 font-heading">Sala Oficial</th>
-                <th class="py-3 px-4 rounded-tr-xl font-heading">Prédio / Local</th>
-              </tr>
-            </thead>
-            <tbody id="turmas-table-body" class="divide-y divide-slate-200">
-              <!-- Dynamically populated rows from PDF data -->
-            </tbody>
-          </table>
+        <!-- Toolbar de Ações (Árvore) -->
+        <div id="organograma-actions-toolbar" class="flex items-center gap-2 flex-wrap">
+          <button id="btn-export-img" onclick="exportOrganogramaImage()" class="inline-flex items-center gap-1.5 bg-[#d4a94f] hover:bg-[#e6c27a] text-slate-950 font-bold px-3.5 py-2 rounded-xl text-xs shadow-md transition transform active:scale-95">
+            <span>📸 Baixar como Imagem (PNG)</span>
+          </button>
+          <button id="btn-edit-org" onclick="toggleOrganogramaEdit()" class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition">
+            <span id="btn-edit-org-label">✏️ Editar Diretamente</span>
+          </button>
+          <button id="btn-save-org" onclick="saveOrganogramaEdits()" class="hidden inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow transition">
+            <span>💾 Salvar Alterações</span>
+          </button>
+          <button id="btn-reset-org" onclick="resetOrganogramaDefault()" class="hidden inline-flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold px-3 py-2 rounded-xl text-xs transition">
+            <span>🔄 Restaurar Padrão</span>
+          </button>
         </div>
       </div>
+
+      <!-- ========================================================= -->
+      <!-- SUB-TAB 1: ORGANOGRAMA EM ÁRVORE GRÁFICA (Visual da Imagem) -->
+      <!-- ========================================================= -->
+      <div id="subview-arvore" class="space-y-4">
+        
+        <!-- Dica de uso em modo edição -->
+        <div id="org-edit-hint" class="hidden p-3 bg-amber-50 border border-amber-300 rounded-xl text-xs text-amber-900 flex items-center justify-between">
+          <span class="flex items-center gap-2">
+            <span>✏️</span> <strong>Modo de Edição Ativo:</strong> Clique diretamente em qualquer texto dos cards abaixo para editar. Depois clique em <strong>"Salvar Alterações"</strong>.
+          </span>
+          <button onclick="toggleOrganogramaEdit()" class="text-xs font-bold text-slate-700 hover:text-slate-950 underline">Fechar Edição</button>
+        </div>
+
+        <!-- Scroll horizontal para acomodar as 6 colunas completas -->
+        <div class="overflow-x-auto pb-6 bg-slate-100/50 p-2 sm:p-4 rounded-3xl border border-slate-200">
+          
+          <!-- Contêiner capturado na exportação de imagem -->
+          <div id="organograma-tree-container" class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-300 shadow-sm mx-auto" style="min-width: 1420px; max-width: 1560px;">
+            
+            <!-- 1. Top Header Box (Raiz do Organograma) -->
+            <div class="flex flex-col items-center mb-2">
+              <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 text-white border-2 border-[#d4a94f] px-8 py-3.5 rounded-2xl shadow-lg text-center max-w-lg w-full">
+                <span class="inline-block text-[11px] font-bold tracking-widest text-[#d4a94f] uppercase">Santuário Imaculado Coração de Maria</span>
+                <h1 class="text-lg font-black font-heading tracking-wide text-white">Catequese Paroquial</h1>
+                <p class="text-xs font-medium text-slate-300">Organograma Geral das Etapas e Turmas • 2026</p>
+              </div>
+
+              <!-- Tronco Vertical Central -->
+              <div class="w-0.5 h-6 bg-[#d4a94f]"></div>
+
+              <!-- Barra Horizontal de Conexão das 6 Colunas -->
+              <div class="w-[92%] h-0.5 bg-[#d4a94f] relative">
+                <!-- 6 Pinos Verticais conectores -->
+                <div class="absolute -top-0 left-[8.33%] w-0.5 h-4 bg-rose-400"></div>
+                <div class="absolute -top-0 left-[25%] w-0.5 h-4 bg-emerald-400"></div>
+                <div class="absolute -top-0 left-[41.66%] w-0.5 h-4 bg-sky-400"></div>
+                <div class="absolute -top-0 left-[58.33%] w-0.5 h-4 bg-amber-400"></div>
+                <div class="absolute -top-0 left-[75%] w-0.5 h-4 bg-purple-400"></div>
+                <div class="absolute -top-0 left-[91.66%] w-0.5 h-4 bg-rose-400"></div>
+              </div>
+            </div>
+
+            <!-- 2. As 6 Colunas das Etapas (Grid de 6 colunas) -->
+            <div id="organograma-tree-content" class="grid grid-cols-6 gap-3 pt-3">
+              
+              <!-- ============================================== -->
+              <!-- COLUNA 1: PRÉ-EUCARISTIA (Rose / Vermelho Claro)-->
+              <!-- ============================================== -->
+              <div class="flex flex-col space-y-2.5">
+                <!-- Header da Etapa -->
+                <div class="bg-rose-50 border-2 border-rose-300 rounded-xl p-3 text-center shadow-xs">
+                  <h3 class="font-bold font-heading text-rose-900 text-sm">Pré Eucaristia</h3>
+                  <p class="text-[11px] text-slate-700 font-semibold mt-0.5">Coord: Patrícia Guimarães</p>
+                  <p class="text-[10px] text-slate-500">Vice: Ana Luísa Chaves</p>
+                  <div class="mt-1 text-[9.5px] font-bold text-rose-700 bg-rose-100/80 py-0.5 rounded px-1">Critério: 7 a 8 anos</div>
+                </div>
+
+                <!-- Turmas -->
+                <div class="bg-white border border-rose-200 rounded-xl p-2.5 shadow-2xs hover:border-rose-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 01 • Sáb: 08:30 às 10:00</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Patrícia e Eliane</div>
+                  <div class="text-[10px] text-slate-400 italic">Aux. em formação: Ane</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Santa Teresa (Sala 16 - Salão Par.)</div>
+                </div>
+
+                <div class="bg-white border border-rose-200 rounded-xl p-2.5 shadow-2xs hover:border-rose-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 02 • Sáb: 08:30 às 10:00</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Ana Luísa</div>
+                  <div class="text-[10px] text-slate-400 italic">Aux. em formação: Mariana Cavalcante e Clarice</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Santo André (Sala 15 - Salão Par.)</div>
+                </div>
+
+                <div class="bg-white border border-rose-200 rounded-xl p-2.5 shadow-2xs hover:border-rose-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 03 • Sáb: 10:30 às 12:00</div>
+                  <div class="text-[10.5px] text-amber-800 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 inline-block mb-1">⚠️ Auxiliares em formação</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Bruna, Jullia e Beatris</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Santo André (Sala 15 - Salão Par.)</div>
+                </div>
+              </div>
+
+              <!-- ============================================== -->
+              <!-- COLUNA 2: EUCARISTIA I (Emerald / Verde Claro) -->
+              <!-- ============================================== -->
+              <div class="flex flex-col space-y-2.5">
+                <!-- Header da Etapa -->
+                <div class="bg-emerald-50 border-2 border-emerald-300 rounded-xl p-3 text-center shadow-xs">
+                  <h3 class="font-bold font-heading text-emerald-900 text-sm">Eucaristia I</h3>
+                  <p class="text-[11px] text-slate-700 font-semibold mt-0.5">Coord: Marilian</p>
+                  <p class="text-[10px] text-slate-500">Vice: Lara</p>
+                  <div class="mt-1 text-[9.5px] font-bold text-emerald-700 bg-emerald-100/80 py-0.5 rounded px-1">Critério: 09 a 10 anos</div>
+                </div>
+
+                <!-- Turmas -->
+                <div class="bg-white border border-emerald-200 rounded-xl p-2.5 shadow-2xs hover:border-emerald-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 01 • Sáb: 08:30 às 10:00</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequista: Polyana</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Protomártires (Sala 01 - Centro Cat.)</div>
+                </div>
+
+                <div class="bg-white border border-emerald-200 rounded-xl p-2.5 shadow-2xs hover:border-emerald-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 02 • Sáb: 08:30 às 10:00</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Shirley e Tatyane</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Anjo da Guarda (Sala 02 - Centro Cat.)</div>
+                </div>
+
+                <div class="bg-white border border-emerald-200 rounded-xl p-2.5 shadow-2xs hover:border-emerald-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 03 • Sáb: 08:30 às 10:00</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Joseline e Silene</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Francisco Marto (Sala 03 - Centro Cat.)</div>
+                </div>
+
+                <div class="bg-white border border-emerald-200 rounded-xl p-2.5 shadow-2xs hover:border-emerald-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 04 • Sáb: 08:30 às 10:00</div>
+                  <div class="text-[10.5px] text-amber-800 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 inline-block mb-1">⚠️ Auxiliares em formação</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Brenda e Joyce</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Gabriel (Sala 04 - Centro Cat.)</div>
+                </div>
+
+                <div class="bg-white border border-emerald-200 rounded-xl p-2.5 shadow-2xs hover:border-emerald-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 05 • Sáb: 08:30 às 10:00</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequista: Valdir</div>
+                  <div class="text-[10px] text-slate-400 italic">Aux. em formação: Mariana Alvarenga</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Santa Jacinta (Sala 05 - Centro Cat.)</div>
+                </div>
+
+                <div class="bg-white border border-emerald-200 rounded-xl p-2.5 shadow-2xs hover:border-emerald-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 10 • Sáb: 08:30 às 10:00</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Lanuzia e Mara Rúbia</div>
+                  <div class="text-[10px] text-slate-400 italic">Aux. em formação: Mariana Garcia</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Miguel (Sala 06 - Centro Cat.)</div>
+                </div>
+
+                <div class="bg-white border border-emerald-200 rounded-xl p-2.5 shadow-2xs hover:border-emerald-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 11 • Sáb: 10:00 às 11:30</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Maria Dulcineide e Elisa</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Capela Nossa Senhora das Graças</div>
+                </div>
+
+                <div class="bg-white border border-emerald-200 rounded-xl p-2.5 shadow-2xs hover:border-emerald-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 06 • Sáb: 10:30 às 12:00</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Andréia e Fernanda</div>
+                  <div class="text-[10px] text-slate-400 italic">Aux. em formação: Marina de Oliveira</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Protomártires (Sala 01 - Centro Cat.)</div>
+                </div>
+
+                <div class="bg-white border border-emerald-200 rounded-xl p-2.5 shadow-2xs hover:border-emerald-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 07 • Sáb: 10:30 às 12:00</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Maria Rilda, Nádia e Marina Neiva</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Gabriel (Sala 04 - Centro Cat.)</div>
+                </div>
+
+                <div class="bg-white border border-emerald-200 rounded-xl p-2.5 shadow-2xs hover:border-emerald-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 08 • Sáb: 10:30 às 12:00</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Elza e Lara</div>
+                  <div class="text-[10px] text-slate-400 italic">Aux. em formação: Zairo</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Santa Jacinta (Sala 05 - Centro Cat.)</div>
+                </div>
+
+                <div class="bg-white border border-emerald-200 rounded-xl p-2.5 shadow-2xs hover:border-emerald-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 09 • Sáb: 10:30 às 12:00</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Danusa e Glenda</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Miguel (Sala 06 - Centro Cat.)</div>
+                </div>
+              </div>
+
+              <!-- ============================================== -->
+              <!-- COLUNA 3: EUCARISTIA II (Sky / Azul Claro)     -->
+              <!-- ============================================== -->
+              <div class="flex flex-col space-y-2.5">
+                <!-- Header da Etapa -->
+                <div class="bg-sky-50 border-2 border-sky-300 rounded-xl p-3 text-center shadow-xs">
+                  <h3 class="font-bold font-heading text-sky-900 text-sm">Eucaristia II</h3>
+                  <p class="text-[11px] text-slate-700 font-semibold mt-0.5">Coord: Marilian</p>
+                  <p class="text-[10px] text-slate-500">Vice: Priscila Ayres</p>
+                  <div class="mt-1 text-[9.5px] font-bold text-sky-700 bg-sky-100/80 py-0.5 rounded px-1">Critério: Ter feito Eucaristia I</div>
+                </div>
+
+                <!-- Turmas -->
+                <div class="bg-white border border-sky-200 rounded-xl p-2.5 shadow-2xs hover:border-sky-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 01 • Sáb: 08:30 às 10:00</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Bruna Noleto e Ana Luiza Yung</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Mateus (Sala 11 - Salão Par.)</div>
+                </div>
+
+                <div class="bg-white border border-sky-200 rounded-xl p-2.5 shadow-2xs hover:border-sky-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 02 • Sáb: 08:30 às 10:00</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Elaine e Carla</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Carlo Acutis (Sala 08 - Centro Cat.)</div>
+                </div>
+
+                <div class="bg-white border border-sky-200 rounded-xl p-2.5 shadow-2xs hover:border-sky-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 03 • Sáb: 08:30 às 10:00</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Marilian e Maria Luísa</div>
+                  <div class="text-[10px] text-slate-400 italic">Aux. em formação: Ana Julia</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Lucas (Sala 13 - Salão Par.)</div>
+                </div>
+
+                <div class="bg-white border border-sky-200 rounded-xl p-2.5 shadow-2xs hover:border-sky-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 04 • Sáb: 08:30 às 10:00</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Maria Laura e Suelene</div>
+                  <div class="text-[10px] text-slate-400 italic">Aux. em formação: Matheus</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Marcos (Sala 12 - Salão Par.)</div>
+                </div>
+
+                <div class="bg-white border border-sky-200 rounded-xl p-2.5 shadow-2xs hover:border-sky-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 09 • Sáb: 10:00 às 11:30</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequista: Carlos</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Capela Nossa Senhora das Graças</div>
+                </div>
+
+                <div class="bg-white border border-sky-200 rounded-xl p-2.5 shadow-2xs hover:border-sky-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 05 • Sáb: 10:30 às 12:00</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Bruna Noleto, José Henrique e Heitor</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Mateus (Sala 11 - Salão Par.)</div>
+                </div>
+
+                <div class="bg-white border border-sky-200 rounded-xl p-2.5 shadow-2xs hover:border-sky-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 06 • Sáb: 10:30 às 12:00</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Solange e Núbia</div>
+                  <div class="text-[10px] text-slate-400 italic">Aux. em formação: Gabriella</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Marcos (Sala 12 - Salão Par.)</div>
+                </div>
+
+                <div class="bg-white border border-sky-200 rounded-xl p-2.5 shadow-2xs hover:border-sky-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 07 • Sáb: 10:30 às 12:00</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Priscila Ayres e Camila</div>
+                  <div class="text-[10px] text-slate-400 italic">Aux. em formação: Ana</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Lucas (Sala 13 - Salão Par.)</div>
+                </div>
+
+                <div class="bg-white border border-sky-200 rounded-xl p-2.5 shadow-2xs hover:border-sky-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 08 • Quarta: 16:00 às 17:30</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Eliane e Carlos</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Santa Jacinta (Sala 05 - Centro Cat.)</div>
+                </div>
+              </div>
+
+              <!-- ============================================== -->
+              <!-- COLUNA 4: PERSEVERANÇA (Amber / Dourado)       -->
+              <!-- ============================================== -->
+              <div class="flex flex-col space-y-2.5">
+                <!-- Header da Etapa -->
+                <div class="bg-amber-50 border-2 border-amber-300 rounded-xl p-3 text-center shadow-xs">
+                  <h3 class="font-bold font-heading text-amber-900 text-sm">Perseverança</h3>
+                  <p class="text-[11px] text-slate-700 font-semibold mt-0.5">Coord: Lanuzia</p>
+                  <p class="text-[10px] text-slate-500">Vice: Beatriz</p>
+                  <div class="mt-1 text-[9.5px] font-bold text-amber-800 bg-amber-100/80 py-0.5 rounded px-1">Critério: Menores de 13 anos</div>
+                </div>
+
+                <!-- Turmas -->
+                <div class="bg-white border border-amber-200 rounded-xl p-2.5 shadow-2xs hover:border-amber-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 01 • Sáb: 08:30 às 10:00</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Marcella, Bruna e Sônia</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São João Bosco (Sala 17 - Salão Par.)</div>
+                </div>
+
+                <div class="bg-white border border-amber-200 rounded-xl p-2.5 shadow-2xs hover:border-amber-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 02 • Sáb: 10:30 às 12:00</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Alda e Rosângela</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São João Bosco (Sala 17 - Salão Par.)</div>
+                </div>
+              </div>
+
+              <!-- ============================================== -->
+              <!-- COLUNA 5: CRISMA JOVEM (Purple / Roxo)         -->
+              <!-- ============================================== -->
+              <div class="flex flex-col space-y-2.5">
+                <!-- Header da Etapa -->
+                <div class="bg-purple-50 border-2 border-purple-300 rounded-xl p-3 text-center shadow-xs">
+                  <h3 class="font-bold font-heading text-purple-900 text-sm">Crisma Jovem</h3>
+                  <p class="text-[11px] text-slate-700 font-semibold mt-0.5">Coord: Tiago</p>
+                  <p class="text-[10px] text-slate-500">Vice: Piante</p>
+                  <div class="mt-1 text-[9.5px] font-bold text-purple-800 bg-purple-100/80 py-0.5 rounded px-1">Critério: 13 a 17 anos</div>
+                </div>
+
+                <!-- Turmas -->
+                <div class="bg-white border border-purple-200 rounded-xl p-2.5 shadow-2xs hover:border-purple-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 01 • Sáb: 15:00 às 16:30</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Giovanna Lopes e Heloísa</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Rafael (Sala 07 - Centro Cat.)</div>
+                </div>
+
+                <div class="bg-white border border-purple-200 rounded-xl p-2.5 shadow-2xs hover:border-purple-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 02 • Sáb: 15:00 às 16:30</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequista: Artur</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Santa Jacinta (Sala 05 - Centro Cat.)</div>
+                </div>
+
+                <div class="bg-white border border-purple-200 rounded-xl p-2.5 shadow-2xs hover:border-purple-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 03 • Sáb: 15:00 às 16:30</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Alessandra Moraes e Mônica</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Anjo da Guarda (Sala 02 - Centro Cat.)</div>
+                </div>
+
+                <div class="bg-white border border-purple-200 rounded-xl p-2.5 shadow-2xs hover:border-purple-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 04 • Seg: 20:00 às 21:30</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Amanda, Gabriela e Flávia</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Carlo Acutis (Sala 08 - Centro Cat.)</div>
+                </div>
+
+                <div class="bg-white border border-purple-200 rounded-xl p-2.5 shadow-2xs hover:border-purple-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 05 • Seg: 20:00 às 21:30</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Anderson e Kéllibe</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Miguel (Sala 06 - Centro Cat.)</div>
+                </div>
+
+                <div class="bg-white border border-purple-200 rounded-xl p-2.5 shadow-2xs hover:border-purple-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 06 • Seg: 20:00 às 21:30</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequista: Jonatan</div>
+                  <div class="text-[10px] text-slate-400 italic">Aux. em formação: Davi</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Protomártires (Sala 01 - Centro Cat.)</div>
+                </div>
+
+                <div class="bg-white border border-purple-200 rounded-xl p-2.5 shadow-2xs hover:border-purple-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 07 • Seg: 20:00 às 21:30</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Tiago e Piante</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Anjo da Guarda (Sala 02 - Centro Cat.)</div>
+                </div>
+
+                <div class="bg-white border border-purple-200 rounded-xl p-2.5 shadow-2xs hover:border-purple-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 08 • Seg: 20:00 às 21:30</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: José Bernardo e Priscila</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Mateus (Sala 11 - Salão Par.)</div>
+                </div>
+
+                <div class="bg-white border border-purple-200 rounded-xl p-2.5 shadow-2xs hover:border-purple-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 09 • Seg: 20:00 às 21:30</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequista: Lanuzia</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Lucas (Sala 13 - Salão Par.)</div>
+                </div>
+
+                <div class="bg-white border border-purple-200 rounded-xl p-2.5 shadow-2xs hover:border-purple-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 10 • Seg: 20:00 às 21:30</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Klebson, Heitor e Beatriz</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São João (Sala 14 - Salão Par.)</div>
+                </div>
+
+                <div class="bg-white border border-purple-200 rounded-xl p-2.5 shadow-2xs hover:border-purple-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 11 • Seg: 20:00 às 21:30</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Rosilene e Pierre</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Santa Teresa (Sala 16 - Salão Par.)</div>
+                </div>
+              </div>
+
+              <!-- ============================================== -->
+              <!-- COLUNA 6: CRISMA ADULTOS (Indigo / Laranja)    -->
+              <!-- ============================================== -->
+              <div class="flex flex-col space-y-2.5">
+                <!-- Header da Etapa -->
+                <div class="bg-indigo-50 border-2 border-indigo-300 rounded-xl p-3 text-center shadow-xs">
+                  <h3 class="font-bold font-heading text-indigo-900 text-sm">Crisma Adultos</h3>
+                  <p class="text-[11px] text-slate-700 font-semibold mt-0.5">Coord: Daniel</p>
+                  <p class="text-[10px] text-slate-500">Vice: Patrícia Gomes</p>
+                  <div class="mt-1 text-[9.5px] font-bold text-indigo-800 bg-indigo-100/80 py-0.5 rounded px-1">Critério: Maiores de 18 anos</div>
+                </div>
+
+                <!-- Turmas -->
+                <div class="bg-white border border-indigo-200 rounded-xl p-2.5 shadow-2xs hover:border-indigo-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 01 • Sáb: 08:30 às 10:15</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Letícia, Eduardo, Cauã e Danilo</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Auditório (Centro Catequético)</div>
+                </div>
+
+                <div class="bg-white border border-indigo-200 rounded-xl p-2.5 shadow-2xs hover:border-indigo-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 02 • Sáb: 10:15 às 12:00</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Fábio, Marcelo, Otávio, Patrícia e Ronaldo</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Auditório (Centro Catequético)</div>
+                </div>
+
+                <div class="bg-white border border-indigo-200 rounded-xl p-2.5 shadow-2xs hover:border-indigo-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 03 • Seg: 20:00 às 22:00</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Lorena e Natanai</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Auditório (Centro Catequético)</div>
+                </div>
+
+                <div class="bg-white border border-indigo-200 rounded-xl p-2.5 shadow-2xs hover:border-indigo-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 04 • Seg: 20:00 às 22:00</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Lourival e Thiago Malaquias</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Marcos (Sala 12 - Salão Par.)</div>
+                </div>
+
+                <div class="bg-white border border-indigo-200 rounded-xl p-2.5 shadow-2xs hover:border-indigo-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 05 • Sacramento: 03/12/2026 – 19:30</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Daniel e Alexandre</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Rafael (Sala 07 - Centro Cat.)</div>
+                </div>
+
+                <div class="bg-white border border-indigo-200 rounded-xl p-2.5 shadow-2xs hover:border-indigo-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 06 • Sacramento: 03/12/2026 – 19:30</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Guilherme e Hermes</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Francisco Marto (Sala 03 - Centro Cat.)</div>
+                </div>
+
+                <div class="bg-white border border-indigo-200 rounded-xl p-2.5 shadow-2xs hover:border-indigo-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 07 • Sacramento: 03/12/2026 – 19:30</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Thiago e Thais</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Miguel (Sala 06 - Centro Cat.)</div>
+                </div>
+
+                <div class="bg-white border border-indigo-200 rounded-xl p-2.5 shadow-2xs hover:border-indigo-400 transition org-editable">
+                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 08 • Sacramento: 03/12/2026 – 19:30</div>
+                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Victor e Juliana</div>
+                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Santa Jacinta (Sala 05 - Centro Cat.)</div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Rodapé do Organograma impresso/exportado -->
+            <div class="mt-6 pt-3 border-t border-slate-200 flex items-center justify-between text-[10px] text-slate-400">
+              <span>Santuário Imaculado Coração de Maria • Park Way / DF</span>
+              <span>Pastoral da Catequese Oficial • 2026</span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================================= -->
+      <!-- SUB-TAB 2: TABELA & RESUMO POR COORDENAÇÃO                -->
+      <!-- ========================================================= -->
+      <div id="subview-tabela" class="hidden space-y-6">
+        
+        <!-- Stage Coordinator Cards -->
+        <!-- Coordenação Geral (topo) -->
+        <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white p-5 rounded-2xl border-l-4 border-[#d4a94f] shadow-md col-span-full" id="card-coord-geral">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <span class="text-[11px] font-bold uppercase text-[#d4a94f] bg-amber-950/60 px-2 py-0.5 rounded border border-amber-500/30">Coordenação Geral da Catequese</span>
+              <h4 class="font-bold font-heading text-white text-lg mt-2" id="coord-geral-nome">Coordenadora: Lorena</h4>
+              <p class="text-sm text-slate-300" id="coord-geral-vice">Vice Coordenador: Andrés</p>
+            </div>
+            <div class="text-xs text-slate-400">Santuário Imaculado Coração de Maria • Park Way</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 col-span-full">
+          <div class="bg-white p-5 rounded-2xl border-l-4 border-emerald-500 shadow-sm" id="card-pre-eucaristia">
+            <span class="text-[11px] font-bold uppercase text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">Pré-Eucaristia (7 a 8 anos)</span>
+            <h4 class="font-bold font-heading text-slate-900 text-base mt-2" id="coord-pre-nome">Coord: Patrícia Guimarães</h4>
+            <p class="text-xs text-slate-500" id="coord-pre-vice">Vice: Ana Luísa Chaves • 3 Turmas</p>
+          </div>
+          <div class="bg-white p-5 rounded-2xl border-l-4 border-sky-400 shadow-sm" id="card-euc1">
+            <span class="text-[11px] font-bold uppercase text-sky-700 bg-sky-50 px-2 py-0.5 rounded">Eucaristia I (9 a 10 anos)</span>
+            <h4 class="font-bold font-heading text-slate-900 text-base mt-2" id="coord-euc1-nome">Coord: Marilian</h4>
+            <p class="text-xs text-slate-500" id="coord-euc1-vice">Vice: Lara • 11 Turmas</p>
+          </div>
+          <div class="bg-white p-5 rounded-2xl border-l-4 border-sky-600 shadow-sm" id="card-euc2">
+            <span class="text-[11px] font-bold uppercase text-sky-800 bg-sky-50 px-2 py-0.5 rounded">Eucaristia II (11 a 12 anos)</span>
+            <h4 class="font-bold font-heading text-slate-900 text-base mt-2" id="coord-euc2-nome">Coord: Marilian</h4>
+            <p class="text-xs text-slate-500" id="coord-euc2-vice">Vice: Priscila Ayres • 9 Turmas</p>
+          </div>
+          <div class="bg-white p-5 rounded-2xl border-l-4 border-amber-500 shadow-sm" id="card-perseveranca">
+            <span class="text-[11px] font-bold uppercase text-amber-700 bg-amber-50 px-2 py-0.5 rounded">Perseverança (Menores de 13 anos)</span>
+            <h4 class="font-bold font-heading text-slate-900 text-base mt-2" id="coord-perv-nome">Coord: Lanuzia</h4>
+            <p class="text-xs text-slate-500" id="coord-perv-vice">Vice: Beatriz • 2 Turmas (Sala 17 São João Bosco)</p>
+          </div>
+          <div class="bg-white p-5 rounded-2xl border-l-4 border-purple-500 shadow-sm" id="card-crisma-jovem">
+            <span class="text-[11px] font-bold uppercase text-purple-700 bg-purple-50 px-2 py-0.5 rounded">Crisma Jovem (13 a 17 anos)</span>
+            <h4 class="font-bold font-heading text-slate-900 text-base mt-2" id="coord-cj-nome">Coord: Tiago</h4>
+            <p class="text-xs text-slate-500" id="coord-cj-vice">Vice: Piante • 11 Turmas</p>
+          </div>
+          <div class="bg-white p-5 rounded-2xl border-l-4 border-indigo-500 shadow-sm" id="card-crisma-adultos">
+            <span class="text-[11px] font-bold uppercase text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded">Crisma Adultos (+18 anos)</span>
+            <h4 class="font-bold font-heading text-slate-900 text-base mt-2" id="coord-ca-nome">Coord: Daniel</h4>
+            <p class="text-xs text-slate-500" id="coord-ca-vice">Vice: Patrícia Gomes • 8 Turmas</p>
+          </div>
+        </div>
+
+        <!-- Main Schedule Table -->
+        <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+              <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 font-heading flex items-center gap-2">
+                <span class="text-[#d4a94f]">📋</span> Tabela Completa de Todas as Turmas (Fonte da Verdade)
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-500">Total de 44 turmas mapeadas e cruzadas com o Organograma Oficial.</p>
+            </div>
+            <button onclick="window.print()" class="no-print inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2 rounded-xl transition">
+              <svg class="w-4 h-4 text-[#d4a94f]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+              <span>Imprimir Tabela</span>
+            </button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs sm:text-sm border-collapse">
+              <thead>
+                <tr class="bg-slate-900 text-white border-b-2 border-[#d4a94f]">
+                  <th class="py-3 px-4 rounded-tl-xl font-heading">Etapa &amp; Turma</th>
+                  <th class="py-3 px-4 font-heading">Dia e Horário</th>
+                  <th class="py-3 px-4 font-heading">Catequistas</th>
+                  <th class="py-3 px-4 font-heading">Sala Oficial</th>
+                  <th class="py-3 px-4 rounded-tr-xl font-heading">Prédio / Local</th>
+                </tr>
+              </thead>
+              <tbody id="turmas-table-body" class="divide-y divide-slate-200">
+                <!-- Dynamically populated rows from PDF data -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
     </section>
 
     <!-- ========================================== -->
@@ -2104,10 +2559,169 @@
     }
 
     // =============================================
+    // ORGANOGRAMA GRÁFICO EM ÁRVORE — CONTROLES
+    // Alternância de Abas, Exportação e Edição Direta
+    // =============================================
+    let orgEditModeActive = false;
+    const STORAGE_KEY_ORG_CUSTOM = 'catequese_organograma_custom_html_v1';
+
+    function switchOrganogramaSubTab(tab) {
+      const viewArvore = document.getElementById('subview-arvore');
+      const viewTabela = document.getElementById('subview-tabela');
+      const btnArvore = document.getElementById('btn-subtab-arvore');
+      const btnTabela = document.getElementById('btn-subtab-tabela');
+      const toolbar = document.getElementById('organograma-actions-toolbar');
+
+      if (tab === 'arvore') {
+        if (viewArvore) viewArvore.classList.remove('hidden');
+        if (viewTabela) viewTabela.classList.add('hidden');
+        if (toolbar) toolbar.classList.remove('hidden');
+
+        if (btnArvore) {
+          btnArvore.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition bg-slate-900 text-white shadow-xs';
+        }
+        if (btnTabela) {
+          btnTabela.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition text-slate-600 hover:text-slate-900 hover:bg-slate-100';
+        }
+      } else {
+        if (viewArvore) viewArvore.classList.add('hidden');
+        if (viewTabela) viewTabela.classList.remove('hidden');
+        if (toolbar) toolbar.classList.add('hidden');
+
+        if (btnArvore) {
+          btnArvore.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition text-slate-600 hover:text-slate-900 hover:bg-slate-100';
+        }
+        if (btnTabela) {
+          btnTabela.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition bg-slate-900 text-white shadow-xs';
+        }
+      }
+    }
+
+    // 📸 Exportação de Imagem (PNG) usando html2canvas
+    async function exportOrganogramaImage() {
+      const container = document.getElementById('organograma-tree-container');
+      if (!container) return;
+
+      if (typeof html2canvas === 'undefined') {
+        alert('A biblioteca de geração de imagens ainda está carregando. Por favor, aguarde 2 segundos e tente novamente.');
+        return;
+      }
+
+      const btn = document.getElementById('btn-export-img');
+      const originalText = btn ? btn.innerHTML : '';
+      if (btn) btn.innerHTML = '<span>⏳ Renderizando Imagem...</span>';
+
+      // Salva estado de overflow temporariamente
+      const prevTransform = container.style.transform;
+      container.style.transform = 'none';
+
+      try {
+        const canvas = await html2canvas(container, {
+          scale: 2, // Alta resolução (Retina display quality)
+          useCORS: true,
+          logging: false,
+          backgroundColor: '#ffffff',
+          windowWidth: 1600
+        });
+
+        const imageUri = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.download = 'organograma-catequese-icm-2026.png';
+        link.href = imageUri;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (err) {
+        console.error('Erro ao exportar imagem:', err);
+        alert('Ocorreu um erro ao gerar a imagem PNG. Você também pode usar a opção de Imprimir / Salvar como PDF.');
+      } finally {
+        container.style.transform = prevTransform;
+        if (btn) btn.innerHTML = originalText;
+      }
+    }
+
+    // ✏️ Edição Direta nos Cards do Organograma (WYSIWYG)
+    function toggleOrganogramaEdit() {
+      const btn = document.getElementById('btn-edit-org');
+      const label = document.getElementById('btn-edit-org-label');
+      const btnSave = document.getElementById('btn-save-org');
+      const btnReset = document.getElementById('btn-reset-org');
+      const hint = document.getElementById('org-edit-hint');
+      const editables = document.querySelectorAll('.org-editable');
+
+      if (orgEditModeActive) {
+        // Desativar edição
+        orgEditModeActive = false;
+        if (label) label.textContent = '✏️ Editar Diretamente';
+        if (btn) btn.className = 'inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition';
+        if (btnSave) btnSave.classList.add('hidden');
+        if (btnReset) btnReset.classList.add('hidden');
+        if (hint) hint.classList.add('hidden');
+
+        editables.forEach(el => {
+          el.contentEditable = 'false';
+          el.classList.remove('ring-2', 'ring-amber-400', 'ring-offset-1', 'bg-amber-50/20');
+        });
+        return;
+      }
+
+      const pin = prompt('🔒 Digite a senha de administração (Sicm@2026) para editar o organograma:');
+      if (pin === EDIT_PIN) {
+        orgEditModeActive = true;
+        if (label) label.textContent = '🔓 Cancelar Edição';
+        if (btn) btn.className = 'inline-flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 font-bold px-3.5 py-2 rounded-xl text-xs transition';
+        if (btnSave) btnSave.classList.remove('hidden');
+        if (btnReset) btnReset.classList.remove('hidden');
+        if (hint) hint.classList.remove('hidden');
+
+        editables.forEach(el => {
+          el.contentEditable = 'true';
+          el.classList.add('ring-2', 'ring-amber-400', 'ring-offset-1', 'bg-amber-50/20');
+        });
+      } else if (pin !== null) {
+        alert('Senha incorreta.');
+      }
+    }
+
+    function saveOrganogramaEdits() {
+      const content = document.getElementById('organograma-tree-content');
+      if (!content) return;
+
+      try {
+        localStorage.setItem(STORAGE_KEY_ORG_CUSTOM, content.innerHTML);
+        alert('✅ Alterações no organograma salvas com sucesso neste dispositivo!');
+      } catch (e) {
+        console.error('Erro ao salvar organograma customizado:', e);
+        alert('Erro ao salvar alterações localmente.');
+      }
+
+      toggleOrganogramaEdit();
+    }
+
+    function resetOrganogramaDefault() {
+      if (!confirm('Deseja realmente restaurar os textos padrão do organograma oficial? Todas as edições manuais deste navegador serão descartadas.')) return;
+      localStorage.removeItem(STORAGE_KEY_ORG_CUSTOM);
+      location.reload();
+    }
+
+    function loadOrganogramaCustomEdits() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY_ORG_CUSTOM);
+        if (saved) {
+          const content = document.getElementById('organograma-tree-content');
+          if (content) content.innerHTML = saved;
+        }
+      } catch (e) {
+        console.error('Erro ao carregar organograma salvo:', e);
+      }
+    }
+
+    // =============================================
     // INICIALIZAÇÃO
     // =============================================
     document.addEventListener('DOMContentLoaded', () => {
       checkSiteAuth();
+      loadOrganogramaCustomEdits();
       renderRoomCards();
       renderScheduleTable();
       renderEventosTimeline();
