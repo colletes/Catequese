@@ -338,8 +338,10 @@
 
               <!-- Single Integrated Building Footprint & Floor (Main Body) -->
               <rect x="70" y="450" width="800" height="1100" rx="20" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#cardShadow)"/>
-              <!-- Extension block: right-wing upper section (above Carlo Acutis / new rooms) -->
-              <rect x="550" y="50" width="320" height="400" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#cardShadow)"/>
+              
+              <!-- Extension block footprints: Top tier (Banheiros + Secretaria) & Intermediary (Sala Anônima) -->
+              <rect x="190" y="50" width="680" height="276" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#cardShadow)"/>
+              <rect x="550" y="325" width="320" height="125" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#cardShadow)"/>
               
               <!-- Corridor Floor with subtle tiles -->
               <rect x="390" y="580" width="160" height="970" fill="url(#corridorGrad)"/>
@@ -358,7 +360,8 @@
               <!-- Solid External Structural Walls of Main Integrated Building -->
               <rect x="70" y="450" width="800" height="1100" rx="20" fill="none" stroke="url(#wallGrad)" stroke-width="12"/>
               <!-- Extension block walls -->
-              <rect x="550" y="50" width="320" height="400" rx="12" fill="none" stroke="url(#wallGrad)" stroke-width="10"/>
+              <rect x="190" y="50" width="680" height="276" rx="14" fill="none" stroke="url(#wallGrad)" stroke-width="10"/>
+              <rect x="550" y="325" width="320" height="125" rx="8" fill="none" stroke="url(#wallGrad)" stroke-width="10"/>
               
               <!-- Internal Left Wall of Corridor (x=390) -->
               <line x1="390" y1="580" x2="390" y2="700" stroke="#1e293b" stroke-width="8"/>
@@ -377,78 +380,92 @@
               <line x1="550" y1="1360" x2="550" y2="1550" stroke="#1e293b" stroke-width="8"/>
 
               <!-- ================================================== -->
-              <!-- EXTENSÃO SUPERIOR DIREITA: NOVAS SALAS              -->
-              <!-- (Acima da Sala Carlo Acutis, y=50 a y=450)          -->
+              <!-- EXTENSÃO SUPERIOR: BANHEIROS, SECRETARIA E SALAS   -->
               <!-- ================================================== -->
 
-              <!-- === BANHEIROS FEMININO E MASCULINO (topo, y=55 a y=185) === -->
-              <!-- Parede de fundo dos banheiros (topo do bloco) -->
-              <line x1="555" y1="55" x2="865" y2="55" stroke="#0f172a" stroke-width="8"/>
-              <!-- Parede divisória central (entre feminino e masculino) -->
-              <line x1="710" y1="55" x2="710" y2="195" stroke="#334155" stroke-width="5"/>
-
-              <!-- Banheiro Feminino -->
+              <!-- === 1. BANHEIRO MASCULINO (Extrema Esquerda, y=55 a y=320) === -->
               <g>
-                <rect x="555" y="58" width="150" height="135" rx="6" fill="#fce7f3" stroke="#ec4899" stroke-width="2"/>
-                <!-- Porta voltada para cima (arco abrindo para cima do bloco = exterior) -->
-                <rect x="575" y="52" width="55" height="10" fill="#ffffff"/>
-                <path d="M 575 58 A 40 40 0 0 1 615 18" fill="none" stroke="#db2777" stroke-width="2.5" class="door-arc"/>
-                <line x1="575" y1="58" x2="575" y2="18" stroke="#be185d" stroke-width="3"/>
+                <rect x="195" y="58" width="165" height="260" rx="8" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+                <!-- Porta voltada para CIMA (abre para cima/exterior) -->
+                <rect x="225" y="50" width="55" height="12" fill="#ffffff"/>
+                <path d="M 225 58 A 38 38 0 0 1 263 20" fill="none" stroke="#2563eb" stroke-width="2.5" class="door-arc"/>
+                <line x1="225" y1="58" x2="225" y2="20" stroke="#1d4ed8" stroke-width="3"/>
+                <rect x="220" y="32" width="70" height="16" rx="4" fill="#1e293b"/>
+                <text x="255" y="43" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="8" font-weight="800" fill="#93c5fd">🚪 PORTA ⇧</text>
                 <!-- Conteúdo -->
-                <text x="628" y="100" text-anchor="middle" font-size="26">♀</text>
-                <text x="628" y="126" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="11" font-weight="800" fill="#be185d">FEMININO</text>
-                <text x="628" y="143" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="9" font-weight="600" fill="#9d174d">Banheiro</text>
+                <text x="277" y="160" text-anchor="middle" font-size="34">♂</text>
+                <text x="277" y="195" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="12" font-weight="800" fill="#1d4ed8">MASCULINO</text>
+                <text x="277" y="215" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="10" font-weight="600" fill="#1e40af">Banheiro</text>
               </g>
 
-              <!-- Banheiro Masculino -->
+              <!-- Parede divisória entre Banheiro Masculino e Área Central -->
+              <line x1="365" y1="55" x2="365" y2="322" stroke="#334155" stroke-width="6"/>
+
+              <!-- === 2. BEBEDOURO (Entre os dois banheiros) === -->
+              <g transform="translate(365, 185)">
+                <rect x="-18" y="-26" width="36" height="52" rx="8" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="2" filter="url(#cardShadow)"/>
+                <text x="0" y="2" text-anchor="middle" font-size="18">💧</text>
+                <text x="0" y="18" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="7" font-weight="800" fill="#0369a1">BEBEDOURO</text>
+              </g>
+
+              <!-- === 3. BANHEIRO FEMININO (Encostado na Secretaria, y=55 a y=320) === -->
               <g>
-                <rect x="715" y="58" width="145" height="135" rx="6" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
-                <!-- Porta voltada para cima -->
-                <rect x="740" y="52" width="55" height="10" fill="#ffffff"/>
-                <path d="M 740 58 A 40 40 0 0 1 780 18" fill="none" stroke="#2563eb" stroke-width="2.5" class="door-arc"/>
-                <line x1="740" y1="58" x2="740" y2="18" stroke="#1d4ed8" stroke-width="3"/>
+                <rect x="375" y="58" width="165" height="260" rx="8" fill="#fce7f3" stroke="#ec4899" stroke-width="2"/>
+                <!-- Porta voltada para CIMA (abre para cima/exterior) -->
+                <rect x="405" y="50" width="55" height="12" fill="#ffffff"/>
+                <path d="M 405 58 A 38 38 0 0 1 443 20" fill="none" stroke="#db2777" stroke-width="2.5" class="door-arc"/>
+                <line x1="405" y1="58" x2="405" y2="20" stroke="#be185d" stroke-width="3"/>
+                <rect x="400" y="32" width="70" height="16" rx="4" fill="#1e293b"/>
+                <text x="435" y="43" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="8" font-weight="800" fill="#fbcfe8">🚪 PORTA ⇧</text>
                 <!-- Conteúdo -->
-                <text x="787" y="100" text-anchor="middle" font-size="26">♂</text>
-                <text x="787" y="126" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="11" font-weight="800" fill="#1d4ed8">MASCULINO</text>
-                <text x="787" y="143" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="9" font-weight="600" fill="#1e40af">Banheiro</text>
+                <text x="457" y="160" text-anchor="middle" font-size="34">♀</text>
+                <text x="457" y="195" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="12" font-weight="800" fill="#be185d">FEMININO</text>
+                <text x="457" y="215" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="10" font-weight="600" fill="#9d174d">Banheiro</text>
               </g>
 
-              <!-- === BEBEDOURO (entre os banheiros, na parede divisória) === -->
-              <g transform="translate(710, 130)">
-                <rect x="-20" y="-22" width="40" height="44" rx="8" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="2"/>
-                <text x="0" y="5" text-anchor="middle" font-size="16">💧</text>
-                <text x="0" y="30" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="7.5" font-weight="800" fill="#0369a1">BEBED.</text>
-              </g>
+              <!-- Parede divisória entre Banheiro Feminino e Secretaria da Catequese -->
+              <line x1="545" y1="55" x2="545" y2="322" stroke="#0f172a" stroke-width="8"/>
 
-              <!-- Parede separando banheiros da Secretaria -->
-              <line x1="555" y1="195" x2="865" y2="195" stroke="#334155" stroke-width="6"/>
-
-              <!-- === SECRETARIA DA CATEQUESE (y=198 a y=325) === -->
+              <!-- === 4. SECRETARIA DA CATEQUESE (Direita, y=58 a y=320) === -->
               <g id="svg-room-secretaria" class="svg-room" onclick="selectRoom('sala-secretaria')">
-                <rect class="room-bg" x="555" y="198" width="305" height="127" rx="8" fill="#fefce8" stroke="#d4a94f" stroke-width="2.5"/>
-                <!-- Badge -->
-                <rect x="570" y="212" width="95" height="24" rx="6" fill="#1e293b"/>
-                <text x="617" y="228" text-anchor="middle" font-family="'Outfit', sans-serif" font-size="10" font-weight="800" fill="#d4a94f">SECRETARIA</text>
-                <text x="675" y="229" font-family="'Questrial', sans-serif" font-size="15" font-weight="700" fill="#0f172a">Secretaria da Catequese</text>
-                <text x="570" y="262" font-family="'Nunito', sans-serif" font-size="10" font-weight="600" fill="#92400e">📋 Atendimento e suporte administrativo à Pastoral da Catequese</text>
-                <text x="570" y="278" font-family="'Nunito', sans-serif" font-size="9.5" font-weight="600" fill="#78350f">📍 Acima da Sala Carlo Acutis • Acesso pelo bloco superior direito</text>
+                <rect class="room-bg" x="550" y="58" width="315" height="260" rx="8" fill="#fefce8" stroke="#d4a94f" stroke-width="2.5"/>
+                
+                <!-- Porta Externa à Direita -->
+                <rect x="860" y="150" width="15" height="45" fill="#ffffff"/>
+                <path d="M 865 150 A 35 35 0 0 1 900 185" fill="none" stroke="#b45309" stroke-width="2.5" class="door-arc"/>
+                <line x1="865" y1="150" x2="900" y2="150" stroke="#92400e" stroke-width="3"/>
+                
+                <!-- Badge & Header -->
+                <rect x="568" y="75" width="95" height="24" rx="6" fill="#1e293b"/>
+                <text x="615" y="91" text-anchor="middle" font-family="'Outfit', sans-serif" font-size="10" font-weight="800" fill="#d4a94f">SECRETARIA</text>
+                <text x="672" y="92" font-family="'Questrial', sans-serif" font-size="15" font-weight="700" fill="#0f172a">Secretaria da Catequese</text>
+                
+                <!-- Descrição -->
+                <text x="568" y="130" font-family="'Nunito', sans-serif" font-size="11" font-weight="700" fill="#92400e">📋 Atendimento e Apoio Pastoral</text>
+                <text x="568" y="150" font-family="'Nunito', sans-serif" font-size="10" font-weight="600" fill="#475569">Suporte aos catequistas, turmas e pais</text>
+                
+                <text x="568" y="195" font-family="'Nunito', sans-serif" font-size="9.5" font-weight="700" fill="#b45309">📍 Acima da Sala sem identificação</text>
+                <text x="568" y="215" font-family="'Nunito', sans-serif" font-size="9" font-weight="600" fill="#64748b">Banheiros Feminino e Masculino à esquerda</text>
+                
+                <rect x="740" y="278" width="115" height="18" rx="4" fill="#1e293b"/>
+                <text x="797" y="290" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="8.5" font-weight="800" fill="#fde047">🚪 ACESSO EXTERNO</text>
               </g>
 
-              <!-- Parede separando Secretaria da Sala Anônima -->
-              <line x1="555" y1="328" x2="865" y2="328" stroke="#334155" stroke-width="6"/>
+              <!-- Parede divisória entre Secretaria e Sala Anônima abaixo -->
+              <line x1="550" y1="322" x2="865" y2="322" stroke="#0f172a" stroke-width="8"/>
 
-              <!-- === SALA SEM IDENTIFICAÇÃO (não catequética, y=331 a y=447) === -->
+              <!-- === 5. SALA SEM IDENTIFICAÇÃO (Abaixo da Secretaria, Acima da Carlo Acutis, y=328 a y=445) === -->
               <g>
                 <!-- Fundo cinza -->
-                <rect x="555" y="331" width="305" height="116" rx="8" fill="#e2e8f0" stroke="#94a3b8" stroke-width="2"/>
+                <rect x="555" y="328" width="305" height="117" rx="8" fill="#e2e8f0" stroke="#94a3b8" stroke-width="2"/>
                 <!-- Hachura sobreposta -->
-                <rect x="555" y="331" width="305" height="116" rx="8" fill="url(#hatchPattern)" opacity="0.4"/>
+                <rect x="555" y="328" width="305" height="117" rx="8" fill="url(#hatchPattern)" opacity="0.4"/>
                 <!-- Label discreto -->
-                <text x="707" y="388" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="11" font-weight="700" fill="#64748b">Sala não utilizada pela catequese</text>
-                <text x="707" y="407" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="9.5" font-weight="600" fill="#94a3b8">Área de uso externo</text>
+                <text x="707" y="380" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="11" font-weight="700" fill="#64748b">Sala não utilizada pela catequese</text>
+                <text x="707" y="400" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="9.5" font-weight="600" fill="#94a3b8">Área de uso externo</text>
               </g>
 
-              <!-- Parede separando Sala Anônima da Sala Carlo Acutis (linha de ligação) -->
+              <!-- Parede separando Sala Anônima da Sala Carlo Acutis -->
               <line x1="555" y1="450" x2="865" y2="450" stroke="#0f172a" stroke-width="8"/>
 
               <!-- ============================================== -->
@@ -1270,7 +1287,7 @@
         name: 'Secretaria da Catequese',
         hall: 'catequetico',
         wing: 'Centro Catequético • Bloco Superior Direito',
-        location: 'Localizada no bloco superior direito do Centro Catequético, acima da Sala Carlo Acutis. Acesso pelo exterior do bloco.',
+        location: 'Localizada no bloco superior do Centro Catequético, acima da sala sem identificação (e da Sala Carlo Acutis). Possui os sanitários Feminino e Masculino à sua esquerda com bebedouro, e acesso externo à direita.',
         desc: 'Atendimento e suporte administrativo à Pastoral da Catequese.',
         schedules: [
           { stage: 'Secretaria', turma: 'Administrativo', day: 'Conforme horário', time: 'Atendimento Pastoral', catechists: 'Equipe da Secretaria', period: 'all' }
