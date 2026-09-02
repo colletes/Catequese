@@ -2256,6 +2256,10 @@
               <div class="text-[10px] uppercase font-bold text-slate-500">1ª Eucaristia</div>
               <div id="kpi-eucaristia" class="text-base font-black text-indigo-700 font-heading">0</div>
             </div>
+            <div class="bg-white border border-indigo-200 px-3 py-1.5 rounded-xl text-center shadow-2xs">
+              <div class="text-[10px] uppercase font-bold text-slate-500">Impedidos</div>
+              <div id="kpi-impedidos" class="text-base font-black text-rose-700 font-heading">0</div>
+            </div>
           </div>
         </div>
 
@@ -2277,6 +2281,8 @@
                 <th class="py-3 px-3 font-heading min-w-[150px]">Estado Civil / Afetivo</th>
                 <th class="py-3 px-2.5 font-heading text-center min-w-[85px]">Batizado?</th>
                 <th class="py-3 px-2.5 font-heading text-center min-w-[85px]">1ª Eucaristia?</th>
+                <th class="py-3 px-2.5 font-heading text-center min-w-[95px]">Impedido(a)?</th>
+                <th class="py-3 px-3 font-heading min-w-[170px]">Justificativa</th>
                 <th class="py-3 px-2.5 font-heading text-center no-print w-16">Ações</th>
               </tr>
             </thead>
@@ -2375,6 +2381,22 @@
                 <option value="Sim">Sim</option>
                 <option value="Não">Não</option>
               </select>
+            </div>
+
+            <!-- Impedido(a)? -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Impedido(a)?</label>
+              <select id="aluno-impedido" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none">
+                <option value="">(Não informado / Não)</option>
+                <option value="Não">Não</option>
+                <option value="Sim">Sim</option>
+              </select>
+            </div>
+
+            <!-- Justificativa -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Justificativa do Impedimento</label>
+              <input type="text" id="aluno-justificativa" placeholder="Motivo do impedimento / observação canônica..." class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none" />
             </div>
 
             <!-- Observações -->
@@ -5097,6 +5119,8 @@
                (a.email || '').toLowerCase().includes(query) ||
                (a.endereco || '').toLowerCase().includes(query) ||
                (a.estadoCivil || '').toLowerCase().includes(query) ||
+               (a.justificativa || '').toLowerCase().includes(query) ||
+               (a.impedido || '').toLowerCase().includes(query) ||
                (a.contato || '').toLowerCase().includes(query);
       });
 
@@ -5104,25 +5128,30 @@
       const kpiTotal = document.getElementById('kpi-total-alunos');
       const kpiBatizados = document.getElementById('kpi-batizados');
       const kpiEucaristia = document.getElementById('kpi-eucaristia');
+      const kpiImpedidos = document.getElementById('kpi-impedidos');
 
       let batizadosCount = 0;
       let eucaristiaCount = 0;
+      let impedidosCount = 0;
 
       alunos.forEach(a => {
         const batStr = (a.batizado || '').toLowerCase();
         if (batStr.includes('sim') || batStr.includes('católica') || batStr.includes('batizado')) batizadosCount++;
         const eucStr = (a.primeiraEucaristia || '').toLowerCase();
         if (eucStr.includes('sim') || eucStr.includes('primeira')) eucaristiaCount++;
+        const impStr = (a.impedido || '').toLowerCase().trim();
+        if (impStr === 'sim' || impStr.startsWith('sim') || (a.justificativa && a.justificativa.trim() !== '' && impStr !== 'não' && impStr !== 'nao')) impedidosCount++;
       });
 
       if (kpiTotal) kpiTotal.textContent = alunos.length;
       if (kpiBatizados) kpiBatizados.textContent = batizadosCount;
       if (kpiEucaristia) kpiEucaristia.textContent = eucaristiaCount;
+      if (kpiImpedidos) kpiImpedidos.textContent = impedidosCount;
 
       if (filtered.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="11" class="py-12 text-center text-slate-400">
+            <td colspan="13" class="py-12 text-center text-slate-400">
               <div class="text-3xl mb-2">📂</div>
               <p class="font-semibold text-slate-600">Nenhum catequizando encontrado nesta turma.</p>
               <p class="text-xs text-slate-400 mt-1">Clique em "➕ Adicionar Aluno" ou "📤 Upload Planilha" acima para cadastrar catequizandos.</p>
@@ -5188,6 +5217,23 @@
         // Estado Civil
         const estCivilHtml = a.estadoCivil ? `<span class="text-xs text-slate-700 leading-tight block max-w-[150px]" title="${a.estadoCivil.replace(/"/g, '&quot;')}">${a.estadoCivil}</span>` : '<span class="text-slate-300">—</span>';
 
+        // Formata Impedido(a) Badge
+        const impStr = (a.impedido || '').trim().toLowerCase();
+        let impedidoBadge = '<span class="text-slate-300">—</span>';
+        if (impStr === 'sim' || impStr.startsWith('sim')) {
+          impedidoBadge = '<span class="inline-flex items-center text-[10px] font-bold text-rose-800 bg-rose-100 px-2 py-0.5 rounded-full" title="Catequizando com impedimento">⚠️ Sim</span>';
+        } else if (impStr === 'não' || impStr === 'nao') {
+          impedidoBadge = '<span class="inline-flex items-center text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">Não</span>';
+        } else if (a.justificativa && a.justificativa.trim()) {
+          impedidoBadge = '<span class="inline-flex items-center text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full" title="Possui justificativa">Pendente</span>';
+        }
+
+        // Formata Justificativa
+        const justVal = a.justificativa ? a.justificativa.trim() : '';
+        const justHtml = justVal
+          ? `<span class="text-xs text-slate-700 block max-w-[170px] leading-tight" title="${justVal.replace(/"/g, '&quot;')}">${justVal}</span>`
+          : '<span class="text-slate-300">—</span>';
+
         return `
           <tr class="hover:bg-slate-50/80 transition">
             <td class="py-2.5 px-3 text-center font-bold text-slate-400 text-xs">${idx + 1}</td>
@@ -5203,6 +5249,8 @@
             <td class="py-2.5 px-3">${estCivilHtml}</td>
             <td class="py-2.5 px-2.5 text-center">${batizadoBadge}</td>
             <td class="py-2.5 px-2.5 text-center">${eucaristiaBadge}</td>
+            <td class="py-2.5 px-2.5 text-center">${impedidoBadge}</td>
+            <td class="py-2.5 px-3">${justHtml}</td>
             <td class="py-2.5 px-2.5 text-center no-print">
               <div class="flex items-center justify-center gap-1">
                 <button onclick="editAluno('${a.id}')" class="p-1 rounded text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition" title="Editar Catequizando">
@@ -5239,6 +5287,8 @@
         document.getElementById('aluno-estado-civil').value = alunoData.estadoCivil || '';
         document.getElementById('aluno-batizado').value = alunoData.batizado || '';
         document.getElementById('aluno-eucaristia').value = alunoData.primeiraEucaristia || '';
+        document.getElementById('aluno-impedido').value = alunoData.impedido || '';
+        document.getElementById('aluno-justificativa').value = alunoData.justificativa || '';
         document.getElementById('aluno-obs').value = alunoData.observacoes || '';
       } else {
         if (title) title.textContent = 'Cadastrar Novo Catequizando';
@@ -5300,6 +5350,8 @@
         estadoCivil: (document.getElementById('aluno-estado-civil').value || '').trim(),
         batizado: document.getElementById('aluno-batizado').value || '',
         primeiraEucaristia: document.getElementById('aluno-eucaristia').value || '',
+        impedido: document.getElementById('aluno-impedido').value || '',
+        justificativa: (document.getElementById('aluno-justificativa').value || '').trim(),
         observacoes: (document.getElementById('aluno-obs').value || '').trim()
       };
 
@@ -5328,7 +5380,7 @@
         return;
       }
 
-      const headers = ['Nº', 'Nome Completo', 'CPF', 'Data de Nascimento', 'Telefone', 'E-mail', 'Endereço', 'Estado Civil / Afetivo', 'Batizado', '1ª Eucaristia', 'Observações'];
+      const headers = ['Nº', 'Nome Completo', 'CPF', 'Data de Nascimento', 'Telefone', 'E-mail', 'Endereço', 'Estado Civil / Afetivo', 'Batizado', '1ª Eucaristia', 'Impedido(a)?', 'Justificativa', 'Observações'];
 
       const rows = alunos.map((a, i) => [
         i + 1,
@@ -5341,6 +5393,8 @@
         `"${(a.estadoCivil || '').replace(/"/g, '""')}"`,
         `"${(a.batizado || '').replace(/"/g, '""')}"`,
         `"${(a.primeiraEucaristia || '').replace(/"/g, '""')}"`,
+        `"${(a.impedido || '').replace(/"/g, '""')}"`,
+        `"${(a.justificativa || '').replace(/"/g, '""')}"`,
         `"${(a.observacoes || '').replace(/"/g, '""')}"`
       ]);
 
@@ -5476,7 +5530,9 @@
         endereco: headers.findIndex(h => h.includes('end') || h.includes('endereço') || h.includes('residencia')),
         estadoCivil: headers.findIndex(h => h.includes('civil') || h.includes('afetivo') || h.includes('matrim')),
         batizado: headers.findIndex(h => h.includes('batiz')),
-        eucaristia: headers.findIndex(h => h.includes('eucarist'))
+        eucaristia: headers.findIndex(h => h.includes('eucarist')),
+        impedido: headers.findIndex(h => h.includes('impid') || h.includes('imped')),
+        justificativa: headers.findIndex(h => h.includes('justif'))
       };
 
       const parsedAlunos = [];
@@ -5500,6 +5556,8 @@
           estadoCivil: getVal(colMap.estadoCivil),
           batizado: getVal(colMap.batizado),
           primeiraEucaristia: getVal(colMap.eucaristia),
+          impedido: getVal(colMap.impedido),
+          justificativa: getVal(colMap.justificativa),
           observacoes: ''
         });
       }
