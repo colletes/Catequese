@@ -236,6 +236,11 @@
             <span>Papéis &amp; Atribuições</span>
             <span class="bg-amber-100 text-amber-900 text-[10px] font-bold px-2 py-0.5 rounded-full">2026</span>
           </button>
+          <button id="tab-btn-alunos" onclick="switchTab('alunos')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/70">
+            <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
+            <span>Catequizandos</span>
+            <span class="bg-indigo-100 text-indigo-900 text-[10px] font-bold px-2 py-0.5 rounded-full">Turmas</span>
+          </button>
           <button id="tab-btn-campus" onclick="switchTab('campus')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/70">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
             <span>Complexo Paroquial</span>
@@ -1568,6 +1573,9 @@
                   <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 07 • Sacramento: 03/12/2026 – 19:30</div>
                   <div class="text-[11px] text-slate-700 font-medium">Catequistas: Thiago e Thais</div>
                   <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Miguel (Sala 06 - Centro Cat.)</div>
+                  <button onclick="openTurmaAlunos('Crisma Adultos', 'Turma 07')" class="mt-2 w-full flex items-center justify-center gap-1.5 text-[10.5px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 py-1 rounded-lg transition" title="Ver lista com os 17 catequizandos desta turma">
+                    <span>👥</span> <span>Ver Alunos (17)</span>
+                  </button>
                 </div>
 
                 <div class="bg-white border border-indigo-200 rounded-xl p-2.5 shadow-2xs hover:border-indigo-400 transition org-editable">
@@ -1994,6 +2002,266 @@
       </div>
 
     </section>
+
+    <!-- ========================================== -->
+    <!-- TAB: CATEQUIZANDOS & TURMAS                -->
+    <!-- ========================================== -->
+    <section id="view-alunos" class="tab-view hidden space-y-6">
+
+      <!-- Header Banner -->
+      <div class="bg-gradient-to-r from-slate-950 via-indigo-950 to-slate-950 text-white p-6 sm:p-8 rounded-3xl border-2 border-indigo-500/40 shadow-xl relative overflow-hidden">
+        <div class="absolute -top-20 -right-20 w-48 h-48 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="w-3 h-3 rounded-full bg-indigo-400"></span>
+              <span class="text-xs font-bold uppercase tracking-wider text-indigo-300 font-heading">Gestão de Catequizandos 2026</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-bold font-heading text-white flex items-center gap-2">
+              <span>📋</span> <span>Listas de Turmas &amp; Chamada</span>
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
+              Acompanhamento nominal dos catequizandos, dados cadastrais, sacramentos e controle de documentação e Google Drive.
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 self-start sm:self-center">
+            <button onclick="openAlunoModal()" class="inline-flex items-center gap-1.5 bg-[#d4a94f] hover:bg-amber-600 text-slate-950 font-bold px-3.5 py-2 rounded-xl text-xs sm:text-sm transition shadow">
+              <span>➕</span> <span>Adicionar Aluno</span>
+            </button>
+            <button onclick="exportTurmaCSV()" class="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 px-3 py-2 rounded-xl text-xs sm:text-sm transition font-medium" title="Exportar lista atual para planilha CSV/Excel">
+              <span>📥</span> <span>Exportar</span>
+            </button>
+            <button onclick="printTurmaChamada()" class="no-print inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 px-3 py-2 rounded-xl text-xs sm:text-sm transition font-medium" title="Imprimir lista de presença/chamada">
+              <span>🖨️</span> <span>Imprimir Chamada</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtros e Seletores de Etapa & Turma -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          
+          <!-- Seletor de Etapa -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Etapa Catequética</label>
+            <select id="sel-etapa-alunos" onchange="handleEtapaChange(this.value)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs sm:text-sm font-semibold text-slate-800 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none">
+              <option value="Pré Eucaristia">Pré Eucaristia</option>
+              <option value="Eucaristia I">Eucaristia I</option>
+              <option value="Eucaristia II">Eucaristia II</option>
+              <option value="Perseverança">Perseverança</option>
+              <option value="Crisma Jovem">Crisma Jovem</option>
+              <option value="Crisma Adultos" selected>Crisma Adultos</option>
+            </select>
+          </div>
+
+          <!-- Seletor de Turma -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Turma Específica</label>
+            <select id="sel-turma-alunos" onchange="handleTurmaChange(this.value)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs sm:text-sm font-semibold text-slate-800 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none">
+              <!-- Populado via JS -->
+            </select>
+          </div>
+
+          <!-- Busca Rápida na Turma -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Buscar na Turma</label>
+            <div class="relative">
+              <input type="text" id="search-alunos-turma" oninput="renderAlunosTable()" placeholder="Filtrar por nome, contato ou e-mail..." class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-8 pr-3 py-2 text-xs sm:text-sm text-slate-800 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none">
+              <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Banner com Detalhes da Turma Selecionada -->
+        <div id="turma-info-banner" class="bg-indigo-50/60 border border-indigo-200/80 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span id="turma-info-badge" class="text-xs font-black uppercase text-indigo-900 bg-indigo-200/80 px-2.5 py-0.5 rounded-full">Turma 07 • Crisma Adultos</span>
+              <span id="turma-info-room" class="text-xs font-semibold text-slate-600">Sala 06 (São Miguel)</span>
+            </div>
+            <p id="turma-info-details" class="text-xs sm:text-sm text-slate-800 font-medium">
+              Catequistas: <strong>Thiago e Thais</strong> • Horário: <strong>Sacramento: 03/12/2026 – 19:30</strong>
+            </p>
+          </div>
+          
+          <!-- Contadores -->
+          <div class="flex items-center gap-2 flex-wrap">
+            <div class="bg-white border border-indigo-200 px-3 py-1.5 rounded-xl text-center shadow-2xs">
+              <div class="text-[10px] uppercase font-bold text-slate-500">Inscritos</div>
+              <div id="kpi-total-alunos" class="text-base font-black text-indigo-950 font-heading">17</div>
+            </div>
+            <div class="bg-white border border-indigo-200 px-3 py-1.5 rounded-xl text-center shadow-2xs">
+              <div class="text-[10px] uppercase font-bold text-slate-500">Com Documentos</div>
+              <div id="kpi-com-docs" class="text-base font-black text-emerald-700 font-heading">0</div>
+            </div>
+            <div class="bg-white border border-indigo-200 px-3 py-1.5 rounded-xl text-center shadow-2xs">
+              <div class="text-[10px] uppercase font-bold text-slate-500">Pendências</div>
+              <div id="kpi-pendentes" class="text-base font-black text-rose-700 font-heading">0</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Tabela Principal de Catequizandos -->
+      <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs sm:text-sm border-collapse">
+            <thead>
+              <tr class="bg-slate-900 text-white border-b-2 border-indigo-500">
+                <th class="py-3 px-3.5 font-heading text-center w-12">#</th>
+                <th class="py-3 px-4 font-heading min-w-[200px]">Nome do Catequizando</th>
+                <th class="py-3 px-3 font-heading text-center">Idade</th>
+                <th class="py-3 px-3 font-heading">Contato (WhatsApp)</th>
+                <th class="py-3 px-3 font-heading">E-mail</th>
+                <th class="py-3 px-3 font-heading">Estado Civil</th>
+                <th class="py-3 px-3 font-heading text-center">Batizado</th>
+                <th class="py-3 px-3 font-heading text-center">1ª Eucaristia</th>
+                <th class="py-3 px-4 font-heading min-w-[220px]">Comprovantes (Drive / Status)</th>
+                <th class="py-3 px-3 font-heading text-center no-print">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="alunos-table-body" class="divide-y divide-slate-100">
+              <!-- Renderizado via JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- MODAL: CADASTRAR / EDITAR CATEQUIZANDO     -->
+    <!-- ========================================== -->
+    <div id="modal-aluno" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+      <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-8">
+        
+        <!-- Modal Header -->
+        <div class="bg-gradient-to-r from-slate-900 to-indigo-950 text-white p-5 sm:p-6 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">👤</span>
+            <div>
+              <h3 id="modal-aluno-title" class="text-lg sm:text-xl font-bold font-heading">Cadastrar Catequizando</h3>
+              <p id="modal-aluno-subtitle" class="text-xs text-indigo-200">Turma selecionada</p>
+            </div>
+          </div>
+          <button onclick="closeAlunoModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
+        </div>
+
+        <!-- Modal Form -->
+        <form id="form-aluno" onsubmit="handleSaveAluno(event)" class="p-5 sm:p-6 space-y-4">
+          <input type="hidden" id="aluno-id" />
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            
+            <!-- Nome -->
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Nome Completo do Catequizando *</label>
+              <input type="text" id="aluno-nome" required placeholder="Ex: Maria da Silva" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none font-medium" />
+            </div>
+
+            <!-- Idade -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Idade</label>
+              <input type="text" id="aluno-idade" placeholder="Ex: 27" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none" />
+            </div>
+
+            <!-- Contato / WhatsApp -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Contato (WhatsApp)</label>
+              <input type="text" id="aluno-contato" placeholder="Ex: (61) 98516-6501" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none" />
+            </div>
+
+            <!-- E-mail -->
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Endereço de E-mail</label>
+              <input type="email" id="aluno-email" placeholder="Ex: catequizando@email.com" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none" />
+            </div>
+
+            <!-- Estado Civil -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Estado Civil</label>
+              <input type="text" id="aluno-estado-civil" placeholder="Ex: Solteiro, Casado na Igreja..." class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none" />
+            </div>
+
+            <!-- Batizado -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Batizado na Igreja Católica?</label>
+              <select id="aluno-batizado" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none">
+                <option value="">(Não informado)</option>
+                <option value="Sim">Sim</option>
+                <option value="Não">Não</option>
+                <option value="Batizado">Batizado</option>
+              </select>
+            </div>
+
+            <!-- Primeira Eucaristia -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Fez a 1ª Eucaristia?</label>
+              <select id="aluno-eucaristia" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none">
+                <option value="">(Não informado)</option>
+                <option value="Sim">Sim</option>
+                <option value="Não">Não</option>
+                <option value="Primeira Eucaristia">Primeira Eucaristia</option>
+              </select>
+            </div>
+
+            <!-- Comprovante de Batismo -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Comprovante de Batismo</label>
+              <input type="text" id="aluno-comp-batismo" placeholder="Link Google Drive ou 'DEVE'" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none" />
+            </div>
+
+            <!-- Comprovante de Primeira Eucaristia -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Comprovante de 1ª Eucaristia</label>
+              <input type="text" id="aluno-comp-eucaristia" placeholder="Link Google Drive ou 'DEVE'" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none" />
+            </div>
+
+            <!-- Comprovante de Matrimônio -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Comprovante de Matrimônio</label>
+              <input type="text" id="aluno-comp-matrimonio" placeholder="Link Google Drive ou 'DEVE'" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none" />
+            </div>
+
+            <!-- Documento de Identificação -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Documento de Identificação (RG/CNH)</label>
+              <input type="text" id="aluno-doc-identificacao" placeholder="Link Google Drive ou status" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none" />
+            </div>
+
+            <!-- Comprovante de Pagamento -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Comprovante de Pagamento</label>
+              <input type="text" id="aluno-comp-pagamento" placeholder="Link Google Drive ou status" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none" />
+            </div>
+
+            <!-- Observações -->
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Observações e Pendências</label>
+              <textarea id="aluno-obs" rows="2" placeholder="Observações pastorais ou anotações..." class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none"></textarea>
+            </div>
+
+          </div>
+
+          <!-- Footer Buttons -->
+          <div class="pt-3 border-t border-slate-200 flex items-center justify-end gap-2">
+            <button type="button" onclick="closeAlunoModal()" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-100 transition">
+              Cancelar
+            </button>
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl text-xs sm:text-sm font-bold shadow transition">
+              Salvar Catequizando
+            </button>
+          </div>
+
+        </form>
+
+      </div>
+    </div>
 
     <!-- ========================================== -->
     <!-- TAB 4: VISÃO DO COMPLEXO / COMO CHEGAR     -->
@@ -3240,6 +3508,407 @@
     }
 
     // =============================================
+    // CATEQUIZANDOS & TURMAS — GESTÃO E LISTAS
+    // Suporte ao schema do Excel e links Google Drive
+    // =============================================
+    const STORAGE_KEY_ALUNOS = 'catequese_turmas_alunos_v2';
+
+    // Seed com os 17 catequizandos da turma de Crisma Adultos - Thiago e Thais (campos em branco exceto nome)
+    const SEED_ALUNOS_DATABASE = {
+      "Crisma Adultos__Turma 07": [
+        { id: "ca7-1", nome: "Alanis Mariano Menezes", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
+        { id: "ca7-2", nome: "Ana Cristina da Conceição Leão", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
+        { id: "ca7-3", nome: "Arthur Silva Carneiro", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
+        { id: "ca7-4", nome: "Bianca Manzi Campos de O. Pereira", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
+        { id: "ca7-5", nome: "Carolina Mendonça Costa", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
+        { id: "ca7-6", nome: "Giovanna Brandão de Oliveira Santos", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
+        { id: "ca7-7", nome: "José Gabriel Braga de Souza", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
+        { id: "ca7-8", nome: "Kesia Carolina de Sousa Castro Gontijo", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
+        { id: "ca7-9", nome: "Kelleny Alves Moreira", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
+        { id: "ca7-10", nome: "LUCELIA SUMIHARA DOS REIS", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
+        { id: "ca7-11", nome: "Márcia Frederica de Jesus de Melo", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
+        { id: "ca7-12", nome: "MARIA EDICLECIA DE ALMEIDA GUERRA MENEZES", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
+        { id: "ca7-13", nome: "Murilo Borges Nery", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
+        { id: "ca7-14", nome: "Nathiara Uisieli da Costa Seixas Savi", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
+        { id: "ca7-15", nome: "PEDRO HENRIQUE SOARES LIMA", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
+        { id: "ca7-16", nome: "Rayanne Guttierre de Melo", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
+        { id: "ca7-17", nome: "Rodrigo de Abreu Inácio", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" }
+      ]
+    };
+
+    let currentAlunosEtapa = 'Crisma Adultos';
+    let currentAlunosTurma = 'Turma 07';
+
+    function getAlunosDatabase() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY_ALUNOS);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && typeof parsed === 'object') return parsed;
+        }
+      } catch (e) {
+        console.error('Erro ao ler banco de catequizandos:', e);
+      }
+      return JSON.parse(JSON.stringify(SEED_ALUNOS_DATABASE));
+    }
+
+    function saveAlunosDatabase(data) {
+      try {
+        localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(data));
+      } catch (e) {
+        console.error('Erro ao salvar banco de catequizandos:', e);
+      }
+    }
+
+    function getTurmaKey(etapa, turma) {
+      return `${etapa}__${turma}`;
+    }
+
+    function getTurmaAlunos(etapa, turma) {
+      const db = getAlunosDatabase();
+      const key = getTurmaKey(etapa, turma);
+      return db[key] || [];
+    }
+
+    function populateTurmasSelect(selectedEtapa, preferredTurma) {
+      const selTurma = document.getElementById('sel-turma-alunos');
+      if (!selTurma) return;
+
+      const turmasDaEtapa = masterScheduleList.filter(item => item.stage === selectedEtapa);
+
+      selTurma.innerHTML = turmasDaEtapa.map(item => {
+        return `<option value="${item.turma}">${item.turma} (${item.catechists})</option>`;
+      }).join('');
+
+      if (preferredTurma && turmasDaEtapa.some(t => t.turma === preferredTurma)) {
+        selTurma.value = preferredTurma;
+      } else if (turmasDaEtapa.length > 0) {
+        selTurma.value = turmasDaEtapa[0].turma;
+      }
+
+      currentAlunosTurma = selTurma.value;
+      updateTurmaInfoBanner();
+      renderAlunosTable();
+    }
+
+    function handleEtapaChange(etapa) {
+      currentAlunosEtapa = etapa;
+      populateTurmasSelect(etapa);
+    }
+
+    function handleTurmaChange(turma) {
+      currentAlunosTurma = turma;
+      updateTurmaInfoBanner();
+      renderAlunosTable();
+    }
+
+    function updateTurmaInfoBanner() {
+      const info = masterScheduleList.find(t => t.stage === currentAlunosEtapa && t.turma === currentAlunosTurma);
+      const badge = document.getElementById('turma-info-badge');
+      const room = document.getElementById('turma-info-room');
+      const details = document.getElementById('turma-info-details');
+
+      if (badge) badge.textContent = `${currentAlunosTurma} • ${currentAlunosEtapa}`;
+      if (room) room.textContent = info ? `${info.room} • ${info.hall}` : '';
+      if (details) {
+        details.innerHTML = info ? `Catequistas: <strong>${info.catechists}</strong>${info.auxiliares ? ` <em class="text-xs text-slate-500">(Aux: ${info.auxiliares.join(', ')})</em>` : ''} • Horário: <strong>${info.dayTime}</strong>` : '';
+      }
+    }
+
+    function openTurmaAlunos(etapa, turma) {
+      switchTab('alunos');
+      const selEtapa = document.getElementById('sel-etapa-alunos');
+      if (selEtapa) selEtapa.value = etapa;
+      currentAlunosEtapa = etapa;
+      populateTurmasSelect(etapa, turma);
+    }
+
+    function _renderDocBadge(label, val) {
+      if (!val || val.trim() === '') return '';
+      const v = val.trim();
+      if (v.startsWith('http://') || v.startsWith('https://')) {
+        const isDrive = v.includes('drive.google.com') || v.includes('docs.google.com');
+        return `
+          <a href="${v}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-1.5 py-0.5 rounded transition" title="${label}: Ver Documento no Drive">
+            ${isDrive ? '<svg class="w-3 h-3 text-blue-600" viewBox="0 0 24 24" fill="currentColor"><path d="M7.71 3.5L1.15 15l3.43 6 6.55-11.5L7.71 3.5zm3.43 0l6.56 11.5h6.86L18 3.5h-6.86zm1.14 12.5l-3.43 6h13.72l3.43-6H12.28z"/></svg>' : '🔗'}
+            <span>${label}</span>
+          </a>
+        `;
+      }
+      if (v.toUpperCase() === 'DEVE' || v.toUpperCase().includes('PENDENTE')) {
+        return `<span class="inline-flex items-center text-[9px] font-black uppercase text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded" title="${label}: Pendente / Não entregue">⚠️ ${label}: DEVE</span>`;
+      }
+      return `<span class="text-[10px] text-slate-700 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded">${label}: ${v}</span>`;
+    }
+
+    function renderAlunosTable() {
+      const tbody = document.getElementById('alunos-table-body');
+      if (!tbody) return;
+
+      const alunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma);
+      const searchInput = document.getElementById('search-alunos-turma');
+      const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
+
+      const filtered = alunos.filter(a => {
+        if (!query) return true;
+        return (a.nome || '').toLowerCase().includes(query) ||
+               (a.email || '').toLowerCase().includes(query) ||
+               (a.contato || '').toLowerCase().includes(query);
+      });
+
+      // Atualiza KPIs
+      const kpiTotal = document.getElementById('kpi-total-alunos');
+      const kpiDocs = document.getElementById('kpi-com-docs');
+      const kpiPend = document.getElementById('kpi-pendentes');
+
+      let comDocsCount = 0;
+      let pendentesCount = 0;
+
+      alunos.forEach(a => {
+        const hasDriveDoc = [a.docIdentificacao, a.comprovanteBatismo, a.comprovanteEucaristia, a.comprovanteMatrimonio, a.comprovantePagamento].some(d => (d || '').includes('http'));
+        const hasDeve = [a.comprovanteBatismo, a.comprovanteEucaristia, a.comprovanteMatrimonio].some(d => (d || '').toUpperCase().includes('DEVE'));
+        if (hasDriveDoc) comDocsCount++;
+        if (hasDeve) pendentesCount++;
+      });
+
+      if (kpiTotal) kpiTotal.textContent = alunos.length;
+      if (kpiDocs) kpiDocs.textContent = comDocsCount;
+      if (kpiPend) kpiPend.textContent = pendentesCount;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="10" class="py-12 text-center text-slate-400">
+              <div class="text-3xl mb-2">📂</div>
+              <p class="font-semibold text-slate-600">Nenhum catequizando cadastrado nesta turma ainda.</p>
+              <p class="text-xs text-slate-400 mt-1">Clique em "Adicionar Aluno" acima para cadastrar o primeiro catequizando.</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map((a, idx) => {
+        let contatoHtml = '<span class="text-slate-300">—</span>';
+        if (a.contato && a.contato.trim()) {
+          const rawDigits = a.contato.replace(/\\D/g, '');
+          if (rawDigits.length >= 8) {
+            const num = rawDigits.startsWith('55') ? rawDigits : `55${rawDigits}`;
+            contatoHtml = `<a href="https://wa.me/${num}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-900 font-semibold text-xs hover:underline"><span>📱</span> ${a.contato}</a>`;
+          } else {
+            contatoHtml = `<span class="text-xs text-slate-700">${a.contato}</span>`;
+          }
+        }
+
+        let emailHtml = '<span class="text-slate-300">—</span>';
+        if (a.email && a.email.trim()) {
+          emailHtml = `<a href="mailto:${a.email.trim()}" class="text-indigo-600 hover:text-indigo-800 text-xs hover:underline">${a.email.trim()}</a>`;
+        }
+
+        const batizadoBadge = a.batizado === 'Sim' || a.batizado === 'Batizado'
+          ? '<span class="inline-flex items-center text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">Sim</span>'
+          : a.batizado === 'Não'
+          ? '<span class="inline-flex items-center text-[10px] font-bold text-rose-800 bg-rose-100 px-2 py-0.5 rounded-full">Não</span>'
+          : '<span class="text-slate-300">—</span>';
+
+        const eucaristiaBadge = a.primeiraEucaristia === 'Sim' || a.primeiraEucaristia === 'Primeira Eucaristia'
+          ? '<span class="inline-flex items-center text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">Sim</span>'
+          : a.primeiraEucaristia === 'Não'
+          ? '<span class="inline-flex items-center text-[10px] font-bold text-rose-800 bg-rose-100 px-2 py-0.5 rounded-full">Não</span>'
+          : '<span class="text-slate-300">—</span>';
+
+        const badges = [
+          _renderDocBadge('RG', a.docIdentificacao),
+          _renderDocBadge('Batismo', a.comprovanteBatismo),
+          _renderDocBadge('1ª Euc.', a.comprovanteEucaristia),
+          _renderDocBadge('Casam.', a.comprovanteMatrimonio),
+          _renderDocBadge('Pag.', a.comprovantePagamento)
+        ].filter(Boolean);
+
+        const docsHtml = badges.length > 0 
+          ? `<div class="flex flex-wrap items-center gap-1">${badges.join('')}</div>`
+          : '<span class="text-slate-300 text-xs">—</span>';
+
+        return `
+          <tr class="hover:bg-slate-50/80 transition">
+            <td class="py-2.5 px-3.5 text-center font-bold text-slate-400 text-xs">${idx + 1}</td>
+            <td class="py-2.5 px-4">
+              <div class="font-bold text-slate-900">${a.nome}</div>
+              ${a.observacoes ? `<div class="text-[10px] text-amber-700 mt-0.5">⚠️ ${a.observacoes}</div>` : ''}
+            </td>
+            <td class="py-2.5 px-3 text-center text-slate-700 font-medium">${a.idade || '<span class="text-slate-300">—</span>'}</td>
+            <td class="py-2.5 px-3">${contatoHtml}</td>
+            <td class="py-2.5 px-3">${emailHtml}</td>
+            <td class="py-2.5 px-3 text-slate-700">${a.estadoCivil || '<span class="text-slate-300">—</span>'}</td>
+            <td class="py-2.5 px-3 text-center">${batizadoBadge}</td>
+            <td class="py-2.5 px-3 text-center">${eucaristiaBadge}</td>
+            <td class="py-2.5 px-4">${docsHtml}</td>
+            <td class="py-2.5 px-3 text-center no-print">
+              <div class="flex items-center justify-center gap-1">
+                <button onclick="editAluno('${a.id}')" class="p-1 rounded text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition" title="Editar Catequizando">
+                  ✏️
+                </button>
+                <button onclick="deleteAluno('${a.id}')" class="p-1 rounded text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition" title="Excluir Catequizando">
+                  🗑️
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function openAlunoModal(alunoData = null) {
+      const modal = document.getElementById('modal-aluno');
+      const title = document.getElementById('modal-aluno-title');
+      const sub = document.getElementById('modal-aluno-subtitle');
+      const form = document.getElementById('form-aluno');
+
+      if (!modal || !form) return;
+
+      if (alunoData) {
+        if (title) title.textContent = 'Editar Catequizando';
+        if (sub) sub.textContent = `${currentAlunosTurma} • ${currentAlunosEtapa}`;
+        document.getElementById('aluno-id').value = alunoData.id;
+        document.getElementById('aluno-nome').value = alunoData.nome || '';
+        document.getElementById('aluno-idade').value = alunoData.idade || '';
+        document.getElementById('aluno-contato').value = alunoData.contato || '';
+        document.getElementById('aluno-email').value = alunoData.email || '';
+        document.getElementById('aluno-estado-civil').value = alunoData.estadoCivil || '';
+        document.getElementById('aluno-batizado').value = alunoData.batizado || '';
+        document.getElementById('aluno-eucaristia').value = alunoData.primeiraEucaristia || '';
+        document.getElementById('aluno-comp-batismo').value = alunoData.comprovanteBatismo || '';
+        document.getElementById('aluno-comp-eucaristia').value = alunoData.comprovanteEucaristia || '';
+        document.getElementById('aluno-comp-matrimonio').value = alunoData.comprovanteMatrimonio || '';
+        document.getElementById('aluno-doc-identificacao').value = alunoData.docIdentificacao || '';
+        document.getElementById('aluno-comp-pagamento').value = alunoData.comprovantePagamento || '';
+        document.getElementById('aluno-obs').value = alunoData.observacoes || '';
+      } else {
+        if (title) title.textContent = 'Cadastrar Novo Catequizando';
+        if (sub) sub.textContent = `${currentAlunosTurma} • ${currentAlunosEtapa}`;
+        form.reset();
+        document.getElementById('aluno-id').value = '';
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeAlunoModal() {
+      const modal = document.getElementById('modal-aluno');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function editAluno(id) {
+      const alunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma);
+      const aluno = alunos.find(a => a.id === id);
+      if (aluno) openAlunoModal(aluno);
+    }
+
+    function deleteAluno(id) {
+      const pin = prompt('🔒 Digite a senha de administração (Sicm@2026) para excluir este catequizando:');
+      if (pin !== EDIT_PIN) {
+        if (pin !== null) alert('Senha incorreta.');
+        return;
+      }
+
+      if (!confirm('Deseja realmente excluir este catequizando da turma?')) return;
+
+      const db = getAlunosDatabase();
+      const key = getTurmaKey(currentAlunosEtapa, currentAlunosTurma);
+      db[key] = (db[key] || []).filter(a => a.id !== id);
+      saveAlunosDatabase(db);
+      renderAlunosTable();
+    }
+
+    function handleSaveAluno(event) {
+      event.preventDefault();
+
+      const pin = prompt('🔒 Digite a senha de administração (Sicm@2026) para salvar os dados:');
+      if (pin !== EDIT_PIN) {
+        if (pin !== null) alert('Senha incorreta. Alteração cancelada.');
+        return;
+      }
+
+      const idField = document.getElementById('aluno-id');
+      const isEdit = idField && idField.value;
+
+      const alunoObj = {
+        id: isEdit ? idField.value : 'aluno-' + Date.now(),
+        nome: (document.getElementById('aluno-nome').value || '').trim(),
+        idade: (document.getElementById('aluno-idade').value || '').trim(),
+        contato: (document.getElementById('aluno-contato').value || '').trim(),
+        email: (document.getElementById('aluno-email').value || '').trim(),
+        estadoCivil: (document.getElementById('aluno-estado-civil').value || '').trim(),
+        batizado: document.getElementById('aluno-batizado').value || '',
+        primeiraEucaristia: document.getElementById('aluno-eucaristia').value || '',
+        comprovanteBatismo: (document.getElementById('aluno-comp-batismo').value || '').trim(),
+        comprovanteEucaristia: (document.getElementById('aluno-comp-eucaristia').value || '').trim(),
+        comprovanteMatrimonio: (document.getElementById('aluno-comp-matrimonio').value || '').trim(),
+        docIdentificacao: (document.getElementById('aluno-doc-identificacao').value || '').trim(),
+        comprovantePagamento: (document.getElementById('aluno-comp-pagamento').value || '').trim(),
+        observacoes: (document.getElementById('aluno-obs').value || '').trim()
+      };
+
+      const db = getAlunosDatabase();
+      const key = getTurmaKey(currentAlunosEtapa, currentAlunosTurma);
+      if (!db[key]) db[key] = [];
+
+      if (isEdit) {
+        const idx = db[key].findIndex(a => a.id === alunoObj.id);
+        if (idx !== -1) db[key][idx] = alunoObj;
+        else db[key].push(alunoObj);
+      } else {
+        db[key].push(alunoObj);
+      }
+
+      saveAlunosDatabase(db);
+      closeAlunoModal();
+      renderAlunosTable();
+      alert('✅ Dados do catequizando salvos com sucesso!');
+    }
+
+    function exportTurmaCSV() {
+      const alunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma);
+      if (alunos.length === 0) {
+        alert('Não há catequizandos para exportar nesta turma.');
+        return;
+      }
+
+      const headers = ['Nº', 'Nome Completo', 'Idade', 'Contato', 'E-mail', 'Estado Civil', 'Batizado', 'Comprovante Batismo', '1ª Eucaristia', 'Comprovante Eucaristia', 'Comprovante Matrimônio', 'Documento Identificação', 'Comprovante Pagamento', 'Observações'];
+
+      const rows = alunos.map((a, i) => [
+        i + 1,
+        `"${(a.nome || '').replace(/"/g, '""')}"`,
+        `"${(a.idade || '').replace(/"/g, '""')}"`,
+        `"${(a.contato || '').replace(/"/g, '""')}"`,
+        `"${(a.email || '').replace(/"/g, '""')}"`,
+        `"${(a.estadoCivil || '').replace(/"/g, '""')}"`,
+        `"${(a.batizado || '').replace(/"/g, '""')}"`,
+        `"${(a.comprovanteBatismo || '').replace(/"/g, '""')}"`,
+        `"${(a.primeiraEucaristia || '').replace(/"/g, '""')}"`,
+        `"${(a.comprovanteEucaristia || '').replace(/"/g, '""')}"`,
+        `"${(a.comprovanteMatrimonio || '').replace(/"/g, '""')}"`,
+        `"${(a.docIdentificacao || '').replace(/"/g, '""')}"`,
+        `"${(a.comprovantePagamento || '').replace(/"/g, '""')}"`,
+        `"${(a.observacoes || '').replace(/"/g, '""')}"`
+      ]);
+
+      const csvContent = '\\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\\r\\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `Catequese_${currentAlunosEtapa}_${currentAlunosTurma}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function printTurmaChamada() {
+      window.print();
+    }
+
+    // =============================================
     // INICIALIZAÇÃO
     // =============================================
     document.addEventListener('DOMContentLoaded', () => {
@@ -3248,6 +3917,7 @@
       renderRoomCards();
       renderScheduleTable();
       renderEventosTimeline();
+      populateTurmasSelect('Crisma Adultos', 'Turma 07');
       selectRoom('sala-01');
     });
   </script>
