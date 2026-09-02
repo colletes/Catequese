@@ -41,6 +41,38 @@
     .font-marcellus {
       font-family: 'Marcellus', serif;
     }
+    /* Estilos para congelamento de cabeçalho e colunas na tabela de turmas */
+    .table-freeze-container {
+      max-height: 75vh;
+      overflow: auto;
+      position: relative;
+    }
+    .col-freeze-idx {
+      position: sticky;
+      left: 0;
+      width: 44px;
+      min-width: 44px;
+      max-width: 44px;
+    }
+    .col-freeze-name {
+      position: sticky;
+      left: 44px;
+      min-width: 210px;
+      border-right: 2px solid #e2e8f0;
+      box-shadow: 3px 0 6px -2px rgba(0, 0, 0, 0.08);
+    }
+    thead .col-freeze-idx, thead .col-freeze-name {
+      z-index: 30;
+      background-color: #0f172a !important; /* slate-900 */
+      border-right-color: #334155;
+    }
+    tbody tr:hover .col-freeze-idx, tbody tr:hover .col-freeze-name {
+      background-color: #f1f5f9 !important; /* slate-100 no hover */
+    }
+    tbody .col-freeze-idx, tbody .col-freeze-name {
+      z-index: 15;
+      background-color: #ffffff;
+    }
     .room-card {
       transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -2265,14 +2297,14 @@
 
       </div>
 
-      <!-- Tabela Principal de Catequizandos (Colunas alinhadas com a planilha oficial) -->
+      <!-- Tabela Principal de Catequizandos (Com cabeçalho e coluna de nome congelados) -->
       <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
+        <div class="table-freeze-container">
           <table class="w-full text-left text-xs sm:text-sm border-collapse">
-            <thead>
-              <tr class="bg-slate-900 text-white border-b-2 border-indigo-500">
-                <th class="py-3 px-3 font-heading text-center w-10">#</th>
-                <th class="py-3 px-3.5 font-heading min-w-[190px]">Nome Completo</th>
+            <thead class="sticky top-0 z-20 bg-slate-900 text-white">
+              <tr class="border-b-2 border-indigo-500 bg-slate-900">
+                <th class="py-3 px-3 font-heading text-center col-freeze-idx">#</th>
+                <th class="py-3 px-3.5 font-heading col-freeze-name">Nome Completo</th>
                 <th class="py-3 px-2.5 font-heading text-center min-w-[110px]">CPF</th>
                 <th class="py-3 px-2.5 font-heading text-center min-w-[95px]">Data Nasc.</th>
                 <th class="py-3 px-3 font-heading min-w-[130px]">Telefone (WhatsApp)</th>
@@ -5235,9 +5267,9 @@
           : '<span class="text-slate-300">—</span>';
 
         return `
-          <tr class="hover:bg-slate-50/80 transition">
-            <td class="py-2.5 px-3 text-center font-bold text-slate-400 text-xs">${idx + 1}</td>
-            <td class="py-2.5 px-3.5">
+          <tr class="hover:bg-slate-50/80 transition group">
+            <td class="py-2.5 px-3 text-center font-bold text-slate-400 text-xs col-freeze-idx">${idx + 1}</td>
+            <td class="py-2.5 px-3.5 col-freeze-name">
               <div class="font-bold text-slate-900 leading-snug">${a.nome}</div>
               ${a.observacoes ? `<div class="text-[10px] text-amber-700 mt-0.5">⚠️ ${a.observacoes}</div>` : ''}
             </td>
