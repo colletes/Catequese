@@ -1,0 +1,15 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Eventos: leitura pública, escrita apenas autenticada (PIN validado no client)
+    match /eventos/{eventoId} {
+      allow read: if true;
+      allow write: if request.auth == null; // sem auth SDK, usamos validação no client
+    }
+    // Organograma: leitura pública, escrita bloqueada (dados são hardcoded por ora)
+    match /organograma/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+  }
+}

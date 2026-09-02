@@ -93,6 +93,35 @@
         page-break-inside: avoid;
       }
     }
+
+    /* Top Navigation Tabs Scrollbar & Indicator Affordances */
+    .nav-tabs-scroll {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(212, 169, 79, 0.45) rgba(226, 232, 240, 0.6);
+      -webkit-overflow-scrolling: touch;
+    }
+    .nav-tabs-scroll::-webkit-scrollbar {
+      height: 4px;
+    }
+    .nav-tabs-scroll::-webkit-scrollbar-track {
+      background: rgba(226, 232, 240, 0.5);
+      border-radius: 9999px;
+    }
+    .nav-tabs-scroll::-webkit-scrollbar-thumb {
+      background: rgba(212, 169, 79, 0.5);
+      border-radius: 9999px;
+    }
+    .nav-tabs-scroll::-webkit-scrollbar-thumb:hover {
+      background: #d4a94f;
+    }
+
+    @keyframes pulseNavX {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(3px); }
+    }
+    .animate-pulse-x {
+      animation: pulseNavX 1.4s infinite ease-in-out;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased bg-[#fdfbf7]/60">
@@ -211,67 +240,182 @@
   </header>
 
   <!-- NAVIGATION TABS & FILTER BAR -->
-  <section class="bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-xs sticky top-[71px] z-30 no-print">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-      <div class="flex flex-col lg:flex-row items-center justify-between gap-3">
+  <section class="bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs sticky top-[71px] z-30 no-print">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5">
+      <div class="flex flex-col gap-2.5">
         
-        <!-- Tabs -->
-        <nav class="flex items-center gap-1.5 p-1 bg-slate-100/90 rounded-2xl border border-slate-200/80 w-full lg:w-auto overflow-x-auto">
-          <button id="tab-btn-catequetico" onclick="switchTab('catequetico')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition whitespace-nowrap bg-slate-900 text-white shadow-xs border border-slate-800">
-            <span class="w-2.5 h-2.5 rounded-full bg-[#d4a94f]"></span>
-            <span>Centro Catequético</span>
-            <span class="bg-amber-950 text-[#d4a94f] border border-amber-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">Salas 01 a 08</span>
-          </button>
-          <button id="tab-btn-paroquial" onclick="switchTab('paroquial')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/70">
-            <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-            <span>Salão Paroquial (Subsolo)</span>
-            <span class="bg-blue-100 text-blue-900 text-[10px] font-bold px-2 py-0.5 rounded-full">Salas 11 a 17</span>
-          </button>
-          <button id="tab-btn-guia" onclick="switchTab('guia')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/70">
-            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-            <span>Organograma &amp; Turmas</span>
-          </button>
-          <button id="tab-btn-papeis" onclick="switchTab('papeis')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/70">
-            <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-            <span>Papéis &amp; Atribuições</span>
-            <span class="bg-amber-100 text-amber-900 text-[10px] font-bold px-2 py-0.5 rounded-full">2026</span>
-          </button>
-          <button id="tab-btn-alunos" onclick="switchTab('alunos')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/70">
-            <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
-            <span>Catequizandos</span>
-            <span class="bg-indigo-100 text-indigo-900 text-[10px] font-bold px-2 py-0.5 rounded-full">Turmas</span>
-          </button>
-          <button id="tab-btn-campus" onclick="switchTab('campus')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/70">
-            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-            <span>Complexo Paroquial</span>
-          </button>
-          <button id="tab-btn-eventos" onclick="switchTab('eventos')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/70">
-            <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-            <span>Eventos &amp; Retiros</span>
-            <span class="bg-rose-100 text-rose-900 text-[10px] font-bold px-2 py-0.5 rounded-full">2026</span>
-          </button>
-        </nav>
+        <!-- Row 1: Primary Tabs Navigation with Lateral Scroll & Quick Access -->
+        <div class="flex items-center gap-2 w-full">
+          
+          <!-- Scrollable Nav Wrapper -->
+          <div class="relative flex items-center flex-1 min-w-0 bg-slate-100/90 rounded-2xl border border-slate-200/80 p-1">
+            
+            <!-- Left Scroll Button -->
+            <button id="nav-scroll-left" onclick="scrollNavTabs('left')" class="flex items-center justify-center w-8 h-8 rounded-xl bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50 shadow-xs transition z-20 flex-shrink-0 disabled:opacity-20 disabled:cursor-not-allowed" title="Rolar para a esquerda" aria-label="Rolar abas para a esquerda">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+            </button>
 
-        <!-- Search & Filter Area -->
-        <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+            <!-- Left Gradient Fade Indicator -->
+            <div id="nav-fade-left" class="pointer-events-none absolute left-8 top-1 bottom-1 w-10 bg-gradient-to-r from-slate-100 to-transparent opacity-0 transition-opacity duration-200 z-10"></div>
+
+            <!-- Scrollable Tabs Nav -->
+            <nav id="nav-tabs" class="nav-tabs-scroll flex items-center gap-1.5 overflow-x-auto scroll-smooth w-full px-2 py-0.5 select-none">
+              <!-- 1. Complexo Paroquial -->
+              <button id="tab-btn-campus" onclick="switchTab('campus')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition whitespace-nowrap bg-slate-900 text-white shadow-xs border border-slate-800">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                <span>Complexo Paroquial</span>
+              </button>
+
+              <!-- 2. Centro Catequético -->
+              <button id="tab-btn-catequetico" onclick="switchTab('catequetico')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/70">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#d4a94f]"></span>
+                <span>Centro Catequético</span>
+                <span class="bg-amber-950 text-[#d4a94f] border border-amber-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">Salas 01 a 08</span>
+              </button>
+
+              <!-- 3. Salão Paroquial -->
+              <button id="tab-btn-paroquial" onclick="switchTab('paroquial')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/70">
+                <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                <span>Salão Paroquial (Subsolo)</span>
+                <span class="bg-blue-100 text-blue-900 text-[10px] font-bold px-2 py-0.5 rounded-full">Salas 11 a 17</span>
+              </button>
+
+              <!-- 4. Eventos e Retiros -->
+              <button id="tab-btn-eventos" onclick="switchTab('eventos')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/70">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                <span>Eventos &amp; Retiros</span>
+                <span class="bg-rose-100 text-rose-900 text-[10px] font-bold px-2 py-0.5 rounded-full">2026</span>
+              </button>
+
+              <!-- 5. Papéis e Atribuições -->
+              <button id="tab-btn-papeis" onclick="switchTab('papeis')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/70">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                <span>Papéis &amp; Atribuições</span>
+                <span class="bg-amber-100 text-amber-900 text-[10px] font-bold px-2 py-0.5 rounded-full">2026</span>
+              </button>
+
+              <!-- 6. Organograma e Turmas -->
+              <button id="tab-btn-guia" onclick="switchTab('guia')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/70">
+                <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                <span>Organograma &amp; Turmas</span>
+              </button>
+
+              <!-- 7. Catequizandos -->
+              <button id="tab-btn-alunos" onclick="switchTab('alunos')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/70">
+                <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
+                <span>Catequizandos</span>
+                <span class="bg-indigo-100 text-indigo-900 text-[10px] font-bold px-2 py-0.5 rounded-full">Turmas</span>
+              </button>
+            </nav>
+
+            <!-- Right Gradient Fade Indicator -->
+            <div id="nav-fade-right" class="pointer-events-none absolute right-8 top-1 bottom-1 w-10 bg-gradient-to-l from-slate-100 to-transparent opacity-100 transition-opacity duration-200 z-10"></div>
+
+            <!-- Right Scroll Button -->
+            <button id="nav-scroll-right" onclick="scrollNavTabs('right')" class="flex items-center justify-center w-8 h-8 rounded-xl bg-white border border-[#d4a94f]/80 text-[#b88d36] hover:bg-amber-50 hover:text-amber-950 shadow-xs transition z-20 flex-shrink-0 animate-pulse-x" title="Rolar para ver mais abas" aria-label="Rolar abas para a direita">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+
+          <!-- Quick Dropdown Menu: "Todas as Abas (7)" -->
+          <div class="relative flex-shrink-0">
+            <button id="btn-all-tabs-dropdown" onclick="toggleTabsDropdown()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-bold bg-slate-100/90 hover:bg-white text-slate-700 hover:text-slate-950 border border-slate-200/90 shadow-xs transition whitespace-nowrap" title="Ver todas as 7 abas disponíveis">
+              <svg class="w-4 h-4 text-[#d4a94f]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+              <span class="hidden md:inline">Todas as Abas</span>
+              <span class="bg-amber-100 text-amber-900 border border-amber-300/60 text-[10px] font-black px-1.5 py-0.5 rounded-full">7</span>
+              <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+
+            <!-- Dropdown Menu -->
+            <div id="tabs-dropdown-menu" class="hidden absolute right-0 mt-1.5 w-72 bg-white rounded-2xl shadow-2xl border border-slate-200 py-2 z-50">
+              <div class="px-3.5 py-2 border-b border-slate-100 flex items-center justify-between">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 font-heading">Navegação Rápida</span>
+                <span class="text-[10px] text-slate-400 font-medium">7 páginas</span>
+              </div>
+              <div class="p-1 space-y-0.5">
+                <button onclick="switchTab('campus')" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 transition text-left group">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-xs font-bold text-slate-800 group-hover:text-emerald-700">Complexo Paroquial</div>
+                    <div class="text-[10px] text-slate-400 truncate">Visão geral do Santuário e mapas</div>
+                  </div>
+                </button>
+                <button onclick="switchTab('catequetico')" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 transition text-left group">
+                  <span class="w-2.5 h-2.5 rounded-full bg-[#d4a94f] flex-shrink-0"></span>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-xs font-bold text-slate-800 group-hover:text-amber-700">Centro Catequético</div>
+                    <div class="text-[10px] text-slate-400 truncate">Salas 01 a 08, Costura e Auditório</div>
+                  </div>
+                </button>
+                <button onclick="switchTab('paroquial')" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 transition text-left group">
+                  <span class="w-2.5 h-2.5 rounded-full bg-blue-500 flex-shrink-0"></span>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-xs font-bold text-slate-800 group-hover:text-blue-700">Salão Paroquial (Subsolo)</div>
+                    <div class="text-[10px] text-slate-400 truncate">Salas 11 a 17</div>
+                  </div>
+                </button>
+                <button onclick="switchTab('eventos')" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 transition text-left group">
+                  <span class="w-2.5 h-2.5 rounded-full bg-rose-500 flex-shrink-0"></span>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-xs font-bold text-slate-800 group-hover:text-rose-700">Eventos &amp; Retiros</div>
+                    <div class="text-[10px] text-slate-400 truncate">Calendário de formações e retiros 2026</div>
+                  </div>
+                </button>
+                <button onclick="switchTab('papeis')" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 transition text-left group">
+                  <span class="w-2.5 h-2.5 rounded-full bg-amber-500 flex-shrink-0"></span>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-xs font-bold text-slate-800 group-hover:text-amber-700">Papéis &amp; Atribuições</div>
+                    <div class="text-[10px] text-slate-400 truncate">Coordenação, catequistas e apoios</div>
+                  </div>
+                </button>
+                <button onclick="switchTab('guia')" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 transition text-left group">
+                  <span class="w-2.5 h-2.5 rounded-full bg-slate-500 flex-shrink-0"></span>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-xs font-bold text-slate-800 group-hover:text-slate-900">Organograma &amp; Turmas</div>
+                    <div class="text-[10px] text-slate-400 truncate">Grade por horários, turmas e salas</div>
+                  </div>
+                </button>
+                <button onclick="switchTab('alunos')" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 transition text-left group">
+                  <span class="w-2.5 h-2.5 rounded-full bg-indigo-600 flex-shrink-0"></span>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-xs font-bold text-slate-800 group-hover:text-indigo-700">Catequizandos</div>
+                    <div class="text-[10px] text-slate-400 truncate">Listas nominais de presença e chamadas</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Row 2: Search & Quick Day Filter Bar -->
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-0.5">
           <!-- Search input -->
-          <div class="relative flex-1 sm:w-64">
+          <div class="relative flex-1 sm:w-80">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
-            <input type="text" id="global-search" oninput="handleSearch(this.value)" placeholder="Buscar catequista, turma, etapa ou sala..." class="w-full pl-9 pr-8 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200/90 rounded-xl focus:bg-white focus:border-[#d4a94f] focus:ring-2 focus:ring-amber-200/50 outline-none transition placeholder:text-slate-400">
+            <input type="text" id="global-search" oninput="handleSearch(this.value)" placeholder="Buscar catequista, turma, etapa ou sala..." class="w-full pl-9 pr-8 py-1.5 text-xs sm:text-sm bg-slate-50 border border-slate-200/90 rounded-xl focus:bg-white focus:border-[#d4a94f] focus:ring-2 focus:ring-amber-200/50 outline-none transition placeholder:text-slate-400">
             <button id="clear-search-btn" onclick="clearSearch()" class="hidden absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
           </div>
 
-          <!-- Quick Day / Period Filter -->
-          <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 flex-shrink-0 text-xs overflow-x-auto">
-            <button onclick="filterByPeriod('all')" class="period-filter-btn px-2 py-1 rounded-lg font-bold bg-white text-slate-800 shadow-xs" data-period="all">Todos</button>
-            <button onclick="filterByPeriod('sab-manha')" class="period-filter-btn px-2 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="sab-manha">Sáb 8h30</button>
-            <button onclick="filterByPeriod('sab-tarde')" class="period-filter-btn px-2 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="sab-tarde">Sáb 15h</button>
-            <button onclick="filterByPeriod('seg-noite')" class="period-filter-btn px-2 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="seg-noite">Seg 20h</button>
-            <button onclick="filterByPeriod('quarta')" class="period-filter-btn px-2 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="quarta">Qua 16h</button>
+          <!-- Quick Day / Period Filter & Scroll Notice -->
+          <div class="flex items-center gap-2 flex-wrap">
+            <div class="flex items-center gap-1 bg-slate-100 p-0.5 rounded-xl border border-slate-200 flex-shrink-0 text-xs overflow-x-auto">
+              <button onclick="filterByPeriod('all')" class="period-filter-btn px-2 py-1 rounded-lg font-bold bg-white text-slate-800 shadow-xs" data-period="all">Todos</button>
+              <button onclick="filterByPeriod('sab-manha')" class="period-filter-btn px-2 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="sab-manha">Sáb 8h30</button>
+              <button onclick="filterByPeriod('sab-tarde')" class="period-filter-btn px-2 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="sab-tarde">Sáb 15h</button>
+              <button onclick="filterByPeriod('seg-noite')" class="period-filter-btn px-2 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="seg-noite">Seg 20h</button>
+              <button onclick="filterByPeriod('quarta')" class="period-filter-btn px-2 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="quarta">Qua 16h</button>
+            </div>
+
+            <!-- Scroll notice pill (visible when scrollable to right, guides new users) -->
+            <div id="nav-scroll-hint" onclick="scrollNavTabs('right')" class="hidden sm:flex items-center gap-1.5 text-[11px] font-semibold text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-300/80 px-2.5 py-1 rounded-xl shadow-2xs cursor-pointer transition select-none" title="Clique para rolar o menu e ver mais opções">
+              <span>Mais abas</span>
+              <span class="animate-pulse">👉</span>
+            </div>
           </div>
         </div>
 
@@ -299,7 +443,7 @@
     <!-- ========================================== -->
     <!-- TAB 1: CENTRO CATEQUÉTICO                  -->
     <!-- ========================================== -->
-    <section id="view-catequetico" class="tab-view space-y-6">
+    <section id="view-catequetico" class="tab-view hidden space-y-6">
       
       <!-- Section Header -->
       <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-md relative overflow-hidden border border-amber-500/20">
@@ -2266,7 +2410,7 @@
     <!-- ========================================== -->
     <!-- TAB 4: VISÃO DO COMPLEXO / COMO CHEGAR     -->
     <!-- ========================================== -->
-    <section id="view-campus" class="tab-view hidden space-y-6">
+    <section id="view-campus" class="tab-view space-y-6">
       <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm">
         <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 font-heading mb-2 flex items-center gap-2">
           <span class="text-[#d4a94f]">🧭</span> Mapa do Complexo Paroquial
@@ -2765,20 +2909,148 @@
       if (selectedBtn) {
         selectedBtn.classList.remove('text-slate-600', 'hover:text-slate-900', 'hover:bg-white/70');
         selectedBtn.classList.add('bg-slate-900', 'text-white', 'shadow-xs', 'border', 'border-slate-800');
+        selectedBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
       }
+
+      // Close dropdown if open
+      const dropdown = document.getElementById('tabs-dropdown-menu');
+      if (dropdown && !dropdown.classList.contains('hidden')) {
+        dropdown.classList.add('hidden');
+      }
+
+      setTimeout(updateNavScrollState, 150);
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    // TOP NAVIGATION LATERAL SCROLL & DROPDOWN UX
+    function scrollNavTabs(direction) {
+      const navTabs = document.getElementById('nav-tabs');
+      if (!navTabs) return;
+      const scrollStep = 240;
+      if (direction === 'left') {
+        navTabs.scrollBy({ left: -scrollStep, behavior: 'smooth' });
+      } else {
+        navTabs.scrollBy({ left: scrollStep, behavior: 'smooth' });
+      }
+      setTimeout(updateNavScrollState, 260);
+    }
+
+    function updateNavScrollState() {
+      const navTabs = document.getElementById('nav-tabs');
+      const btnLeft = document.getElementById('nav-scroll-left');
+      const btnRight = document.getElementById('nav-scroll-right');
+      const fadeLeft = document.getElementById('nav-fade-left');
+      const fadeRight = document.getElementById('nav-fade-right');
+      const hintBadge = document.getElementById('nav-scroll-hint');
+
+      if (!navTabs) return;
+
+      const maxScroll = navTabs.scrollWidth - navTabs.clientWidth;
+      const canScrollLeft = navTabs.scrollLeft > 6;
+      const canScrollRight = maxScroll > 6 && (navTabs.scrollLeft < maxScroll - 6);
+
+      if (btnLeft) {
+        btnLeft.disabled = !canScrollLeft;
+        btnLeft.style.opacity = canScrollLeft ? '1' : '0.2';
+      }
+      if (btnRight) {
+        btnRight.disabled = !canScrollRight;
+        btnRight.style.opacity = canScrollRight ? '1' : '0.2';
+        if (canScrollRight) {
+          btnRight.classList.add('animate-pulse-x');
+        } else {
+          btnRight.classList.remove('animate-pulse-x');
+        }
+      }
+
+      if (fadeLeft) fadeLeft.style.opacity = canScrollLeft ? '1' : '0';
+      if (fadeRight) fadeRight.style.opacity = canScrollRight ? '1' : '0';
+
+      if (hintBadge) {
+        hintBadge.style.display = canScrollRight ? 'flex' : 'none';
+      }
+    }
+
+    function toggleTabsDropdown() {
+      const menu = document.getElementById('tabs-dropdown-menu');
+      if (menu) menu.classList.toggle('hidden');
+    }
+
+    function initNavScroll() {
+      const navTabs = document.getElementById('nav-tabs');
+      if (!navTabs) return;
+
+      // Mouse wheel horizontal scroll over tabs
+      navTabs.addEventListener('wheel', (e) => {
+        if (e.deltaY !== 0) {
+          e.preventDefault();
+          navTabs.scrollLeft += e.deltaY * 0.9;
+          updateNavScrollState();
+        }
+      }, { passive: false });
+
+      // Click and drag mouse support
+      let isDown = false;
+      let startX = 0;
+      let scrollStart = 0;
+
+      navTabs.addEventListener('mousedown', (e) => {
+        isDown = true;
+        startX = e.pageX - navTabs.offsetLeft;
+        scrollStart = navTabs.scrollLeft;
+        navTabs.style.cursor = 'grabbing';
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (isDown) {
+          isDown = false;
+          if (navTabs) navTabs.style.cursor = '';
+        }
+      });
+
+      navTabs.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - navTabs.offsetLeft;
+        const walk = (x - startX) * 1.5;
+        navTabs.scrollLeft = scrollStart - walk;
+        updateNavScrollState();
+      });
+
+      navTabs.addEventListener('scroll', () => {
+        updateNavScrollState();
+      });
+
+      window.addEventListener('resize', () => {
+        updateNavScrollState();
+      });
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        const dropdown = document.getElementById('tabs-dropdown-menu');
+        const btn = document.getElementById('btn-all-tabs-dropdown');
+        if (dropdown && !dropdown.classList.contains('hidden')) {
+          if (!dropdown.contains(e.target) && !btn.contains(e.target)) {
+            dropdown.classList.add('hidden');
+          }
+        }
+      });
+
+      updateNavScrollState();
+    }
+
     // SELECT ROOM AND UPDATE DETAIL PANELS
-    function selectRoom(roomId) {
+    function selectRoom(roomId, shouldSwitchTab = true) {
       const room = roomsData[roomId];
       if (!room) return;
 
-      if (room.hall === 'catequetico' && document.getElementById('view-catequetico').classList.contains('hidden')) {
-        switchTab('catequetico');
-      } else if (room.hall === 'paroquial' && document.getElementById('view-paroquial').classList.contains('hidden')) {
-        switchTab('paroquial');
+      if (shouldSwitchTab) {
+        if (room.hall === 'catequetico' && document.getElementById('view-catequetico').classList.contains('hidden')) {
+          switchTab('catequetico');
+        } else if (room.hall === 'paroquial' && document.getElementById('view-paroquial').classList.contains('hidden')) {
+          switchTab('paroquial');
+        }
       }
 
       document.querySelectorAll('.svg-room').forEach(el => el.classList.remove('active-room'));
@@ -3918,7 +4190,14 @@
       renderScheduleTable();
       renderEventosTimeline();
       populateTurmasSelect('Crisma Adultos', 'Turma 07');
-      selectRoom('sala-01');
+      selectRoom('sala-01', false);
+      initNavScroll();
+      if (window.location.hash) {
+        const hashTab = window.location.hash.replace('#', '');
+        if (document.getElementById('view-' + hashTab)) {
+          switchTab(hashTab);
+        }
+      }
     });
   </script>
 
