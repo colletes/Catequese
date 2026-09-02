@@ -13,6 +13,7 @@
   <!-- Tailwind CSS & html2canvas -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   
   <!-- Tipografia Oficial do Santuário (Questrial, Nunito, Marcellus, Outfit, Roboto) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1693,12 +1694,18 @@
                   <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 03 • Seg: 20:00 às 22:00</div>
                   <div class="text-[11px] text-slate-700 font-medium">Catequistas: Lorena e Natanai</div>
                   <div class="text-[10px] text-slate-500 mt-1 font-semibold">Auditório (Centro Catequético)</div>
+                  <button onclick="openTurmaAlunos('Crisma Adultos', 'Turma 03')" class="mt-2 w-full flex items-center justify-center gap-1.5 text-[10.5px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 py-1 rounded-lg transition" title="Ver lista com os 31 catequizandos desta turma">
+                    <span>👥</span> <span>Ver Alunos (31)</span>
+                  </button>
                 </div>
 
                 <div class="bg-white border border-indigo-200 rounded-xl p-2.5 shadow-2xs hover:border-indigo-400 transition org-editable">
                   <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 04 • Seg: 20:00 às 22:00</div>
                   <div class="text-[11px] text-slate-700 font-medium">Catequistas: Lourival e Thiago Malaquias</div>
                   <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Marcos (Sala 12 - Salão Par.)</div>
+                  <button onclick="openTurmaAlunos('Crisma Adultos', 'Turma 04')" class="mt-2 w-full flex items-center justify-center gap-1.5 text-[10.5px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 py-1 rounded-lg transition" title="Ver lista com os 19 catequizandos desta turma">
+                    <span>👥</span> <span>Ver Alunos (19)</span>
+                  </button>
                 </div>
 
                 <div class="bg-white border border-indigo-200 rounded-xl p-2.5 shadow-2xs hover:border-indigo-400 transition org-editable">
@@ -2165,12 +2172,15 @@
               <span>📋</span> <span>Listas de Turmas &amp; Chamada</span>
             </h2>
             <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
-              Acompanhamento nominal dos catequizandos, dados cadastrais, sacramentos e controle de documentação e Google Drive.
+              Acompanhamento cadastral, sacramentos (Batismo, 1ª Eucaristia) e chamada dos catequizandos integrados à planilha de inscrições.
             </p>
           </div>
           <div class="flex flex-wrap items-center gap-2 self-start sm:self-center">
             <button onclick="openAlunoModal()" class="inline-flex items-center gap-1.5 bg-[#d4a94f] hover:bg-amber-600 text-slate-950 font-bold px-3.5 py-2 rounded-xl text-xs sm:text-sm transition shadow">
               <span>➕</span> <span>Adicionar Aluno</span>
+            </button>
+            <button onclick="openUploadModal()" class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs sm:text-sm transition shadow" title="Upload de planilha de inscrições (.xlsx / .csv)">
+              <span>📤</span> <span>Upload Planilha</span>
             </button>
             <button onclick="exportTurmaCSV()" class="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 px-3 py-2 rounded-xl text-xs sm:text-sm transition font-medium" title="Exportar lista atual para planilha CSV/Excel">
               <span>📥</span> <span>Exportar</span>
@@ -2211,7 +2221,7 @@
           <div>
             <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Buscar na Turma</label>
             <div class="relative">
-              <input type="text" id="search-alunos-turma" oninput="renderAlunosTable()" placeholder="Filtrar por nome, contato ou e-mail..." class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-8 pr-3 py-2 text-xs sm:text-sm text-slate-800 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none">
+              <input type="text" id="search-alunos-turma" oninput="renderAlunosTable()" placeholder="Filtrar por nome, CPF, contato, e-mail ou endereço..." class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-8 pr-3 py-2 text-xs sm:text-sm text-slate-800 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none">
               <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
               </div>
@@ -2224,49 +2234,50 @@
         <div id="turma-info-banner" class="bg-indigo-50/60 border border-indigo-200/80 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div class="space-y-1">
             <div class="flex items-center gap-2">
-              <span id="turma-info-badge" class="text-xs font-black uppercase text-indigo-900 bg-indigo-200/80 px-2.5 py-0.5 rounded-full">Turma 07 • Crisma Adultos</span>
-              <span id="turma-info-room" class="text-xs font-semibold text-slate-600">Sala 06 (São Miguel)</span>
+              <span id="turma-info-badge" class="text-xs font-black uppercase text-indigo-900 bg-indigo-200/80 px-2.5 py-0.5 rounded-full">Turma 03 • Crisma Adultos</span>
+              <span id="turma-info-room" class="text-xs font-semibold text-slate-600">Auditório</span>
             </div>
             <p id="turma-info-details" class="text-xs sm:text-sm text-slate-800 font-medium">
-              Catequistas: <strong>Thiago e Thais</strong> • Horário: <strong>Sacramento: 03/12/2026 – 19:30</strong>
+              Catequistas: <strong>Lorena e Natanai</strong> • Horário: <strong>Segunda: 20:00 às 22:00</strong>
             </p>
           </div>
           
-          <!-- Contadores -->
+          <!-- Contadores / KPIs -->
           <div class="flex items-center gap-2 flex-wrap">
             <div class="bg-white border border-indigo-200 px-3 py-1.5 rounded-xl text-center shadow-2xs">
               <div class="text-[10px] uppercase font-bold text-slate-500">Inscritos</div>
-              <div id="kpi-total-alunos" class="text-base font-black text-indigo-950 font-heading">17</div>
+              <div id="kpi-total-alunos" class="text-base font-black text-indigo-950 font-heading">0</div>
             </div>
             <div class="bg-white border border-indigo-200 px-3 py-1.5 rounded-xl text-center shadow-2xs">
-              <div class="text-[10px] uppercase font-bold text-slate-500">Com Documentos</div>
-              <div id="kpi-com-docs" class="text-base font-black text-emerald-700 font-heading">0</div>
+              <div class="text-[10px] uppercase font-bold text-slate-500">Batizados</div>
+              <div id="kpi-batizados" class="text-base font-black text-emerald-700 font-heading">0</div>
             </div>
             <div class="bg-white border border-indigo-200 px-3 py-1.5 rounded-xl text-center shadow-2xs">
-              <div class="text-[10px] uppercase font-bold text-slate-500">Pendências</div>
-              <div id="kpi-pendentes" class="text-base font-black text-rose-700 font-heading">0</div>
+              <div class="text-[10px] uppercase font-bold text-slate-500">1ª Eucaristia</div>
+              <div id="kpi-eucaristia" class="text-base font-black text-indigo-700 font-heading">0</div>
             </div>
           </div>
         </div>
 
       </div>
 
-      <!-- Tabela Principal de Catequizandos -->
+      <!-- Tabela Principal de Catequizandos (Colunas alinhadas com a planilha oficial) -->
       <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs sm:text-sm border-collapse">
             <thead>
               <tr class="bg-slate-900 text-white border-b-2 border-indigo-500">
-                <th class="py-3 px-3.5 font-heading text-center w-12">#</th>
-                <th class="py-3 px-4 font-heading min-w-[200px]">Nome do Catequizando</th>
-                <th class="py-3 px-3 font-heading text-center">Idade</th>
-                <th class="py-3 px-3 font-heading">Contato (WhatsApp)</th>
-                <th class="py-3 px-3 font-heading">E-mail</th>
-                <th class="py-3 px-3 font-heading">Estado Civil</th>
-                <th class="py-3 px-3 font-heading text-center">Batizado</th>
-                <th class="py-3 px-3 font-heading text-center">1ª Eucaristia</th>
-                <th class="py-3 px-4 font-heading min-w-[220px]">Comprovantes (Drive / Status)</th>
-                <th class="py-3 px-3 font-heading text-center no-print">Ações</th>
+                <th class="py-3 px-3 font-heading text-center w-10">#</th>
+                <th class="py-3 px-3.5 font-heading min-w-[190px]">Nome Completo</th>
+                <th class="py-3 px-2.5 font-heading text-center min-w-[110px]">CPF</th>
+                <th class="py-3 px-2.5 font-heading text-center min-w-[95px]">Data Nasc.</th>
+                <th class="py-3 px-3 font-heading min-w-[130px]">Telefone (WhatsApp)</th>
+                <th class="py-3 px-3 font-heading min-w-[160px]">E-mail</th>
+                <th class="py-3 px-3.5 font-heading min-w-[210px]">Endereço</th>
+                <th class="py-3 px-3 font-heading min-w-[150px]">Estado Civil / Afetivo</th>
+                <th class="py-3 px-2.5 font-heading text-center min-w-[85px]">Batizado?</th>
+                <th class="py-3 px-2.5 font-heading text-center min-w-[85px]">1ª Eucaristia?</th>
+                <th class="py-3 px-2.5 font-heading text-center no-print w-16">Ações</th>
               </tr>
             </thead>
             <tbody id="alunos-table-body" class="divide-y divide-slate-100">
@@ -2308,86 +2319,68 @@
               <input type="text" id="aluno-nome" required placeholder="Ex: Maria da Silva" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none font-medium" />
             </div>
 
-            <!-- Idade -->
+            <!-- CPF -->
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Idade</label>
-              <input type="text" id="aluno-idade" placeholder="Ex: 27" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none" />
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">CPF</label>
+              <input type="text" id="aluno-cpf" placeholder="Ex: 000.000.000-00" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none" />
             </div>
 
-            <!-- Contato / WhatsApp -->
+            <!-- Data de Nascimento -->
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Contato (WhatsApp)</label>
-              <input type="text" id="aluno-contato" placeholder="Ex: (61) 98516-6501" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none" />
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Data de Nascimento</label>
+              <input type="text" id="aluno-nasc" placeholder="Ex: DD/MM/AAAA" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none" />
+            </div>
+
+            <!-- Telefone / WhatsApp -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Telefone (WhatsApp)</label>
+              <input type="text" id="aluno-contato" placeholder="Ex: (61) 99999-9999" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none" />
             </div>
 
             <!-- E-mail -->
-            <div class="sm:col-span-2">
+            <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Endereço de E-mail</label>
               <input type="email" id="aluno-email" placeholder="Ex: catequizando@email.com" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none" />
             </div>
 
-            <!-- Estado Civil -->
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Estado Civil</label>
-              <input type="text" id="aluno-estado-civil" placeholder="Ex: Solteiro, Casado na Igreja..." class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none" />
+            <!-- Endereço -->
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Endereço Completo</label>
+              <input type="text" id="aluno-endereco" placeholder="Ex: Quadra 101, Águas Claras - DF" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none" />
+            </div>
+
+            <!-- Estado Civil / Afetivo -->
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Estado Civil / Afetivo</label>
+              <input type="text" id="aluno-estado-civil" placeholder="Ex: Solteiro, Casado na Igreja Católica, União Estável..." class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none" />
             </div>
 
             <!-- Batizado -->
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Batizado na Igreja Católica?</label>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">É Batizado na Igreja Católica?</label>
               <select id="aluno-batizado" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none">
                 <option value="">(Não informado)</option>
+                <option value="Sim, na Igreja Católica">Sim, na Igreja Católica</option>
                 <option value="Sim">Sim</option>
                 <option value="Não">Não</option>
-                <option value="Batizado">Batizado</option>
+                <option value="Outros">Outros</option>
               </select>
             </div>
 
             <!-- Primeira Eucaristia -->
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Fez a 1ª Eucaristia?</label>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Tem 1ª Eucaristia?</label>
               <select id="aluno-eucaristia" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none">
                 <option value="">(Não informado)</option>
                 <option value="Sim">Sim</option>
                 <option value="Não">Não</option>
-                <option value="Primeira Eucaristia">Primeira Eucaristia</option>
               </select>
-            </div>
-
-            <!-- Comprovante de Batismo -->
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Comprovante de Batismo</label>
-              <input type="text" id="aluno-comp-batismo" placeholder="Link Google Drive ou 'DEVE'" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none" />
-            </div>
-
-            <!-- Comprovante de Primeira Eucaristia -->
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Comprovante de 1ª Eucaristia</label>
-              <input type="text" id="aluno-comp-eucaristia" placeholder="Link Google Drive ou 'DEVE'" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none" />
-            </div>
-
-            <!-- Comprovante de Matrimônio -->
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Comprovante de Matrimônio</label>
-              <input type="text" id="aluno-comp-matrimonio" placeholder="Link Google Drive ou 'DEVE'" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none" />
-            </div>
-
-            <!-- Documento de Identificação -->
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Documento de Identificação (RG/CNH)</label>
-              <input type="text" id="aluno-doc-identificacao" placeholder="Link Google Drive ou status" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none" />
-            </div>
-
-            <!-- Comprovante de Pagamento -->
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Comprovante de Pagamento</label>
-              <input type="text" id="aluno-comp-pagamento" placeholder="Link Google Drive ou status" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none" />
             </div>
 
             <!-- Observações -->
             <div class="sm:col-span-2">
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Observações e Pendências</label>
-              <textarea id="aluno-obs" rows="2" placeholder="Observações pastorais ou anotações..." class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none"></textarea>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Observações e Anotações Pastorais</label>
+              <textarea id="aluno-obs" rows="2" placeholder="Anotações pastorais, padrinhos, pendências..." class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none"></textarea>
             </div>
 
           </div>
@@ -2403,6 +2396,91 @@
           </div>
 
         </form>
+
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL: UPLOAD DE PLANILHA (XLSX / CSV)     -->
+    <!-- ========================================== -->
+    <div id="modal-upload-planilha" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+      <div class="bg-white w-full max-w-xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-8">
+        
+        <div class="bg-gradient-to-r from-emerald-900 to-teal-950 text-white p-5 sm:p-6 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">📤</span>
+            <div>
+              <h3 class="text-lg sm:text-xl font-bold font-heading">Importar Planilha de Inscrição</h3>
+              <p class="text-xs text-emerald-200">Importe arquivos .xlsx ou .csv com mapeamento automático de colunas</p>
+            </div>
+          </div>
+          <button onclick="closeUploadModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
+        </div>
+
+        <div class="p-5 sm:p-6 space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Selecione o arquivo (.xlsx ou .csv)</label>
+            <input type="file" id="upload-file-input" accept=".xlsx,.xls,.csv" onchange="handleFileSelect(event)" class="w-full border border-dashed border-slate-300 rounded-xl p-3 bg-slate-50 text-sm focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer" />
+          </div>
+
+          <!-- Seletor de Aba (se houver mais de uma) -->
+          <div id="upload-sheet-select-container" class="hidden">
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Aba da Planilha</label>
+            <select id="upload-sheet-select" onchange="handleSheetSelect(this.value)" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs sm:text-sm bg-slate-50 font-semibold text-slate-800 outline-none">
+            </select>
+          </div>
+
+          <!-- Turma Destino -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Turma de Destino</label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <select id="upload-target-etapa" onchange="updateUploadTargetTurmas()" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold bg-slate-50 outline-none">
+                <option value="Pré Eucaristia">Pré Eucaristia</option>
+                <option value="Eucaristia I">Eucaristia I</option>
+                <option value="Eucaristia II">Eucaristia II</option>
+                <option value="Perseverança">Perseverança</option>
+                <option value="Crisma Jovem">Crisma Jovem</option>
+                <option value="Crisma Adultos" selected>Crisma Adultos</option>
+              </select>
+              <select id="upload-target-turma" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold bg-slate-50 outline-none">
+              </select>
+            </div>
+          </div>
+
+          <!-- Modo de Importação -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Modo de Importação</label>
+            <div class="space-y-1 text-xs text-slate-700">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="upload-mode" value="replace" checked class="text-emerald-600 focus:ring-emerald-500">
+                <span><strong>Substituir lista existente</strong> da turma pelos dados da planilha</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="upload-mode" value="append" class="text-emerald-600 focus:ring-emerald-500">
+                <span><strong>Adicionar / Mesclar</strong> aos catequizandos já cadastrados</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Preview da Importação -->
+          <div id="upload-preview" class="hidden bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs space-y-2">
+            <div class="flex items-center justify-between font-bold text-slate-800">
+              <span id="upload-preview-title">Preview dos Dados</span>
+              <span id="upload-preview-count" class="text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full text-[10px]">0 registros</span>
+            </div>
+            <div class="text-slate-600 max-h-36 overflow-y-auto space-y-1 font-mono text-[11px] bg-white p-2 rounded-lg border border-slate-200" id="upload-preview-list"></div>
+          </div>
+
+          <!-- Footer Buttons -->
+          <div class="pt-3 border-t border-slate-200 flex items-center justify-end gap-2">
+            <button type="button" onclick="closeUploadModal()" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-100 transition">
+              Cancelar
+            </button>
+            <button type="button" id="btn-confirm-upload" onclick="executeUploadImport()" disabled class="bg-emerald-600 disabled:bg-slate-300 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-xs sm:text-sm font-bold shadow transition">
+              Importar Catequizandos
+            </button>
+          </div>
+        </div>
 
       </div>
     </div>
@@ -3781,35 +3859,1143 @@
 
     // =============================================
     // CATEQUIZANDOS & TURMAS — GESTÃO E LISTAS
-    // Suporte ao schema do Excel e links Google Drive
+    // Suporte ao schema oficial do Excel e Upload
     // =============================================
-    const STORAGE_KEY_ALUNOS = 'catequese_turmas_alunos_v2';
+    const STORAGE_KEY_ALUNOS = 'catequese_turmas_alunos_v3';
 
-    // Seed com os 17 catequizandos da turma de Crisma Adultos - Thiago e Thais (campos em branco exceto nome)
+    // Seed com turmas de Crisma Adultos (Turma 03 - Lorena, Turma 04 - Lourival, Turma 07 - Thiago e Thais)
     const SEED_ALUNOS_DATABASE = {
+      "Crisma Adultos__Turma 03": [
+            {
+                  "id": "ca3-1",
+                  "nome": "Ana Paula de Moura - Dizimista",
+                  "cpf": "81894589149",
+                  "dataNascimento": "21/01/1976",
+                  "contato": "(61)996299611",
+                  "email": "paula.moura.df@gmail.com",
+                  "endereco": "Rua 37 Norte, Lote 4, Apartamento 401, Residencial Cincinatti,Águas Claras",
+                  "estadoCivil": "Solteira (vive com um namorado que virou amigo)",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-2",
+                  "nome": "André Ribeiro dos Santos",
+                  "cpf": "902991751-20",
+                  "dataNascimento": "10/04/1980",
+                  "contato": "(61)981598666",
+                  "email": "dr.andreribeiro@hotmail.com",
+                  "endereco": "Rua 21 norte lote 01 - ap.1402 / ed.Le Grand Valle.",
+                  "estadoCivil": "Solteiro (sem vida marital)",
+                  "batizado": "Não",
+                  "primeiraEucaristia": "Não",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-3",
+                  "nome": "Anna Aimée Codeço - Dizimista",
+                  "cpf": "29482757-92",
+                  "dataNascimento": "20/08/1978",
+                  "contato": "(61)984267044",
+                  "email": "annacodeco@gmail.com",
+                  "endereco": "Rua 12 Sul, Bloco B, apto 101 Residencial Sonho Verde",
+                  "estadoCivil": "Casado na Igreja Católica",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-4",
+                  "nome": "Antonio Carlos da Silva",
+                  "cpf": "423067101-63",
+                  "dataNascimento": "08/09/1967",
+                  "contato": "(61)992500300",
+                  "email": "samantaranielleo@gmail.com",
+                  "endereco": "SHA CONJ.06 CHÁCARA 10A CASA 23 CONDOMÍNIO RECANTO DAS ORQUÍDEAS",
+                  "estadoCivil": "Casado na Igreja Católica",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Não",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-5",
+                  "nome": "Brenno Pinheiro Pinto",
+                  "cpf": "30977711-90",
+                  "dataNascimento": "18/09/1990",
+                  "contato": "(31)993234956",
+                  "email": "brenno.adm@gmail.com",
+                  "endereco": "Rua das Figueiras, lote 02, apt 1512, Figueiras Residence & Mall, Águas Claras, Brasília/DF",
+                  "estadoCivil": "União estável (nenhum dos dois contraiu matrimônio anteriormente)",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-6",
+                  "nome": "Caio Henrique Braga da Silva",
+                  "cpf": "043263371-50",
+                  "dataNascimento": "20/02/1992",
+                  "contato": "(61)986451448",
+                  "email": "williana.soares@gmail.com",
+                  "endereco": "Quadra 14 lote 07 casa 02 vargem bonita",
+                  "estadoCivil": "Casado civil (nenhum dos dois contraiu matrimônio anteriormente)",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Não",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-7",
+                  "nome": "Camila Santos Corrêa",
+                  "cpf": "126583397-47",
+                  "dataNascimento": "20/11/1988",
+                  "contato": "(21)982094788",
+                  "email": "milacorrrea@hotmail.com",
+                  "endereco": "Rua 7 Norte, 5 apt 1911B",
+                  "estadoCivil": "Casamento marcado para agosto de 2027 - EPVM pendente",
+                  "batizado": "Outros (igreja brasileira)",
+                  "primeiraEucaristia": "Não",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-8",
+                  "nome": "Cosme Wanderson Martins",
+                  "cpf": "5537741-66",
+                  "dataNascimento": "05/07/1984",
+                  "contato": "(61)995786080",
+                  "email": "andersonjoseinvestimentosjose1984@gmail.com",
+                  "endereco": "End: Avenida Sibipiruna, 810 UBNL - Urbanlife, Apto: 810, BL: A, Sul (Águas Claras)",
+                  "estadoCivil": "Solteiro (sem vida marital)",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Não",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-9",
+                  "nome": "Daniel Gouvea Costa",
+                  "cpf": "131364917-18",
+                  "dataNascimento": "06/07/1990",
+                  "contato": "(21)991518310",
+                  "email": "danielgouvea2006@gmail.com",
+                  "endereco": "Quadra 208, lote 3 , apt 404 - Águas Claras",
+                  "estadoCivil": "Casado na Igreja Católica",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Não",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-10",
+                  "nome": "Denise Jardim Costa",
+                  "cpf": "951891901-10",
+                  "dataNascimento": "03/06/1982",
+                  "contato": "(61)992260514",
+                  "email": "denisejardim1@hotmail.com",
+                  "endereco": "Av pau brasil res pau brasil qd 207 lt 18 ap 2301 bl A",
+                  "estadoCivil": "Casado na Igreja Católica",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-11",
+                  "nome": "Eric Jean Gonçalves Dias",
+                  "cpf": "264281738-59",
+                  "dataNascimento": "23/11/1977",
+                  "contato": "(61)983094410",
+                  "email": "jeanodontologo@gmail.com",
+                  "endereco": "Avenida Jacarandá , lote 14, Bloco B, Apt 1406",
+                  "estadoCivil": "Casado na Igreja Católica",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Não",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-12",
+                  "nome": "Fabiana de Siqueira Dias",
+                  "cpf": "658413101-78",
+                  "dataNascimento": "12/11/1974",
+                  "contato": "(61)99978-8424",
+                  "email": "fabianasiqueiradias@gmail.com",
+                  "endereco": "SHA Quadra 10 conjunto 02 casa 26B",
+                  "estadoCivil": "Casado na Igreja Católica",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-13",
+                  "nome": "Felipe Araujo Oliveira",
+                  "cpf": "750058081-91",
+                  "dataNascimento": "05/03/1990",
+                  "contato": "(61)991330822",
+                  "email": "felipeeaoliveira@gmail.com",
+                  "endereco": "Qi 12 Bloco T apartamento 207 - Guara 1",
+                  "estadoCivil": "Solteiro (sem vida marital)",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-14",
+                  "nome": "Felipe Nascimento Maia",
+                  "cpf": "133499957-05",
+                  "dataNascimento": "14/07/1989",
+                  "contato": "(21)982835398",
+                  "email": "felipenmaia@hotmail.com",
+                  "endereco": "Rua 3 Norte, 3 Apt 503B - Águas Claras",
+                  "estadoCivil": "Casamento marcado para agosto de 2027 - EPVM pendente",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-15",
+                  "nome": "Franciralves Luduina Araujo Costa Costa - Dizimista",
+                  "cpf": "658970561-53",
+                  "dataNascimento": "27/07/1971",
+                  "contato": "(61)991110278",
+                  "email": "franci.costa71@gmail.com",
+                  "endereco": "Rua das figueiras 05 torre B apto 1806",
+                  "estadoCivil": "Divorciada (casada na Igreja Católica)",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-16",
+                  "nome": "Hanah Karine Hilario do Nascimento",
+                  "cpf": "715750141-49",
+                  "dataNascimento": "22/07/1980",
+                  "contato": "(61)999515571",
+                  "email": "hanahnascimentoferreira1004@gmail.com",
+                  "endereco": "Alameda Gravatá Quadra 301 Conjunto 18 Lotes 4/6 Apto 501 Edifício Beatriz Águas Claras Brasília/DF CEP: 71.901-290",
+                  "estadoCivil": "Casado na Igreja Católica",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-17",
+                  "nome": "Jordana de Assis Silva",
+                  "cpf": "004336381-41",
+                  "dataNascimento": "15/11/1989",
+                  "contato": "(61)984277151",
+                  "email": "jordanaa.assis@gmail.com",
+                  "endereco": "Rua 04 Norte Lote 04",
+                  "estadoCivil": "Solteira (sem vida marital)",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Não",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-18",
+                  "nome": "Leandro Ciabotti Costa",
+                  "cpf": "042753276-08",
+                  "dataNascimento": "11/05/1978",
+                  "contato": "(61)992901555",
+                  "email": "leciabotti@gmail.com",
+                  "endereco": "Quadra 102 Lote 08 apto 303",
+                  "estadoCivil": "Casado na Igreja Católica",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-19",
+                  "nome": "Lucélia Rodrigues Barbosa Kuzma",
+                  "cpf": "888842791-00",
+                  "dataNascimento": "23/01/1981",
+                  "contato": "(41)987028485",
+                  "email": "luceliabarbosa25@gmail.com",
+                  "endereco": "Rua das carnaúbas n 12 bloco 9 apt 1101",
+                  "estadoCivil": "Casada civil (processo de divórcio / ela não contraiu matrimônio anteriormente)",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-20",
+                  "nome": "Marina Nunes Sales Vidal - Ouvinte",
+                  "cpf": "041372831-50",
+                  "dataNascimento": "17/06/1997",
+                  "contato": "‪(61)981186828‬",
+                  "email": "marinavidal_17@hotmail.com",
+                  "endereco": "Araucárias 1525 ap 1202 residencial metrópole águas claras DF",
+                  "estadoCivil": "Solteira (sem vida marital)",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-21",
+                  "nome": "Nathalia Silva Barbosa",
+                  "cpf": "042808321-88",
+                  "dataNascimento": "27/10/1992",
+                  "contato": "(61)985443152",
+                  "email": "nathaliasesdf@gmail.com",
+                  "endereco": "Avenida parque águas claras Lt 25 ap 1302",
+                  "estadoCivil": "Solteira (sem vida marital)",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-22",
+                  "nome": "Patricia de Siqueira Pinto",
+                  "cpf": "779238631-72",
+                  "dataNascimento": "08/10/1976",
+                  "contato": "(61)996544907",
+                  "email": "psp.paty@gmail.com",
+                  "endereco": "Qd 102 lote 6 bl a apt 504 águas claras",
+                  "estadoCivil": "Solteira (divorciada - casado civil / ele não contraiu matrimônio anteriormente)",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-23",
+                  "nome": "Paulo Ricardo Araújo Martins",
+                  "cpf": "030160981-05",
+                  "dataNascimento": "07/12/1988",
+                  "contato": "(61)99749355",
+                  "email": "ricardoaraujo.pr@gmail.com",
+                  "endereco": "SHA CONJUNTO 04 CHÁCARA 09 CONDOMÍNIO REAL CASA 04A ARNIQUEIRA DF",
+                  "estadoCivil": "Casado na Igreja Católica",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-24",
+                  "nome": "Priscila Dias Rocha de Araujo",
+                  "cpf": "001117551-66",
+                  "dataNascimento": "04/10/1983",
+                  "contato": "(61)981242482",
+                  "email": "pri_ucb@yahoo.com.br",
+                  "endereco": "Rua 17 Norte, Lt. 03, Apt. 1308",
+                  "estadoCivil": "Casado na Igreja Católica",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Não",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-25",
+                  "nome": "Rafaela Farias Pinto",
+                  "cpf": "68535061-46",
+                  "dataNascimento": "11/01/1999",
+                  "contato": "(61)83590390",
+                  "email": "rafafariasfarias.99@gmail.com",
+                  "endereco": "Qs 05 rua 300 lote 34 Areal",
+                  "estadoCivil": "Solteiro",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Não",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-26",
+                  "nome": "Simone Morais Ximenes Aguiar",
+                  "cpf": "815800611-68",
+                  "dataNascimento": "19/10/1977",
+                  "contato": "(61)999059326",
+                  "email": "SIMONEP2004@HOTMAIL.COM",
+                  "endereco": "QI 24 TOP LIFE - TAGUATINGA",
+                  "estadoCivil": "Casamento marcado para 2027 - EPVM OK",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-27",
+                  "nome": "Thiago Lima Queiroz de Araujo",
+                  "cpf": "994263821-00",
+                  "dataNascimento": "12/04/1983",
+                  "contato": "(61)981491897",
+                  "email": "thiagolqa@gmail.com",
+                  "endereco": "Rua 17 Norte, Lt 03, apt 1308",
+                  "estadoCivil": "Casado na Igreja Católica",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-28",
+                  "nome": "Valter Tayson Rodrigues de Assis",
+                  "cpf": "886491802-72",
+                  "dataNascimento": "07/08/1990",
+                  "contato": "(61)984006761",
+                  "email": "taysontk.0@gmail.com",
+                  "endereco": "Rua 5 sul lote 5 apto 706",
+                  "estadoCivil": "Casado na Igreja Católica",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-29",
+                  "nome": "Wysy Yanne Nobre Saraiva",
+                  "cpf": "012684473-90",
+                  "dataNascimento": "23/01/1985",
+                  "contato": "(61)982373638",
+                  "email": "yannenobre@hotmail.com",
+                  "endereco": "SHA conj. 4 Chác. 25/1 casa 7-A",
+                  "estadoCivil": "União estável (cônjuge já foi casado na Igreja Católica e não tem processo de nulidade em andamento)",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Não",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-30",
+                  "nome": "Fabíola Maeda de Araújo Diniz",
+                  "cpf": "97693626-70",
+                  "dataNascimento": "29/12/1988",
+                  "contato": "(61)983461064",
+                  "email": "fabiola.maeda@hotmail.com",
+                  "endereco": "SHVP Quadra 01 Conjunto 04 Casa 10B Residencial Costa Verde",
+                  "estadoCivil": "Casado na Igreja Católica",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca3-31",
+                  "nome": "Flávia Elias Ferreira",
+                  "cpf": "25659911-42",
+                  "dataNascimento": "28/02/1987",
+                  "contato": "(61)984451242",
+                  "email": "flaviaeliasferreira@gmail.com",
+                  "endereco": "Rua 10 Ch 318 lt 18B apt 106 residencial Viva Bella Vicente Pires",
+                  "estadoCivil": "Solteiro",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Não",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            }
+      ],
+      "Crisma Adultos__Turma 04": [
+            {
+                  "id": "ca4-1",
+                  "nome": "Luiz Paulo Ribeiro Sales Lima",
+                  "cpf": "20113771-29",
+                  "dataNascimento": "03/06/2002",
+                  "contato": "(61)991189129",
+                  "email": "lpl.lima02@gmail.com",
+                  "endereco": "Quadra 101, Lt 07, Cond Spazio Bella Vita, Bloco C, Apt 803, Águas Claras Norte",
+                  "estadoCivil": "Solteiro",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca4-2",
+                  "nome": "Murilo Munhoz de Souza",
+                  "cpf": "386496658-29",
+                  "dataNascimento": "17/07/1994",
+                  "contato": "(13)991422442",
+                  "email": "murilo_munhozz@hotmail.com",
+                  "endereco": "Avenida das araucárias, 4150, apto 1417A",
+                  "estadoCivil": "Solteiro",
+                  "batizado": "Não",
+                  "primeiraEucaristia": "Não",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca4-3",
+                  "nome": "Camila Ohrana Soares de Sousa",
+                  "cpf": "50133661-35",
+                  "dataNascimento": "10/09/1992",
+                  "contato": "(61)991338498",
+                  "email": "camilaohranasoares@gmail.com",
+                  "endereco": "Rua 5 Sul, lote 6 apto Apto 406 - Dalmo Rebello",
+                  "estadoCivil": "Casado no civil",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca4-4",
+                  "nome": "Giulia Costa Rocha",
+                  "cpf": "53002601-50",
+                  "dataNascimento": "08/08/2006",
+                  "contato": "(61)999849952",
+                  "email": "giuliacr08@gmail.com",
+                  "endereco": "Quadra 106, lote 3, Ed. Giardino Michelângelo",
+                  "estadoCivil": "Solteiro",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca4-5",
+                  "nome": "Louise Helena Gomes Rocha",
+                  "cpf": "486321448-04",
+                  "dataNascimento": "24/02/2003",
+                  "contato": "(61)991972832",
+                  "email": "louisehgomesrocha0@gmail.com",
+                  "endereco": "Av. Pau Brasil Lote 18 - Residencial Pau Brasil 302A",
+                  "estadoCivil": "Solteiro",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca4-6",
+                  "nome": "Lucas Gomes Aragão e Vasconcelos",
+                  "cpf": "63611171-70",
+                  "dataNascimento": "27/05/1999",
+                  "contato": "(61)982140770",
+                  "email": "lucasvasconcelos2705@gmail.com",
+                  "endereco": "rua 21 sul, lote 11",
+                  "estadoCivil": "Solteiro",
+                  "batizado": "Não",
+                  "primeiraEucaristia": "Não",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca4-7",
+                  "nome": "Carlos Matheus Lima Pereira",
+                  "cpf": "166023807-29",
+                  "dataNascimento": "15/02/1996",
+                  "contato": "(21)964952956",
+                  "email": "cmatheuslima96@gmail.com",
+                  "endereco": "Avenida sibipiruna 11 smart residence 2302 B",
+                  "estadoCivil": "Casado no civil",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca4-8",
+                  "nome": "Álvaro de Almeida Ventura",
+                  "cpf": "65396971-63",
+                  "dataNascimento": "08/11/1998",
+                  "contato": "(61)996894303",
+                  "email": "alvaroventura1998@gmail.com",
+                  "endereco": "qe 26 conj q 22",
+                  "estadoCivil": "União estável (mora junto com o cônjuge, sem formalização)",
+                  "batizado": "Não",
+                  "primeiraEucaristia": "Não",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca4-9",
+                  "nome": "Luiza Pacheco Lopes",
+                  "cpf": "58710891-60",
+                  "dataNascimento": "26/12/2001",
+                  "contato": "(61)982244804",
+                  "email": "luizaplsoares@gmail.com",
+                  "endereco": "SHA CONJUNTO 06 CHACARA 23 CASA 03",
+                  "estadoCivil": "Solteiro",
+                  "batizado": "Não",
+                  "primeiraEucaristia": "Não",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca4-10",
+                  "nome": "Vitor de Castro Nobre",
+                  "cpf": "44856161-18",
+                  "dataNascimento": "28/06/1994",
+                  "contato": "(61)999528315",
+                  "email": "vitnobre@gmail.com",
+                  "endereco": "Reserva Parque Clube Torre 08 Ap 208",
+                  "estadoCivil": "União estável (mora junto com o cônjuge, sem formalização)",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca4-11",
+                  "nome": "Kamila Azevedo klier",
+                  "cpf": "53975841-85",
+                  "dataNascimento": "10/07/1997",
+                  "contato": "(61)984034454",
+                  "email": "klierkamila@gmail.com",
+                  "endereco": "Avenida sibipiruna 11 smart residence 2302 B",
+                  "estadoCivil": "Casado no civil",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca4-12",
+                  "nome": "Júlia Leite Isidoro Silva",
+                  "cpf": "65398521-50",
+                  "dataNascimento": "23/01/2007",
+                  "contato": "(61)991219070",
+                  "email": "julialeiteisidoro@gmail.com",
+                  "endereco": "quadra 203, lote 10, residencial Florence, Águas Claras -DF",
+                  "estadoCivil": "Solteiro",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca4-13",
+                  "nome": "Rafaela Cristina Monteiro Pereira",
+                  "cpf": "37809071-27",
+                  "dataNascimento": "07/02/1997",
+                  "contato": "(62)992490737",
+                  "email": "rafapessoal97@gmail.com",
+                  "endereco": "Quadra 101 lote 06 ap 604 c Spazio Bella Vita",
+                  "estadoCivil": "Solteiro",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca4-14",
+                  "nome": "Anna Júlia Alves Mendonça",
+                  "cpf": "91548561-32",
+                  "dataNascimento": "04/10/2006",
+                  "contato": "(62)985801268",
+                  "email": "annajuh6002@gmail.com",
+                  "endereco": "Qs 07 Rua 820, Águas Claras (Areal)",
+                  "estadoCivil": "Solteiro",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca4-15",
+                  "nome": "Gabriel de Oliveira Matos",
+                  "cpf": "44360361-89",
+                  "dataNascimento": "24/04/2004",
+                  "contato": "(61)998785672",
+                  "email": "gabrieldoliveira.matos@gmail.com",
+                  "endereco": "Águas claras, Rua 14 Norte, residencial supremo, apto 103B",
+                  "estadoCivil": "Solteiro",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Não",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca4-16",
+                  "nome": "Mariana de Oliveira Matos",
+                  "cpf": "44360001-50",
+                  "dataNascimento": "21/06/1999",
+                  "contato": "(61)991397246",
+                  "email": "marianamatos123@gmail.com",
+                  "endereco": "Rua 14 Norte lote 01 residencial supremo apt 103B",
+                  "estadoCivil": "Solteiro",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca4-17",
+                  "nome": "Gabriel de Oliveira Matos",
+                  "cpf": "44360361-89",
+                  "dataNascimento": "10/04/2004",
+                  "contato": "(61)998785672",
+                  "email": "gabrieldoliveira.matos@gmail.com",
+                  "endereco": "Águas Claras, Rua 14 Norte, Supremo Residencial",
+                  "estadoCivil": "Solteiro",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Não",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca4-18",
+                  "nome": "Kamila Braga da Silva",
+                  "cpf": "71745091-00",
+                  "dataNascimento": "16/10/2008",
+                  "contato": "(61)998388296",
+                  "email": "kamilabragadasilva0@gmail.com",
+                  "endereco": "SHA CONJUNTO 6 CHÁCARA 427B casa 5 Arniqueiras Df",
+                  "estadoCivil": "Solteiro",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Não",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca4-19",
+                  "nome": "Maria eduarda tartuce",
+                  "cpf": "33781991-21",
+                  "dataNascimento": "05/08/2026",
+                  "contato": "(61)981264790",
+                  "email": "duda.tartuce@gmail.com",
+                  "endereco": "Shvp rua 1 chacara 12 b casa 02",
+                  "estadoCivil": "Solteiro",
+                  "batizado": "Sim, na Igreja Católica",
+                  "primeiraEucaristia": "Sim",
+                  "comprovanteBatismo": "",
+                  "comprovanteEucaristia": "",
+                  "comprovanteMatrimonio": "",
+                  "docIdentificacao": "",
+                  "comprovantePagamento": "",
+                  "observacoes": ""
+            }
+      ],
       "Crisma Adultos__Turma 07": [
-        { id: "ca7-1", nome: "Alanis Mariano Menezes", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
-        { id: "ca7-2", nome: "Ana Cristina da Conceição Leão", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
-        { id: "ca7-3", nome: "Arthur Silva Carneiro", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
-        { id: "ca7-4", nome: "Bianca Manzi Campos de O. Pereira", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
-        { id: "ca7-5", nome: "Carolina Mendonça Costa", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
-        { id: "ca7-6", nome: "Giovanna Brandão de Oliveira Santos", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
-        { id: "ca7-7", nome: "José Gabriel Braga de Souza", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
-        { id: "ca7-8", nome: "Kesia Carolina de Sousa Castro Gontijo", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
-        { id: "ca7-9", nome: "Kelleny Alves Moreira", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
-        { id: "ca7-10", nome: "LUCELIA SUMIHARA DOS REIS", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
-        { id: "ca7-11", nome: "Márcia Frederica de Jesus de Melo", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
-        { id: "ca7-12", nome: "MARIA EDICLECIA DE ALMEIDA GUERRA MENEZES", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
-        { id: "ca7-13", nome: "Murilo Borges Nery", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
-        { id: "ca7-14", nome: "Nathiara Uisieli da Costa Seixas Savi", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
-        { id: "ca7-15", nome: "PEDRO HENRIQUE SOARES LIMA", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
-        { id: "ca7-16", nome: "Rayanne Guttierre de Melo", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" },
-        { id: "ca7-17", nome: "Rodrigo de Abreu Inácio", idade: "", contato: "", email: "", estadoCivil: "", batizado: "", comprovanteBatismo: "", primeiraEucaristia: "", comprovanteEucaristia: "", comprovanteMatrimonio: "", docIdentificacao: "", comprovantePagamento: "", observacoes: "" }
+            {
+                  "id": "ca7-1",
+                  "nome": "Alanis Mariano Menezes",
+                  "cpf": "",
+                  "dataNascimento": "",
+                  "contato": "",
+                  "email": "",
+                  "endereco": "",
+                  "estadoCivil": "",
+                  "batizado": "",
+                  "primeiraEucaristia": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca7-2",
+                  "nome": "Ana Cristina da Conceição Leão",
+                  "cpf": "",
+                  "dataNascimento": "",
+                  "contato": "",
+                  "email": "",
+                  "endereco": "",
+                  "estadoCivil": "",
+                  "batizado": "",
+                  "primeiraEucaristia": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca7-3",
+                  "nome": "Arthur Silva Carneiro",
+                  "cpf": "",
+                  "dataNascimento": "",
+                  "contato": "",
+                  "email": "",
+                  "endereco": "",
+                  "estadoCivil": "",
+                  "batizado": "",
+                  "primeiraEucaristia": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca7-4",
+                  "nome": "Bianca Manzi Campos de O. Pereira",
+                  "cpf": "",
+                  "dataNascimento": "",
+                  "contato": "",
+                  "email": "",
+                  "endereco": "",
+                  "estadoCivil": "",
+                  "batizado": "",
+                  "primeiraEucaristia": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca7-5",
+                  "nome": "Carolina Mendonça Costa",
+                  "cpf": "",
+                  "dataNascimento": "",
+                  "contato": "",
+                  "email": "",
+                  "endereco": "",
+                  "estadoCivil": "",
+                  "batizado": "",
+                  "primeiraEucaristia": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca7-6",
+                  "nome": "Giovanna Brandão de Oliveira Santos",
+                  "cpf": "",
+                  "dataNascimento": "",
+                  "contato": "",
+                  "email": "",
+                  "endereco": "",
+                  "estadoCivil": "",
+                  "batizado": "",
+                  "primeiraEucaristia": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca7-7",
+                  "nome": "José Gabriel Braga de Souza",
+                  "cpf": "",
+                  "dataNascimento": "",
+                  "contato": "",
+                  "email": "",
+                  "endereco": "",
+                  "estadoCivil": "",
+                  "batizado": "",
+                  "primeiraEucaristia": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca7-8",
+                  "nome": "Kesia Carolina de Sousa Castro Gontijo",
+                  "cpf": "",
+                  "dataNascimento": "",
+                  "contato": "",
+                  "email": "",
+                  "endereco": "",
+                  "estadoCivil": "",
+                  "batizado": "",
+                  "primeiraEucaristia": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca7-9",
+                  "nome": "Kelleny Alves Moreira",
+                  "cpf": "",
+                  "dataNascimento": "",
+                  "contato": "",
+                  "email": "",
+                  "endereco": "",
+                  "estadoCivil": "",
+                  "batizado": "",
+                  "primeiraEucaristia": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca7-10",
+                  "nome": "LUCELIA SUMIHARA DOS REIS",
+                  "cpf": "",
+                  "dataNascimento": "",
+                  "contato": "",
+                  "email": "",
+                  "endereco": "",
+                  "estadoCivil": "",
+                  "batizado": "",
+                  "primeiraEucaristia": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca7-11",
+                  "nome": "Márcia Frederica de Jesus de Melo",
+                  "cpf": "",
+                  "dataNascimento": "",
+                  "contato": "",
+                  "email": "",
+                  "endereco": "",
+                  "estadoCivil": "",
+                  "batizado": "",
+                  "primeiraEucaristia": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca7-12",
+                  "nome": "MARIA EDICLECIA DE ALMEIDA GUERRA MENEZES",
+                  "cpf": "",
+                  "dataNascimento": "",
+                  "contato": "",
+                  "email": "",
+                  "endereco": "",
+                  "estadoCivil": "",
+                  "batizado": "",
+                  "primeiraEucaristia": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca7-13",
+                  "nome": "Murilo Borges Nery",
+                  "cpf": "",
+                  "dataNascimento": "",
+                  "contato": "",
+                  "email": "",
+                  "endereco": "",
+                  "estadoCivil": "",
+                  "batizado": "",
+                  "primeiraEucaristia": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca7-14",
+                  "nome": "Nathiara Uisieli da Costa Seixas Savi",
+                  "cpf": "",
+                  "dataNascimento": "",
+                  "contato": "",
+                  "email": "",
+                  "endereco": "",
+                  "estadoCivil": "",
+                  "batizado": "",
+                  "primeiraEucaristia": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca7-15",
+                  "nome": "PEDRO HENRIQUE SOARES LIMA",
+                  "cpf": "",
+                  "dataNascimento": "",
+                  "contato": "",
+                  "email": "",
+                  "endereco": "",
+                  "estadoCivil": "",
+                  "batizado": "",
+                  "primeiraEucaristia": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca7-16",
+                  "nome": "Rayanne Guttierre de Melo",
+                  "cpf": "",
+                  "dataNascimento": "",
+                  "contato": "",
+                  "email": "",
+                  "endereco": "",
+                  "estadoCivil": "",
+                  "batizado": "",
+                  "primeiraEucaristia": "",
+                  "observacoes": ""
+            },
+            {
+                  "id": "ca7-17",
+                  "nome": "Rodrigo de Abreu Inácio",
+                  "cpf": "",
+                  "dataNascimento": "",
+                  "contato": "",
+                  "email": "",
+                  "endereco": "",
+                  "estadoCivil": "",
+                  "batizado": "",
+                  "primeiraEucaristia": "",
+                  "observacoes": ""
+            }
       ]
-    };
+};
 
     let currentAlunosEtapa = 'Crisma Adultos';
-    let currentAlunosTurma = 'Turma 07';
+    let currentAlunosTurma = 'Turma 03';
 
     function getAlunosDatabase() {
       try {
@@ -3895,24 +5081,6 @@
       populateTurmasSelect(etapa, turma);
     }
 
-    function _renderDocBadge(label, val) {
-      if (!val || val.trim() === '') return '';
-      const v = val.trim();
-      if (v.startsWith('http://') || v.startsWith('https://')) {
-        const isDrive = v.includes('drive.google.com') || v.includes('docs.google.com');
-        return `
-          <a href="${v}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-1.5 py-0.5 rounded transition" title="${label}: Ver Documento no Drive">
-            ${isDrive ? '<svg class="w-3 h-3 text-blue-600" viewBox="0 0 24 24" fill="currentColor"><path d="M7.71 3.5L1.15 15l3.43 6 6.55-11.5L7.71 3.5zm3.43 0l6.56 11.5h6.86L18 3.5h-6.86zm1.14 12.5l-3.43 6h13.72l3.43-6H12.28z"/></svg>' : '🔗'}
-            <span>${label}</span>
-          </a>
-        `;
-      }
-      if (v.toUpperCase() === 'DEVE' || v.toUpperCase().includes('PENDENTE')) {
-        return `<span class="inline-flex items-center text-[9px] font-black uppercase text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded" title="${label}: Pendente / Não entregue">⚠️ ${label}: DEVE</span>`;
-      }
-      return `<span class="text-[10px] text-slate-700 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded">${label}: ${v}</span>`;
-    }
-
     function renderAlunosTable() {
       const tbody = document.getElementById('alunos-table-body');
       if (!tbody) return;
@@ -3924,36 +5092,40 @@
       const filtered = alunos.filter(a => {
         if (!query) return true;
         return (a.nome || '').toLowerCase().includes(query) ||
+               (a.cpf || '').toLowerCase().includes(query) ||
+               (a.dataNascimento || '').toLowerCase().includes(query) ||
                (a.email || '').toLowerCase().includes(query) ||
+               (a.endereco || '').toLowerCase().includes(query) ||
+               (a.estadoCivil || '').toLowerCase().includes(query) ||
                (a.contato || '').toLowerCase().includes(query);
       });
 
       // Atualiza KPIs
       const kpiTotal = document.getElementById('kpi-total-alunos');
-      const kpiDocs = document.getElementById('kpi-com-docs');
-      const kpiPend = document.getElementById('kpi-pendentes');
+      const kpiBatizados = document.getElementById('kpi-batizados');
+      const kpiEucaristia = document.getElementById('kpi-eucaristia');
 
-      let comDocsCount = 0;
-      let pendentesCount = 0;
+      let batizadosCount = 0;
+      let eucaristiaCount = 0;
 
       alunos.forEach(a => {
-        const hasDriveDoc = [a.docIdentificacao, a.comprovanteBatismo, a.comprovanteEucaristia, a.comprovanteMatrimonio, a.comprovantePagamento].some(d => (d || '').includes('http'));
-        const hasDeve = [a.comprovanteBatismo, a.comprovanteEucaristia, a.comprovanteMatrimonio].some(d => (d || '').toUpperCase().includes('DEVE'));
-        if (hasDriveDoc) comDocsCount++;
-        if (hasDeve) pendentesCount++;
+        const batStr = (a.batizado || '').toLowerCase();
+        if (batStr.includes('sim') || batStr.includes('católica') || batStr.includes('batizado')) batizadosCount++;
+        const eucStr = (a.primeiraEucaristia || '').toLowerCase();
+        if (eucStr.includes('sim') || eucStr.includes('primeira')) eucaristiaCount++;
       });
 
       if (kpiTotal) kpiTotal.textContent = alunos.length;
-      if (kpiDocs) kpiDocs.textContent = comDocsCount;
-      if (kpiPend) kpiPend.textContent = pendentesCount;
+      if (kpiBatizados) kpiBatizados.textContent = batizadosCount;
+      if (kpiEucaristia) kpiEucaristia.textContent = eucaristiaCount;
 
       if (filtered.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="10" class="py-12 text-center text-slate-400">
+            <td colspan="11" class="py-12 text-center text-slate-400">
               <div class="text-3xl mb-2">📂</div>
-              <p class="font-semibold text-slate-600">Nenhum catequizando cadastrado nesta turma ainda.</p>
-              <p class="text-xs text-slate-400 mt-1">Clique em "Adicionar Aluno" acima para cadastrar o primeiro catequizando.</p>
+              <p class="font-semibold text-slate-600">Nenhum catequizando encontrado nesta turma.</p>
+              <p class="text-xs text-slate-400 mt-1">Clique em "➕ Adicionar Aluno" ou "📤 Upload Planilha" acima para cadastrar catequizandos.</p>
             </td>
           </tr>
         `;
@@ -3961,61 +5133,77 @@
       }
 
       tbody.innerHTML = filtered.map((a, idx) => {
+        // Formata WhatsApp / Telefone
         let contatoHtml = '<span class="text-slate-300">—</span>';
         if (a.contato && a.contato.trim()) {
-          const rawDigits = a.contato.replace(/\\D/g, '');
+          const rawDigits = a.contato.replace(/\D/g, '');
           if (rawDigits.length >= 8) {
             const num = rawDigits.startsWith('55') ? rawDigits : `55${rawDigits}`;
-            contatoHtml = `<a href="https://wa.me/${num}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-900 font-semibold text-xs hover:underline"><span>📱</span> ${a.contato}</a>`;
+            contatoHtml = `<a href="https://wa.me/${num}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-900 font-semibold text-xs hover:underline" title="Conversar no WhatsApp"><span>📱</span> ${a.contato}</a>`;
           } else {
             contatoHtml = `<span class="text-xs text-slate-700">${a.contato}</span>`;
           }
         }
 
+        // Formata E-mail
         let emailHtml = '<span class="text-slate-300">—</span>';
         if (a.email && a.email.trim()) {
-          emailHtml = `<a href="mailto:${a.email.trim()}" class="text-indigo-600 hover:text-indigo-800 text-xs hover:underline">${a.email.trim()}</a>`;
+          emailHtml = `<a href="mailto:${a.email.trim()}" class="text-indigo-600 hover:text-indigo-800 text-xs hover:underline truncate max-w-[150px] inline-block" title="${a.email.trim()}">${a.email.trim()}</a>`;
         }
 
-        const batizadoBadge = a.batizado === 'Sim' || a.batizado === 'Batizado'
-          ? '<span class="inline-flex items-center text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">Sim</span>'
-          : a.batizado === 'Não'
-          ? '<span class="inline-flex items-center text-[10px] font-bold text-rose-800 bg-rose-100 px-2 py-0.5 rounded-full">Não</span>'
+        // Formata Batizado Badge
+        const batStr = (a.batizado || '').trim();
+        let batizadoBadge = '<span class="text-slate-300">—</span>';
+        if (batStr.toLowerCase().startsWith('sim')) {
+          batizadoBadge = '<span class="inline-flex items-center text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full" title="' + batStr + '">Sim</span>';
+        } else if (batStr.toLowerCase().startsWith('não') || batStr.toLowerCase().startsWith('nao')) {
+          batizadoBadge = '<span class="inline-flex items-center text-[10px] font-bold text-rose-800 bg-rose-100 px-2 py-0.5 rounded-full">Não</span>';
+        } else if (batStr) {
+          batizadoBadge = `<span class="inline-flex items-center text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full" title="${batStr}">${batStr}</span>`;
+        }
+
+        // Formata 1ª Eucaristia Badge
+        const eucStr = (a.primeiraEucaristia || '').trim();
+        let eucaristiaBadge = '<span class="text-slate-300">—</span>';
+        if (eucStr.toLowerCase().startsWith('sim')) {
+          eucaristiaBadge = '<span class="inline-flex items-center text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">Sim</span>';
+        } else if (eucStr.toLowerCase().startsWith('não') || eucStr.toLowerCase().startsWith('nao')) {
+          eucaristiaBadge = '<span class="inline-flex items-center text-[10px] font-bold text-rose-800 bg-rose-100 px-2 py-0.5 rounded-full">Não</span>';
+        } else if (eucStr) {
+          eucaristiaBadge = `<span class="inline-flex items-center text-[10px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full">${eucStr}</span>`;
+        }
+
+        // Endereço com tooltip
+        const enderecoVal = a.endereco ? a.endereco.trim() : '';
+        const enderecoHtml = enderecoVal 
+          ? `<span class="text-xs text-slate-700 block max-w-[210px] leading-tight" title="${enderecoVal.replace(/"/g, '&quot;')}">${enderecoVal}</span>` 
           : '<span class="text-slate-300">—</span>';
 
-        const eucaristiaBadge = a.primeiraEucaristia === 'Sim' || a.primeiraEucaristia === 'Primeira Eucaristia'
-          ? '<span class="inline-flex items-center text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">Sim</span>'
-          : a.primeiraEucaristia === 'Não'
-          ? '<span class="inline-flex items-center text-[10px] font-bold text-rose-800 bg-rose-100 px-2 py-0.5 rounded-full">Não</span>'
-          : '<span class="text-slate-300">—</span>';
+        // CPF
+        const cpfHtml = a.cpf ? `<span class="font-mono text-[11px] text-slate-600">${a.cpf}</span>` : '<span class="text-slate-300">—</span>';
 
-        const badges = [
-          _renderDocBadge('RG', a.docIdentificacao),
-          _renderDocBadge('Batismo', a.comprovanteBatismo),
-          _renderDocBadge('1ª Euc.', a.comprovanteEucaristia),
-          _renderDocBadge('Casam.', a.comprovanteMatrimonio),
-          _renderDocBadge('Pag.', a.comprovantePagamento)
-        ].filter(Boolean);
+        // Data Nasc
+        const dataNascHtml = a.dataNascimento ? `<span class="text-xs text-slate-700">${a.dataNascimento}</span>` : '<span class="text-slate-300">—</span>';
 
-        const docsHtml = badges.length > 0 
-          ? `<div class="flex flex-wrap items-center gap-1">${badges.join('')}</div>`
-          : '<span class="text-slate-300 text-xs">—</span>';
+        // Estado Civil
+        const estCivilHtml = a.estadoCivil ? `<span class="text-xs text-slate-700 leading-tight block max-w-[150px]" title="${a.estadoCivil.replace(/"/g, '&quot;')}">${a.estadoCivil}</span>` : '<span class="text-slate-300">—</span>';
 
         return `
           <tr class="hover:bg-slate-50/80 transition">
-            <td class="py-2.5 px-3.5 text-center font-bold text-slate-400 text-xs">${idx + 1}</td>
-            <td class="py-2.5 px-4">
-              <div class="font-bold text-slate-900">${a.nome}</div>
+            <td class="py-2.5 px-3 text-center font-bold text-slate-400 text-xs">${idx + 1}</td>
+            <td class="py-2.5 px-3.5">
+              <div class="font-bold text-slate-900 leading-snug">${a.nome}</div>
               ${a.observacoes ? `<div class="text-[10px] text-amber-700 mt-0.5">⚠️ ${a.observacoes}</div>` : ''}
             </td>
-            <td class="py-2.5 px-3 text-center text-slate-700 font-medium">${a.idade || '<span class="text-slate-300">—</span>'}</td>
+            <td class="py-2.5 px-2.5 text-center">${cpfHtml}</td>
+            <td class="py-2.5 px-2.5 text-center">${dataNascHtml}</td>
             <td class="py-2.5 px-3">${contatoHtml}</td>
             <td class="py-2.5 px-3">${emailHtml}</td>
-            <td class="py-2.5 px-3 text-slate-700">${a.estadoCivil || '<span class="text-slate-300">—</span>'}</td>
-            <td class="py-2.5 px-3 text-center">${batizadoBadge}</td>
-            <td class="py-2.5 px-3 text-center">${eucaristiaBadge}</td>
-            <td class="py-2.5 px-4">${docsHtml}</td>
-            <td class="py-2.5 px-3 text-center no-print">
+            <td class="py-2.5 px-3.5">${enderecoHtml}</td>
+            <td class="py-2.5 px-3">${estCivilHtml}</td>
+            <td class="py-2.5 px-2.5 text-center">${batizadoBadge}</td>
+            <td class="py-2.5 px-2.5 text-center">${eucaristiaBadge}</td>
+            <td class="py-2.5 px-2.5 text-center no-print">
               <div class="flex items-center justify-center gap-1">
                 <button onclick="editAluno('${a.id}')" class="p-1 rounded text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition" title="Editar Catequizando">
                   ✏️
@@ -4041,19 +5229,16 @@
       if (alunoData) {
         if (title) title.textContent = 'Editar Catequizando';
         if (sub) sub.textContent = `${currentAlunosTurma} • ${currentAlunosEtapa}`;
-        document.getElementById('aluno-id').value = alunoData.id;
+        document.getElementById('aluno-id').value = alunoData.id || '';
         document.getElementById('aluno-nome').value = alunoData.nome || '';
-        document.getElementById('aluno-idade').value = alunoData.idade || '';
+        document.getElementById('aluno-cpf').value = alunoData.cpf || '';
+        document.getElementById('aluno-nasc').value = alunoData.dataNascimento || '';
         document.getElementById('aluno-contato').value = alunoData.contato || '';
         document.getElementById('aluno-email').value = alunoData.email || '';
+        document.getElementById('aluno-endereco').value = alunoData.endereco || '';
         document.getElementById('aluno-estado-civil').value = alunoData.estadoCivil || '';
         document.getElementById('aluno-batizado').value = alunoData.batizado || '';
         document.getElementById('aluno-eucaristia').value = alunoData.primeiraEucaristia || '';
-        document.getElementById('aluno-comp-batismo').value = alunoData.comprovanteBatismo || '';
-        document.getElementById('aluno-comp-eucaristia').value = alunoData.comprovanteEucaristia || '';
-        document.getElementById('aluno-comp-matrimonio').value = alunoData.comprovanteMatrimonio || '';
-        document.getElementById('aluno-doc-identificacao').value = alunoData.docIdentificacao || '';
-        document.getElementById('aluno-comp-pagamento').value = alunoData.comprovantePagamento || '';
         document.getElementById('aluno-obs').value = alunoData.observacoes || '';
       } else {
         if (title) title.textContent = 'Cadastrar Novo Catequizando';
@@ -4107,17 +5292,14 @@
       const alunoObj = {
         id: isEdit ? idField.value : 'aluno-' + Date.now(),
         nome: (document.getElementById('aluno-nome').value || '').trim(),
-        idade: (document.getElementById('aluno-idade').value || '').trim(),
+        cpf: (document.getElementById('aluno-cpf').value || '').trim(),
+        dataNascimento: (document.getElementById('aluno-nasc').value || '').trim(),
         contato: (document.getElementById('aluno-contato').value || '').trim(),
         email: (document.getElementById('aluno-email').value || '').trim(),
+        endereco: (document.getElementById('aluno-endereco').value || '').trim(),
         estadoCivil: (document.getElementById('aluno-estado-civil').value || '').trim(),
         batizado: document.getElementById('aluno-batizado').value || '',
         primeiraEucaristia: document.getElementById('aluno-eucaristia').value || '',
-        comprovanteBatismo: (document.getElementById('aluno-comp-batismo').value || '').trim(),
-        comprovanteEucaristia: (document.getElementById('aluno-comp-eucaristia').value || '').trim(),
-        comprovanteMatrimonio: (document.getElementById('aluno-comp-matrimonio').value || '').trim(),
-        docIdentificacao: (document.getElementById('aluno-doc-identificacao').value || '').trim(),
-        comprovantePagamento: (document.getElementById('aluno-comp-pagamento').value || '').trim(),
         observacoes: (document.getElementById('aluno-obs').value || '').trim()
       };
 
@@ -4146,26 +5328,23 @@
         return;
       }
 
-      const headers = ['Nº', 'Nome Completo', 'Idade', 'Contato', 'E-mail', 'Estado Civil', 'Batizado', 'Comprovante Batismo', '1ª Eucaristia', 'Comprovante Eucaristia', 'Comprovante Matrimônio', 'Documento Identificação', 'Comprovante Pagamento', 'Observações'];
+      const headers = ['Nº', 'Nome Completo', 'CPF', 'Data de Nascimento', 'Telefone', 'E-mail', 'Endereço', 'Estado Civil / Afetivo', 'Batizado', '1ª Eucaristia', 'Observações'];
 
       const rows = alunos.map((a, i) => [
         i + 1,
         `"${(a.nome || '').replace(/"/g, '""')}"`,
-        `"${(a.idade || '').replace(/"/g, '""')}"`,
+        `"${(a.cpf || '').replace(/"/g, '""')}"`,
+        `"${(a.dataNascimento || '').replace(/"/g, '""')}"`,
         `"${(a.contato || '').replace(/"/g, '""')}"`,
         `"${(a.email || '').replace(/"/g, '""')}"`,
+        `"${(a.endereco || '').replace(/"/g, '""')}"`,
         `"${(a.estadoCivil || '').replace(/"/g, '""')}"`,
         `"${(a.batizado || '').replace(/"/g, '""')}"`,
-        `"${(a.comprovanteBatismo || '').replace(/"/g, '""')}"`,
         `"${(a.primeiraEucaristia || '').replace(/"/g, '""')}"`,
-        `"${(a.comprovanteEucaristia || '').replace(/"/g, '""')}"`,
-        `"${(a.comprovanteMatrimonio || '').replace(/"/g, '""')}"`,
-        `"${(a.docIdentificacao || '').replace(/"/g, '""')}"`,
-        `"${(a.comprovantePagamento || '').replace(/"/g, '""')}"`,
         `"${(a.observacoes || '').replace(/"/g, '""')}"`
       ]);
 
-      const csvContent = '\\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\\r\\n');
+      const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\r\n');
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -4181,6 +5360,205 @@
     }
 
     // =============================================
+    // UPLOAD E PROCESSAMENTO DE PLANILHAS (XLSX / CSV)
+    // =============================================
+    let currentUploadWorkbook = null;
+    let currentUploadParsedData = {};
+
+    function openUploadModal() {
+      const modal = document.getElementById('modal-upload-planilha');
+      if (!modal) return;
+      
+      const fileInput = document.getElementById('upload-file-input');
+      if (fileInput) fileInput.value = '';
+      
+      document.getElementById('upload-sheet-select-container').classList.add('hidden');
+      document.getElementById('upload-preview').classList.add('hidden');
+      document.getElementById('btn-confirm-upload').disabled = true;
+      
+      // Sincroniza turma padrão com a tela
+      const targetEtapa = document.getElementById('upload-target-etapa');
+      if (targetEtapa) targetEtapa.value = currentAlunosEtapa;
+      updateUploadTargetTurmas();
+      const targetTurma = document.getElementById('upload-target-turma');
+      if (targetTurma) targetTurma.value = currentAlunosTurma;
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeUploadModal() {
+      const modal = document.getElementById('modal-upload-planilha');
+      if (modal) modal.classList.add('hidden');
+      currentUploadWorkbook = null;
+      currentUploadParsedData = {};
+    }
+
+    function updateUploadTargetTurmas() {
+      const etapa = document.getElementById('upload-target-etapa').value;
+      const turmaSel = document.getElementById('upload-target-turma');
+      if (!turmaSel) return;
+      const turmas = masterScheduleList.filter(item => item.stage === etapa);
+      turmaSel.innerHTML = turmas.map(t => `<option value="${t.turma}">${t.turma} (${t.catechists})</option>`).join('');
+    }
+
+    function handleFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      if (typeof XLSX === 'undefined') {
+        alert('Erro: Biblioteca XLSX de leitura de planilha não carregada. Verifique sua conexão à internet.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+          currentUploadWorkbook = workbook;
+          currentUploadParsedData = {};
+
+          const sheetContainer = document.getElementById('upload-sheet-select-container');
+          const sheetSelect = document.getElementById('upload-sheet-select');
+
+          if (workbook.SheetNames.length > 1) {
+            sheetSelect.innerHTML = workbook.SheetNames.map(name => `<option value="${name}">${name}</option>`).join('');
+            sheetContainer.classList.remove('hidden');
+          } else {
+            sheetContainer.classList.add('hidden');
+          }
+
+          handleSheetSelect(workbook.SheetNames[0]);
+        } catch (err) {
+          console.error('Erro ao processar planilha:', err);
+          alert('Erro ao ler arquivo da planilha. Certifique-se de que é um arquivo Excel (.xlsx) ou CSV válido.');
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function handleSheetSelect(sheetName) {
+      if (!currentUploadWorkbook) return;
+      const sheet = currentUploadWorkbook.Sheets[sheetName];
+      if (!sheet) return;
+
+      // Sugestão automática de turma a partir do nome da aba
+      const sheetLower = sheetName.toLowerCase();
+      const targetEtapa = document.getElementById('upload-target-etapa');
+      const targetTurma = document.getElementById('upload-target-turma');
+
+      if (sheetLower.includes('lorena')) {
+        if (targetEtapa) targetEtapa.value = 'Crisma Adultos';
+        updateUploadTargetTurmas();
+        if (targetTurma) targetTurma.value = 'Turma 03';
+      } else if (sheetLower.includes('lourival')) {
+        if (targetEtapa) targetEtapa.value = 'Crisma Adultos';
+        updateUploadTargetTurmas();
+        if (targetTurma) targetTurma.value = 'Turma 04';
+      }
+
+      // Converte dados
+      const rawRows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false, dateNF: 'dd/mm/yyyy' });
+      if (rawRows.length < 2) {
+        alert('A aba selecionada não possui linhas de dados suficientes.');
+        return;
+      }
+
+      const headers = rawRows[0].map(h => String(h || '').trim().toLowerCase());
+      
+      // Mapeamento inteligente de colunas
+      const colMap = {
+        nome: headers.findIndex(h => h.includes('nome')),
+        cpf: headers.findIndex(h => h.includes('cpf')),
+        dataNasc: headers.findIndex(h => h.includes('nasc') || h.includes('data de nascimento')),
+        contato: headers.findIndex(h => h.includes('tel') || h.includes('contato') || h.includes('fone') || h.includes('whatsapp')),
+        email: headers.findIndex(h => h.includes('mail')),
+        endereco: headers.findIndex(h => h.includes('end') || h.includes('endereço') || h.includes('residencia')),
+        estadoCivil: headers.findIndex(h => h.includes('civil') || h.includes('afetivo') || h.includes('matrim')),
+        batizado: headers.findIndex(h => h.includes('batiz')),
+        eucaristia: headers.findIndex(h => h.includes('eucarist'))
+      };
+
+      const parsedAlunos = [];
+      for (let r = 1; r < rawRows.length; r++) {
+        const row = rawRows[r];
+        if (!row || row.length === 0) continue;
+        
+        const getVal = (idx) => (idx !== -1 && row[idx] !== undefined ? String(row[idx]).trim() : '');
+        const nome = colMap.nome !== -1 ? getVal(colMap.nome) : String(row[0] || '').trim();
+        
+        if (!nome) continue;
+
+        parsedAlunos.push({
+          id: 'up-' + Date.now() + '-' + r,
+          nome: nome,
+          cpf: getVal(colMap.cpf),
+          dataNascimento: getVal(colMap.dataNasc),
+          contato: getVal(colMap.contato),
+          email: getVal(colMap.email),
+          endereco: getVal(colMap.endereco),
+          estadoCivil: getVal(colMap.estadoCivil),
+          batizado: getVal(colMap.batizado),
+          primeiraEucaristia: getVal(colMap.eucaristia),
+          observacoes: ''
+        });
+      }
+
+      currentUploadParsedData[sheetName] = parsedAlunos;
+
+      // Exibe Preview
+      const previewBox = document.getElementById('upload-preview');
+      const previewTitle = document.getElementById('upload-preview-title');
+      const previewCount = document.getElementById('upload-preview-count');
+      const previewList = document.getElementById('upload-preview-list');
+      const btnConfirm = document.getElementById('btn-confirm-upload');
+
+      previewTitle.textContent = `Aba: "${sheetName}"`;
+      previewCount.textContent = `${parsedAlunos.length} catequizandos identificados`;
+      previewList.innerHTML = parsedAlunos.slice(0, 5).map((a, i) => `<div>${i+1}. <strong>${a.nome}</strong> ${a.cpf ? `(CPF: ${a.cpf})` : ''} ${a.contato ? `• ${a.contato}` : ''}</div>`).join('') + (parsedAlunos.length > 5 ? `<div class="text-slate-400 italic mt-1">... e mais ${parsedAlunos.length - 5} registros</div>` : '');
+
+      previewBox.classList.remove('hidden');
+      btnConfirm.disabled = parsedAlunos.length === 0;
+    }
+
+    function executeUploadImport() {
+      const sheetName = document.getElementById('upload-sheet-select').value || (currentUploadWorkbook ? currentUploadWorkbook.SheetNames[0] : null);
+      const alunos = currentUploadParsedData[sheetName];
+
+      if (!alunos || alunos.length === 0) {
+        alert('Nenhum catequizando pronto para importação.');
+        return;
+      }
+
+      const pin = prompt('🔒 Digite a senha de administração (Sicm@2026) para confirmar a importação:');
+      if (pin !== EDIT_PIN) {
+        if (pin !== null) alert('Senha incorreta. Importação cancelada.');
+        return;
+      }
+
+      const targetEtapa = document.getElementById('upload-target-etapa').value;
+      const targetTurma = document.getElementById('upload-target-turma').value;
+      const mode = document.querySelector('input[name="upload-mode"]:checked').value;
+
+      const db = getAlunosDatabase();
+      const key = getTurmaKey(targetEtapa, targetTurma);
+
+      if (mode === 'replace') {
+        db[key] = alunos;
+      } else {
+        if (!db[key]) db[key] = [];
+        db[key].push(...alunos);
+      }
+
+      saveAlunosDatabase(db);
+      closeUploadModal();
+
+      // Navega para a turma recém importada
+      openTurmaAlunos(targetEtapa, targetTurma);
+      alert(`🎉 Sucesso! ${alunos.length} catequizandos foram importados para ${targetTurma} (${targetEtapa})!`);
+    }
+
+    // =============================================
     // INICIALIZAÇÃO
     // =============================================
     document.addEventListener('DOMContentLoaded', () => {
@@ -4189,7 +5567,7 @@
       renderRoomCards();
       renderScheduleTable();
       renderEventosTimeline();
-      populateTurmasSelect('Crisma Adultos', 'Turma 07');
+      populateTurmasSelect('Crisma Adultos', 'Turma 03');
       selectRoom('sala-01', false);
       initNavScroll();
       if (window.location.hash) {
