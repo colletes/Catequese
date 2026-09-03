@@ -1317,30 +1317,68 @@
     <!-- ========================================== -->
     <section id="view-guia" class="tab-view hidden space-y-6">
       
-      <!-- Sub-Navigation Switcher (Árvore Gráfica vs Tabela) -->
+      <!-- Organograma Version Switcher & Management Bar -->
+      <div class="bg-gradient-to-r from-slate-900 via-slate-900 to-slate-950 text-white p-4 sm:p-5 rounded-3xl border-2 border-[#d4a94f]/60 shadow-xl space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#d4a94f] animate-pulse"></span>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-[#d4a94f] font-heading">Gestão de Organogramas &amp; Anos Letivos</span>
+            </div>
+            <h2 class="text-xl sm:text-2xl font-bold font-heading text-white flex items-center gap-2">
+              <span id="org-active-badge-title">Organograma 2026</span>
+              <span id="org-active-stats-pill" class="text-xs bg-amber-950/80 text-[#d4a94f] border border-amber-500/40 px-2.5 py-0.5 rounded-full font-sans font-bold">44 turmas</span>
+            </h2>
+          </div>
+
+          <!-- Quick Actions for Organogram Version -->
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <button onclick="duplicarOrganogramaAtivo()" class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-amber-400/50 px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-xs" title="Criar uma cópia do organograma atual com outro nome/ano">
+              <span>📋 Duplicar</span>
+            </button>
+            <button onclick="renomearOrganogramaAtivo()" class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-amber-400/50 px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-xs" title="Renomear este organograma">
+              <span>✏️ Renomear</span>
+            </button>
+            <button onclick="criarNovoOrganograma()" class="inline-flex items-center gap-1.5 bg-gradient-to-r from-[#d4a94f] to-[#b88d36] hover:from-[#facf75] hover:to-[#d4a94f] text-slate-950 px-3.5 py-1.5 rounded-xl text-xs font-black shadow-md transition transform active:scale-95 font-heading" title="Criar um novo organograma">
+              <span>➕ Novo Organograma</span>
+            </button>
+            <button onclick="excluirOrganogramaAtivo()" class="inline-flex items-center gap-1.5 bg-rose-950/40 hover:bg-rose-900/70 text-rose-300 border border-rose-800/60 px-2.5 py-1.5 rounded-xl text-xs font-bold transition" title="Excluir este organograma">
+              <span>🗑️</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Organograma Selector Tabs / Pills -->
+        <div class="pt-2 border-t border-slate-800/80 flex items-center gap-2 overflow-x-auto pb-1" id="organograma-pills-list">
+          <!-- Dynamically populated pills for 2026, 2027, etc. -->
+        </div>
+      </div>
+
+      <!-- Sub-Navigation Switcher (Árvore Gráfica vs Planilha / Tabela) -->
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
         <div class="flex items-center gap-2">
           <button id="btn-subtab-arvore" onclick="switchOrganogramaSubTab('arvore')" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition bg-slate-900 text-white shadow-xs">
             <span>🌳 Visualização Gráfica em Árvore</span>
-            <span class="bg-[#d4a94f] text-slate-950 text-[10px] font-black px-2 py-0.5 rounded-full">Oficial</span>
+            <span class="bg-[#d4a94f] text-slate-950 text-[10px] font-black px-2 py-0.5 rounded-full">Gráfico</span>
           </button>
           <button id="btn-subtab-tabela" onclick="switchOrganogramaSubTab('tabela')" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition text-slate-600 hover:text-slate-900 hover:bg-slate-100">
-            <span>📋 Tabela &amp; Cards por Etapa</span>
+            <span>📋 Planilha &amp; Tabela de Turmas</span>
+            <span class="bg-emerald-100 text-emerald-900 text-[10px] font-bold px-2 py-0.5 rounded-full">Planilha</span>
           </button>
         </div>
 
-        <!-- Toolbar de Ações (Árvore) -->
+        <!-- Toolbar de Ações (Contextual) -->
         <div id="organograma-actions-toolbar" class="flex items-center gap-2 flex-wrap">
           <button id="btn-export-img" onclick="exportOrganogramaImage()" class="inline-flex items-center gap-1.5 bg-[#d4a94f] hover:bg-[#e6c27a] text-slate-950 font-bold px-3.5 py-2 rounded-xl text-xs shadow-md transition transform active:scale-95">
-            <span>📸 Baixar como Imagem (PNG)</span>
+            <span>📸 Baixar Imagem (PNG)</span>
           </button>
           <button id="btn-edit-org" onclick="toggleOrganogramaEdit()" class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition">
-            <span id="btn-edit-org-label">✏️ Editar Diretamente</span>
+            <span id="btn-edit-org-label">✏️ Editar no Gráfico</span>
           </button>
           <button id="btn-save-org" onclick="saveOrganogramaEdits()" class="hidden inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow transition">
             <span>💾 Salvar Alterações</span>
           </button>
-          <button id="btn-reset-org" onclick="resetOrganogramaDefault()" class="hidden inline-flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold px-3 py-2 rounded-xl text-xs transition">
+          <button id="btn-reset-org" onclick="resetOrganogramaDefault()" class="inline-flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold px-3 py-2 rounded-xl text-xs transition">
             <span>🔄 Restaurar Padrão</span>
           </button>
         </div>
@@ -1352,11 +1390,14 @@
       <div id="subview-arvore" class="space-y-4">
         
         <!-- Dica de uso em modo edição -->
-        <div id="org-edit-hint" class="hidden p-3 bg-amber-50 border border-amber-300 rounded-xl text-xs text-amber-900 flex items-center justify-between">
+        <div id="org-edit-hint" class="hidden p-3.5 bg-amber-50 border border-amber-300 rounded-2xl text-xs text-amber-900 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-xs">
           <span class="flex items-center gap-2">
-            <span>✏️</span> <strong>Modo de Edição Ativo:</strong> Clique diretamente em qualquer texto dos cards abaixo para editar. Depois clique em <strong>"Salvar Alterações"</strong>.
+            <span class="text-base">✏️</span> <strong>Modo de Edição Gráfica Ativo:</strong> Clique diretamente nos textos dos cards abaixo para editar ou use os botões "+ Turma" em cada etapa. Ao terminar, clique em <strong>"Salvar Alterações"</strong> para sincronizar com a planilha.
           </span>
-          <button onclick="toggleOrganogramaEdit()" class="text-xs font-bold text-slate-700 hover:text-slate-950 underline">Fechar Edição</button>
+          <div class="flex items-center gap-2 shrink-0">
+            <button onclick="saveOrganogramaEdits()" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-xs transition">💾 Salvar</button>
+            <button onclick="toggleOrganogramaEdit()" class="text-xs font-bold text-slate-700 hover:text-slate-950 underline">Fechar</button>
+          </div>
         </div>
 
         <!-- Scroll horizontal para acomodar as 6 colunas completas -->
@@ -1373,8 +1414,8 @@
                 </div>
                 <div class="text-center sm:text-left">
                   <span class="inline-block text-[10px] font-bold tracking-widest text-[#d4a94f] uppercase font-heading">Santuário Imaculado Coração de Maria</span>
-                  <h1 class="text-lg sm:text-xl font-bold font-heading tracking-wide text-white">Catequese Paroquial • 2026</h1>
-                  <p class="text-[11px] font-medium text-slate-300">Organograma Geral das Etapas, Turmas e Salas de Encontro</p>
+                  <h1 id="org-tree-header-title" class="text-lg sm:text-xl font-bold font-heading tracking-wide text-white">Catequese Paroquial • 2026</h1>
+                  <p id="org-tree-header-subtitle" class="text-[11px] font-medium text-slate-300">Organograma Geral das Etapas, Turmas e Salas de Encontro</p>
                 </div>
               </div>
 
@@ -1393,387 +1434,15 @@
               </div>
             </div>
 
-            <!-- 2. As 6 Colunas das Etapas (Grid de 6 colunas) -->
+            <!-- 2. As 6 Colunas das Etapas (Grid dinâmico) -->
             <div id="organograma-tree-content" class="grid grid-cols-6 gap-3 pt-3">
-              
-              <!-- ============================================== -->
-              <!-- COLUNA 1: PRÉ-EUCARISTIA (Rose / Vermelho Claro)-->
-              <!-- ============================================== -->
-              <div class="flex flex-col space-y-2.5">
-                <!-- Header da Etapa -->
-                <div class="bg-rose-50 border-2 border-rose-300 rounded-xl p-3 text-center shadow-xs">
-                  <h3 class="font-bold font-heading text-rose-900 text-sm">Pré Eucaristia</h3>
-                  <p class="text-[11px] text-slate-700 font-semibold mt-0.5">Coord: Patrícia Guimarães</p>
-                  <p class="text-[10px] text-slate-500">Vice: Ana Luísa Chaves</p>
-                  <div class="mt-1 text-[9.5px] font-bold text-rose-700 bg-rose-100/80 py-0.5 rounded px-1">Critério: 7 a 8 anos</div>
-                </div>
-
-                <!-- Turmas -->
-                <div class="bg-white border border-rose-200 rounded-xl p-2.5 shadow-2xs hover:border-rose-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 01 • Sáb: 08:30 às 10:00</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Patrícia e Eliane</div>
-                  <div class="text-[10px] text-slate-400 italic">Aux. em formação: Ane</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Santa Teresa (Sala 16 - Salão Par.)</div>
-                </div>
-
-                <div class="bg-white border border-rose-200 rounded-xl p-2.5 shadow-2xs hover:border-rose-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 02 • Sáb: 08:30 às 10:00</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Ana Luísa</div>
-                  <div class="text-[10px] text-slate-400 italic">Aux. em formação: Mariana Cavalcante e Clarice</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Santo André (Sala 15 - Salão Par.)</div>
-                </div>
-
-                <div class="bg-white border border-rose-200 rounded-xl p-2.5 shadow-2xs hover:border-rose-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 03 • Sáb: 10:30 às 12:00</div>
-                  <div class="text-[10.5px] text-amber-800 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 inline-block mb-1">⚠️ Auxiliares em formação</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Bruna, Jullia e Beatris</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Santo André (Sala 15 - Salão Par.)</div>
-                </div>
-              </div>
-
-              <!-- ============================================== -->
-              <!-- COLUNA 2: EUCARISTIA I (Emerald / Verde Claro) -->
-              <!-- ============================================== -->
-              <div class="flex flex-col space-y-2.5">
-                <!-- Header da Etapa -->
-                <div class="bg-emerald-50 border-2 border-emerald-300 rounded-xl p-3 text-center shadow-xs">
-                  <h3 class="font-bold font-heading text-emerald-900 text-sm">Eucaristia I</h3>
-                  <p class="text-[11px] text-slate-700 font-semibold mt-0.5">Coord: Marilian</p>
-                  <p class="text-[10px] text-slate-500">Vice: Lara</p>
-                  <div class="mt-1 text-[9.5px] font-bold text-emerald-700 bg-emerald-100/80 py-0.5 rounded px-1">Critério: 09 a 10 anos</div>
-                </div>
-
-                <!-- Turmas -->
-                <div class="bg-white border border-emerald-200 rounded-xl p-2.5 shadow-2xs hover:border-emerald-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 01 • Sáb: 08:30 às 10:00</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequista: Polyana</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Protomártires (Sala 01 - Centro Cat.)</div>
-                </div>
-
-                <div class="bg-white border border-emerald-200 rounded-xl p-2.5 shadow-2xs hover:border-emerald-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 02 • Sáb: 08:30 às 10:00</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Shirley e Tatyane</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Anjo da Guarda (Sala 02 - Centro Cat.)</div>
-                </div>
-
-                <div class="bg-white border border-emerald-200 rounded-xl p-2.5 shadow-2xs hover:border-emerald-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 03 • Sáb: 08:30 às 10:00</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Joseline e Silene</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Francisco Marto (Sala 03 - Centro Cat.)</div>
-                </div>
-
-                <div class="bg-white border border-emerald-200 rounded-xl p-2.5 shadow-2xs hover:border-emerald-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 04 • Sáb: 08:30 às 10:00</div>
-                  <div class="text-[10.5px] text-amber-800 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 inline-block mb-1">⚠️ Auxiliares em formação</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Brenda e Joyce</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Gabriel (Sala 04 - Centro Cat.)</div>
-                </div>
-
-                <div class="bg-white border border-emerald-200 rounded-xl p-2.5 shadow-2xs hover:border-emerald-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 05 • Sáb: 08:30 às 10:00</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequista: Valdir</div>
-                  <div class="text-[10px] text-slate-400 italic">Aux. em formação: Mariana Alvarenga</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Santa Jacinta (Sala 05 - Centro Cat.)</div>
-                </div>
-
-                <div class="bg-white border border-emerald-200 rounded-xl p-2.5 shadow-2xs hover:border-emerald-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 10 • Sáb: 08:30 às 10:00</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Lanuzia e Mara Rúbia</div>
-                  <div class="text-[10px] text-slate-400 italic">Aux. em formação: Mariana Garcia</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Miguel (Sala 06 - Centro Cat.)</div>
-                </div>
-
-                <div class="bg-white border border-emerald-200 rounded-xl p-2.5 shadow-2xs hover:border-emerald-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 11 • Sáb: 10:00 às 11:30</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Maria Dulcineide e Elisa</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Capela Nossa Senhora das Graças</div>
-                </div>
-
-                <div class="bg-white border border-emerald-200 rounded-xl p-2.5 shadow-2xs hover:border-emerald-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 06 • Sáb: 10:30 às 12:00</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Andréia e Fernanda</div>
-                  <div class="text-[10px] text-slate-400 italic">Aux. em formação: Marina de Oliveira</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Protomártires (Sala 01 - Centro Cat.)</div>
-                </div>
-
-                <div class="bg-white border border-emerald-200 rounded-xl p-2.5 shadow-2xs hover:border-emerald-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 07 • Sáb: 10:30 às 12:00</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Maria Rilda, Nádia e Marina Neiva</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Gabriel (Sala 04 - Centro Cat.)</div>
-                </div>
-
-                <div class="bg-white border border-emerald-200 rounded-xl p-2.5 shadow-2xs hover:border-emerald-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 08 • Sáb: 10:30 às 12:00</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Elza e Lara</div>
-                  <div class="text-[10px] text-slate-400 italic">Aux. em formação: Zairo</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Santa Jacinta (Sala 05 - Centro Cat.)</div>
-                </div>
-
-                <div class="bg-white border border-emerald-200 rounded-xl p-2.5 shadow-2xs hover:border-emerald-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 09 • Sáb: 10:30 às 12:00</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Danusa e Glenda</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Miguel (Sala 06 - Centro Cat.)</div>
-                </div>
-              </div>
-
-              <!-- ============================================== -->
-              <!-- COLUNA 3: EUCARISTIA II (Sky / Azul Claro)     -->
-              <!-- ============================================== -->
-              <div class="flex flex-col space-y-2.5">
-                <!-- Header da Etapa -->
-                <div class="bg-sky-50 border-2 border-sky-300 rounded-xl p-3 text-center shadow-xs">
-                  <h3 class="font-bold font-heading text-sky-900 text-sm">Eucaristia II</h3>
-                  <p class="text-[11px] text-slate-700 font-semibold mt-0.5">Coord: Marilian</p>
-                  <p class="text-[10px] text-slate-500">Vice: Priscila Ayres</p>
-                  <div class="mt-1 text-[9.5px] font-bold text-sky-700 bg-sky-100/80 py-0.5 rounded px-1">Critério: Ter feito Eucaristia I</div>
-                </div>
-
-                <!-- Turmas -->
-                <div class="bg-white border border-sky-200 rounded-xl p-2.5 shadow-2xs hover:border-sky-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 01 • Sáb: 08:30 às 10:00</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Bruna Noleto e Ana Luiza Yung</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Mateus (Sala 11 - Salão Par.)</div>
-                </div>
-
-                <div class="bg-white border border-sky-200 rounded-xl p-2.5 shadow-2xs hover:border-sky-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 02 • Sáb: 08:30 às 10:00</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Elaine e Carla</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Carlo Acutis (Sala 08 - Centro Cat.)</div>
-                </div>
-
-                <div class="bg-white border border-sky-200 rounded-xl p-2.5 shadow-2xs hover:border-sky-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 03 • Sáb: 08:30 às 10:00</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Marilian e Maria Luísa</div>
-                  <div class="text-[10px] text-slate-400 italic">Aux. em formação: Ana Julia</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Lucas (Sala 13 - Salão Par.)</div>
-                </div>
-
-                <div class="bg-white border border-sky-200 rounded-xl p-2.5 shadow-2xs hover:border-sky-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 04 • Sáb: 08:30 às 10:00</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Maria Laura e Suelene</div>
-                  <div class="text-[10px] text-slate-400 italic">Aux. em formação: Matheus</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Marcos (Sala 12 - Salão Par.)</div>
-                </div>
-
-                <div class="bg-white border border-sky-200 rounded-xl p-2.5 shadow-2xs hover:border-sky-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 09 • Sáb: 10:00 às 11:30</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequista: Carlos</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Capela Nossa Senhora das Graças</div>
-                </div>
-
-                <div class="bg-white border border-sky-200 rounded-xl p-2.5 shadow-2xs hover:border-sky-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 05 • Sáb: 10:30 às 12:00</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Bruna Noleto, José Henrique e Heitor</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Mateus (Sala 11 - Salão Par.)</div>
-                </div>
-
-                <div class="bg-white border border-sky-200 rounded-xl p-2.5 shadow-2xs hover:border-sky-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 06 • Sáb: 10:30 às 12:00</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Solange e Núbia</div>
-                  <div class="text-[10px] text-slate-400 italic">Aux. em formação: Gabriella</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Marcos (Sala 12 - Salão Par.)</div>
-                </div>
-
-                <div class="bg-white border border-sky-200 rounded-xl p-2.5 shadow-2xs hover:border-sky-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 07 • Sáb: 10:30 às 12:00</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Priscila Ayres e Camila</div>
-                  <div class="text-[10px] text-slate-400 italic">Aux. em formação: Ana</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Lucas (Sala 13 - Salão Par.)</div>
-                </div>
-
-                <div class="bg-white border border-sky-200 rounded-xl p-2.5 shadow-2xs hover:border-sky-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 08 • Quarta: 16:00 às 17:30</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Eliane e Carlos</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Santa Jacinta (Sala 05 - Centro Cat.)</div>
-                </div>
-              </div>
-
-              <!-- ============================================== -->
-              <!-- COLUNA 4: PERSEVERANÇA (Amber / Dourado)       -->
-              <!-- ============================================== -->
-              <div class="flex flex-col space-y-2.5">
-                <!-- Header da Etapa -->
-                <div class="bg-amber-50 border-2 border-amber-300 rounded-xl p-3 text-center shadow-xs">
-                  <h3 class="font-bold font-heading text-amber-900 text-sm">Perseverança</h3>
-                  <p class="text-[11px] text-slate-700 font-semibold mt-0.5">Coord: Lanuzia</p>
-                  <p class="text-[10px] text-slate-500">Vice: Beatriz</p>
-                  <div class="mt-1 text-[9.5px] font-bold text-amber-800 bg-amber-100/80 py-0.5 rounded px-1">Critério: Menores de 13 anos</div>
-                </div>
-
-                <!-- Turmas -->
-                <div class="bg-white border border-amber-200 rounded-xl p-2.5 shadow-2xs hover:border-amber-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 01 • Sáb: 08:30 às 10:00</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Marcella, Bruna e Sônia</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São João Bosco (Sala 17 - Salão Par.)</div>
-                </div>
-
-                <div class="bg-white border border-amber-200 rounded-xl p-2.5 shadow-2xs hover:border-amber-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 02 • Sáb: 10:30 às 12:00</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Alda e Rosângela</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São João Bosco (Sala 17 - Salão Par.)</div>
-                </div>
-              </div>
-
-              <!-- ============================================== -->
-              <!-- COLUNA 5: CRISMA JOVEM (Purple / Roxo)         -->
-              <!-- ============================================== -->
-              <div class="flex flex-col space-y-2.5">
-                <!-- Header da Etapa -->
-                <div class="bg-purple-50 border-2 border-purple-300 rounded-xl p-3 text-center shadow-xs">
-                  <h3 class="font-bold font-heading text-purple-900 text-sm">Crisma Jovem</h3>
-                  <p class="text-[11px] text-slate-700 font-semibold mt-0.5">Coord: Tiago</p>
-                  <p class="text-[10px] text-slate-500">Vice: Piante</p>
-                  <div class="mt-1.5 text-[8.5px] leading-tight font-semibold text-purple-900 bg-purple-100/90 py-1 rounded px-1 border border-purple-200">
-                    <strong>Idade mínima:</strong> 14 anos completos, alcançados até o meio do ano em que se inicia a preparação.
-                  </div>
-                </div>
-
-                <!-- Turmas -->
-                <div class="bg-white border border-purple-200 rounded-xl p-2.5 shadow-2xs hover:border-purple-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 01 • Sáb: 15:00 às 16:30</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Giovanna Lopes e Heloísa</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Rafael (Sala 07 - Centro Cat.)</div>
-                </div>
-
-                <div class="bg-white border border-purple-200 rounded-xl p-2.5 shadow-2xs hover:border-purple-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 02 • Sáb: 15:00 às 16:30</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequista: Artur</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Santa Jacinta (Sala 05 - Centro Cat.)</div>
-                </div>
-
-                <div class="bg-white border border-purple-200 rounded-xl p-2.5 shadow-2xs hover:border-purple-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 03 • Sáb: 15:00 às 16:30</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Alessandra Moraes e Mônica</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Anjo da Guarda (Sala 02 - Centro Cat.)</div>
-                </div>
-
-                <div class="bg-white border border-purple-200 rounded-xl p-2.5 shadow-2xs hover:border-purple-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 04 • Seg: 20:00 às 21:30</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Amanda, Gabriela e Flávia</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Carlo Acutis (Sala 08 - Centro Cat.)</div>
-                </div>
-
-                <div class="bg-white border border-purple-200 rounded-xl p-2.5 shadow-2xs hover:border-purple-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 05 • Seg: 20:00 às 21:30</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Anderson e Kéllibe</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Miguel (Sala 06 - Centro Cat.)</div>
-                </div>
-
-                <div class="bg-white border border-purple-200 rounded-xl p-2.5 shadow-2xs hover:border-purple-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 06 • Seg: 20:00 às 21:30</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequista: Jonatan</div>
-                  <div class="text-[10px] text-slate-400 italic">Aux. em formação: Davi</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Protomártires (Sala 01 - Centro Cat.)</div>
-                </div>
-
-                <div class="bg-white border border-purple-200 rounded-xl p-2.5 shadow-2xs hover:border-purple-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 07 • Seg: 20:00 às 21:30</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Tiago e Piante</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Anjo da Guarda (Sala 02 - Centro Cat.)</div>
-                </div>
-
-                <div class="bg-white border border-purple-200 rounded-xl p-2.5 shadow-2xs hover:border-purple-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 08 • Seg: 20:00 às 21:30</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: José Bernardo e Priscila</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Mateus (Sala 11 - Salão Par.)</div>
-                </div>
-
-                <div class="bg-white border border-purple-200 rounded-xl p-2.5 shadow-2xs hover:border-purple-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 09 • Seg: 20:00 às 21:30</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequista: Lanuzia</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Lucas (Sala 13 - Salão Par.)</div>
-                </div>
-
-                <div class="bg-white border border-purple-200 rounded-xl p-2.5 shadow-2xs hover:border-purple-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 10 • Seg: 20:00 às 21:30</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Klebson, Heitor e Beatriz</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São João (Sala 14 - Salão Par.)</div>
-                </div>
-
-                <div class="bg-white border border-purple-200 rounded-xl p-2.5 shadow-2xs hover:border-purple-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 11 • Seg: 20:00 às 21:30</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Rosilene e Pierre</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Santa Teresa (Sala 16 - Salão Par.)</div>
-                </div>
-              </div>
-
-              <!-- ============================================== -->
-              <!-- COLUNA 6: CRISMA ADULTOS (Indigo / Laranja)    -->
-              <!-- ============================================== -->
-              <div class="flex flex-col space-y-2.5">
-                <!-- Header da Etapa -->
-                <div class="bg-indigo-50 border-2 border-indigo-300 rounded-xl p-3 text-center shadow-xs">
-                  <h3 class="font-bold font-heading text-indigo-900 text-sm">Crisma Adultos</h3>
-                  <p class="text-[11px] text-slate-700 font-semibold mt-0.5">Coord: Daniel</p>
-                  <p class="text-[10px] text-slate-500">Vice: Patrícia Gomes</p>
-                  <div class="mt-1 text-[9.5px] font-bold text-indigo-800 bg-indigo-100/80 py-0.5 rounded px-1">Critério: Maiores de 18 anos</div>
-                </div>
-
-                <!-- Turmas -->
-                <div class="bg-white border border-indigo-200 rounded-xl p-2.5 shadow-2xs hover:border-indigo-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 01 • Sáb: 08:30 às 10:15</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Letícia, Eduardo, Cauã e Danilo</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Auditório (Centro Catequético)</div>
-                </div>
-
-                <div class="bg-white border border-indigo-200 rounded-xl p-2.5 shadow-2xs hover:border-indigo-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 02 • Sáb: 10:15 às 12:00</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Fábio, Marcelo, Otávio, Patrícia e Ronaldo</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Auditório (Centro Catequético)</div>
-                </div>
-
-                <div class="bg-white border border-indigo-200 rounded-xl p-2.5 shadow-2xs hover:border-indigo-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 03 • Seg: 20:00 às 22:00</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Lorena e Natanai</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Auditório (Centro Catequético)</div>
-                  <button onclick="openTurmaAlunos('Crisma Adultos', 'Turma 03')" class="mt-2 w-full flex items-center justify-center gap-1.5 text-[10.5px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 py-1 rounded-lg transition" title="Ver lista com os 31 catequizandos desta turma">
-                    <span>👥</span> <span>Ver Alunos (31)</span>
-                  </button>
-                </div>
-
-                <div class="bg-white border border-indigo-200 rounded-xl p-2.5 shadow-2xs hover:border-indigo-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 04 • Seg: 20:00 às 22:00</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Lourival e Thiago Malaquias</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Marcos (Sala 12 - Salão Par.)</div>
-                  <button onclick="openTurmaAlunos('Crisma Adultos', 'Turma 04')" class="mt-2 w-full flex items-center justify-center gap-1.5 text-[10.5px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 py-1 rounded-lg transition" title="Ver lista com os 19 catequizandos desta turma">
-                    <span>👥</span> <span>Ver Alunos (19)</span>
-                  </button>
-                </div>
-
-                <div class="bg-white border border-indigo-200 rounded-xl p-2.5 shadow-2xs hover:border-indigo-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 05 • Sacramento: 03/12/2026 – 19:30</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Daniel e Alexandre</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Rafael (Sala 07 - Centro Cat.)</div>
-                </div>
-
-                <div class="bg-white border border-indigo-200 rounded-xl p-2.5 shadow-2xs hover:border-indigo-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 06 • Sacramento: 03/12/2026 – 19:30</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Guilherme e Hermes</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Francisco Marto (Sala 03 - Centro Cat.)</div>
-                </div>
-
-                <div class="bg-white border border-indigo-200 rounded-xl p-2.5 shadow-2xs hover:border-indigo-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 07 • Sacramento: 03/12/2026 – 19:30</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Thiago e Thais</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala São Miguel (Sala 06 - Centro Cat.)</div>
-                  <button onclick="openTurmaAlunos('Crisma Adultos', 'Turma 07')" class="mt-2 w-full flex items-center justify-center gap-1.5 text-[10.5px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 py-1 rounded-lg transition" title="Ver lista com os 17 catequizandos desta turma">
-                    <span>👥</span> <span>Ver Alunos (17)</span>
-                  </button>
-                </div>
-
-                <div class="bg-white border border-indigo-200 rounded-xl p-2.5 shadow-2xs hover:border-indigo-400 transition org-editable">
-                  <div class="text-[11px] font-bold text-slate-900 mb-0.5">Turma 08 • Sacramento: 03/12/2026 – 19:30</div>
-                  <div class="text-[11px] text-slate-700 font-medium">Catequistas: Victor e Juliana</div>
-                  <div class="text-[10px] text-slate-500 mt-1 font-semibold">Sala Santa Jacinta (Sala 05 - Centro Cat.)</div>
-                </div>
-              </div>
-
+              <!-- Renderizado dinamicamente por renderOrganogramaTree() -->
             </div>
 
             <!-- Rodapé do Organograma impresso/exportado -->
             <div class="mt-6 pt-3 border-t border-slate-200 flex items-center justify-between text-[10px] text-slate-400">
               <span>Santuário Imaculado Coração de Maria • Park Way / DF</span>
-              <span>Pastoral da Catequese Oficial • 2026</span>
+              <span id="org-tree-footer-year">Pastoral da Catequese Oficial • 2026</span>
             </div>
 
           </div>
@@ -1781,88 +1450,80 @@
       </div>
 
       <!-- ========================================================= -->
-      <!-- SUB-TAB 2: TABELA & RESUMO POR COORDENAÇÃO                -->
+      <!-- SUB-TAB 2: PLANILHA & TABELA INTERATIVA DE TURMAS         -->
       <!-- ========================================================= -->
       <div id="subview-tabela" class="hidden space-y-6">
         
-        <!-- Stage Coordinator Cards -->
-        <!-- Coordenação Geral (topo) -->
-        <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white p-5 rounded-2xl border-l-4 border-[#d4a94f] shadow-md col-span-full" id="card-coord-geral">
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div>
-              <span class="text-[11px] font-bold uppercase text-[#d4a94f] bg-amber-950/60 px-2 py-0.5 rounded border border-amber-500/30">Coordenação Geral da Catequese</span>
-              <h4 class="font-bold font-heading text-white text-lg mt-2" id="coord-geral-nome">Coordenadora: Lorena</h4>
-              <p class="text-sm text-slate-300" id="coord-geral-vice">Vice Coordenador: Andrés</p>
-            </div>
-            <div class="text-xs text-slate-400">Santuário Imaculado Coração de Maria • Park Way</div>
-          </div>
+        <!-- Coordenação Geral & Cards por Etapa -->
+        <div id="organograma-coordinators-container" class="space-y-4">
+          <!-- Renderizado dinamicamente por renderOrganogramaCoordinators() -->
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 col-span-full">
-          <div class="bg-white p-5 rounded-2xl border-l-4 border-emerald-500 shadow-sm" id="card-pre-eucaristia">
-            <span class="text-[11px] font-bold uppercase text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">Pré-Eucaristia (7 a 8 anos)</span>
-            <h4 class="font-bold font-heading text-slate-900 text-base mt-2" id="coord-pre-nome">Coord: Patrícia Guimarães</h4>
-            <p class="text-xs text-slate-500" id="coord-pre-vice">Vice: Ana Luísa Chaves • 3 Turmas</p>
-          </div>
-          <div class="bg-white p-5 rounded-2xl border-l-4 border-sky-400 shadow-sm" id="card-euc1">
-            <span class="text-[11px] font-bold uppercase text-sky-700 bg-sky-50 px-2 py-0.5 rounded">Eucaristia I (9 a 10 anos)</span>
-            <h4 class="font-bold font-heading text-slate-900 text-base mt-2" id="coord-euc1-nome">Coord: Marilian</h4>
-            <p class="text-xs text-slate-500" id="coord-euc1-vice">Vice: Lara • 11 Turmas</p>
-          </div>
-          <div class="bg-white p-5 rounded-2xl border-l-4 border-sky-600 shadow-sm" id="card-euc2">
-            <span class="text-[11px] font-bold uppercase text-sky-800 bg-sky-50 px-2 py-0.5 rounded">Eucaristia II (11 a 12 anos)</span>
-            <h4 class="font-bold font-heading text-slate-900 text-base mt-2" id="coord-euc2-nome">Coord: Marilian</h4>
-            <p class="text-xs text-slate-500" id="coord-euc2-vice">Vice: Priscila Ayres • 9 Turmas</p>
-          </div>
-          <div class="bg-white p-5 rounded-2xl border-l-4 border-amber-500 shadow-sm" id="card-perseveranca">
-            <span class="text-[11px] font-bold uppercase text-amber-700 bg-amber-50 px-2 py-0.5 rounded">Perseverança (Menores de 13 anos)</span>
-            <h4 class="font-bold font-heading text-slate-900 text-base mt-2" id="coord-perv-nome">Coord: Lanuzia</h4>
-            <p class="text-xs text-slate-500" id="coord-perv-vice">Vice: Beatriz • 2 Turmas (Sala 17 São João Bosco)</p>
-          </div>
-          <div class="bg-white p-5 rounded-2xl border-l-4 border-purple-500 shadow-sm" id="card-crisma-jovem">
-            <span class="text-[11px] font-bold uppercase text-purple-700 bg-purple-50 px-2 py-0.5 rounded">Crisma Jovem (Mínimo: 14 anos)</span>
-            <h4 class="font-bold font-heading text-slate-900 text-base mt-2" id="coord-cj-nome">Coord: Tiago</h4>
-            <p class="text-xs text-slate-500" id="coord-cj-vice">Vice: Piante • 11 Turmas</p>
-            <p class="text-[10.5px] text-purple-900/80 mt-1 font-medium leading-tight">Idade mínima: 14 anos completos até o meio do ano em que se inicia a preparação.</p>
-          </div>
-          <div class="bg-white p-5 rounded-2xl border-l-4 border-indigo-500 shadow-sm" id="card-crisma-adultos">
-            <span class="text-[11px] font-bold uppercase text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded">Crisma Adultos (+18 anos)</span>
-            <h4 class="font-bold font-heading text-slate-900 text-base mt-2" id="coord-ca-nome">Coord: Daniel</h4>
-            <p class="text-xs text-slate-500" id="coord-ca-vice">Vice: Patrícia Gomes • 8 Turmas</p>
-          </div>
-        </div>
-
-        <!-- Main Schedule Table -->
-        <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <!-- Main Schedule Table (Spreadsheet) -->
+        <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+          
+          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
               <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 font-heading flex items-center gap-2">
-                <span class="text-[#d4a94f]">📋</span> Tabela Completa de Todas as Turmas (Fonte da Verdade)
+                <span class="text-[#d4a94f]">📋</span> Planilha de Turmas &amp; Grade Horária
               </h2>
-              <p class="text-xs sm:text-sm text-slate-500">Total de 44 turmas mapeadas e cruzadas com o Organograma Oficial.</p>
+              <p class="text-xs sm:text-sm text-slate-500" id="org-table-stats-caption">Edite diretamente qualquer turma ou adicione novas turmas neste organograma.</p>
             </div>
-            <button onclick="window.print()" class="no-print inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2 rounded-xl transition">
-              <svg class="w-4 h-4 text-[#d4a94f]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-              <span>Imprimir Tabela</span>
-            </button>
+            
+            <div class="flex items-center gap-2 flex-wrap">
+              <button onclick="openAddTurmaModal()" class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow-md transition transform active:scale-95">
+                <span>➕ Adicionar Turma</span>
+              </button>
+              <button onclick="openEditCoordinatorsModal()" class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition">
+                <span>👥 Editar Coordenações</span>
+              </button>
+              <button onclick="exportOrganogramaExcel()" class="inline-flex items-center gap-1.5 bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300 font-bold px-3.5 py-2 rounded-xl text-xs transition">
+                <span>📥 Exportar Planilha</span>
+              </button>
+              <button onclick="window.print()" class="no-print inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-2 rounded-xl text-xs transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                <span>Imprimir</span>
+              </button>
+            </div>
           </div>
 
-          <div class="overflow-x-auto">
+          <!-- Filtros e Busca da Planilha -->
+          <div class="flex flex-col sm:flex-row items-center gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+            <div class="flex-1 w-full relative">
+              <input type="text" id="filter-org-table-search" oninput="renderScheduleTable()" placeholder="Buscar por catequista, turma, horário ou sala..." class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-800 placeholder-slate-400 outline-none focus:border-[#d4a94f] focus:ring-1 focus:ring-[#d4a94f]">
+            </div>
+            <div class="w-full sm:w-auto">
+              <select id="filter-org-table-etapa" onchange="renderScheduleTable()" class="w-full sm:w-auto bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 outline-none">
+                <option value="all">Todas as Etapas (6)</option>
+                <option value="Pré Eucaristia">Pré Eucaristia</option>
+                <option value="Eucaristia I">Eucaristia I</option>
+                <option value="Eucaristia II">Eucaristia II</option>
+                <option value="Perseverança">Perseverança</option>
+                <option value="Crisma Jovem">Crisma Jovem</option>
+                <option value="Crisma Adultos">Crisma Adultos</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Tabela de Turmas -->
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
             <table class="w-full text-left text-xs sm:text-sm border-collapse">
               <thead>
                 <tr class="bg-slate-900 text-white border-b-2 border-[#d4a94f]">
-                  <th class="py-3 px-4 rounded-tl-xl font-heading">Etapa &amp; Turma</th>
+                  <th class="py-3 px-4 font-heading">Etapa &amp; Turma</th>
                   <th class="py-3 px-4 font-heading">Dia e Horário</th>
-                  <th class="py-3 px-4 font-heading">Catequistas</th>
+                  <th class="py-3 px-4 font-heading">Catequistas &amp; Auxiliares</th>
                   <th class="py-3 px-4 font-heading">Sala Oficial</th>
-                  <th class="py-3 px-4 rounded-tr-xl font-heading">Prédio / Local</th>
+                  <th class="py-3 px-4 font-heading">Prédio / Local</th>
+                  <th class="py-3 px-4 text-center font-heading no-print" style="width: 110px;">Ações</th>
                 </tr>
               </thead>
               <tbody id="turmas-table-body" class="divide-y divide-slate-200">
-                <!-- Dynamically populated rows from PDF data -->
+                <!-- Dynamically populated rows from active organogram -->
               </tbody>
             </table>
           </div>
+
         </div>
       </div>
 
@@ -2540,6 +2201,139 @@
     </div>
 
     <!-- ========================================== -->
+    <!-- MODAL: ADICIONAR / EDITAR TURMA            -->
+    <!-- ========================================== -->
+    <div id="modal-turma-form" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+      <div class="bg-white w-full max-w-xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-8">
+        
+        <div class="bg-gradient-to-r from-slate-900 to-slate-950 text-white p-5 sm:p-6 flex items-center justify-between border-b border-amber-500/30">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl" id="turma-modal-icon">🏫</span>
+            <div>
+              <h3 class="text-lg sm:text-xl font-bold font-heading" id="turma-modal-title">Adicionar Turma</h3>
+              <p class="text-xs text-slate-300" id="turma-modal-subtitle">Organograma Selecionado</p>
+            </div>
+          </div>
+          <button onclick="closeTurmaModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
+        </div>
+
+        <form id="form-turma-modal" onsubmit="handleSaveTurmaModal(event)" class="p-5 sm:p-6 space-y-4">
+          <input type="hidden" id="turma-form-id" value="">
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Etapa *</label>
+              <select id="turma-form-etapa" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs sm:text-sm font-semibold bg-slate-50 outline-none focus:border-[#d4a94f]">
+                <option value="Pré Eucaristia">Pré Eucaristia</option>
+                <option value="Eucaristia I">Eucaristia I</option>
+                <option value="Eucaristia II">Eucaristia II</option>
+                <option value="Perseverança">Perseverança</option>
+                <option value="Crisma Jovem">Crisma Jovem</option>
+                <option value="Crisma Adultos">Crisma Adultos</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Nome da Turma *</label>
+              <input type="text" id="turma-form-turma" required placeholder="Ex: Turma 01" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs sm:text-sm font-semibold text-slate-800 outline-none focus:border-[#d4a94f]">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Dia e Horário *</label>
+            <input type="text" id="turma-form-daytime" required placeholder="Ex: Sábado: 08:30 às 10:00 ou Segunda: 20:00 às 21:30" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs sm:text-sm font-semibold text-slate-800 outline-none focus:border-[#d4a94f]">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Catequistas *</label>
+            <input type="text" id="turma-form-catechists" required placeholder="Ex: Patrícia e Eliane" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs sm:text-sm font-semibold text-slate-800 outline-none focus:border-[#d4a94f]">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Auxiliares em formação (opcional)</label>
+            <input type="text" id="turma-form-auxiliares" placeholder="Ex: Ane, Mariana (separar por vírgula)" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs sm:text-sm font-semibold text-slate-800 outline-none focus:border-[#d4a94f]">
+            <label class="flex items-center gap-2 mt-1.5 text-xs text-slate-600 cursor-pointer">
+              <input type="checkbox" id="turma-form-semcatequista" class="rounded text-amber-500 focus:ring-0">
+              <span>Marcar como "Apenas auxiliares em formação (sem catequista titular)"</span>
+            </label>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Sala Oficial *</label>
+              <input type="text" id="turma-form-room" required placeholder="Ex: Sala 01 (Protomártires)" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs sm:text-sm font-semibold text-slate-800 outline-none focus:border-[#d4a94f]">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Prédio / Local *</label>
+              <input type="text" id="turma-form-hall" required placeholder="Ex: Centro Catequético ou Salão Paroquial" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs sm:text-sm font-semibold text-slate-800 outline-none focus:border-[#d4a94f]">
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-slate-200 flex items-center justify-end gap-2">
+            <button type="button" onclick="closeTurmaModal()" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-100 transition">
+              Cancelar
+            </button>
+            <button type="submit" class="bg-gradient-to-r from-[#d4a94f] to-[#b88d36] hover:from-[#facf75] hover:to-[#d4a94f] text-slate-950 px-5 py-2 rounded-xl text-xs sm:text-sm font-black shadow-md transition transform active:scale-95 font-heading">
+              Salvar Turma
+            </button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL: EDITAR COORDENAÇÕES DO ORGANOGRAMA  -->
+    <!-- ========================================== -->
+    <div id="modal-edit-coordenacoes" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+      <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-8 max-h-[90vh] flex flex-col">
+        
+        <div class="bg-gradient-to-r from-slate-900 to-slate-950 text-white p-5 sm:p-6 flex items-center justify-between border-b border-amber-500/30 shrink-0">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">👥</span>
+            <div>
+              <h3 class="text-lg sm:text-xl font-bold font-heading">Editar Coordenações &amp; Critérios</h3>
+              <p class="text-xs text-slate-300" id="coord-modal-org-subtitle">Organograma Ativo</p>
+            </div>
+          </div>
+          <button onclick="closeCoordinatorsModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
+        </div>
+
+        <form id="form-coordinators-modal" onsubmit="handleSaveCoordinatorsModal(event)" class="p-5 sm:p-6 space-y-5 overflow-y-auto flex-1">
+          
+          <!-- Coordenação Geral -->
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+            <h4 class="font-bold text-xs uppercase tracking-wider text-[#b88d36] font-heading">🏛️ Coordenação Geral da Catequese</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 mb-1">Coordenador(a)</label>
+                <input type="text" id="coord-input-geral-nome" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 bg-white outline-none">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 mb-1">Vice-Coordenador(a)</label>
+                <input type="text" id="coord-input-geral-vice" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 bg-white outline-none">
+              </div>
+            </div>
+          </div>
+
+          <!-- 6 Etapas -->
+          <div class="space-y-4" id="coord-stage-inputs-list">
+            <!-- Dynamically populated per stage -->
+          </div>
+
+          <div class="pt-4 border-t border-slate-200 flex items-center justify-end gap-2 shrink-0">
+            <button type="button" onclick="closeCoordinatorsModal()" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-100 transition">
+              Cancelar
+            </button>
+            <button type="submit" class="bg-gradient-to-r from-[#d4a94f] to-[#b88d36] hover:from-[#facf75] hover:to-[#d4a94f] text-slate-950 px-5 py-2 rounded-xl text-xs sm:text-sm font-black shadow-md transition transform active:scale-95 font-heading">
+              Salvar Coordenações
+            </button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+
+    <!-- ========================================== -->
     <!-- TAB 4: VISÃO DO COMPLEXO / COMO CHEGAR     -->
     <!-- ========================================== -->
     <section id="view-campus" class="tab-view space-y-6">
@@ -2968,63 +2762,8 @@
       }
     };
 
-    const masterScheduleList = [
-      // Pré Eucaristia
-      { stage: 'Pré Eucaristia', turma: 'Turma 01', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Patrícia e Eliane', auxiliares: ['Ane'], room: 'Sala 16 (Santa Teresa de Calcutá)', hall: 'Salão Paroquial' },
-      { stage: 'Pré Eucaristia', turma: 'Turma 02', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Ana Luísa', auxiliares: ['Mariana Cavalcante', 'Clarice'], room: 'Sala 15 (Santo André)', hall: 'Salão Paroquial' },
-      { stage: 'Pré Eucaristia', turma: 'Turma 03', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Bruna, Jullia e Beatris', semCatequista: true, auxiliares: ['Bruna', 'Jullia', 'Beatris'], room: 'Sala 15 (Santo André)', hall: 'Salão Paroquial' },
-
-      // Eucaristia I
-      { stage: 'Eucaristia I', turma: 'Turma 01', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Polyana', room: 'Sala 01 (Protomártires do Brasil)', hall: 'Centro Catequético' },
-      { stage: 'Eucaristia I', turma: 'Turma 02', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Shirley e Tatyane', room: 'Sala 02 (Anjo da Guarda)', hall: 'Centro Catequético' },
-      { stage: 'Eucaristia I', turma: 'Turma 03', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Joseline e Silene', room: 'Sala 03 (São Francisco Marto)', hall: 'Centro Catequético' },
-      { stage: 'Eucaristia I', turma: 'Turma 04', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Brenda e Joyce', semCatequista: true, auxiliares: ['Brenda', 'Joyce'], room: 'Sala 04 (São Gabriel)', hall: 'Centro Catequético' },
-      { stage: 'Eucaristia I', turma: 'Turma 05', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Valdir', auxiliares: ['Mariana Alvarenga'], room: 'Sala 05 (Santa Jacinta Marto)', hall: 'Centro Catequético' },
-      { stage: 'Eucaristia I', turma: 'Turma 10', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Lanuzia e Mara Rúbia', auxiliares: ['Mariana Garcia'], room: 'Sala 06 (São Miguel)', hall: 'Centro Catequético' },
-      { stage: 'Eucaristia I', turma: 'Turma 11', dayTime: 'Sábado: 10:00 às 11:30', catechists: 'Maria Dulcineide e Elisa', room: 'Capela Nossa Senhora das Graças', hall: 'Capela Externa' },
-      { stage: 'Eucaristia I', turma: 'Turma 06', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Andréia e Fernanda', auxiliares: ['Marina de Oliveira'], room: 'Sala 01 (Protomártires do Brasil)', hall: 'Centro Catequético' },
-      { stage: 'Eucaristia I', turma: 'Turma 07', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Maria Rilda, Nádia e Marina Neiva', room: 'Sala 04 (São Gabriel)', hall: 'Centro Catequético' },
-      { stage: 'Eucaristia I', turma: 'Turma 08', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Elza e Lara', auxiliares: ['Zairo'], room: 'Sala 05 (Santa Jacinta Marto)', hall: 'Centro Catequético' },
-      { stage: 'Eucaristia I', turma: 'Turma 09', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Danusa e Glenda', room: 'Sala 06 (São Miguel)', hall: 'Centro Catequético' },
-
-      // Eucaristia II
-      { stage: 'Eucaristia II', turma: 'Turma 01', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Bruna Noleto e Ana Luiza Yung', room: 'Sala 11 (São Mateus)', hall: 'Salão Paroquial' },
-      { stage: 'Eucaristia II', turma: 'Turma 02', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Elaine e Carla', room: 'Sala 08 (Carlo Acutis - Acesso Ext.)', hall: 'Centro Catequético' },
-      { stage: 'Eucaristia II', turma: 'Turma 03', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Marilian e Maria Luísa', auxiliares: ['Ana Julia'], room: 'Sala 13 (São Lucas)', hall: 'Salão Paroquial' },
-      { stage: 'Eucaristia II', turma: 'Turma 04', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Maria Laura e Suelene', auxiliares: ['Matheus'], room: 'Sala 12 (São Marcos)', hall: 'Salão Paroquial' },
-      { stage: 'Eucaristia II', turma: 'Turma 09', dayTime: 'Sábado: 10:00 às 11:30', catechists: 'Carlos', room: 'Capela Nossa Senhora das Graças', hall: 'Capela Externa' },
-      { stage: 'Eucaristia II', turma: 'Turma 05', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Bruna Noleto, José Henrique e Heitor', room: 'Sala 11 (São Mateus)', hall: 'Salão Paroquial' },
-      { stage: 'Eucaristia II', turma: 'Turma 06', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Solange e Núbia', auxiliares: ['Gabriella'], room: 'Sala 12 (São Marcos)', hall: 'Salão Paroquial' },
-      { stage: 'Eucaristia II', turma: 'Turma 07', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Priscila Ayres e Camila', auxiliares: ['Ana'], room: 'Sala 13 (São Lucas)', hall: 'Salão Paroquial' },
-      { stage: 'Eucaristia II', turma: 'Turma 08', dayTime: 'Quarta: 16:00 às 17:30', catechists: 'Eliane e Carlos', room: 'Sala 05 (Santa Jacinta Marto)', hall: 'Centro Catequético' },
-
-      // Perseverança
-      { stage: 'Perseverança', turma: 'Turma 01', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Marcella, Bruna e Sônia', room: 'Sala 17 (São João Bosco)', hall: 'Salão Paroquial (Anexo à dir. dos banheiros)' },
-      { stage: 'Perseverança', turma: 'Turma 02', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Alda e Rosângela', room: 'Sala 17 (São João Bosco)', hall: 'Salão Paroquial (Anexo à dir. dos banheiros)' },
-
-      // Crisma Jovem
-      { stage: 'Crisma Jovem', turma: 'Turma 01', dayTime: 'Sábado: 15:00 às 16:30', catechists: 'Giovanna Lopes e Heloísa', room: 'Sala 07 (São Rafael)', hall: 'Centro Catequético' },
-      { stage: 'Crisma Jovem', turma: 'Turma 02', dayTime: 'Sábado: 15:00 às 16:30', catechists: 'Artur', room: 'Sala 05 (Santa Jacinta Marto)', hall: 'Centro Catequético' },
-      { stage: 'Crisma Jovem', turma: 'Turma 03', dayTime: 'Sábado: 15:00 às 16:30', catechists: 'Alessandra Moraes e Mônica', room: 'Sala 02 (Anjo da Guarda)', hall: 'Centro Catequético' },
-      { stage: 'Crisma Jovem', turma: 'Turma 04', dayTime: 'Segunda: 20:00 às 21:30', catechists: 'Amanda, Gabriela e Flávia', room: 'Sala 08 (Carlo Acutis)', hall: 'Centro Catequético (Acesso Ext. Direita)' },
-      { stage: 'Crisma Jovem', turma: 'Turma 05', dayTime: 'Segunda: 20:00 às 21:30', catechists: 'Anderson e Kéllibe', room: 'Sala 06 (São Miguel)', hall: 'Centro Catequético' },
-      { stage: 'Crisma Jovem', turma: 'Turma 06', dayTime: 'Segunda: 20:00 às 21:30', catechists: 'Jonatan', auxiliares: ['Davi'], room: 'Sala 01 (Protomártires do Brasil)', hall: 'Centro Catequético' },
-      { stage: 'Crisma Jovem', turma: 'Turma 07', dayTime: 'Segunda: 20:00 às 21:30', catechists: 'Tiago e Piante', room: 'Sala 02 (Anjo da Guarda)', hall: 'Centro Catequético' },
-      { stage: 'Crisma Jovem', turma: 'Turma 08', dayTime: 'Segunda: 20:00 às 21:30', catechists: 'José Bernardo e Priscila Mesquita', room: 'Sala 11 (São Mateus)', hall: 'Salão Paroquial' },
-      { stage: 'Crisma Jovem', turma: 'Turma 09', dayTime: 'Segunda: 20:00 às 21:30', catechists: 'Lanuzia', room: 'Sala 13 (São Lucas)', hall: 'Salão Paroquial' },
-      { stage: 'Crisma Jovem', turma: 'Turma 10', dayTime: 'Segunda: 20:00 às 21:30', catechists: 'Klebson, Heitor e Beatriz', room: 'Sala 14 (São João)', hall: 'Salão Paroquial' },
-      { stage: 'Crisma Jovem', turma: 'Turma 11', dayTime: 'Segunda: 20:00 às 21:30', catechists: 'Rosilene e Pierre', room: 'Sala 16 (Santa Teresa de Calcutá)', hall: 'Salão Paroquial' },
-
-      // Crisma Adultos
-      { stage: 'Crisma Adultos', turma: 'Turma 01', dayTime: 'Sábado: 08:30 às 10:15', catechists: 'Letícia, Eduardo, Cauã e Danilo', room: 'Auditório', hall: 'Centro Catequético' },
-      { stage: 'Crisma Adultos', turma: 'Turma 02', dayTime: 'Sábado: 10:15 às 12:00', catechists: 'Fábio, Marcelo, Otávio, Patrícia e Ronaldo', room: 'Auditório', hall: 'Centro Catequético' },
-      { stage: 'Crisma Adultos', turma: 'Turma 03', dayTime: 'Segunda: 20:00 às 22:00', catechists: 'Lorena e Natanai', room: 'Auditório', hall: 'Centro Catequético' },
-      { stage: 'Crisma Adultos', turma: 'Turma 04', dayTime: 'Segunda: 20:00 às 22:00', catechists: 'Lourival e Thiago Malaquias', room: 'Sala 12 (São Marcos)', hall: 'Salão Paroquial' },
-      { stage: 'Crisma Adultos', turma: 'Turma 05', dayTime: 'Sacramento: 03/12/2026 – 19:30', catechists: 'Daniel e Alexandre', room: 'Sala 07 (São Rafael)', hall: 'Centro Catequético' },
-      { stage: 'Crisma Adultos', turma: 'Turma 06', dayTime: 'Sacramento: 03/12/2026 – 19:30', catechists: 'Guilherme e Hermes', room: 'Sala 03 (São Francisco Marto)', hall: 'Centro Catequético' },
-      { stage: 'Crisma Adultos', turma: 'Turma 07', dayTime: 'Sacramento: 03/12/2026 – 19:30', catechists: 'Thiago e Thais', room: 'Sala 06 (São Miguel)', hall: 'Centro Catequético' },
-      { stage: 'Crisma Adultos', turma: 'Turma 08', dayTime: 'Sacramento: 03/12/2026 – 19:30', catechists: 'Victor e Juliana', room: 'Sala 05 (Santa Jacinta Marto)', hall: 'Centro Catequético' }
-    ];
+    // Lista mestre dinâmica de horários (sincronizada com o organograma ativo)
+    let masterScheduleList = [];
 
     // TAB SWITCHING
     function switchTab(tabId) {
@@ -3416,48 +3155,7 @@
       });
     }
 
-    // POPULATE MASTER SCHEDULE TABLE (com auxiliares em menor destaque)
-    function renderScheduleTable() {
-      const tbody = document.getElementById('turmas-table-body');
-      if (!tbody) return;
-      tbody.innerHTML = '';
 
-      masterScheduleList.forEach(r => {
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-amber-50/50 transition';
-        
-        let badgeColor = 'bg-slate-100 text-slate-800';
-        if (r.stage.includes('Pré')) badgeColor = 'bg-emerald-100 text-emerald-800';
-        else if (r.stage.includes('Eucaristia I') && !r.stage.includes('II')) badgeColor = 'bg-sky-100 text-sky-800';
-        else if (r.stage.includes('Eucaristia II')) badgeColor = 'bg-blue-100 text-blue-800';
-        else if (r.stage.includes('Perseverança')) badgeColor = 'bg-amber-100 text-amber-900';
-        else if (r.stage.includes('Crisma Jovem')) badgeColor = 'bg-purple-100 text-purple-900';
-        else if (r.stage.includes('Crisma Adultos')) badgeColor = 'bg-indigo-100 text-indigo-900';
-
-        // Renderização do campo de catequistas com auxiliares em menor destaque
-        let catechistsHtml = '';
-        if (r.semCatequista) {
-          catechistsHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-yellow-100 text-yellow-800 border border-yellow-300">⚠️ Todos auxiliares em formação</span>`;
-        } else {
-          catechistsHtml = `<span class="font-medium text-slate-900">${r.catechists}</span>`;
-          if (r.auxiliares && r.auxiliares.length > 0) {
-            catechistsHtml += `<div class="text-[11px] text-slate-400 italic mt-0.5">Aux. em formação: ${r.auxiliares.join(', ')}</div>`;
-          }
-        }
-
-        tr.innerHTML = `
-          <td class="py-3 px-4">
-            <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold ${badgeColor}">${r.stage}</span>
-            <div class="text-xs font-bold text-slate-900 mt-1">${r.turma}</div>
-          </td>
-          <td class="py-3 px-4 font-semibold text-slate-700 whitespace-nowrap">${r.dayTime}</td>
-          <td class="py-3 px-4">${catechistsHtml}</td>
-          <td class="py-3 px-4 font-bold text-slate-800">${r.room}</td>
-          <td class="py-3 px-4 text-slate-500 text-xs">${r.hall}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
 
     // =============================================
     // CONTROLE DE ACESSO AO SITE (Senha: Sicm@2026)
@@ -3721,11 +3419,911 @@
     }
 
     // =============================================
-    // ORGANOGRAMA GRÁFICO EM ÁRVORE — CONTROLES
-    // Alternância de Abas, Exportação e Edição Direta
+    // GESTÃO DE ORGANOGRAMAS & TURMAS (2026, 2027...)
+    // Múltiplos Organogramas, Sincronização Bidirecional
+    // Edição via Gráfico em Árvore e via Planilha
     // =============================================
+    const STORAGE_KEY_ORGANOGRAMAS = 'catequese_organogramas_v6';
+    const STORAGE_KEY_ACTIVE_ORG_ID = 'catequese_active_org_id_v6';
     let orgEditModeActive = false;
-    const STORAGE_KEY_ORG_CUSTOM = 'catequese_organograma_custom_html_v4';
+
+    const SEED_ORGANOGRAMAS = {
+      'org-2026': {
+        id: 'org-2026',
+        name: '2026',
+        isDefault: true,
+        title: 'Catequese Paroquial • 2026',
+        subtitle: 'Organograma Geral das Etapas, Turmas e Salas de Encontro',
+        generalCoord: {
+          coord: 'Lorena',
+          vice: 'Andrés'
+        },
+        stages: [
+          {
+            id: 'pre',
+            name: 'Pré Eucaristia',
+            coord: 'Patrícia Guimarães',
+            vice: 'Ana Luísa Chaves',
+            criteria: '7 a 8 anos',
+            colorTheme: 'rose',
+            turmas: [
+              { id: 't-pre-1', turma: 'Turma 01', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Patrícia e Eliane', auxiliares: ['Ane'], semCatequista: false, room: 'Sala Santa Teresa (Sala 16 - Salão Par.)', hall: 'Salão Paroquial' },
+              { id: 't-pre-2', turma: 'Turma 02', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Ana Luísa', auxiliares: ['Mariana Cavalcante', 'Clarice'], semCatequista: false, room: 'Sala Santo André (Sala 15 - Salão Par.)', hall: 'Salão Paroquial' },
+              { id: 't-pre-3', turma: 'Turma 03', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Bruna, Jullia e Beatris', auxiliares: ['Bruna', 'Jullia', 'Beatris'], semCatequista: true, room: 'Sala Santo André (Sala 15 - Salão Par.)', hall: 'Salão Paroquial' }
+            ]
+          },
+          {
+            id: 'euc1',
+            name: 'Eucaristia I',
+            coord: 'Marilian',
+            vice: 'Lara',
+            criteria: '09 a 10 anos',
+            colorTheme: 'emerald',
+            turmas: [
+              { id: 't-euc1-1', turma: 'Turma 01', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Polyana', auxiliares: [], semCatequista: false, room: 'Sala Protomártires (Sala 01 - Centro Cat.)', hall: 'Centro Catequético' },
+              { id: 't-euc1-2', turma: 'Turma 02', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Shirley e Tatyane', auxiliares: [], semCatequista: false, room: 'Sala Anjo da Guarda (Sala 02 - Centro Cat.)', hall: 'Centro Catequético' },
+              { id: 't-euc1-3', turma: 'Turma 03', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Joseline e Silene', auxiliares: [], semCatequista: false, room: 'Sala São Francisco Marto (Sala 03 - Centro Cat.)', hall: 'Centro Catequético' },
+              { id: 't-euc1-4', turma: 'Turma 04', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Brenda e Joyce', auxiliares: ['Brenda', 'Joyce'], semCatequista: true, room: 'Sala São Gabriel (Sala 04 - Centro Cat.)', hall: 'Centro Catequético' },
+              { id: 't-euc1-5', turma: 'Turma 05', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Valdir', auxiliares: ['Mariana Alvarenga'], semCatequista: false, room: 'Sala Santa Jacinta (Sala 05 - Centro Cat.)', hall: 'Centro Catequético' },
+              { id: 't-euc1-10', turma: 'Turma 10', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Lanuzia e Mara Rúbia', auxiliares: ['Mariana Garcia'], semCatequista: false, room: 'Sala São Miguel (Sala 06 - Centro Cat.)', hall: 'Centro Catequético' },
+              { id: 't-euc1-11', turma: 'Turma 11', dayTime: 'Sábado: 10:00 às 11:30', catechists: 'Maria Dulcineide e Elisa', auxiliares: [], semCatequista: false, room: 'Capela Nossa Senhora das Graças', hall: 'Capela Externa' },
+              { id: 't-euc1-6', turma: 'Turma 06', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Andréia e Fernanda', auxiliares: ['Marina de Oliveira'], semCatequista: false, room: 'Sala Protomártires (Sala 01 - Centro Cat.)', hall: 'Centro Catequético' },
+              { id: 't-euc1-7', turma: 'Turma 07', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Maria Rilda, Nádia e Marina Neiva', auxiliares: [], semCatequista: false, room: 'Sala São Gabriel (Sala 04 - Centro Cat.)', hall: 'Centro Catequético' },
+              { id: 't-euc1-8', turma: 'Turma 08', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Elza e Lara', auxiliares: ['Zairo'], semCatequista: false, room: 'Sala Santa Jacinta (Sala 05 - Centro Cat.)', hall: 'Centro Catequético' },
+              { id: 't-euc1-9', turma: 'Turma 09', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Danusa e Glenda', auxiliares: [], semCatequista: false, room: 'Sala São Miguel (Sala 06 - Centro Cat.)', hall: 'Centro Catequético' }
+            ]
+          },
+          {
+            id: 'euc2',
+            name: 'Eucaristia II',
+            coord: 'Marilian',
+            vice: 'Priscila Ayres',
+            criteria: 'Ter feito Eucaristia I',
+            colorTheme: 'sky',
+            turmas: [
+              { id: 't-euc2-1', turma: 'Turma 01', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Bruna Noleto e Ana Luiza Yung', auxiliares: [], semCatequista: false, room: 'Sala São Mateus (Sala 11 - Salão Par.)', hall: 'Salão Paroquial' },
+              { id: 't-euc2-2', turma: 'Turma 02', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Elaine e Carla', auxiliares: [], semCatequista: false, room: 'Sala Carlo Acutis (Sala 08 - Centro Cat.)', hall: 'Centro Catequético' },
+              { id: 't-euc2-3', turma: 'Turma 03', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Marilian e Maria Luísa', auxiliares: ['Ana Julia'], semCatequista: false, room: 'Sala São Lucas (Sala 13 - Salão Par.)', hall: 'Salão Paroquial' },
+              { id: 't-euc2-4', turma: 'Turma 04', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Maria Laura e Suelene', auxiliares: ['Matheus'], semCatequista: false, room: 'Sala São Marcos (Sala 12 - Salão Par.)', hall: 'Salão Paroquial' },
+              { id: 't-euc2-9', turma: 'Turma 09', dayTime: 'Sábado: 10:00 às 11:30', catechists: 'Carlos', auxiliares: [], semCatequista: false, room: 'Capela Nossa Senhora das Graças', hall: 'Capela Externa' },
+              { id: 't-euc2-5', turma: 'Turma 05', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Bruna Noleto, José Henrique e Heitor', auxiliares: [], semCatequista: false, room: 'Sala São Mateus (Sala 11 - Salão Par.)', hall: 'Salão Paroquial' },
+              { id: 't-euc2-6', turma: 'Turma 06', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Solange e Núbia', auxiliares: ['Gabriella'], semCatequista: false, room: 'Sala São Marcos (Sala 12 - Salão Par.)', hall: 'Salão Paroquial' },
+              { id: 't-euc2-7', turma: 'Turma 07', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Priscila Ayres e Camila', auxiliares: ['Ana'], semCatequista: false, room: 'Sala São Lucas (Sala 13 - Salão Par.)', hall: 'Salão Paroquial' },
+              { id: 't-euc2-8', turma: 'Turma 08', dayTime: 'Quarta: 16:00 às 17:30', catechists: 'Eliane e Carlos', auxiliares: [], semCatequista: false, room: 'Sala Santa Jacinta (Sala 05 - Centro Cat.)', hall: 'Centro Catequético' }
+            ]
+          },
+          {
+            id: 'perv',
+            name: 'Perseverança',
+            coord: 'Lanuzia',
+            vice: 'Beatriz',
+            criteria: 'Menores de 13 anos',
+            colorTheme: 'amber',
+            turmas: [
+              { id: 't-perv-1', turma: 'Turma 01', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Marcella, Bruna e Sônia', auxiliares: [], semCatequista: false, room: 'Sala São João Bosco (Sala 17 - Salão Par.)', hall: 'Salão Paroquial' },
+              { id: 't-perv-2', turma: 'Turma 02', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Alda e Rosângela', auxiliares: [], semCatequista: false, room: 'Sala São João Bosco (Sala 17 - Salão Par.)', hall: 'Salão Paroquial' }
+            ]
+          },
+          {
+            id: 'cj',
+            name: 'Crisma Jovem',
+            coord: 'Tiago',
+            vice: 'Piante',
+            criteria: 'Mínimo: 14 anos',
+            colorTheme: 'purple',
+            turmas: [
+              { id: 't-cj-1', turma: 'Turma 01', dayTime: 'Sábado: 15:00 às 16:30', catechists: 'Giovanna Lopes e Heloísa', auxiliares: [], semCatequista: false, room: 'Sala São Rafael (Sala 07 - Centro Cat.)', hall: 'Centro Catequético' },
+              { id: 't-cj-2', turma: 'Turma 02', dayTime: 'Sábado: 15:00 às 16:30', catechists: 'Artur', auxiliares: [], semCatequista: false, room: 'Sala Santa Jacinta (Sala 05 - Centro Cat.)', hall: 'Centro Catequético' },
+              { id: 't-cj-3', turma: 'Turma 03', dayTime: 'Sábado: 15:00 às 16:30', catechists: 'Alessandra Moraes e Mônica', auxiliares: [], semCatequista: false, room: 'Sala Anjo da Guarda (Sala 02 - Centro Cat.)', hall: 'Centro Catequético' },
+              { id: 't-cj-4', turma: 'Turma 04', dayTime: 'Segunda: 20:00 às 21:30', catechists: 'Amanda, Gabriela e Flávia', auxiliares: [], semCatequista: false, room: 'Sala Carlo Acutis (Sala 08 - Centro Cat.)', hall: 'Centro Catequético' },
+              { id: 't-cj-5', turma: 'Turma 05', dayTime: 'Segunda: 20:00 às 21:30', catechists: 'Anderson e Kéllibe', auxiliares: [], semCatequista: false, room: 'Sala São Miguel (Sala 06 - Centro Cat.)', hall: 'Centro Catequético' },
+              { id: 't-cj-6', turma: 'Turma 06', dayTime: 'Segunda: 20:00 às 21:30', catechists: 'Jonatan', auxiliares: ['Davi'], semCatequista: false, room: 'Sala Protomártires (Sala 01 - Centro Cat.)', hall: 'Centro Catequético' },
+              { id: 't-cj-7', turma: 'Turma 07', dayTime: 'Segunda: 20:00 às 21:30', catechists: 'Tiago e Piante', auxiliares: [], semCatequista: false, room: 'Sala Anjo da Guarda (Sala 02 - Centro Cat.)', hall: 'Centro Catequético' },
+              { id: 't-cj-8', turma: 'Turma 08', dayTime: 'Segunda: 20:00 às 21:30', catechists: 'José Bernardo e Priscila Mesquita', auxiliares: [], semCatequista: false, room: 'Sala São Mateus (Sala 11 - Salão Par.)', hall: 'Salão Paroquial' },
+              { id: 't-cj-9', turma: 'Turma 09', dayTime: 'Segunda: 20:00 às 21:30', catechists: 'Lanuzia', auxiliares: [], semCatequista: false, room: 'Sala São Lucas (Sala 13 - Salão Par.)', hall: 'Salão Paroquial' },
+              { id: 't-cj-10', turma: 'Turma 10', dayTime: 'Segunda: 20:00 às 21:30', catechists: 'Klebson, Heitor e Beatriz', auxiliares: [], semCatequista: false, room: 'Sala São João (Sala 14 - Salão Par.)', hall: 'Salão Paroquial' },
+              { id: 't-cj-11', turma: 'Turma 11', dayTime: 'Segunda: 20:00 às 21:30', catechists: 'Rosilene e Pierre', auxiliares: [], semCatequista: false, room: 'Sala Santa Teresa (Sala 16 - Salão Par.)', hall: 'Salão Paroquial' }
+            ]
+          },
+          {
+            id: 'ca',
+            name: 'Crisma Adultos',
+            coord: 'Daniel',
+            vice: 'Patrícia Gomes',
+            criteria: '+18 anos',
+            colorTheme: 'indigo',
+            turmas: [
+              { id: 't-ca-1', turma: 'Turma 01', dayTime: 'Sábado: 08:30 às 10:15', catechists: 'Letícia, Eduardo, Cauã e Danilo', auxiliares: [], semCatequista: false, room: 'Auditório (Centro Catequético)', hall: 'Centro Catequético' },
+              { id: 't-ca-2', turma: 'Turma 02', dayTime: 'Sábado: 10:15 às 12:00', catechists: 'Fábio, Marcelo, Otávio, Patrícia e Ronaldo', auxiliares: [], semCatequista: false, room: 'Auditório (Centro Catequético)', hall: 'Centro Catequético' },
+              { id: 't-ca-3', turma: 'Turma 03', dayTime: 'Segunda: 20:00 às 22:00', catechists: 'Lorena e Natanai', auxiliares: [], semCatequista: false, room: 'Auditório (Centro Catequético)', hall: 'Centro Catequético', alunosBadge: 31 },
+              { id: 't-ca-4', turma: 'Turma 04', dayTime: 'Segunda: 20:00 às 22:00', catechists: 'Lourival e Thiago Malaquias', auxiliares: [], semCatequista: false, room: 'Sala São Marcos (Sala 12 - Salão Par.)', hall: 'Salão Paroquial', alunosBadge: 19 },
+              { id: 't-ca-5', turma: 'Turma 05', dayTime: 'Sacramento: 03/12/2026 – 19:30', catechists: 'Daniel e Alexandre', auxiliares: [], semCatequista: false, room: 'Sala São Rafael (Sala 07 - Centro Cat.)', hall: 'Centro Catequético' },
+              { id: 't-ca-6', turma: 'Turma 06', dayTime: 'Sacramento: 03/12/2026 – 19:30', catechists: 'Guilherme e Hermes', auxiliares: [], semCatequista: false, room: 'Sala São Francisco Marto (Sala 03 - Centro Cat.)', hall: 'Centro Catequético' },
+              { id: 't-ca-7', turma: 'Turma 07', dayTime: 'Sacramento: 03/12/2026 – 19:30', catechists: 'Thiago e Thais', auxiliares: [], semCatequista: false, room: 'Sala São Miguel (Sala 06 - Centro Cat.)', hall: 'Centro Catequético', alunosBadge: 17 },
+              { id: 't-ca-8', turma: 'Turma 08', dayTime: 'Sacramento: 03/12/2026 – 19:30', catechists: 'Victor e Juliana', auxiliares: [], semCatequista: false, room: 'Sala Santa Jacinta (Sala 05 - Centro Cat.)', hall: 'Centro Catequético' }
+            ]
+          }
+        ]
+      }
+    };
+
+    // Gera o organograma inicial de 2027 a partir de 2026
+    SEED_ORGANOGRAMAS['org-2027'] = JSON.parse(JSON.stringify(SEED_ORGANOGRAMAS['org-2026']));
+    SEED_ORGANOGRAMAS['org-2027'].id = 'org-2027';
+    SEED_ORGANOGRAMAS['org-2027'].name = '2027';
+    SEED_ORGANOGRAMAS['org-2027'].isDefault = false;
+    SEED_ORGANOGRAMAS['org-2027'].title = 'Catequese Paroquial • 2027';
+
+    // Ler dados de organogramas do LocalStorage
+    function getOrganogramasData() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY_ORGANOGRAMAS);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
+            return parsed;
+          }
+        }
+      } catch (e) {
+        console.error('Erro ao ler organogramas do localStorage:', e);
+      }
+      saveOrganogramasData(SEED_ORGANOGRAMAS);
+      return JSON.parse(JSON.stringify(SEED_ORGANOGRAMAS));
+    }
+
+    function saveOrganogramasData(data) {
+      try {
+        localStorage.setItem(STORAGE_KEY_ORGANOGRAMAS, JSON.stringify(data));
+      } catch (e) {
+        console.error('Erro ao salvar organogramas:', e);
+      }
+    }
+
+    function getActiveOrganogramaId() {
+      const data = getOrganogramasData();
+      const storedId = localStorage.getItem(STORAGE_KEY_ACTIVE_ORG_ID);
+      if (storedId && data[storedId]) return storedId;
+      const keys = Object.keys(data);
+      const defaultId = keys.includes('org-2026') ? 'org-2026' : keys[0];
+      localStorage.setItem(STORAGE_KEY_ACTIVE_ORG_ID, defaultId);
+      return defaultId;
+    }
+
+    function setActiveOrganogramaId(id) {
+      const data = getOrganogramasData();
+      if (!data[id]) return;
+      localStorage.setItem(STORAGE_KEY_ACTIVE_ORG_ID, id);
+      renderOrganogramaAll();
+    }
+
+    function getActiveOrganograma() {
+      const data = getOrganogramasData();
+      const id = getActiveOrganogramaId();
+      return data[id] || Object.values(data)[0];
+    }
+
+    function syncMasterScheduleList() {
+      const org = getActiveOrganograma();
+      if (!org || !Array.isArray(org.stages)) {
+        masterScheduleList = [];
+        return;
+      }
+      masterScheduleList = [];
+      org.stages.forEach(st => {
+        if (Array.isArray(st.turmas)) {
+          st.turmas.forEach(t => {
+            masterScheduleList.push({
+              ...t,
+              stage: st.name
+            });
+          });
+        }
+      });
+    }
+
+    // Renderizar Pílulas de Alternância de Organograma
+    function renderOrganogramaPills() {
+      const container = document.getElementById('organograma-pills-list');
+      if (!container) return;
+
+      const data = getOrganogramasData();
+      const activeId = getActiveOrganogramaId();
+      const activeOrg = data[activeId] || Object.values(data)[0];
+
+      // Atualiza Badge do Topo
+      const titleBadge = document.getElementById('org-active-badge-title');
+      const statsBadge = document.getElementById('org-active-stats-pill');
+      let totalTurmas = 0;
+      if (activeOrg && activeOrg.stages) {
+        totalTurmas = activeOrg.stages.reduce((acc, st) => acc + (st.turmas ? st.turmas.length : 0), 0);
+      }
+      if (titleBadge) titleBadge.textContent = `Organograma ${activeOrg.name || 'Oficial'}`;
+      if (statsBadge) statsBadge.textContent = `${totalTurmas} turmas`;
+
+      // Renderiza Pílulas
+      container.innerHTML = Object.values(data).map(org => {
+        const isActive = org.id === activeId;
+        const count = (org.stages || []).reduce((acc, st) => acc + (st.turmas ? st.turmas.length : 0), 0);
+        return `
+          <button onclick="setActiveOrganogramaId('${org.id}')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${isActive ? 'bg-gradient-to-r from-[#d4a94f] to-[#b88d36] text-slate-950 shadow-md shadow-amber-500/20 ring-2 ring-amber-300' : 'bg-slate-800/90 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700'}">
+            <span>📅 ${org.name}</span>
+            <span class="text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${isActive ? 'bg-amber-950 text-amber-200' : 'bg-slate-900 text-slate-400'}">${count}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    // Renderizar Árvore Gráfica
+    function renderOrganogramaTree() {
+      const org = getActiveOrganograma();
+      if (!org) return;
+
+      const headerTitle = document.getElementById('org-tree-header-title');
+      const headerSubtitle = document.getElementById('org-tree-header-subtitle');
+      const footerYear = document.getElementById('org-tree-footer-year');
+      const treeContent = document.getElementById('organograma-tree-content');
+
+      if (headerTitle) headerTitle.textContent = org.title || `Catequese Paroquial • ${org.name}`;
+      if (headerSubtitle) headerSubtitle.textContent = org.subtitle || 'Organograma Geral das Etapas, Turmas e Salas de Encontro';
+      if (footerYear) footerYear.textContent = `Pastoral da Catequese Oficial • ${org.name}`;
+
+      if (!treeContent) return;
+
+      const colorMap = {
+        rose: {
+          bg: 'bg-rose-50',
+          borderHeader: 'border-rose-300',
+          textHeader: 'text-rose-900',
+          badge: 'text-rose-700 bg-rose-100/80',
+          cardBorder: 'border-rose-200 hover:border-rose-400',
+          accent: 'rose'
+        },
+        emerald: {
+          bg: 'bg-emerald-50',
+          borderHeader: 'border-emerald-300',
+          textHeader: 'text-emerald-900',
+          badge: 'text-emerald-700 bg-emerald-100/80',
+          cardBorder: 'border-emerald-200 hover:border-emerald-400',
+          accent: 'emerald'
+        },
+        sky: {
+          bg: 'bg-sky-50',
+          borderHeader: 'border-sky-300',
+          textHeader: 'text-sky-900',
+          badge: 'text-sky-700 bg-sky-100/80',
+          cardBorder: 'border-sky-200 hover:border-sky-400',
+          accent: 'sky'
+        },
+        amber: {
+          bg: 'bg-amber-50',
+          borderHeader: 'border-amber-300',
+          textHeader: 'text-amber-900',
+          badge: 'text-amber-800 bg-amber-100/80',
+          cardBorder: 'border-amber-200 hover:border-amber-400',
+          accent: 'amber'
+        },
+        purple: {
+          bg: 'bg-purple-50',
+          borderHeader: 'border-purple-300',
+          textHeader: 'text-purple-900',
+          badge: 'text-purple-900 bg-purple-100/90 border border-purple-200',
+          cardBorder: 'border-purple-200 hover:border-purple-400',
+          accent: 'purple'
+        },
+        indigo: {
+          bg: 'bg-indigo-50',
+          borderHeader: 'border-indigo-300',
+          textHeader: 'text-indigo-900',
+          badge: 'text-indigo-800 bg-indigo-100/80',
+          cardBorder: 'border-indigo-200 hover:border-indigo-400',
+          accent: 'indigo'
+        }
+      };
+
+      treeContent.innerHTML = (org.stages || []).map((stage, sIdx) => {
+        const colors = colorMap[stage.colorTheme] || colorMap.sky;
+
+        const turmasHtml = (stage.turmas || []).map(t => {
+          let catechistLabel = t.catechists;
+          if (t.semCatequista) {
+            catechistLabel = `<div class="text-[10.5px] text-amber-800 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 inline-block mb-1">⚠️ Auxiliares em formação</div><div class="text-[11px] text-slate-700 font-medium">${t.catechists}</div>`;
+          } else {
+            catechistLabel = `<div class="text-[11px] text-slate-700 font-medium">Catequistas: ${t.catechists}</div>`;
+          }
+
+          let auxHtml = '';
+          if (t.auxiliares && t.auxiliares.length > 0 && !t.semCatequista) {
+            auxHtml = `<div class="text-[10px] text-slate-400 italic">Aux. em formação: ${t.auxiliares.join(', ')}</div>`;
+          }
+
+          let alunosBtn = '';
+          if (t.alunosBadge) {
+            alunosBtn = `
+              <button onclick="openTurmaAlunos('${stage.name}', '${t.turma}')" class="mt-2 w-full flex items-center justify-center gap-1.5 text-[10.5px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 py-1 rounded-lg transition" title="Ver lista de catequizandos">
+                <span>👥</span> <span>Ver Alunos (${t.alunosBadge})</span>
+              </button>
+            `;
+          }
+
+          return `
+            <div class="relative bg-white border ${colors.cardBorder} rounded-xl p-2.5 shadow-2xs transition org-editable group/card" data-stage-id="${stage.id}" data-turma-id="${t.id}">
+              ${orgEditModeActive ? `
+                <div class="absolute -top-2 -right-2 flex items-center gap-1 z-20">
+                  <button onclick="openEditTurmaModal('${t.id}')" class="w-5 h-5 bg-slate-800 hover:bg-slate-900 text-white rounded-full flex items-center justify-center text-[10px] shadow" title="Editar Turma">✏️</button>
+                  <button onclick="deleteTurma('${t.id}')" class="w-5 h-5 bg-rose-600 hover:bg-rose-700 text-white rounded-full flex items-center justify-center text-[10px] shadow" title="Excluir Turma">✕</button>
+                </div>
+              ` : ''}
+              <div class="text-[11px] font-bold text-slate-900 mb-0.5 field-turma-header">${t.turma} • ${t.dayTime}</div>
+              <div class="field-turma-catechists">${catechistLabel}</div>
+              <div class="field-turma-aux">${auxHtml}</div>
+              <div class="text-[10px] text-slate-500 mt-1 font-semibold field-turma-room">${t.room}</div>
+              ${alunosBtn}
+            </div>
+          `;
+        }).join('');
+
+        return `
+          <div class="flex flex-col space-y-2.5" data-stage-id="${stage.id}">
+            <!-- Header da Etapa -->
+            <div class="${colors.bg} border-2 ${colors.borderHeader} rounded-xl p-3 text-center shadow-xs relative">
+              <h3 class="font-bold font-heading ${colors.textHeader} text-sm field-stage-name">${stage.name}</h3>
+              <p class="text-[11px] text-slate-700 font-semibold mt-0.5 field-stage-coord">Coord: ${stage.coord}</p>
+              <p class="text-[10px] text-slate-500 field-stage-vice">Vice: ${stage.vice}</p>
+              <div class="mt-1 text-[9.5px] font-bold ${colors.badge} py-0.5 rounded px-1 field-stage-criteria">Critério: ${stage.criteria}</div>
+            </div>
+
+            <!-- Turmas -->
+            ${turmasHtml}
+
+            <!-- Botão Adicionar Turma nesta Etapa (visível no modo edição) -->
+            ${orgEditModeActive ? `
+              <button onclick="openAddTurmaModal('${stage.name}')" class="w-full py-2 border-2 border-dashed border-slate-300 hover:border-amber-400 hover:bg-amber-50/50 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1">
+                <span>➕</span> <span>Adicionar Turma</span>
+              </button>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Renderizar Cards de Coordenações (Sub-tab Planilha)
+    function renderOrganogramaCoordinators() {
+      const container = document.getElementById('organograma-coordinators-container');
+      if (!container) return;
+
+      const org = getActiveOrganograma();
+      if (!org) return;
+
+      const themeBorderMap = {
+        rose: 'border-rose-500 text-rose-700 bg-rose-50',
+        emerald: 'border-emerald-500 text-emerald-700 bg-emerald-50',
+        sky: 'border-sky-500 text-sky-700 bg-sky-50',
+        amber: 'border-amber-500 text-amber-700 bg-amber-50',
+        purple: 'border-purple-500 text-purple-700 bg-purple-50',
+        indigo: 'border-indigo-500 text-indigo-700 bg-indigo-50'
+      };
+
+      const stageCards = (org.stages || []).map(st => {
+        const count = (st.turmas || []).length;
+        const theme = themeBorderMap[st.colorTheme] || themeBorderMap.sky;
+        const [badgeBorder, textCol, bgCol] = theme.split(' ');
+
+        return `
+          <div class="bg-white p-5 rounded-2xl border-l-4 ${badgeBorder} shadow-sm">
+            <span class="text-[11px] font-bold uppercase ${textCol} ${bgCol} px-2 py-0.5 rounded">${st.name} (${st.criteria})</span>
+            <h4 class="font-bold font-heading text-slate-900 text-base mt-2">Coord: ${st.coord}</h4>
+            <p class="text-xs text-slate-500">Vice: ${st.vice} • <strong>${count} Turma(s)</strong></p>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = `
+        <!-- Coordenação Geral -->
+        <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white p-5 rounded-2xl border-l-4 border-[#d4a94f] shadow-md flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <span class="text-[11px] font-bold uppercase text-[#d4a94f] bg-amber-950/60 px-2 py-0.5 rounded border border-amber-500/30">Coordenação Geral da Catequese • ${org.name}</span>
+            <h4 class="font-bold font-heading text-white text-lg mt-2">Coordenadora: ${org.generalCoord ? org.generalCoord.coord : 'Lorena'}</h4>
+            <p class="text-sm text-slate-300">Vice Coordenador: ${org.generalCoord ? org.generalCoord.vice : 'Andrés'}</p>
+          </div>
+          <button onclick="openEditCoordinatorsModal()" class="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-slate-200 border border-slate-700 px-3.5 py-1.5 rounded-xl text-xs font-bold transition self-start sm:self-center">
+            <span>✏️ Editar Coordenadores</span>
+          </button>
+        </div>
+
+        <!-- 6 Etapas Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          ${stageCards}
+        </div>
+      `;
+    }
+
+    // Renderizar Planilha & Tabela de Turmas
+    function renderScheduleTable() {
+      const tbody = document.getElementById('turmas-table-body');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      const org = getActiveOrganograma();
+      if (!org || !org.stages) return;
+
+      const searchInput = document.getElementById('filter-org-table-search');
+      const etapaFilter = document.getElementById('filter-org-table-etapa');
+
+      const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
+      const selectedEtapa = etapaFilter ? etapaFilter.value : 'all';
+
+      let totalFiltered = 0;
+      let totalAll = 0;
+
+      org.stages.forEach(st => {
+        if (selectedEtapa !== 'all' && st.name !== selectedEtapa) return;
+
+        (st.turmas || []).forEach(r => {
+          totalAll++;
+          const matchQuery = !query || 
+            st.name.toLowerCase().includes(query) ||
+            r.turma.toLowerCase().includes(query) ||
+            r.dayTime.toLowerCase().includes(query) ||
+            r.catechists.toLowerCase().includes(query) ||
+            (r.auxiliares && r.auxiliares.join(' ').toLowerCase().includes(query)) ||
+            r.room.toLowerCase().includes(query) ||
+            r.hall.toLowerCase().includes(query);
+
+          if (!matchQuery) return;
+          totalFiltered++;
+
+          const tr = document.createElement('tr');
+          tr.className = 'hover:bg-amber-50/50 transition';
+
+          let badgeColor = 'bg-slate-100 text-slate-800';
+          if (st.name.includes('Pré')) badgeColor = 'bg-rose-100 text-rose-800';
+          else if (st.name.includes('Eucaristia I') && !st.name.includes('II')) badgeColor = 'bg-emerald-100 text-emerald-800';
+          else if (st.name.includes('Eucaristia II')) badgeColor = 'bg-sky-100 text-sky-800';
+          else if (st.name.includes('Perseverança')) badgeColor = 'bg-amber-100 text-amber-900';
+          else if (st.name.includes('Crisma Jovem')) badgeColor = 'bg-purple-100 text-purple-900';
+          else if (st.name.includes('Crisma Adultos')) badgeColor = 'bg-indigo-100 text-indigo-900';
+
+          let catechistsHtml = '';
+          if (r.semCatequista) {
+            catechistsHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-yellow-100 text-yellow-800 border border-yellow-300">⚠️ Auxiliares em formação</span><div class="text-xs font-semibold text-slate-800 mt-0.5">${r.catechists}</div>`;
+          } else {
+            catechistsHtml = `<span class="font-medium text-slate-900">${r.catechists}</span>`;
+            if (r.auxiliares && r.auxiliares.length > 0) {
+              catechistsHtml += `<div class="text-[11px] text-slate-400 italic mt-0.5">Aux. em formação: ${r.auxiliares.join(', ')}</div>`;
+            }
+          }
+
+          tr.innerHTML = `
+            <td class="py-3 px-4">
+              <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold ${badgeColor}">${st.name}</span>
+              <div class="text-xs font-bold text-slate-900 mt-1">${r.turma}</div>
+            </td>
+            <td class="py-3 px-4 font-semibold text-slate-700 whitespace-nowrap">${r.dayTime}</td>
+            <td class="py-3 px-4">${catechistsHtml}</td>
+            <td class="py-3 px-4 font-bold text-slate-800">${r.room}</td>
+            <td class="py-3 px-4 text-slate-500 text-xs">${r.hall}</td>
+            <td class="py-3 px-4 text-center no-print whitespace-nowrap">
+              <div class="flex items-center justify-center gap-1">
+                <button onclick="openEditTurmaModal('${r.id}')" class="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition" title="Editar Turma">
+                  ✏️
+                </button>
+                <button onclick="deleteTurma('${r.id}')" class="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg transition" title="Excluir Turma">
+                  🗑️
+                </button>
+              </div>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      });
+
+      const caption = document.getElementById('org-table-stats-caption');
+      if (caption) {
+        caption.innerHTML = `Exibindo <strong>${totalFiltered}</strong> de <strong>${totalAll}</strong> turmas do <strong>Organograma ${org.name}</strong>. Todas as alterações são sincronizadas com a Árvore Gráfica.`;
+      }
+    }
+
+    // Renderizar Tudo do Organograma Ativo
+    function renderOrganogramaAll() {
+      syncMasterScheduleList();
+      renderOrganogramaPills();
+      renderOrganogramaTree();
+      renderOrganogramaCoordinators();
+      renderScheduleTable();
+    }
+
+    // =============================================
+    // GESTÃO DE MÚLTIPLOS ORGANOGRAMAS (Ações)
+    // =============================================
+    function criarNovoOrganograma() {
+      const nome = prompt('📅 Digite o Nome / Ano do novo organograma (ex: 2028):');
+      if (!nome || !nome.trim()) return;
+
+      const trimmed = nome.trim();
+      const id = 'org-' + trimmed.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      const data = getOrganogramasData();
+
+      if (data[id]) {
+        alert(`Já existe um organograma com o identificador "${trimmed}".`);
+        return;
+      }
+
+      // Pergunta se deseja copiar do ativo ou começar modelo padrão
+      const activeOrg = getActiveOrganograma();
+      const novo = JSON.parse(JSON.stringify(activeOrg || SEED_ORGANOGRAMAS['org-2026']));
+      novo.id = id;
+      novo.name = trimmed;
+      novo.isDefault = false;
+      novo.title = `Catequese Paroquial • ${trimmed}`;
+      novo.subtitle = 'Organograma Geral das Etapas, Turmas e Salas de Encontro';
+
+      data[id] = novo;
+      saveOrganogramasData(data);
+      setActiveOrganogramaId(id);
+      alert(`🎉 Organograma "${trimmed}" criado com sucesso!`);
+    }
+
+    function duplicarOrganogramaAtivo() {
+      const active = getActiveOrganograma();
+      const novoNome = prompt(`📋 Duplicar organograma "${active.name}". Digite o nome da cópia (ex: ${active.name} - Cópia ou 2028):`, `${active.name} - Cópia`);
+      if (!novoNome || !novoNome.trim()) return;
+
+      const trimmed = novoNome.trim();
+      const id = 'org-' + Date.now();
+      const data = getOrganogramasData();
+
+      const clone = JSON.parse(JSON.stringify(active));
+      clone.id = id;
+      clone.name = trimmed;
+      clone.isDefault = false;
+      clone.title = `Catequese Paroquial • ${trimmed}`;
+
+      data[id] = clone;
+      saveOrganogramasData(data);
+      setActiveOrganogramaId(id);
+      alert(`🎉 Organograma duplicado como "${trimmed}"!`);
+    }
+
+    function renomearOrganogramaAtivo() {
+      const active = getActiveOrganograma();
+      const novoNome = prompt(`✏️ Digite o novo nome para o organograma "${active.name}":`, active.name);
+      if (!novoNome || !novoNome.trim() || novoNome.trim() === active.name) return;
+
+      const trimmed = novoNome.trim();
+      const data = getOrganogramasData();
+      if (data[active.id]) {
+        data[active.id].name = trimmed;
+        data[active.id].title = `Catequese Paroquial • ${trimmed}`;
+        saveOrganogramasData(data);
+        renderOrganogramaAll();
+        alert(`✅ Organograma renomeado para "${trimmed}".`);
+      }
+    }
+
+    function excluirOrganogramaAtivo() {
+      const data = getOrganogramasData();
+      const keys = Object.keys(data);
+
+      if (keys.length <= 1) {
+        alert('Não é possível excluir o único organograma existente.');
+        return;
+      }
+
+      const active = getActiveOrganograma();
+      const pin = prompt(`🔒 Digite a senha de administração (Sicm@2026) para excluir o organograma "${active.name}":`);
+      if (pin !== EDIT_PIN) {
+        if (pin !== null) alert('Senha incorreta. Exclusão cancelada.');
+        return;
+      }
+
+      if (!confirm(`Tem certeza absoluta que deseja excluir o organograma "${active.name}" e todas as suas turmas?`)) return;
+
+      delete data[active.id];
+      saveOrganogramasData(data);
+
+      const remainingKey = Object.keys(data)[0];
+      setActiveOrganogramaId(remainingKey);
+      alert(`🗑️ Organograma "${active.name}" excluído.`);
+    }
+
+    function resetOrganogramaDefault() {
+      if (!confirm('Deseja restaurar os organogramas padrão oficiais (2026 e 2027)? Todas as alterações locais em todos os organogramas serão redefinidas.')) return;
+      saveOrganogramasData(SEED_ORGANOGRAMAS);
+      localStorage.setItem(STORAGE_KEY_ACTIVE_ORG_ID, 'org-2026');
+      renderOrganogramaAll();
+      alert('✅ Organogramas restaurados com sucesso para os dados padrão oficiais!');
+    }
+
+    // =============================================
+    // MODAIS DE TURMA E COORDENAÇÃO (Planilha & Edição)
+    // =============================================
+    function openAddTurmaModal(stageName) {
+      const org = getActiveOrganograma();
+      document.getElementById('turma-modal-title').textContent = 'Adicionar Nova Turma';
+      document.getElementById('turma-modal-subtitle').textContent = `Organograma ${org.name}`;
+      document.getElementById('turma-form-id').value = '';
+      
+      const etapaSel = document.getElementById('turma-form-etapa');
+      if (etapaSel) {
+        etapaSel.value = stageName || 'Pré Eucaristia';
+      }
+
+      document.getElementById('turma-form-turma').value = '';
+      document.getElementById('turma-form-daytime').value = 'Sábado: 08:30 às 10:00';
+      document.getElementById('turma-form-catechists').value = '';
+      document.getElementById('turma-form-auxiliares').value = '';
+      document.getElementById('turma-form-semcatequista').checked = false;
+      document.getElementById('turma-form-room').value = '';
+      document.getElementById('turma-form-hall').value = 'Centro Catequético';
+
+      document.getElementById('modal-turma-form').classList.remove('hidden');
+    }
+
+    function openEditTurmaModal(turmaId) {
+      const org = getActiveOrganograma();
+      let foundTurma = null;
+      let foundStage = null;
+
+      (org.stages || []).forEach(st => {
+        (st.turmas || []).forEach(t => {
+          if (t.id === turmaId) {
+            foundTurma = t;
+            foundStage = st;
+          }
+        });
+      });
+
+      if (!foundTurma) return;
+
+      document.getElementById('turma-modal-title').textContent = `Editar ${foundTurma.turma}`;
+      document.getElementById('turma-modal-subtitle').textContent = `${foundStage.name} • Organograma ${org.name}`;
+      document.getElementById('turma-form-id').value = foundTurma.id;
+      document.getElementById('turma-form-etapa').value = foundStage.name;
+      document.getElementById('turma-form-turma').value = foundTurma.turma;
+      document.getElementById('turma-form-daytime').value = foundTurma.dayTime;
+      document.getElementById('turma-form-catechists').value = foundTurma.catechists;
+      document.getElementById('turma-form-auxiliares').value = (foundTurma.auxiliares || []).join(', ');
+      document.getElementById('turma-form-semcatequista').checked = !!foundTurma.semCatequista;
+      document.getElementById('turma-form-room').value = foundTurma.room;
+      document.getElementById('turma-form-hall').value = foundTurma.hall;
+
+      document.getElementById('modal-turma-form').classList.remove('hidden');
+    }
+
+    function closeTurmaModal() {
+      document.getElementById('modal-turma-form').classList.add('hidden');
+    }
+
+    function handleSaveTurmaModal(event) {
+      if (event) event.preventDefault();
+
+      const turmaId = document.getElementById('turma-form-id').value;
+      const etapaName = document.getElementById('turma-form-etapa').value;
+      const turmaName = document.getElementById('turma-form-turma').value.trim();
+      const dayTime = document.getElementById('turma-form-daytime').value.trim();
+      const catechists = document.getElementById('turma-form-catechists').value.trim();
+      const auxRaw = document.getElementById('turma-form-auxiliares').value.trim();
+      const semCatequista = document.getElementById('turma-form-semcatequista').checked;
+      const room = document.getElementById('turma-form-room').value.trim();
+      const hall = document.getElementById('turma-form-hall').value.trim();
+
+      const auxiliares = auxRaw ? auxRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+      const data = getOrganogramasData();
+      const activeId = getActiveOrganogramaId();
+      const org = data[activeId];
+      if (!org) return;
+
+      const stage = (org.stages || []).find(st => st.name === etapaName);
+      if (!stage) {
+        alert('Etapa não encontrada.');
+        return;
+      }
+
+      if (turmaId) {
+        // Edit existing: Remove from wherever it was and insert into target stage
+        (org.stages || []).forEach(st => {
+          st.turmas = (st.turmas || []).filter(t => t.id !== turmaId);
+        });
+
+        stage.turmas.push({
+          id: turmaId,
+          turma: turmaName,
+          dayTime,
+          catechists,
+          auxiliares,
+          semCatequista,
+          room,
+          hall
+        });
+      } else {
+        // Create new
+        const newId = 't-' + Date.now();
+        if (!stage.turmas) stage.turmas = [];
+        stage.turmas.push({
+          id: newId,
+          turma: turmaName,
+          dayTime,
+          catechists,
+          auxiliares,
+          semCatequista,
+          room,
+          hall
+        });
+      }
+
+      saveOrganogramasData(data);
+      closeTurmaModal();
+      renderOrganogramaAll();
+    }
+
+    function deleteTurma(turmaId) {
+      if (!confirm('Deseja realmente remover esta turma deste organograma?')) return;
+
+      const data = getOrganogramasData();
+      const activeId = getActiveOrganogramaId();
+      const org = data[activeId];
+      if (!org) return;
+
+      (org.stages || []).forEach(st => {
+        st.turmas = (st.turmas || []).filter(t => t.id !== turmaId);
+      });
+
+      saveOrganogramasData(data);
+      renderOrganogramaAll();
+    }
+
+    // Modal de Edição de Coordenações
+    function openEditCoordinatorsModal() {
+      const org = getActiveOrganograma();
+      if (!org) return;
+
+      document.getElementById('coord-modal-org-subtitle').textContent = `Organograma ${org.name}`;
+      document.getElementById('coord-input-geral-nome').value = org.generalCoord ? org.generalCoord.coord : 'Lorena';
+      document.getElementById('coord-input-geral-vice').value = org.generalCoord ? org.generalCoord.vice : 'Andrés';
+
+      const list = document.getElementById('coord-stage-inputs-list');
+      if (list) {
+        list.innerHTML = (org.stages || []).map((st, idx) => `
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <h5 class="font-bold text-xs uppercase text-slate-800 font-heading">${st.name}</h5>
+              <span class="text-[10px] bg-slate-200 px-2 py-0.5 rounded-full font-bold text-slate-700">${(st.turmas || []).length} turmas</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <div>
+                <label class="block text-[10px] font-bold text-slate-600 uppercase mb-0.5">Coordenador(a)</label>
+                <input type="text" id="coord-stage-name-${st.id}" value="${st.coord || ''}" class="w-full border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-800 bg-white outline-none">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-600 uppercase mb-0.5">Vice-Coordenador(a)</label>
+                <input type="text" id="coord-stage-vice-${st.id}" value="${st.vice || ''}" class="w-full border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-800 bg-white outline-none">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-600 uppercase mb-0.5">Critério de Idade</label>
+                <input type="text" id="coord-stage-criteria-${st.id}" value="${st.criteria || ''}" class="w-full border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-800 bg-white outline-none">
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      document.getElementById('modal-edit-coordenacoes').classList.remove('hidden');
+    }
+
+    function closeCoordinatorsModal() {
+      document.getElementById('modal-edit-coordenacoes').classList.add('hidden');
+    }
+
+    function handleSaveCoordinatorsModal(event) {
+      if (event) event.preventDefault();
+
+      const data = getOrganogramasData();
+      const activeId = getActiveOrganogramaId();
+      const org = data[activeId];
+      if (!org) return;
+
+      org.generalCoord = {
+        coord: document.getElementById('coord-input-geral-nome').value.trim(),
+        vice: document.getElementById('coord-input-geral-vice').value.trim()
+      };
+
+      (org.stages || []).forEach(st => {
+        const coordInput = document.getElementById(`coord-stage-name-${st.id}`);
+        const viceInput = document.getElementById(`coord-stage-vice-${st.id}`);
+        const critInput = document.getElementById(`coord-stage-criteria-${st.id}`);
+
+        if (coordInput) st.coord = coordInput.value.trim();
+        if (viceInput) st.vice = viceInput.value.trim();
+        if (critInput) st.criteria = critInput.value.trim();
+      });
+
+      saveOrganogramasData(data);
+      closeCoordinatorsModal();
+      renderOrganogramaAll();
+      alert('✅ Coordenações atualizadas com sucesso!');
+    }
+
+    // Exportar Organograma como Excel / CSV
+    function exportOrganogramaExcel() {
+      const org = getActiveOrganograma();
+      if (!org) return;
+
+      const rows = [
+        ['Etapa', 'Turma', 'Dia e Horário', 'Catequistas', 'Auxiliares em Formação', 'Apenas Auxiliares', 'Sala Oficial', 'Prédio / Local']
+      ];
+
+      (org.stages || []).forEach(st => {
+        (st.turmas || []).forEach(t => {
+          rows.push([
+            st.name,
+            t.turma,
+            t.dayTime,
+            t.catechists,
+            (t.auxiliares || []).join(', '),
+            t.semCatequista ? 'Sim' : 'Não',
+            t.room,
+            t.hall
+          ]);
+        });
+      });
+
+      if (typeof XLSX !== 'undefined') {
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, `Turmas ${org.name}`);
+        XLSX.writeFile(wb, `organograma-turmas-catequese-${org.name}.xlsx`);
+      } else {
+        // CSV Fallback
+        const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.map(x => `"${(x||'').replace(/"/g, '""')}"`).join(",")).join("\n");
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `organograma-turmas-catequese-${org.name}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    }
+
+    // =============================================
+    // EDIÇÃO NO GRÁFICO (Árvore) & EXPORTAÇÃO DE IMAGEM
+    // =============================================
+    function toggleOrganogramaEdit() {
+      const btn = document.getElementById('btn-edit-org');
+      const label = document.getElementById('btn-edit-org-label');
+      const btnSave = document.getElementById('btn-save-org');
+      const hint = document.getElementById('org-edit-hint');
+
+      if (orgEditModeActive) {
+        orgEditModeActive = false;
+        if (label) label.textContent = '✏️ Editar no Gráfico';
+        if (btn) btn.className = 'inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition';
+        if (btnSave) btnSave.classList.add('hidden');
+        if (hint) hint.classList.add('hidden');
+        renderOrganogramaTree();
+        return;
+      }
+
+      const pin = prompt('🔒 Digite a senha de administração (Sicm@2026) para editar o gráfico:');
+      if (pin === EDIT_PIN) {
+        orgEditModeActive = true;
+        if (label) label.textContent = '🔓 Concluir Edição';
+        if (btn) btn.className = 'inline-flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 font-bold px-3.5 py-2 rounded-xl text-xs transition';
+        if (btnSave) btnSave.classList.remove('hidden');
+        if (hint) hint.classList.remove('hidden');
+        renderOrganogramaTree();
+      } else if (pin !== null) {
+        alert('Senha incorreta.');
+      }
+    }
+
+    function saveOrganogramaEdits() {
+      // Salva e atualiza o estado
+      renderOrganogramaAll();
+      alert('✅ Alterações no organograma sincronizadas e salvas com sucesso!');
+      if (orgEditModeActive) toggleOrganogramaEdit();
+    }
 
     function switchOrganogramaSubTab(tab) {
       const viewArvore = document.getElementById('subview-arvore');
@@ -3748,7 +4346,7 @@
       } else {
         if (viewArvore) viewArvore.classList.add('hidden');
         if (viewTabela) viewTabela.classList.remove('hidden');
-        if (toolbar) toolbar.classList.add('hidden');
+        if (toolbar) toolbar.classList.remove('hidden');
 
         if (btnArvore) {
           btnArvore.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition text-slate-600 hover:text-slate-900 hover:bg-slate-100';
@@ -3759,27 +4357,26 @@
       }
     }
 
-    // 📸 Exportação de Imagem (PNG) usando html2canvas
     async function exportOrganogramaImage() {
       const container = document.getElementById('organograma-tree-container');
       if (!container) return;
 
       if (typeof html2canvas === 'undefined') {
-        alert('A biblioteca de geração de imagens ainda está carregando. Por favor, aguarde 2 segundos e tente novamente.');
+        alert('Aguarde um momento enquanto a ferramenta de imagem é inicializada...');
         return;
       }
 
+      const org = getActiveOrganograma();
       const btn = document.getElementById('btn-export-img');
       const originalText = btn ? btn.innerHTML : '';
       if (btn) btn.innerHTML = '<span>⏳ Renderizando Imagem...</span>';
 
-      // Salva estado de overflow temporariamente
       const prevTransform = container.style.transform;
       container.style.transform = 'none';
 
       try {
         const canvas = await html2canvas(container, {
-          scale: 2, // Alta resolução (Retina display quality)
+          scale: 2,
           useCORS: true,
           logging: false,
           backgroundColor: '#ffffff',
@@ -3788,93 +4385,17 @@
 
         const imageUri = canvas.toDataURL('image/png');
         const link = document.createElement('a');
-        link.download = 'organograma-catequese-icm-2026.png';
+        link.download = `organograma-catequese-icm-${org ? org.name : '2026'}.png`;
         link.href = imageUri;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
       } catch (err) {
         console.error('Erro ao exportar imagem:', err);
-        alert('Ocorreu um erro ao gerar a imagem PNG. Você também pode usar a opção de Imprimir / Salvar como PDF.');
+        alert('Ocorreu um erro ao gerar a imagem PNG. Você também pode usar a opção Imprimir / Salvar PDF.');
       } finally {
         container.style.transform = prevTransform;
         if (btn) btn.innerHTML = originalText;
-      }
-    }
-
-    // ✏️ Edição Direta nos Cards do Organograma (WYSIWYG)
-    function toggleOrganogramaEdit() {
-      const btn = document.getElementById('btn-edit-org');
-      const label = document.getElementById('btn-edit-org-label');
-      const btnSave = document.getElementById('btn-save-org');
-      const btnReset = document.getElementById('btn-reset-org');
-      const hint = document.getElementById('org-edit-hint');
-      const editables = document.querySelectorAll('.org-editable');
-
-      if (orgEditModeActive) {
-        // Desativar edição
-        orgEditModeActive = false;
-        if (label) label.textContent = '✏️ Editar Diretamente';
-        if (btn) btn.className = 'inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition';
-        if (btnSave) btnSave.classList.add('hidden');
-        if (btnReset) btnReset.classList.add('hidden');
-        if (hint) hint.classList.add('hidden');
-
-        editables.forEach(el => {
-          el.contentEditable = 'false';
-          el.classList.remove('ring-2', 'ring-amber-400', 'ring-offset-1', 'bg-amber-50/20');
-        });
-        return;
-      }
-
-      const pin = prompt('🔒 Digite a senha de administração (Sicm@2026) para editar o organograma:');
-      if (pin === EDIT_PIN) {
-        orgEditModeActive = true;
-        if (label) label.textContent = '🔓 Cancelar Edição';
-        if (btn) btn.className = 'inline-flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 font-bold px-3.5 py-2 rounded-xl text-xs transition';
-        if (btnSave) btnSave.classList.remove('hidden');
-        if (btnReset) btnReset.classList.remove('hidden');
-        if (hint) hint.classList.remove('hidden');
-
-        editables.forEach(el => {
-          el.contentEditable = 'true';
-          el.classList.add('ring-2', 'ring-amber-400', 'ring-offset-1', 'bg-amber-50/20');
-        });
-      } else if (pin !== null) {
-        alert('Senha incorreta.');
-      }
-    }
-
-    function saveOrganogramaEdits() {
-      const content = document.getElementById('organograma-tree-content');
-      if (!content) return;
-
-      try {
-        localStorage.setItem(STORAGE_KEY_ORG_CUSTOM, content.innerHTML);
-        alert('✅ Alterações no organograma salvas com sucesso neste dispositivo!');
-      } catch (e) {
-        console.error('Erro ao salvar organograma customizado:', e);
-        alert('Erro ao salvar alterações localmente.');
-      }
-
-      toggleOrganogramaEdit();
-    }
-
-    function resetOrganogramaDefault() {
-      if (!confirm('Deseja realmente restaurar os textos padrão do organograma oficial? Todas as edições manuais deste navegador serão descartadas.')) return;
-      localStorage.removeItem(STORAGE_KEY_ORG_CUSTOM);
-      location.reload();
-    }
-
-    function loadOrganogramaCustomEdits() {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY_ORG_CUSTOM);
-        if (saved) {
-          const content = document.getElementById('organograma-tree-content');
-          if (content) content.innerHTML = saved;
-        }
-      } catch (e) {
-        console.error('Erro ao carregar organograma salvo:', e);
       }
     }
 
@@ -5653,9 +6174,8 @@
     // =============================================
     document.addEventListener('DOMContentLoaded', () => {
       checkSiteAuth();
-      loadOrganogramaCustomEdits();
+      renderOrganogramaAll();
       renderRoomCards();
-      renderScheduleTable();
       renderEventosTimeline();
       populateTurmasSelect('Crisma Adultos', 'Turma 03');
       selectRoom('sala-01', false);
