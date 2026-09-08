@@ -3978,7 +3978,14 @@
         console.error('Erro na autenticação Google:', authErr);
         logAuthDiagnostic(`❌ [${authErr.code || 'ERRO'}]: ${authErr.message || authErr}`, true);
 
-        if (authErr.code === 'auth/unauthorized-domain') {
+        if (authErr.code === 'auth/configuration-not-found' || authErr.code === 'auth/operation-not-allowed') {
+          logAuthDiagnostic('⚠️ Provedor Google NÃO está ativado no Firebase Console do projeto "catequese-icm".', true);
+          logAuthDiagnostic('👉 Solução rápida (1 minuto):', true);
+          logAuthDiagnostic('1. Acesse: https://console.firebase.google.com/project/catequese-icm/authentication/providers', true);
+          logAuthDiagnostic('2. Se solicitado, clique em "Começar" (Get started).', true);
+          logAuthDiagnostic('3. Na lista de Provedores, clique em "Google", marque "Ativar", selecione o e-mail de suporte e clique em "Salvar".', true);
+          showAuthFeedback(`⚠️ O login com Google ainda não foi ativado no Firebase do projeto <strong>catequese-icm</strong>.<br><a href="https://console.firebase.google.com/project/catequese-icm/authentication/providers" target="_blank" class="underline font-bold text-amber-300">Clique aqui para abrir o Firebase Console</a> e ativar o provedor <strong>Google</strong>.`, 'error');
+        } else if (authErr.code === 'auth/unauthorized-domain') {
           const currentHost = window.location.hostname || 'localhost';
           logAuthDiagnostic(`⚠️ O domínio "${currentHost}" não está na lista de Domínios Autorizados no Firebase!`, true);
           logAuthDiagnostic(`👉 Solução: Acesse o Firebase Console > Authentication > Settings > Authorized Domains e adicione "${currentHost}".`, true);
@@ -3986,10 +3993,6 @@
         } else if (authErr.code === 'auth/popup-closed-by-user') {
           logAuthDiagnostic('ℹ️ A janela de login do Google foi fechada antes de selecionar a conta.', true);
           showAuthFeedback('A janela do Google foi fechada antes da conclusão do login. Tente novamente.', 'info');
-        } else if (authErr.code === 'auth/operation-not-allowed') {
-          logAuthDiagnostic('⚠️ O provedor Google não está ativado no Firebase Console.', true);
-          logAuthDiagnostic('👉 Solução: Acesse Firebase Console > Authentication > Sign-in method e ative o provedor "Google".', true);
-          showAuthFeedback('⚠️ O login com Google precisa ser ativado no Firebase Console (Authentication > Sign-in method).', 'error');
         } else if (authErr.code === 'auth/popup-blocked') {
           logAuthDiagnostic('⚠️ Abertura do popup foi bloqueada pelo navegador. Redirecionando...', true);
           showAuthFeedback('Popup bloqueado pelo navegador. Tentando modo de redirecionamento...', 'info');
