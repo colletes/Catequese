@@ -1,15 +1,62 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Eventos: leitura pública, escrita apenas autenticada (PIN validado no client)
-    match /eventos/{eventoId} {
-      allow read: if true;
-      allow write: if request.auth == null; // sem auth SDK, usamos validação no client
+
+    // Funções auxiliares de controle de acesso baseado em papéis (RBAC)
+    function isAuthenticated() {
+      return request.auth != null;
     }
-    // Organograma: leitura pública, escrita bloqueada (dados são hardcoded por ora)
+
+    function isMasterAdmin() {
+      return isAuthenticated() && request.auth.token.email.lower() == 'colletes@gmail.com';
+    }
+
+    function isCoordGeral() {
+      return isAuthenticated() && request.auth.token.email.lower() == 'lorenammoraes@gmail.com';
+    }
+
+    function isCoordOrAdmin() {
+      return isMasterAdmin() || isCoordGeral();
+    }
+
+    // Perfis de Usuários (Governança e Consentimento LGPD)
+    match /usuarios/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isCoordOrAdmin());
+      allow create, update: if isAuthenticated() && (request.auth.uid == userId || isMasterAdmin());
+      allow delete: if isMasterAdmin();
+    }
+
+    // Dados Sensíveis de Catequizandos (LGPD — Criptografados e Restritos)
+    match /catequizandos_seguros/{docId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated();
+      allow delete: if isCoordOrAdmin();
+    }
+
+    // Trilha Perene de Auditoria (Audit Trail — Art. 37 LGPD)
+    // NUNCA alterável ou excluível por qualquer usuário para garantir integridade probatória
+    match /audit_logs/{logId} {
+      allow read: if isCoordOrAdmin();
+      allow create: if isAuthenticated();
+      allow update, delete: if false;
+    }
+
+    // Modelos de Notificações e Mensagens (WhatsApp e E-mail)
+    match /notificacoes_templates/{templateId} {
+      allow read: if isAuthenticated();
+      allow write: if isCoordOrAdmin();
+    }
+
+    // Eventos, Retiros e Cronograma Pastoral
+    match /eventos/{eventoId} {
+      allow read: if isAuthenticated();
+      allow write: if isCoordOrAdmin();
+    }
+
+    // Organogramas Oficiais
     match /organograma/{docId} {
-      allow read: if true;
-      allow write: if false;
+      allow read: if isAuthenticated();
+      allow write: if isCoordOrAdmin();
     }
   }
 }
