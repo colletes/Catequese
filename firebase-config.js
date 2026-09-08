@@ -5,12 +5,12 @@
 // ==========================================================================
 
 const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyD-ICM-Catequese2026-AppSecureKey",
+  apiKey: "AIzaSyAWrOAoRIfWQTerWqP4TO-XlQ8xuk192vU",
   authDomain: "catequese-icm.firebaseapp.com",
   projectId: "catequese-icm",
-  storageBucket: "catequese-icm.appspot.com",
-  messagingSenderId: "109876543210",
-  appId: "1:109876543210:web:icmcatequese2026hash"
+  storageBucket: "catequese-icm.firebasestorage.app",
+  messagingSenderId: "30745657329",
+  appId: "1:30745657329:web:0ff21f4671238f64fa0e50"
 };
 
 // Chave do Cloudflare Turnstile (Site Key pública)

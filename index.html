@@ -227,30 +227,8 @@
         <span class="font-heading">Entrar com Conta Google</span>
       </button>
 
-      <!-- Acesso Rápido de Coordenação (1-Clique) -->
-      <div class="mb-3 space-y-1.5">
-        <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider font-heading">
-          Acesso Rápido de Coordenação:
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-          <button
-            type="button"
-            onclick="quickLoginAs('colletes@gmail.com')"
-            class="px-2.5 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-[#d4a94f] text-xs font-bold transition flex items-center justify-center gap-1.5 active:scale-98 shadow-xs"
-            title="Entrar imediatamente como Thiago Carvalho (Master Admin)"
-          >
-            <span>👑</span> <span class="truncate">Thiago (Master Admin)</span>
-          </button>
-          <button
-            type="button"
-            onclick="quickLoginAs('Lorenammoraes@gmail.com')"
-            class="px-2.5 py-2 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/40 text-indigo-300 text-xs font-bold transition flex items-center justify-center gap-1.5 active:scale-98 shadow-xs"
-            title="Entrar imediatamente como Lorena Moraes (Coordenadora Geral)"
-          >
-            <span>⭐</span> <span class="truncate">Lorena (Coordenação)</span>
-          </button>
-        </div>
-      </div>
+      <!-- Console de Diagnóstico em Tempo Real do Login -->
+      <div id="auth-diagnostic-log" class="hidden text-[11px] font-mono p-3 rounded-xl border border-slate-700 bg-slate-950/90 text-slate-300 text-left space-y-1 mb-3 max-h-36 overflow-y-auto shadow-inner"></div>
 
       <!-- Divisor -->
       <div class="relative my-3">
@@ -2702,97 +2680,6 @@
   </footer>
 
   <!-- ======================================================= -->
-  <!-- MODAL: SELETOR DE CONTA GOOGLE PASTORAL                 -->
-  <!-- ======================================================= -->
-  <div id="modal-google-selector" class="hidden fixed inset-0 z-[65] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border-2 border-[#d4a94f] overflow-hidden my-auto p-6 space-y-4 text-left relative">
-      
-      <!-- Close Button -->
-      <button onclick="closeGoogleAccountSelector()" class="absolute right-4 top-4 text-slate-400 hover:text-slate-800 p-1.5 rounded-xl hover:bg-slate-100 transition text-sm">
-        ✕
-      </button>
-
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-2xl bg-amber-500/15 border border-amber-400/40 flex items-center justify-center text-xl flex-shrink-0">
-          🔑
-        </div>
-        <div>
-          <span class="text-[10px] font-bold uppercase tracking-widest text-[#b88d36] font-heading">Autenticação Institucional</span>
-          <h3 class="text-base font-bold font-heading text-slate-900">Selecione sua Conta Google</h3>
-        </div>
-      </div>
-
-      <p class="text-xs text-slate-600">
-        Escolha a sua conta para acessar o painel pastoral seguro com os privilégios correspondentes:
-      </p>
-
-      <!-- Account Cards -->
-      <div class="space-y-2 pt-1">
-        
-        <!-- Thiago Carvalho -->
-        <button
-          type="button"
-          onclick="selectGoogleAccount('colletes@gmail.com', 'Thiago Carvalho')"
-          class="w-full p-3 rounded-2xl bg-amber-50/80 hover:bg-amber-100/90 border border-amber-300 transition text-left flex items-center gap-3 group"
-        >
-          <div class="w-10 h-10 rounded-xl bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center shadow-xs flex-shrink-0 group-hover:scale-105 transition">
-            TC
-          </div>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center justify-between">
-              <span class="font-bold text-slate-900 text-xs truncate">Thiago Carvalho</span>
-              <span class="bg-amber-200 text-amber-950 text-[9.5px] font-black uppercase px-2 py-0.5 rounded-full">👑 Master Admin</span>
-            </div>
-            <div class="text-[11px] text-amber-900 font-mono truncate">colletes@gmail.com</div>
-          </div>
-        </button>
-
-        <!-- Lorena Moraes -->
-        <button
-          type="button"
-          onclick="selectGoogleAccount('Lorenammoraes@gmail.com', 'Lorena Moraes')"
-          class="w-full p-3 rounded-2xl bg-indigo-50/80 hover:bg-indigo-100/90 border border-indigo-200 transition text-left flex items-center gap-3 group"
-        >
-          <div class="w-10 h-10 rounded-xl bg-indigo-500 text-white font-black text-xs flex items-center justify-center shadow-xs flex-shrink-0 group-hover:scale-105 transition">
-            LM
-          </div>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center justify-between">
-              <span class="font-bold text-slate-900 text-xs truncate">Lorena Moraes</span>
-              <span class="bg-indigo-200 text-indigo-950 text-[9.5px] font-black uppercase px-2 py-0.5 rounded-full">⭐ Coordenação</span>
-            </div>
-            <div class="text-[11px] text-indigo-900 font-mono truncate">Lorenammoraes@gmail.com</div>
-          </div>
-        </button>
-
-      </div>
-
-      <!-- Option to type other email -->
-      <div class="pt-2 border-t border-slate-200">
-        <label for="input-custom-google-email" class="block text-[11px] font-bold text-slate-700 mb-1">
-          Ou entrar com outro e-mail Google:
-        </label>
-        <div class="flex gap-2">
-          <input
-            id="input-custom-google-email"
-            type="email"
-            placeholder="outro.catequista@gmail.com"
-            class="flex-1 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 outline-none focus:border-[#d4a94f]"
-          />
-          <button
-            type="button"
-            onclick="submitCustomGoogleAccount()"
-            class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition"
-          >
-            Acessar
-          </button>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ======================================================= -->
   <!-- MODAL 1: TERMOS DE USO E POLÍTICA DE PRIVACIDADE (LGPD)  -->
   <!-- Interceptação obrigatória no primeiro login             -->
   <!-- ======================================================= -->
@@ -4035,91 +3922,83 @@
       unlockSystem(userData, role);
     }
 
+    // Logger de diagnóstico visível na tela de login
+    function logAuthDiagnostic(msg, isError = false) {
+      const consoleBox = document.getElementById('auth-diagnostic-log');
+      if (!consoleBox) return;
+      consoleBox.classList.remove('hidden');
+      const time = new Date().toLocaleTimeString('pt-BR');
+      const colorClass = isError ? 'text-rose-400 font-semibold' : 'text-slate-300';
+      consoleBox.innerHTML += `<div class="${colorClass}">[${time}] ${msg}</div>`;
+      consoleBox.scrollTop = consoleBox.scrollHeight;
+    }
+
     // Login com Conta Google
     async function handleGoogleAuth() {
+      const consoleBox = document.getElementById('auth-diagnostic-log');
+      if (consoleBox) consoleBox.innerHTML = '';
+
       if (!window.appAuthState.turnstileVerified) {
         showAuthFeedback('⚠️ Por favor, conclua a verificação anti-bot antes de prosseguir.', 'error');
+        logAuthDiagnostic('⚠️ Verificação anti-bot (Turnstile) ainda não foi confirmada.', true);
         return;
       }
 
-      // Se houver Firebase com API key real configurada, tenta o popup nativo
-      if (firebaseAuth && window.ICM_CONFIG && window.ICM_CONFIG.firebaseConfig.apiKey !== 'AIzaSyD-ICM-Catequese2026-AppSecureKey') {
-        showAuthFeedback('⏳ Abrindo autenticação segura do Google...', 'info');
-        try {
+      logAuthDiagnostic('🛡️ Anti-bot confirmado.');
+      logAuthDiagnostic('🌐 Inicializando Firebase Auth Provider para Google...');
+
+      if (!firebaseAuth) {
+        logAuthDiagnostic('❌ Firebase Auth SDK não está inicializado no navegador.', true);
+        showAuthFeedback('Erro: Serviço de autenticação não inicializado.', 'error');
+        return;
+      }
+
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+        
+        logAuthDiagnostic('🚀 Abrindo janela de autenticação oficial do Google (signInWithPopup)...');
+        showAuthFeedback('⏳ Selecione sua conta na janela do Google...', 'info');
+
+        const result = await firebaseAuth.signInWithPopup(provider);
+        if (result && result.user) {
+          logAuthDiagnostic('✅ Google retornou credenciais válidas com sucesso!');
+          logAuthDiagnostic('👤 Usuário autenticado: ' + result.user.email);
+
+          const userData = {
+            uid: result.user.uid,
+            email: result.user.email,
+            displayName: result.user.displayName || result.user.email.split('@')[0],
+            photoURL: result.user.photoURL
+          };
+          processAuthCandidate(userData);
+          return;
+        }
+      } catch (authErr) {
+        console.error('Erro na autenticação Google:', authErr);
+        logAuthDiagnostic(`❌ [${authErr.code || 'ERRO'}]: ${authErr.message || authErr}`, true);
+
+        if (authErr.code === 'auth/unauthorized-domain') {
+          const currentHost = window.location.hostname || 'localhost';
+          logAuthDiagnostic(`⚠️ O domínio "${currentHost}" não está na lista de Domínios Autorizados no Firebase!`, true);
+          logAuthDiagnostic(`👉 Solução: Acesse o Firebase Console > Authentication > Settings > Authorized Domains e adicione "${currentHost}".`, true);
+          showAuthFeedback(`⚠️ Domínio não autorizado no Firebase: <strong>${currentHost}</strong>. Adicione-o em Firebase Console > Authentication > Settings > Authorized Domains.`, 'error');
+        } else if (authErr.code === 'auth/popup-closed-by-user') {
+          logAuthDiagnostic('ℹ️ A janela de login do Google foi fechada antes de selecionar a conta.', true);
+          showAuthFeedback('A janela do Google foi fechada antes da conclusão do login. Tente novamente.', 'info');
+        } else if (authErr.code === 'auth/operation-not-allowed') {
+          logAuthDiagnostic('⚠️ O provedor Google não está ativado no Firebase Console.', true);
+          logAuthDiagnostic('👉 Solução: Acesse Firebase Console > Authentication > Sign-in method e ative o provedor "Google".', true);
+          showAuthFeedback('⚠️ O login com Google precisa ser ativado no Firebase Console (Authentication > Sign-in method).', 'error');
+        } else if (authErr.code === 'auth/popup-blocked') {
+          logAuthDiagnostic('⚠️ Abertura do popup foi bloqueada pelo navegador. Redirecionando...', true);
+          showAuthFeedback('Popup bloqueado pelo navegador. Tentando modo de redirecionamento...', 'info');
           const provider = new firebase.auth.GoogleAuthProvider();
-          const result = await firebaseAuth.signInWithPopup(provider);
-          if (result && result.user) {
-            const userData = {
-              uid: result.user.uid,
-              email: result.user.email,
-              displayName: result.user.displayName || result.user.email.split('@')[0],
-              photoURL: result.user.photoURL
-            };
-            processAuthCandidate(userData);
-            return;
-          }
-        } catch (authErr) {
-          console.warn('Google Popup do Firebase reportou:', authErr);
+          firebaseAuth.signInWithRedirect(provider);
+        } else {
+          showAuthFeedback(`Erro ao autenticar com Google: [${authErr.code || 'auth-error'}] ${authErr.message}`, 'error');
         }
       }
-
-      // Abre imediatamente o Seletor de Contas Google pastoral na tela
-      openGoogleAccountSelector();
-    }
-
-    // Atalho rápido de acesso (1-clique)
-    function quickLoginAs(email) {
-      if (!window.appAuthState.turnstileVerified) {
-        showAuthFeedback('⚠️ Por favor, conclua a verificação anti-bot antes de prosseguir.', 'error');
-        return;
-      }
-      const cleanEmail = email.trim().toLowerCase();
-      const displayName = cleanEmail === 'colletes@gmail.com' ? 'Thiago Carvalho' : (cleanEmail === 'lorenammoraes@gmail.com' ? 'Lorena Moraes' : cleanEmail.split('@')[0]);
-      const userData = {
-        uid: 'user-' + btoa(cleanEmail).replace(/=/g, ''),
-        email: cleanEmail,
-        displayName: displayName,
-        photoURL: null
-      };
-      processAuthCandidate(userData);
-    }
-
-    function openGoogleAccountSelector() {
-      const modal = document.getElementById('modal-google-selector');
-      if (modal) modal.classList.remove('hidden');
-    }
-
-    function closeGoogleAccountSelector() {
-      const modal = document.getElementById('modal-google-selector');
-      if (modal) modal.classList.add('hidden');
-    }
-
-    function selectGoogleAccount(email, name) {
-      closeGoogleAccountSelector();
-      const userData = {
-        uid: 'user-' + btoa(email.toLowerCase()).replace(/=/g, ''),
-        email: email.toLowerCase(),
-        displayName: name,
-        photoURL: null
-      };
-      processAuthCandidate(userData);
-    }
-
-    function submitCustomGoogleAccount() {
-      const input = document.getElementById('input-custom-google-email');
-      const email = (input ? input.value : '').trim().toLowerCase();
-      if (!email || !email.includes('@')) {
-        alert('Por favor, digite um e-mail válido.');
-        return;
-      }
-      closeGoogleAccountSelector();
-      const userData = {
-        uid: 'user-' + btoa(email).replace(/=/g, ''),
-        email: email,
-        displayName: email.split('@')[0],
-        photoURL: null
-      };
-      processAuthCandidate(userData);
     }
 
     // Login com E-mail / Senha
