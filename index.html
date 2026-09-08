@@ -350,6 +350,18 @@
           <span id="notif-unread-count" class="bg-rose-500 text-white font-black text-[9.5px] px-1.5 py-0.2 rounded-full shadow-xs">3</span>
         </button>
 
+        <!-- Botão Gestão de Usuários (Master Admin & Coordenação) -->
+        <button
+          id="btn-open-user-mgmt"
+          onclick="openUserManagementModal()"
+          class="hidden relative inline-flex items-center gap-1.5 bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 px-2.5 py-1.5 rounded-xl text-xs transition font-semibold"
+          title="Gestão de Usuários, Aprovação de Acessos e Turmas"
+        >
+          <span class="text-sm">👥</span>
+          <span class="hidden xl:inline">Usuários</span>
+          <span id="user-mgmt-pending-badge" class="hidden bg-amber-500 text-slate-950 font-black text-[10px] px-1.5 py-0.2 rounded-full shadow-xs">0</span>
+        </button>
+
         <!-- Botão Matriz RBAC -->
         <button
           onclick="openRbacMatrixModal()"
@@ -2820,6 +2832,23 @@
         </button>
       </div>
 
+      <!-- Alerta de Solicitações de Acesso Pendentes (Visível para Master Admin e Coordenação) -->
+      <div id="notif-pending-users-alert" class="hidden mx-5 mt-3 p-3.5 rounded-2xl bg-amber-500/15 border border-amber-400/50 flex items-center justify-between gap-3 text-xs text-amber-950 shadow-xs">
+        <div class="flex items-center gap-2.5">
+          <span class="text-xl">👥</span>
+          <div>
+            <span class="font-bold font-heading text-slate-900 block" id="notif-pending-users-text">1 Novo catequista aguardando aprovação de acesso</span>
+            <span class="text-[11px] text-slate-600">Vincule a etapa e a turma para liberar a visualização restrita aos alunos dele (LGPD).</span>
+          </div>
+        </div>
+        <button
+          onclick="closeCentralNotificacoesModal(); openUserManagementModal();"
+          class="px-3 py-1.5 bg-gradient-to-r from-[#d4a94f] to-[#b88d36] hover:from-[#facf75] hover:to-[#d4a94f] text-slate-950 font-bold rounded-xl text-xs shadow-xs transition transform active:scale-95 flex-shrink-0"
+        >
+          Aprovar Acesso →
+        </button>
+      </div>
+
       <!-- Tab Contents Container -->
       <div class="p-5 sm:p-6 overflow-y-auto flex-1 space-y-4">
         
@@ -3194,11 +3223,187 @@
                 <td class="text-center text-slate-400">❌</td>
                 <td class="text-center text-slate-400">❌</td>
                 <td class="text-center text-slate-400">❌</td>
-                <td class="text-center bg-indigo-50/50 text-slate-400">❌</td>
+                <td class="text-center bg-indigo-50/50 font-bold text-indigo-700">✅ Coordenação</td>
                 <td class="text-center bg-amber-50/50 font-bold text-amber-700">✅ Master Admin</td>
               </tr>
             </tbody>
           </table>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- MODAL 5: GESTÃO DE USUÁRIOS, CATEQUISTAS E APROVAÇÕES    -->
+  <!-- Painel de Governança Exclusivo Master Admin & Coordenação-->
+  <!-- ======================================================= -->
+  <div id="modal-user-management" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-4xl w-full shadow-2xl border border-slate-200 overflow-hidden my-auto flex flex-col max-h-[92vh]">
+      
+      <!-- Modal Header -->
+      <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 text-white p-5 border-b border-[#d4a94f]/50 flex items-center justify-between flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-lg flex-shrink-0">
+            👥
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-bold font-heading text-white">Gestão de Usuários, Catequistas &amp; Aprovações</h3>
+            <p class="text-[11px] text-slate-300">Controle de acessos, vinculação de turmas e autorizações LGPD</p>
+          </div>
+        </div>
+        <button onclick="closeUserManagementModal()" class="text-slate-400 hover:text-white p-2 text-lg rounded-xl hover:bg-white/10 transition">
+          ✕
+        </button>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="bg-slate-100 px-5 pt-3 border-b border-slate-200 flex items-center gap-2 overflow-x-auto flex-shrink-0">
+        <button
+          id="btn-tab-usermgmt-pendentes"
+          onclick="switchUserMgmtTab('pendentes')"
+          class="px-4 py-2 rounded-t-xl text-xs font-bold transition border-b-2 border-[#d4a94f] bg-white text-slate-900 shadow-xs flex items-center gap-1.5"
+        >
+          <span>⏳ Solicitações Pendentes</span>
+          <span id="badge-usermgmt-pendentes-count" class="bg-amber-500 text-slate-950 text-[10px] px-1.5 py-0.2 rounded-full font-black">0</span>
+        </button>
+        <button
+          id="btn-tab-usermgmt-autorizados"
+          onclick="switchUserMgmtTab('autorizados')"
+          class="px-4 py-2 rounded-t-xl text-xs font-bold transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5"
+        >
+          <span>👥 Usuários Autorizados</span>
+          <span id="badge-usermgmt-autorizados-count" class="bg-slate-200 text-slate-700 text-[10px] px-1.5 py-0.2 rounded-full font-bold">2</span>
+        </button>
+        <button
+          id="btn-tab-usermgmt-novo"
+          onclick="switchUserMgmtTab('novo')"
+          class="px-4 py-2 rounded-t-xl text-xs font-bold transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5"
+        >
+          <span>➕ Pré-autorizar Catequista</span>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-5 sm:p-6 overflow-y-auto flex-1 space-y-4">
+        
+        <!-- Feedback Box -->
+        <div id="usermgmt-feedback" class="hidden text-xs p-3 rounded-xl border"></div>
+
+        <!-- ABA 1: SOLICITAÇÕES PENDENTES -->
+        <div id="subtab-usermgmt-pendentes" class="space-y-3">
+          <div class="p-3 bg-amber-50/80 rounded-2xl border border-amber-200 text-xs text-amber-950 flex items-start gap-2.5">
+            <span class="text-base mt-0.5">ℹ️</span>
+            <div>
+              <strong>Como funciona a aprovação:</strong> Quando um catequista ou secretário tenta entrar com a Conta Google pela primeira vez, ele é retido preventivamente. Selecione abaixo a função e a turma para conceder acesso imediato em conformidade com a LGPD.
+            </div>
+          </div>
+
+          <div id="list-pending-users-container" class="space-y-3">
+            <!-- Renderizado dinamicamente via renderPendingUsersList() -->
+          </div>
+        </div>
+
+        <!-- ABA 2: USUÁRIOS AUTORIZADOS -->
+        <div id="subtab-usermgmt-autorizados" class="hidden space-y-3">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pb-1">
+            <p class="text-xs text-slate-500">Lista de catequistas, coordenação e secretaria com acesso liberado ao sistema.</p>
+            <input
+              type="text"
+              id="input-search-auth-users"
+              oninput="renderAuthorizedUsersList()"
+              placeholder="Buscar por nome ou e-mail..."
+              class="border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-[#d4a94f] w-full sm:w-64"
+            />
+          </div>
+
+          <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-900 text-white font-heading text-[10.5px] uppercase">
+                <tr>
+                  <th class="py-2.5 px-3">Usuário</th>
+                  <th class="py-2.5 px-3">Papel</th>
+                  <th class="py-2.5 px-3">Turma Vinculada</th>
+                  <th class="py-2.5 px-3 text-center">Termos LGPD</th>
+                  <th class="py-2.5 px-3 text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-authorized-users" class="divide-y divide-slate-200 bg-white">
+                <!-- Renderizado dinamicamente via renderAuthorizedUsersList() -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ABA 3: PRÉ-AUTORIZAR CATEQUISTA -->
+        <div id="subtab-usermgmt-novo" class="hidden space-y-4">
+          <div class="p-3 bg-blue-50/80 rounded-2xl border border-blue-200 text-xs text-blue-950 flex items-start gap-2.5">
+            <span class="text-base mt-0.5">💡</span>
+            <div>
+              <strong>Autorização Prévia:</strong> Você pode liberar um catequista antes mesmo do primeiro acesso dele. Basta informar o e-mail Google e a turma. Ao fazer login, ele será reconhecido instantaneamente!
+            </div>
+          </div>
+
+          <form onsubmit="handlePreAuthorizeSubmit(event)" class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label for="preauth-name" class="block text-xs font-bold text-slate-700 mb-1">Nome Completo do Catequista / Usuário *</label>
+                <input
+                  type="text"
+                  id="preauth-name"
+                  required
+                  placeholder="Ex: Carlos Eduardo Silva"
+                  class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 outline-none focus:border-[#d4a94f]"
+                />
+              </div>
+
+              <div>
+                <label for="preauth-email" class="block text-xs font-bold text-slate-700 mb-1">E-mail Google Oficial (@gmail.com) *</label>
+                <input
+                  type="email"
+                  id="preauth-email"
+                  required
+                  placeholder="carlos.catequese@gmail.com"
+                  class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 outline-none focus:border-[#d4a94f]"
+                />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label for="preauth-role" class="block text-xs font-bold text-slate-700 mb-1">Função / Papel Pastoral *</label>
+                <select
+                  id="preauth-role"
+                  class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 outline-none focus:border-[#d4a94f] bg-white"
+                >
+                  <option value="catequista">📖 Catequista</option>
+                  <option value="coord_etapa">📋 Coordenação de Etapa</option>
+                  <option value="secretaria">🏛️ Secretaria Paroquial</option>
+                  <option value="coord_geral">⭐ Coordenação Geral</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="preauth-turma" class="block text-xs font-bold text-slate-700 mb-1">Turma / Etapa Vinculada *</label>
+                <select
+                  id="preauth-turma"
+                  class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 outline-none focus:border-[#d4a94f] bg-white"
+                >
+                  <!-- Opções geradas via getTurmaOptionsHtml() -->
+                </select>
+              </div>
+            </div>
+
+            <div class="pt-2 flex justify-end">
+              <button
+                type="submit"
+                class="bg-gradient-to-r from-[#d4a94f] to-[#b88d36] hover:from-[#facf75] hover:to-[#d4a94f] text-slate-950 font-black px-5 py-2.5 rounded-xl text-xs shadow-md transition transform active:scale-95 flex items-center gap-2"
+              >
+                <span>✅ Conceder Autorização Prévia</span>
+              </button>
+            </div>
+          </form>
         </div>
 
       </div>
@@ -4039,10 +4244,12 @@
       const role = window.ICM_CONFIG.determineUserRole(userData.email);
 
       // Verificação de Liberação de Acesso:
-      // Se for um novo catequista (role PENDENTE), fica bloqueado até liberação de Thiago ou Lorena
+      // Se for um novo catequista (role PENDENTE), salva na fila de solicitações e bloqueia
       if (role === window.ICM_CONFIG.ROLES.PENDENTE) {
-        showAuthFeedback('⏳ <strong>Conta em Análise:</strong> O seu acesso foi registrado com sucesso! Por exigência de conformidade com a LGPD e proteção de menores, novos catequistas devem ser previamente vinculados à sua turma por Thiago Carvalho (Master Admin) ou Lorena Moraes (Coordenação Geral).', 'warning');
-        window.ICM_CONFIG.logAuditEvent('AUTH_PENDING_ATTEMPT', 'segurança', { email: userData.email });
+        if (window.ICM_CONFIG && typeof window.ICM_CONFIG.recordPendingAccessRequest === 'function') {
+          window.ICM_CONFIG.recordPendingAccessRequest(userData);
+        }
+        showAuthFeedback('⏳ <strong>Conta em Análise:</strong> O seu acesso foi registrado com sucesso! Por exigência de conformidade com a LGPD e proteção de menores, novos catequistas devem ser previamente vinculados à sua turma por Thiago Carvalho (Master Admin) ou Lorena Moraes (Coordenação Geral). Assim que liberado, basta entrar novamente.', 'warning');
         return;
       }
 
@@ -4179,6 +4386,17 @@
           btnAuditLogs.classList.remove('hidden');
         } else {
           btnAuditLogs.classList.add('hidden');
+        }
+      }
+
+      // Botão de Gestão de Usuários (Master Admin & Coordenação Geral)
+      const btnUserMgmt = document.getElementById('btn-open-user-mgmt');
+      if (btnUserMgmt) {
+        if (role === window.ICM_CONFIG.ROLES.MASTER_ADMIN || role === window.ICM_CONFIG.ROLES.COORD_GERAL) {
+          btnUserMgmt.classList.remove('hidden');
+          if (typeof updateUserMgmtBadges === 'function') updateUserMgmtBadges();
+        } else {
+          btnUserMgmt.classList.add('hidden');
         }
       }
 
@@ -4345,6 +4563,422 @@
       window.ICM_CONFIG.logAuditEvent('EXPORT_AUDIT_CSV', 'conformidade_juridica', { totalLogs: logs.length });
     }
 
+    // =======================================================
+    // GESTÃO DE USUÁRIOS, CATEQUISTAS E APROVAÇÕES (RBAC & LGPD)
+    // =======================================================
+    let currentUsermgmtTab = 'pendentes';
+
+    function openUserManagementModal() {
+      const role = window.appAuthState.role;
+      if (role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL) {
+        alert('Acesso restrito ao Master Admin (Thiago Carvalho) e à Coordenação Geral (Lorena Moraes).');
+        return;
+      }
+      const modal = document.getElementById('modal-user-management');
+      if (modal) {
+        modal.classList.remove('hidden');
+        populatePreAuthTurmasSelect();
+        renderUserManagementModal();
+      }
+    }
+
+    function closeUserManagementModal() {
+      const modal = document.getElementById('modal-user-management');
+      if (modal) modal.classList.add('hidden');
+      updateUserMgmtBadges();
+      renderPainelPendencias();
+    }
+
+    function switchUserMgmtTab(tabName) {
+      currentUsermgmtTab = tabName;
+      const tabPendentes = document.getElementById('subtab-usermgmt-pendentes');
+      const tabAutorizados = document.getElementById('subtab-usermgmt-autorizados');
+      const tabNovo = document.getElementById('subtab-usermgmt-novo');
+
+      const btnPendentes = document.getElementById('btn-tab-usermgmt-pendentes');
+      const btnAutorizados = document.getElementById('btn-tab-usermgmt-autorizados');
+      const btnNovo = document.getElementById('btn-tab-usermgmt-novo');
+
+      // Oculta todas as abas
+      if (tabPendentes) tabPendentes.classList.add('hidden');
+      if (tabAutorizados) tabAutorizados.classList.add('hidden');
+      if (tabNovo) tabNovo.classList.add('hidden');
+
+      // Reseta estilo dos botões
+      [btnPendentes, btnAutorizados, btnNovo].forEach(b => {
+        if (b) {
+          b.className = 'px-4 py-2 rounded-t-xl text-xs font-bold transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5';
+        }
+      });
+
+      const activeBtnClass = 'px-4 py-2 rounded-t-xl text-xs font-bold transition border-b-2 border-[#d4a94f] bg-white text-slate-900 shadow-xs flex items-center gap-1.5';
+
+      if (tabName === 'pendentes') {
+        if (tabPendentes) tabPendentes.classList.remove('hidden');
+        if (btnPendentes) btnPendentes.className = activeBtnClass;
+        renderPendingUsersList();
+      } else if (tabName === 'autorizados') {
+        if (tabAutorizados) tabAutorizados.classList.remove('hidden');
+        if (btnAutorizados) btnAutorizados.className = activeBtnClass;
+        renderAuthorizedUsersList();
+      } else if (tabName === 'novo') {
+        if (tabNovo) tabNovo.classList.remove('hidden');
+        if (btnNovo) btnNovo.className = activeBtnClass;
+        populatePreAuthTurmasSelect();
+      }
+    }
+
+    function renderUserManagementModal() {
+      renderPendingUsersList();
+      renderAuthorizedUsersList();
+      updateUserMgmtBadges();
+      switchUserMgmtTab(currentUsermgmtTab);
+    }
+
+    function updateUserMgmtBadges() {
+      if (!window.ICM_CONFIG || typeof window.ICM_CONFIG.getPendingUsers !== 'function') return;
+      const pending = window.ICM_CONFIG.getPendingUsers();
+      const authUsers = window.ICM_CONFIG.getAuthorizedUsers();
+
+      const badgeHeader = document.getElementById('user-mgmt-pending-badge');
+      const badgeTabPending = document.getElementById('badge-usermgmt-pendentes-count');
+      const badgeTabAuth = document.getElementById('badge-usermgmt-autorizados-count');
+      const notifPendingAlert = document.getElementById('notif-pending-users-alert');
+      const notifPendingText = document.getElementById('notif-pending-users-text');
+
+      if (badgeHeader) {
+        badgeHeader.textContent = pending.length;
+        if (pending.length > 0) badgeHeader.classList.remove('hidden');
+        else badgeHeader.classList.add('hidden');
+      }
+
+      if (badgeTabPending) badgeTabPending.textContent = pending.length;
+      if (badgeTabAuth) badgeTabAuth.textContent = authUsers.length;
+
+      if (notifPendingAlert && notifPendingText) {
+        if (pending.length > 0) {
+          notifPendingAlert.classList.remove('hidden');
+          notifPendingText.textContent = `${pending.length} novo(s) catequista(s) aguardando aprovação de acesso`;
+        } else {
+          notifPendingAlert.classList.add('hidden');
+        }
+      }
+    }
+
+    function getTurmaOptionsHtml(selectedVal = '') {
+      let html = `<option value="todas">Todas as Turmas (Acesso Amplo)</option>`;
+      if (typeof masterScheduleList !== 'undefined' && Array.isArray(masterScheduleList)) {
+        const grouped = {};
+        masterScheduleList.forEach(item => {
+          if (!grouped[item.stage]) grouped[item.stage] = [];
+          grouped[item.stage].push(item);
+        });
+        Object.entries(grouped).forEach(([stage, list]) => {
+          html += `<optgroup label="${stage}">`;
+          list.forEach(t => {
+            const val = `${stage} • ${t.turma}`;
+            const isSel = (val === selectedVal) ? 'selected' : '';
+            html += `<option value="${val}" ${isSel}>${stage} - ${t.turma} (${t.time} • ${t.catechists})</option>`;
+          });
+          html += `</optgroup>`;
+        });
+      } else {
+        html += `
+          <option value="Eucaristia 1 • Turma Sábado">Eucaristia 1 • Turma Sábado</option>
+          <option value="Eucaristia 2 • Turma Sábado">Eucaristia 2 • Turma Sábado</option>
+          <option value="Crisma 1 • Turma Sábado">Crisma 1 • Turma Sábado</option>
+          <option value="Crisma 2 • Turma Sábado">Crisma 2 • Turma Sábado</option>
+        `;
+      }
+      return html;
+    }
+
+    function populatePreAuthTurmasSelect() {
+      const sel = document.getElementById('preauth-turma');
+      if (sel) sel.innerHTML = getTurmaOptionsHtml();
+    }
+
+    function renderPendingUsersList() {
+      const container = document.getElementById('list-pending-users-container');
+      if (!container) return;
+
+      const pending = window.ICM_CONFIG.getPendingUsers();
+      if (pending.length === 0) {
+        container.innerHTML = `
+          <div class="py-12 px-4 text-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50">
+            <span class="text-4xl block mb-2">🎉</span>
+            <div class="font-bold text-slate-800 text-sm">Nenhuma solicitação pendente!</div>
+            <p class="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+              Quando um novo catequista tentar entrar com a Conta Google pela primeira vez, ele aparecerá aqui para ser liberado e vinculado à turma dele.
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = pending.map((u, idx) => {
+        const timeStr = u.requestedAt ? new Date(u.requestedAt).toLocaleString('pt-BR') : 'Recentemente';
+        const cleanEmail = u.email.toLowerCase();
+        const safeId = 'puser_' + idx;
+        const turmaOptions = getTurmaOptionsHtml();
+
+        return `
+          <div class="p-4 rounded-2xl bg-white border border-amber-300/80 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-11 h-11 rounded-2xl bg-amber-500/20 border border-amber-400/40 text-amber-900 font-bold text-sm flex items-center justify-center flex-shrink-0 shadow-xs">
+                ${(u.displayName || u.email).substring(0, 2).toUpperCase()}
+              </div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                  <h4 class="text-xs sm:text-sm font-bold text-slate-900 truncate">${u.displayName || 'Novo Usuário'}</h4>
+                  <span class="bg-amber-100 text-amber-900 font-bold text-[9.5px] px-2 py-0.5 rounded-full uppercase">⏳ Aguardando Aprovação</span>
+                </div>
+                <div class="text-xs text-slate-600 font-mono truncate">${u.email}</div>
+                <div class="text-[10.5px] text-slate-400 mt-0.5">Tentativa de login: ${timeStr}</div>
+              </div>
+            </div>
+
+            <!-- Controles de Atribuição e Aprovação -->
+            <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
+              <div class="flex-1 md:flex-initial">
+                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-0.5">Função</label>
+                <select id="sel-role-${safeId}" class="w-full text-xs border border-slate-300 rounded-xl px-2.5 py-1.5 bg-white text-slate-800 outline-none focus:border-[#d4a94f]">
+                  <option value="catequista">📖 Catequista</option>
+                  <option value="coord_etapa">📋 Coordenação de Etapa</option>
+                  <option value="secretaria">🏛️ Secretaria Paroquial</option>
+                  <option value="coord_geral">⭐ Coordenação Geral</option>
+                </select>
+              </div>
+
+              <div class="flex-1 md:flex-initial">
+                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-0.5">Turma Vinculada</label>
+                <select id="sel-turma-${safeId}" class="w-full max-w-[200px] text-xs border border-slate-300 rounded-xl px-2.5 py-1.5 bg-white text-slate-800 outline-none focus:border-[#d4a94f]">
+                  ${turmaOptions}
+                </select>
+              </div>
+
+              <div class="flex items-center gap-1.5 self-end">
+                <button
+                  type="button"
+                  onclick="executeApproveUser('${cleanEmail}', 'sel-role-${safeId}', 'sel-turma-${safeId}')"
+                  class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow-xs transition flex items-center gap-1 active:scale-95"
+                  title="Aprovar e conceder acesso imediato"
+                >
+                  <span>✅ Aprovar</span>
+                </button>
+                <button
+                  type="button"
+                  onclick="executeRejectUser('${cleanEmail}')"
+                  class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs px-3 py-2 rounded-xl transition flex items-center gap-1 active:scale-95"
+                  title="Descartar solicitação de acesso"
+                >
+                  <span>❌ Recusar</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function executeApproveUser(email, roleSelectId, turmaSelectId) {
+      const roleSel = document.getElementById(roleSelectId);
+      const turmaSel = document.getElementById(turmaSelectId);
+      const role = roleSel ? roleSel.value : 'catequista';
+      const turmaVal = turmaSel ? turmaSel.value : 'todas';
+
+      const approver = window.appAuthState && window.appAuthState.user ? window.appAuthState.user.displayName : 'Coordenação';
+
+      try {
+        await window.ICM_CONFIG.approvePendingUser({
+          email: email,
+          role: role,
+          turmaId: turmaVal,
+          turmaNome: turmaVal,
+          etapa: turmaVal.split(' • ')[0] || 'Geral',
+          approverName: approver
+        });
+
+        showUsermgmtFeedback(`✅ O usuário <strong>${email}</strong> foi aprovado com sucesso como <strong>${role.toUpperCase()}</strong>!`, 'success');
+        renderUserManagementModal();
+      } catch (e) {
+        console.error(e);
+        showUsermgmtFeedback(`Erro ao aprovar usuário: ${e.message}`, 'error');
+      }
+    }
+
+    async function executeRejectUser(email) {
+      if (!confirm(`Deseja realmente recusar a solicitação de ${email}?`)) return;
+      const rejector = window.appAuthState && window.appAuthState.user ? window.appAuthState.user.displayName : 'Coordenação';
+
+      try {
+        await window.ICM_CONFIG.rejectPendingUser(email, rejector);
+        showUsermgmtFeedback(`A solicitação de <strong>${email}</strong> foi descartada.`, 'info');
+        renderUserManagementModal();
+      } catch (e) {
+        console.error(e);
+        showUsermgmtFeedback(`Erro ao recusar usuário: ${e.message}`, 'error');
+      }
+    }
+
+    function renderAuthorizedUsersList() {
+      const tbody = document.getElementById('tbody-authorized-users');
+      const searchInput = document.getElementById('input-search-auth-users');
+      const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
+      if (!tbody) return;
+
+      let list = window.ICM_CONFIG.getAuthorizedUsers();
+      if (query) {
+        list = list.filter(u => 
+          (u.displayName && u.displayName.toLowerCase().includes(query)) ||
+          (u.email && u.email.toLowerCase().includes(query)) ||
+          (u.turmaNome && u.turmaNome.toLowerCase().includes(query))
+        );
+      }
+
+      if (list.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="py-6 text-center text-slate-400 font-sans">
+              Nenhum usuário encontrado.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = list.map(u => {
+        const isMaster = u.email.toLowerCase() === window.ICM_CONFIG.MASTER_ADMIN_EMAIL.toLowerCase();
+        const isCoordGeral = u.email.toLowerCase() === window.ICM_CONFIG.COORD_GERAL_EMAIL.toLowerCase();
+        const isImmutable = isMaster || isCoordGeral;
+
+        let roleBadge = `<span class="bg-blue-100 text-blue-800 font-bold text-[10px] px-2 py-0.5 rounded-full uppercase">📖 Catequista</span>`;
+        if (u.role === window.ICM_CONFIG.ROLES.MASTER_ADMIN) {
+          roleBadge = `<span class="bg-amber-100 text-amber-900 font-bold text-[10px] px-2 py-0.5 rounded-full uppercase">👑 Master Admin</span>`;
+        } else if (u.role === window.ICM_CONFIG.ROLES.COORD_GERAL) {
+          roleBadge = `<span class="bg-indigo-100 text-indigo-900 font-bold text-[10px] px-2 py-0.5 rounded-full uppercase">⭐ Coord. Geral</span>`;
+        } else if (u.role === window.ICM_CONFIG.ROLES.SECRETARIA) {
+          roleBadge = `<span class="bg-emerald-100 text-emerald-900 font-bold text-[10px] px-2 py-0.5 rounded-full uppercase">🏛️ Secretaria</span>`;
+        } else if (u.role === window.ICM_CONFIG.ROLES.COORD_ETAPA) {
+          roleBadge = `<span class="bg-purple-100 text-purple-900 font-bold text-[10px] px-2 py-0.5 rounded-full uppercase">📋 Coord. Etapa</span>`;
+        }
+
+        // LGPD Consent check
+        const consentKey = CONSENT_PREFIX + u.email.toLowerCase();
+        const hasConsent = localStorage.getItem(consentKey) === 'true';
+        const consentBadge = hasConsent
+          ? `<span class="inline-flex items-center gap-1 text-emerald-700 font-bold text-[10.5px]"><span>✅</span> <span>Aceito</span></span>`
+          : `<span class="inline-flex items-center gap-1 text-amber-700 font-medium text-[10.5px]"><span>⏳</span> <span>No 1º login</span></span>`;
+
+        const initials = (u.displayName || u.email).substring(0, 2).toUpperCase();
+
+        return `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="py-2.5 px-3">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-slate-200 text-slate-800 font-bold text-xs flex items-center justify-center flex-shrink-0">
+                  ${initials}
+                </div>
+                <div>
+                  <div class="font-bold text-slate-900">${u.displayName || 'Usuário'}</div>
+                  <div class="text-[11px] text-slate-500 font-mono">${u.email}</div>
+                </div>
+              </div>
+            </td>
+            <td class="py-2.5 px-3">${roleBadge}</td>
+            <td class="py-2.5 px-3 text-slate-700">${u.turmaNome || 'Todas as Turmas'}</td>
+            <td class="py-2.5 px-3 text-center">${consentBadge}</td>
+            <td class="py-2.5 px-3 text-right">
+              ${isImmutable
+                ? `<span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Titular</span>`
+                : `<button
+                    type="button"
+                    onclick="executeRevokeUser('${u.email}')"
+                    class="text-rose-600 hover:text-rose-800 font-bold text-xs p-1.5 rounded-lg hover:bg-rose-50 transition"
+                    title="Revogar acesso deste catequista"
+                  >
+                    🗑️ Revogar
+                  </button>`
+              }
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function executeRevokeUser(email) {
+      if (!confirm(`Deseja realmente revogar o acesso do usuário ${email}?`)) return;
+      const revoker = window.appAuthState && window.appAuthState.user ? window.appAuthState.user.displayName : 'Coordenação';
+
+      try {
+        await window.ICM_CONFIG.revokeUserAccess(email, revoker);
+        showUsermgmtFeedback(`Acesso de <strong>${email}</strong> foi revogado com sucesso.`, 'info');
+        renderUserManagementModal();
+      } catch (e) {
+        console.error(e);
+        showUsermgmtFeedback(`Erro ao revogar usuário: ${e.message}`, 'error');
+      }
+    }
+
+    async function handlePreAuthorizeSubmit(event) {
+      event.preventDefault();
+      const nameInput = document.getElementById('preauth-name');
+      const emailInput = document.getElementById('preauth-email');
+      const roleSelect = document.getElementById('preauth-role');
+      const turmaSelect = document.getElementById('preauth-turma');
+
+      const name = nameInput ? nameInput.value.trim() : '';
+      const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
+      const role = roleSelect ? roleSelect.value : 'catequista';
+      const turma = turmaSelect ? turmaSelect.value : 'todas';
+
+      if (!email || !email.includes('@')) {
+        alert('Por favor, informe um e-mail válido.');
+        return;
+      }
+
+      const creator = window.appAuthState && window.appAuthState.user ? window.appAuthState.user.displayName : 'Coordenação';
+
+      try {
+        await window.ICM_CONFIG.preAuthorizeUser({
+          email: email,
+          displayName: name,
+          role: role,
+          turmaId: turma,
+          turmaNome: turma,
+          etapa: turma.split(' • ')[0] || 'Geral',
+          creatorName: creator
+        });
+
+        // Limpa formulário
+        if (nameInput) nameInput.value = '';
+        if (emailInput) emailInput.value = '';
+
+        showUsermgmtFeedback(`✅ Usuário <strong>${name} (${email})</strong> foi pré-autorizado com sucesso! Quando ele logar pela primeira vez com o Google, já terá o acesso liberado imediatamente.`, 'success');
+        switchUserMgmtTab('autorizados');
+      } catch (e) {
+        console.error(e);
+        showUsermgmtFeedback(`Erro ao pré-autorizar: ${e.message}`, 'error');
+      }
+    }
+
+    function showUsermgmtFeedback(msg, type = 'success') {
+      const box = document.getElementById('usermgmt-feedback');
+      if (!box) return;
+      box.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-900', 'border-emerald-300', 'bg-rose-50', 'text-rose-900', 'border-rose-300', 'bg-blue-50', 'text-blue-900', 'border-blue-300');
+      if (type === 'success') {
+        box.className = 'text-xs p-3 rounded-xl border bg-emerald-50 text-emerald-900 border-emerald-300';
+      } else if (type === 'error') {
+        box.className = 'text-xs p-3 rounded-xl border bg-rose-50 text-rose-900 border-rose-300';
+      } else {
+        box.className = 'text-xs p-3 rounded-xl border bg-blue-50 text-blue-900 border-blue-300';
+      }
+      box.innerHTML = msg;
+      setTimeout(() => {
+        if (box) box.classList.add('hidden');
+      }, 6000);
+    }
+
     // =============================================
     // CENTRAL DE NOTIFICAÇÕES & PENDÊNCIAS DOCUMENTAIS
     // =============================================
@@ -4462,7 +5096,13 @@
       });
 
       if (badgeCount) badgeCount.textContent = pendencias.length;
-      if (headerNotifCount) headerNotifCount.textContent = pendencias.length;
+      let totalNotifs = pendencias.length;
+      if (window.appAuthState && window.ICM_CONFIG && (window.appAuthState.role === window.ICM_CONFIG.ROLES.MASTER_ADMIN || window.appAuthState.role === window.ICM_CONFIG.ROLES.COORD_GERAL)) {
+        const pendingUsers = window.ICM_CONFIG.getPendingUsers ? window.ICM_CONFIG.getPendingUsers() : [];
+        totalNotifs += pendingUsers.length;
+      }
+      if (headerNotifCount) headerNotifCount.textContent = totalNotifs;
+      if (typeof updateUserMgmtBadges === 'function') updateUserMgmtBadges();
 
       if (pendencias.length === 0) {
         tbody.innerHTML = `

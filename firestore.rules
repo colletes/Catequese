@@ -58,5 +58,17 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow write: if isCoordOrAdmin();
     }
+
+    // Gestão de Usuários Autorizados e Solicitações Pendentes (RBAC & LGPD)
+    match /authorized_users/{userEmail} {
+      allow read: if isAuthenticated();
+      allow write: if isCoordOrAdmin();
+    }
+
+    match /pending_users/{userEmail} {
+      allow read: if isCoordOrAdmin() || (isAuthenticated() && request.auth.token.email.lower() == userEmail.lower());
+      allow create: if isAuthenticated();
+      allow update, delete: if isCoordOrAdmin();
+    }
   }
 }
