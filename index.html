@@ -118,23 +118,79 @@
       stroke-dasharray: 4 2;
     }
     @media print {
-      body {
+      html, body {
         background: #ffffff !important;
         color: #000000 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        overflow: visible !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
       }
       .no-print {
         display: none !important;
       }
-      .print-only {
+
+      /* Esconde absolutamente todos os elementos da interface do portal */
+      #auth-gate,
+      header,
+      nav,
+      main,
+      footer,
+      .tab-view,
+      [id^="modal-"],
+      .fixed {
+        display: none !important;
+      }
+
+      /* Quando a impressão de chamada estiver ativa */
+      body > *:not(#printable-chamada-area) {
+        display: none !important;
+      }
+
+      /* Exibe com perfeição o container de impressão oficial */
+      #printable-chamada-area {
         display: block !important;
+        position: static !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        visibility: visible !important;
       }
-      .print-break {
-        page-break-before: always;
+      #printable-chamada-area * {
+        visibility: visible !important;
       }
-      .print-card {
-        border: 1px solid #cbd5e1 !important;
-        box-shadow: none !important;
-        page-break-inside: avoid;
+
+      /* Estilos estruturais da folha de chamada impressa */
+      #printable-chamada-area .print-sheet {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      #printable-chamada-area table {
+        width: 100% !important;
+        max-width: 100% !important;
+        border-collapse: collapse !important;
+        page-break-inside: auto !important;
+      }
+      #printable-chamada-area tr {
+        page-break-inside: avoid !important;
+        page-break-after: auto !important;
+      }
+      #printable-chamada-area thead {
+        display: table-header-group !important;
+      }
+      #printable-chamada-area tfoot {
+        display: table-footer-group !important;
+      }
+
+      @page {
+        size: landscape;
+        margin: 6mm 6mm 6mm 6mm;
       }
     }
 
@@ -2110,32 +2166,205 @@
 
       </div>
 
-      <!-- Tabela Principal de Catequizandos (Com cabeçalho e coluna de nome congelados) -->
-      <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="table-freeze-container">
-          <table class="w-full text-left text-xs sm:text-sm border-collapse">
-            <thead class="sticky top-0 z-20 bg-slate-900 text-white">
-              <tr class="border-b-2 border-indigo-500 bg-slate-900">
-                <th class="py-3 px-3 font-heading text-center col-freeze-idx">#</th>
-                <th class="py-3 px-3.5 font-heading col-freeze-name">Nome Completo</th>
-                <th class="py-3 px-2.5 font-heading text-center min-w-[110px]">CPF</th>
-                <th class="py-3 px-2.5 font-heading text-center min-w-[95px]">Data Nasc.</th>
-                <th class="py-3 px-3 font-heading min-w-[130px]">Telefone (WhatsApp)</th>
-                <th class="py-3 px-3 font-heading min-w-[160px]">E-mail</th>
-                <th class="py-3 px-3.5 font-heading min-w-[210px]">Endereço</th>
-                <th class="py-3 px-3 font-heading min-w-[150px]">Estado Civil / Afetivo</th>
-                <th class="py-3 px-2.5 font-heading text-center min-w-[85px]">Batizado?</th>
-                <th class="py-3 px-2.5 font-heading text-center min-w-[85px]">1ª Eucaristia?</th>
-                <th class="py-3 px-2.5 font-heading text-center min-w-[95px]">Impedido(a)?</th>
-                <th class="py-3 px-3 font-heading min-w-[170px]">Justificativa</th>
-                <th class="py-3 px-2.5 font-heading text-center no-print w-16">Ações</th>
-              </tr>
-            </thead>
-            <tbody id="alunos-table-body" class="divide-y divide-slate-100">
-              <!-- Renderizado via JavaScript -->
-            </tbody>
-          </table>
+      <!-- Sub-Abas de Navegação: Cadastro vs Diário de Chamada -->
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-2">
+        <div class="flex items-center gap-2">
+          <button type="button" id="subtab-btn-cadastro" onclick="switchAlunosSubTab('cadastro')" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition shadow-xs bg-indigo-600 text-white border border-indigo-700">
+            <span>📋</span> <span>Cadastro e Fichas</span>
+            <span id="badge-total-alunos-subtab" class="bg-white/20 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full">0</span>
+          </button>
+          <button type="button" id="subtab-btn-chamada" onclick="switchAlunosSubTab('chamada')" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200">
+            <span>✅</span> <span>Diário de Chamada &amp; Frequência</span>
+            <span id="badge-chamada-alerta-subtab" class="hidden bg-rose-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse">0 em alerta</span>
+          </button>
         </div>
+        <div id="chamada-subtab-quick-actions" class="hidden flex items-center gap-2">
+          <button type="button" onclick="openPrintChamadaModal()" class="inline-flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-[#d4a94f] border border-[#d4a94f]/50 px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-xs">
+            <span>🖨️</span> <span>Imprimir / Salvar PDF</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- SUBVIEW 1: CADASTRO E DADOS DOS CATEQUIZANDOS -->
+      <div id="subview-alunos-cadastro" class="space-y-4">
+        <!-- Tabela Principal de Catequizandos (Com cabeçalho e coluna de nome congelados) -->
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="table-freeze-container">
+            <table class="w-full text-left text-xs sm:text-sm border-collapse">
+              <thead class="sticky top-0 z-20 bg-slate-900 text-white">
+                <tr class="border-b-2 border-indigo-500 bg-slate-900">
+                  <th class="py-3 px-3 font-heading text-center col-freeze-idx">#</th>
+                  <th class="py-3 px-3.5 font-heading col-freeze-name">Nome Completo</th>
+                  <th class="py-3 px-2.5 font-heading text-center min-w-[110px]">CPF</th>
+                  <th class="py-3 px-2.5 font-heading text-center min-w-[95px]">Data Nasc.</th>
+                  <th class="py-3 px-3 font-heading min-w-[130px]">Telefone (WhatsApp)</th>
+                  <th class="py-3 px-3 font-heading min-w-[160px]">E-mail</th>
+                  <th class="py-3 px-3.5 font-heading min-w-[210px]">Endereço</th>
+                  <th class="py-3 px-3 font-heading min-w-[150px]">Estado Civil / Afetivo</th>
+                  <th class="py-3 px-2.5 font-heading text-center min-w-[85px]">Batizado?</th>
+                  <th class="py-3 px-2.5 font-heading text-center min-w-[85px]">1ª Eucaristia?</th>
+                  <th class="py-3 px-2.5 font-heading text-center min-w-[95px]">Impedido(a)?</th>
+                  <th class="py-3 px-3 font-heading min-w-[170px]">Justificativa</th>
+                  <th class="py-3 px-2.5 font-heading text-center no-print w-16">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="alunos-table-body" class="divide-y divide-slate-100">
+                <!-- Renderizado via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUBVIEW 2: DIÁRIO DE CHAMADA & FREQUÊNCIA -->
+      <div id="subview-alunos-chamada" class="hidden space-y-6">
+        
+        <!-- Barra Superior de Controle de Chamadas -->
+        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            
+            <!-- Seleção e Gestão de Datas de Encontro -->
+            <div class="flex flex-wrap items-center gap-3">
+              <div class="min-w-[220px]">
+                <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                  <span>📅</span> <span>Data do Encontro</span>
+                </label>
+                <select id="sel-data-chamada" onchange="handleChamadaDateChange(this.value)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs sm:text-sm font-bold text-indigo-950 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none shadow-2xs">
+                  <!-- Populado via JS -->
+                </select>
+              </div>
+
+              <div class="flex items-center gap-1.5 pt-4">
+                <button type="button" onclick="promptAddChamadaDate()" class="inline-flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 font-bold px-3 py-2 rounded-xl text-xs transition" title="Adicionar nova data de encontro ao calendário da turma">
+                  <span>➕</span> <span>Nova Data</span>
+                </button>
+                <button type="button" onclick="deleteSelectedChamadaDate()" class="inline-flex items-center gap-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-semibold px-2.5 py-2 rounded-xl text-xs transition" title="Excluir data de encontro selecionada">
+                  <span>🗑️</span>
+                </button>
+              </div>
+
+              <div class="pt-4 border-l border-slate-200 pl-3">
+                <button type="button" onclick="marcarTodosPresentes()" class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-2 rounded-xl text-xs sm:text-sm transition shadow-2xs" title="Marcar todos os catequizandos como presentes na data selecionada">
+                  <span>⚡</span> <span>Todos Presentes</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Alternador de Visão: Modo Diário vs Matriz Completa -->
+            <div class="flex flex-wrap items-center gap-2 self-start lg:self-center">
+              <div class="inline-flex p-1 bg-slate-100 rounded-2xl border border-slate-200">
+                <button type="button" id="btn-chamada-mode-dia" onclick="setChamadaSubMode('dia')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition bg-white text-indigo-950 shadow-2xs">
+                  <span>📅</span> <span>Chamada do Dia</span>
+                </button>
+                <button type="button" id="btn-chamada-mode-matriz" onclick="setChamadaSubMode('matriz')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition text-slate-600 hover:text-slate-900">
+                  <span>📊</span> <span>Matriz Semestral</span>
+                </button>
+              </div>
+
+              <button type="button" onclick="openPrintChamadaModal()" class="inline-flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-[#d4a94f] border border-[#d4a94f]/50 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition shadow-xs" title="Imprimir lista ou exportar para PDF com modelos oficiais">
+                <span>🖨️</span> <span>Imprimir / Salvar PDF</span>
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Cards / KPIs de Frequência da Turma -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 pt-3 border-t border-slate-100">
+            <div class="bg-indigo-50/70 border border-indigo-100 p-2.5 rounded-2xl text-center">
+              <div class="text-[10px] uppercase font-bold text-indigo-700">Catequizandos</div>
+              <div id="kpi-chamada-total-alunos" class="text-lg font-black text-indigo-950 font-heading">0</div>
+            </div>
+            <div class="bg-slate-50 border border-slate-200 p-2.5 rounded-2xl text-center">
+              <div class="text-[10px] uppercase font-bold text-slate-600">Encontros Cadastrados</div>
+              <div id="kpi-chamada-total-datas" class="text-lg font-black text-slate-900 font-heading">0</div>
+            </div>
+            <div class="bg-emerald-50 border border-emerald-200 p-2.5 rounded-2xl text-center">
+              <div class="text-[10px] uppercase font-bold text-emerald-800">Presentes (Data)</div>
+              <div id="kpi-chamada-presentes-dia" class="text-lg font-black text-emerald-700 font-heading">0</div>
+            </div>
+            <div class="bg-amber-50 border border-amber-200 p-2.5 rounded-2xl text-center">
+              <div class="text-[10px] uppercase font-bold text-amber-800">Justificadas (Data)</div>
+              <div id="kpi-chamada-justificadas-dia" class="text-lg font-black text-amber-700 font-heading">0</div>
+            </div>
+            <div class="bg-rose-50 border border-rose-200 p-2.5 rounded-2xl text-center">
+              <div class="text-[10px] uppercase font-bold text-rose-800">Faltas (Data)</div>
+              <div id="kpi-chamada-faltas-dia" class="text-lg font-black text-rose-700 font-heading">0</div>
+            </div>
+            <div id="kpi-chamada-alertas-card" class="bg-slate-50 border border-slate-200 p-2.5 rounded-2xl text-center transition">
+              <div class="text-[10px] uppercase font-bold text-slate-600" id="kpi-chamada-alertas-label">Alertas (&gt;3 Faltas)</div>
+              <div id="kpi-chamada-alertas-count" class="text-lg font-black text-slate-700 font-heading">0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alerta Informativo da Regra Pastoral -->
+        <div class="bg-amber-50/80 border border-amber-200/80 rounded-2xl p-3.5 flex items-start gap-3 text-xs text-amber-900">
+          <span class="text-lg leading-none mt-0.5">ℹ️</span>
+          <div class="space-y-0.5">
+            <div class="font-bold">Diretriz de Frequência Paroquial (SICM):</div>
+            <p class="text-amber-800/90 leading-relaxed">
+              O limite de tolerância é de <strong>3 faltas</strong> no semestre. Alunos com 3 faltas atingiram o limite de atenção. Acima de 3 faltas (&gt;3), o sistema emite alerta crítico para notificação imediata da coordenação e catequistas da turma. Ausências justificadas contam como falta para taxa estatística, preservando o motivo para avaliação pastoral.
+            </p>
+          </div>
+        </div>
+
+        <!-- VISÃO 1: CHAMADA DO DIA (Lista Interativa) -->
+        <div id="chamada-container-dia" class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="p-4 bg-slate-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b-2 border-indigo-500">
+            <div class="flex items-center gap-2">
+              <span class="text-lg">📋</span>
+              <h3 class="font-bold font-heading text-sm sm:text-base">Lista de Chamada do Encontro</h3>
+              <span id="chamada-dia-badge-data" class="bg-indigo-600/80 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">--/--/----</span>
+            </div>
+            <div class="text-xs text-slate-300">
+              Clique nos botões <span class="font-bold text-emerald-400">P</span>, <span class="font-bold text-amber-400">J</span> ou <span class="font-bold text-rose-400">F</span> para registrar.
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs sm:text-sm border-collapse">
+              <thead class="bg-slate-100/80 text-slate-700 border-b border-slate-200">
+                <tr>
+                  <th class="py-3 px-3 text-center font-bold w-12">#</th>
+                  <th class="py-3 px-4 font-bold min-w-[200px]">Catequizando</th>
+                  <th class="py-3 px-4 font-bold text-center min-w-[240px]">Status no Encontro</th>
+                  <th class="py-3 px-4 font-bold min-w-[220px]">Justificativa / Motivo</th>
+                  <th class="py-3 px-4 font-bold text-center min-w-[140px]">Faltas Totais</th>
+                  <th class="py-3 px-4 font-bold text-center min-w-[150px]">Situação Pastoral</th>
+                </tr>
+              </thead>
+              <tbody id="chamada-table-dia-body" class="divide-y divide-slate-100">
+                <!-- Populado dinamicamente via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- VISÃO 2: MATRIZ GERAL SEMESTRAL (Grade Completa) -->
+        <div id="chamada-container-matriz" class="hidden bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="p-4 bg-slate-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b-2 border-indigo-500">
+            <div class="flex items-center gap-2">
+              <span class="text-lg">📊</span>
+              <h3 class="font-bold font-heading text-sm sm:text-base">Matriz Semestral de Frequência</h3>
+              <span class="bg-indigo-600/80 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">Histórico Completo</span>
+            </div>
+            <div class="text-xs text-slate-300">
+              Clique em qualquer pílula da tabela para alternar o status do encontro.
+            </div>
+          </div>
+
+          <div class="table-freeze-container overflow-x-auto">
+            <table class="w-full text-left text-xs sm:text-sm border-collapse">
+              <thead id="chamada-matriz-thead" class="sticky top-0 z-20 bg-slate-900 text-white">
+                <!-- Cabeçalho dinâmico com datas geradas via JS -->
+              </thead>
+              <tbody id="chamada-matriz-tbody" class="divide-y divide-slate-100">
+                <!-- Matriz gerada dinamicamente via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
 
     </section>
@@ -2345,6 +2574,127 @@
             </button>
             <button type="button" id="btn-confirm-upload" onclick="executeUploadImport()" disabled class="bg-emerald-600 disabled:bg-slate-300 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-xs sm:text-sm font-bold shadow transition">
               Importar Catequizandos
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL: IMPRESSÃO & EXPORTAÇÃO EM PDF       -->
+    <!-- ========================================== -->
+    <div id="modal-print-chamada" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto no-print">
+      <div class="bg-white w-full max-w-5xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-4 flex flex-col max-h-[92vh]">
+        
+        <!-- Header do Modal -->
+        <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-4 sm:p-6 flex items-center justify-between border-b border-[#d4a94f]/40 flex-shrink-0">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">🖨️</span>
+            <div>
+              <h3 class="text-base sm:text-xl font-bold font-heading text-white flex items-center gap-2">
+                <span>Impressão e Exportação em PDF — Lista de Chamada</span>
+                <span class="text-xs bg-[#d4a94f] text-slate-950 font-black px-2 py-0.5 rounded-full uppercase">Oficial SICM</span>
+              </h3>
+              <p id="print-modal-turma-subtitle" class="text-xs text-indigo-200 mt-0.5">Turma Selecionada</p>
+            </div>
+          </div>
+          <button type="button" onclick="closePrintChamadaModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
+        </div>
+
+        <!-- Conteúdo do Modal: Opções + Preview -->
+        <div class="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
+          
+          <!-- Seletores de Configuração -->
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              <!-- Modelo de Impressão -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">1. Selecione o Modelo do Documento:</label>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <label class="flex items-start gap-2 p-2.5 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-indigo-400 transition text-xs">
+                    <input type="radio" name="print-doc-model" value="branco" checked onchange="updatePrintChamadaPreview()" class="mt-0.5 text-indigo-600 focus:ring-indigo-500">
+                    <div>
+                      <div class="font-bold text-slate-900">Caderneta em Branco</div>
+                      <div class="text-[10px] text-slate-500">Para levar na sala e preencher a lápis/caneta</div>
+                    </div>
+                  </label>
+                  <label class="flex items-start gap-2 p-2.5 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-indigo-400 transition text-xs">
+                    <input type="radio" name="print-doc-model" value="preenchido" onchange="updatePrintChamadaPreview()" class="mt-0.5 text-indigo-600 focus:ring-indigo-500">
+                    <div>
+                      <div class="font-bold text-slate-900">Diário Preenchido</div>
+                      <div class="text-[10px] text-slate-500">Com status do sistema, totais e alertas</div>
+                    </div>
+                  </label>
+                  <label class="flex items-start gap-2 p-2.5 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-indigo-400 transition text-xs">
+                    <input type="radio" name="print-doc-model" value="dia" onchange="updatePrintChamadaPreview()" class="mt-0.5 text-indigo-600 focus:ring-indigo-500">
+                    <div>
+                      <div class="font-bold text-slate-900">Folha do Dia</div>
+                      <div class="text-[10px] text-slate-500">Para o encontro com linha de assinatura</div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Opções de Layout e Orientação -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">2. Orientação da Página:</label>
+                <div class="flex items-center gap-3">
+                  <label class="flex items-center gap-2 p-2.5 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-indigo-400 transition text-xs flex-1">
+                    <input type="radio" name="print-doc-orientation" value="landscape" checked onchange="updatePrintChamadaPreview()" class="text-indigo-600 focus:ring-indigo-500">
+                    <span class="font-semibold text-slate-800">📑 Paisagem (A4 Horizontal — Recomendado)</span>
+                  </label>
+                  <label class="flex items-center gap-2 p-2.5 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-indigo-400 transition text-xs flex-1">
+                    <input type="radio" name="print-doc-orientation" value="portrait" onchange="updatePrintChamadaPreview()" class="text-indigo-600 focus:ring-indigo-500">
+                    <span class="font-semibold text-slate-800">📄 Retrato (A4 Vertical)</span>
+                  </label>
+                </div>
+
+                <div class="mt-2.5 flex items-center gap-4 text-xs text-slate-600">
+                  <label class="flex items-center gap-1.5 cursor-pointer">
+                    <input type="checkbox" id="print-opt-signatures" checked onchange="updatePrintChamadaPreview()" class="rounded text-indigo-600 focus:ring-indigo-500">
+                    <span>Incluir campo para assinaturas no rodapé</span>
+                  </label>
+                  <label class="flex items-center gap-1.5 cursor-pointer">
+                    <input type="checkbox" id="print-opt-kpis" checked onchange="updatePrintChamadaPreview()" class="rounded text-indigo-600 focus:ring-indigo-500">
+                    <span>Incluir resumo estatístico da turma</span>
+                  </label>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Pré-visualização do Documento -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
+                <span>👁️</span> <span>Pré-visualização do Documento Impresso:</span>
+              </span>
+              <span class="text-[11px] text-slate-400">Escala de exibição adaptada à tela</span>
+            </div>
+            <div class="bg-slate-200/80 p-4 sm:p-6 rounded-2xl border border-slate-300 overflow-x-auto flex justify-center max-h-[42vh] overflow-y-auto shadow-inner">
+              <div id="print-chamada-preview-paper" class="bg-white text-slate-900 p-6 sm:p-8 rounded-lg shadow-md border border-slate-300 w-full min-w-[720px] max-w-[950px] transition-all">
+                <!-- Populado dinamicamente via JS -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Footer com Botões de Ação -->
+        <div class="bg-slate-50 p-4 sm:p-5 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 flex-shrink-0">
+          <div class="text-xs text-slate-500 flex items-center gap-1.5">
+            <span class="text-amber-500 text-base">💡</span>
+            <span>Ao abrir a janela do sistema, escolha <strong>"Salvar como PDF"</strong> no Destino da impressora para gerar o arquivo.</span>
+          </div>
+          <div class="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+            <button type="button" onclick="closePrintChamadaModal()" class="px-4 py-2 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold transition">
+              Fechar
+            </button>
+            <button type="button" onclick="executePrintChamada()" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-md transition">
+              <span>🖨️</span> <span>Imprimir / Salvar em PDF</span>
             </button>
           </div>
         </div>
@@ -8046,6 +8396,18 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       if (kpiEucaristia) kpiEucaristia.textContent = eucaristiaCount;
       if (kpiImpedidos) kpiImpedidos.textContent = impedidosCount;
 
+      // Sincroniza badge de total de catequizandos na sub-aba
+      const badgeSubtabCad = document.getElementById('badge-total-alunos-subtab');
+      if (badgeSubtabCad) badgeSubtabCad.textContent = alunos.length;
+
+      // Mantém os alertas de chamada e KPIs atualizados
+      if (typeof updateChamadaKPIs === 'function') {
+        updateChamadaKPIs();
+      }
+      if (currentAlunosSubTab === 'chamada' && typeof renderChamadaSection === 'function') {
+        renderChamadaSection();
+      }
+
       if (filtered.length === 0) {
         tbody.innerHTML = `
           <tr>
@@ -8340,8 +8702,1202 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       });
     }
 
+    // =============================================
+    // SISTEMA DE LISTA DE CHAMADAS & FREQUÊNCIA (PDF)
+    // Suporte a Presença (P), Justificada (J), Falta (F),
+    // Calendário de Encontros, Alerta Limite de 3 Faltas e PDF Oficial
+    // =============================================
+    const STORAGE_KEY_CHAMADAS = 'catequese_chamadas_v2';
+    let currentAlunosSubTab = 'cadastro'; // 'cadastro' | 'chamada'
+    let currentChamadaSubMode = 'dia'; // 'dia' | 'matriz'
+    let currentChamadaSelectedDate = '';
+
+    function getChamadasDatabase() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY_CHAMADAS);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && typeof parsed === 'object') return parsed;
+        }
+      } catch (e) {
+        console.error('Erro ao ler banco de chamadas:', e);
+      }
+      return {};
+    }
+
+    function saveChamadasDatabase(data) {
+      try {
+        localStorage.setItem(STORAGE_KEY_CHAMADAS, JSON.stringify(data));
+      } catch (e) {
+        console.error('Erro ao salvar banco de chamadas:', e);
+      }
+    }
+
+    // Retorna ou inicializa o calendário e registros da turma
+    function getTurmaChamadasData(etapa, turma) {
+      const db = getChamadasDatabase();
+      const key = getTurmaKey(etapa, turma);
+      if (!db[key]) {
+        db[key] = {
+          dates: generateDefaultTurmaDates(etapa, turma),
+          records: {}
+        };
+        saveChamadasDatabase(db);
+      } else if (!Array.isArray(db[key].dates) || db[key].dates.length === 0) {
+        db[key].dates = generateDefaultTurmaDates(etapa, turma);
+        if (!db[key].records) db[key].records = {};
+        saveChamadasDatabase(db);
+      }
+      return db[key];
+    }
+
+    // Gera datas de aula padrão baseadas no dia da semana da turma
+    function generateDefaultTurmaDates(etapa, turma) {
+      const info = masterScheduleList.find(t => t.stage === etapa && t.turma === turma);
+      let targetDayOfWeek = 6; // Sábado como padrão
+      if (info && info.dayTime) {
+        const str = info.dayTime.toLowerCase();
+        if (str.includes('segunda')) targetDayOfWeek = 1;
+        else if (str.includes('terça') || str.includes('terca')) targetDayOfWeek = 2;
+        else if (str.includes('quarta')) targetDayOfWeek = 3;
+        else if (str.includes('quinta')) targetDayOfWeek = 4;
+        else if (str.includes('sexta')) targetDayOfWeek = 5;
+        else if (str.includes('sábado') || str.includes('sabado')) targetDayOfWeek = 6;
+        else if (str.includes('domingo')) targetDayOfWeek = 0;
+      }
+
+      // Início do semestre pastoral em Março de 2026
+      const dates = [];
+      let d = new Date(2026, 2, 1); // 01/03/2026
+      while (d.getDay() !== targetDayOfWeek) {
+        d.setDate(d.getDate() + 1);
+      }
+
+      // Gera 14 encontros semanais
+      for (let i = 0; i < 14; i++) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        dates.push(`${y}-${m}-${day}`);
+        d.setDate(d.getDate() + 7);
+      }
+      return dates;
+    }
+
+    // Alternador de Sub-Aba: Cadastro vs Diário de Chamada
+    function switchAlunosSubTab(tab) {
+      currentAlunosSubTab = tab;
+      const btnCadastro = document.getElementById('subtab-btn-cadastro');
+      const btnChamada = document.getElementById('subtab-btn-chamada');
+      const viewCadastro = document.getElementById('subview-alunos-cadastro');
+      const viewChamada = document.getElementById('subview-alunos-chamada');
+      const quickActions = document.getElementById('chamada-subtab-quick-actions');
+
+      if (tab === 'chamada') {
+        if (btnCadastro) {
+          btnCadastro.className = 'flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200';
+          const badgeCad = document.getElementById('badge-total-alunos-subtab');
+          if (badgeCad) badgeCad.className = 'bg-slate-200 text-slate-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full';
+        }
+        if (btnChamada) {
+          btnChamada.className = 'flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition shadow-xs bg-indigo-600 text-white border border-indigo-700';
+        }
+        if (viewCadastro) viewCadastro.classList.add('hidden');
+        if (viewChamada) viewChamada.classList.remove('hidden');
+        if (quickActions) quickActions.classList.remove('hidden');
+        renderChamadaSection();
+      } else {
+        if (btnCadastro) {
+          btnCadastro.className = 'flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition shadow-xs bg-indigo-600 text-white border border-indigo-700';
+          const badgeCad = document.getElementById('badge-total-alunos-subtab');
+          if (badgeCad) badgeCad.className = 'bg-white/20 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full';
+        }
+        if (btnChamada) {
+          btnChamada.className = 'flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200';
+        }
+        if (viewCadastro) viewCadastro.classList.remove('hidden');
+        if (viewChamada) viewChamada.classList.add('hidden');
+        if (quickActions) quickActions.classList.add('hidden');
+        renderAlunosTable();
+      }
+    }
+
+    // Alternador de Modo de Chamada: Dia vs Matriz
+    function setChamadaSubMode(mode) {
+      currentChamadaSubMode = mode;
+      const btnDia = document.getElementById('btn-chamada-mode-dia');
+      const btnMatriz = document.getElementById('btn-chamada-mode-matriz');
+      const containerDia = document.getElementById('chamada-container-dia');
+      const containerMatriz = document.getElementById('chamada-container-matriz');
+
+      if (mode === 'matriz') {
+        if (btnDia) btnDia.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition text-slate-600 hover:text-slate-900';
+        if (btnMatriz) btnMatriz.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition bg-white text-indigo-950 shadow-2xs';
+        if (containerDia) containerDia.classList.add('hidden');
+        if (containerMatriz) containerMatriz.classList.remove('hidden');
+        renderChamadaMatrizTable();
+      } else {
+        if (btnDia) btnDia.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition bg-white text-indigo-950 shadow-2xs';
+        if (btnMatriz) btnMatriz.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition text-slate-600 hover:text-slate-900';
+        if (containerDia) containerDia.classList.remove('hidden');
+        if (containerMatriz) containerMatriz.classList.add('hidden');
+        renderChamadaDiaTable();
+      }
+    }
+
+    // Renderiza a seção principal de Chamada
+    function renderChamadaSection() {
+      const dataTurma = getTurmaChamadasData(currentAlunosEtapa, currentAlunosTurma);
+      const selData = document.getElementById('sel-data-chamada');
+
+      if (selData) {
+        if (dataTurma.dates.length === 0) {
+          selData.innerHTML = '<option value="">Nenhuma data cadastrada</option>';
+          currentChamadaSelectedDate = '';
+        } else {
+          // Mantém a data atual se ainda válida, senão usa a primeira
+          if (!currentChamadaSelectedDate || !dataTurma.dates.includes(currentChamadaSelectedDate)) {
+            // Tenta selecionar uma data próxima da data atual
+            const todayStr = new Date().toISOString().split('T')[0];
+            const futureOrToday = dataTurma.dates.find(d => d >= todayStr);
+            currentChamadaSelectedDate = futureOrToday || dataTurma.dates[0];
+          }
+
+          selData.innerHTML = dataTurma.dates.map(dStr => {
+            const sem = _diaSemana(dStr);
+            const fmt = _dataFmt(dStr);
+            return `<option value="${dStr}" ${dStr === currentChamadaSelectedDate ? 'selected' : ''}>${fmt} (${sem})</option>`;
+          }).join('');
+        }
+      }
+
+      updateChamadaKPIs();
+
+      if (currentChamadaSubMode === 'matriz') {
+        renderChamadaMatrizTable();
+      } else {
+        renderChamadaDiaTable();
+      }
+    }
+
+    function handleChamadaDateChange(date) {
+      currentChamadaSelectedDate = date;
+      updateChamadaKPIs();
+      if (currentChamadaSubMode === 'matriz') {
+        renderChamadaMatrizTable();
+      } else {
+        renderChamadaDiaTable();
+      }
+    }
+
+    // Atualiza contadores e KPIs com a regra de 3 faltas
+    function updateChamadaKPIs() {
+      const alunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma);
+      const dataTurma = getTurmaChamadasData(currentAlunosEtapa, currentAlunosTurma);
+      const dateRecords = (dataTurma.records && dataTurma.records[currentChamadaSelectedDate]) || {};
+
+      let presentesDia = 0;
+      let justificadasDia = 0;
+      let faltasDia = 0;
+
+      alunos.forEach(a => {
+        const rec = dateRecords[a.id];
+        if (rec) {
+          if (rec.status === 'P') presentesDia++;
+          else if (rec.status === 'J') justificadasDia++;
+          else if (rec.status === 'F') faltasDia++;
+        }
+      });
+
+      // Cálculo de alertas gerais de faltas na turma (Limite = 3; Alerta Crítico > 3)
+      let alunosEmAlertaCritico = 0;
+      let alunosNoLimite = 0;
+
+      alunos.forEach(a => {
+        let totalFaltasAluno = 0;
+        dataTurma.dates.forEach(d => {
+          const r = dataTurma.records && dataTurma.records[d] && dataTurma.records[d][a.id];
+          if (r && (r.status === 'F' || r.status === 'J')) {
+            totalFaltasAluno++;
+          }
+        });
+        if (totalFaltasAluno > 3) {
+          alunosEmAlertaCritico++;
+        } else if (totalFaltasAluno === 3) {
+          alunosNoLimite++;
+        }
+      });
+
+      // Atualiza DOM
+      const kpiAlunos = document.getElementById('kpi-chamada-total-alunos');
+      const kpiDatas = document.getElementById('kpi-chamada-total-datas');
+      const kpiPres = document.getElementById('kpi-chamada-presentes-dia');
+      const kpiJust = document.getElementById('kpi-chamada-justificadas-dia');
+      const kpiFaltas = document.getElementById('kpi-chamada-faltas-dia');
+      const kpiAlertasCount = document.getElementById('kpi-chamada-alertas-count');
+      const kpiAlertasCard = document.getElementById('kpi-chamada-alertas-card');
+      const badgeSubtab = document.getElementById('badge-chamada-alerta-subtab');
+
+      if (kpiAlunos) kpiAlunos.textContent = alunos.length;
+      if (kpiDatas) kpiDatas.textContent = dataTurma.dates.length;
+      if (kpiPres) kpiPres.textContent = presentesDia;
+      if (kpiJust) kpiJust.textContent = justificadasDia;
+      if (kpiFaltas) kpiFaltas.textContent = faltasDia;
+
+      if (kpiAlertasCount) {
+        kpiAlertasCount.textContent = alunosEmAlertaCritico;
+      }
+      if (kpiAlertasCard) {
+        if (alunosEmAlertaCritico > 0) {
+          kpiAlertasCard.className = 'bg-rose-100 border-2 border-rose-400 p-2.5 rounded-2xl text-center shadow-xs';
+          const lbl = document.getElementById('kpi-chamada-alertas-label');
+          if (lbl) lbl.className = 'text-[10px] uppercase font-black text-rose-900';
+          if (kpiAlertasCount) kpiAlertasCount.className = 'text-lg font-black text-rose-800 font-heading animate-pulse';
+        } else if (alunosNoLimite > 0) {
+          kpiAlertasCard.className = 'bg-amber-100 border border-amber-300 p-2.5 rounded-2xl text-center';
+          const lbl = document.getElementById('kpi-chamada-alertas-label');
+          if (lbl) {
+            lbl.className = 'text-[10px] uppercase font-bold text-amber-800';
+            lbl.textContent = 'No Limite (3 Faltas)';
+          }
+          if (kpiAlertasCount) {
+            kpiAlertasCount.textContent = alunosNoLimite;
+            kpiAlertasCount.className = 'text-lg font-black text-amber-900 font-heading';
+          }
+        } else {
+          kpiAlertasCard.className = 'bg-slate-50 border border-slate-200 p-2.5 rounded-2xl text-center';
+          const lbl = document.getElementById('kpi-chamada-alertas-label');
+          if (lbl) {
+            lbl.className = 'text-[10px] uppercase font-bold text-slate-600';
+            lbl.textContent = 'Alertas (>3 Faltas)';
+          }
+          if (kpiAlertasCount) kpiAlertasCount.className = 'text-lg font-black text-slate-700 font-heading';
+        }
+      }
+
+      // Badge no botão da sub-aba
+      if (badgeSubtab) {
+        if (alunosEmAlertaCritico > 0) {
+          badgeSubtab.classList.remove('hidden');
+          badgeSubtab.textContent = `${alunosEmAlertaCritico} em risco!`;
+          badgeSubtab.className = 'bg-rose-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse';
+        } else if (alunosNoLimite > 0) {
+          badgeSubtab.classList.remove('hidden');
+          badgeSubtab.textContent = `${alunosNoLimite} no limite`;
+          badgeSubtab.className = 'bg-amber-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full';
+        } else {
+          badgeSubtab.classList.add('hidden');
+        }
+      }
+    }
+
+    // VISÃO 1: Renderiza a tabela de chamada do dia selecionado
+    function renderChamadaDiaTable() {
+      const tbody = document.getElementById('chamada-table-dia-body');
+      const badgeData = document.getElementById('chamada-dia-badge-data');
+      if (!tbody) return;
+
+      const alunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma);
+      const dataTurma = getTurmaChamadasData(currentAlunosEtapa, currentAlunosTurma);
+      const currDate = currentChamadaSelectedDate;
+
+      if (badgeData) {
+        badgeData.textContent = currDate ? `${_dataFmt(currDate)} — ${_diaSemana(currDate)}` : 'Sem data selecionada';
+      }
+
+      if (alunos.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-12 text-center text-slate-400">
+              <div class="text-3xl mb-2">📂</div>
+              <p class="font-semibold text-slate-600">Nenhum catequizando cadastrado nesta turma.</p>
+              <p class="text-xs text-slate-400 mt-1">Utilize a aba "Cadastro e Fichas" para adicionar catequizandos.</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      if (!currDate) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-12 text-center text-slate-400">
+              <div class="text-3xl mb-2">📅</div>
+              <p class="font-semibold text-slate-600">Nenhuma data de encontro selecionada.</p>
+              <p class="text-xs text-slate-400 mt-1">Clique em "➕ Nova Data" acima para adicionar um encontro ao calendário.</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      const records = (dataTurma.records && dataTurma.records[currDate]) || {};
+
+      tbody.innerHTML = alunos.map((a, idx) => {
+        const rec = records[a.id] || { status: '', justificativa: '' };
+        const status = rec.status || '';
+        const just = rec.justificativa || '';
+
+        // Calcula total histórico de faltas do catequizando
+        let totalFaltas = 0;
+        let totalPresencas = 0;
+        let totalJustificadas = 0;
+
+        dataTurma.dates.forEach(d => {
+          const r = dataTurma.records && dataTurma.records[d] && dataTurma.records[d][a.id];
+          if (r) {
+            if (r.status === 'P') totalPresencas++;
+            else if (r.status === 'F') totalFaltas++;
+            else if (r.status === 'J') {
+              totalFaltas++; // Conforme regra aprovada: ausência justificada conta como falta normalmente
+              totalJustificadas++;
+            }
+          }
+        });
+
+        // Determina indicador pastoral segundo a regra de limite de 3 faltas
+        let situacaoBadge = '';
+        if (totalFaltas > 3) {
+          situacaoBadge = `
+            <span class="inline-flex items-center gap-1 text-[11px] font-black text-rose-800 bg-rose-100 border border-rose-300 px-2.5 py-1 rounded-full animate-pulse" title="Excedeu o limite de 3 faltas: avisar coordenação e catequistas da turma">
+              <span>🚨</span> <span>Alerta (&gt;3 Faltas)</span>
+            </span>
+          `;
+        } else if (totalFaltas === 3) {
+          situacaoBadge = `
+            <span class="inline-flex items-center gap-1 text-[11px] font-bold text-amber-800 bg-amber-100 border border-amber-300 px-2.5 py-1 rounded-full" title="Limite de 3 faltas atingido! Em atenção pastoral">
+              <span>⚠️</span> <span>Limite Atingido (3)</span>
+            </span>
+          `;
+        } else {
+          situacaoBadge = `
+            <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+              <span>🟢</span> <span>Regular (${totalFaltas}/3)</span>
+            </span>
+          `;
+        }
+
+        // Estilos dos botões P, J, F
+        const btnPClass = status === 'P'
+          ? 'bg-emerald-600 text-white font-black shadow-xs ring-2 ring-emerald-400'
+          : 'bg-slate-100 text-slate-700 hover:bg-emerald-50 hover:text-emerald-800';
+
+        const btnJClass = status === 'J'
+          ? 'bg-amber-500 text-white font-black shadow-xs ring-2 ring-amber-300'
+          : 'bg-slate-100 text-slate-700 hover:bg-amber-50 hover:text-amber-800';
+
+        const btnFClass = status === 'F'
+          ? 'bg-rose-600 text-white font-black shadow-xs ring-2 ring-rose-400'
+          : 'bg-slate-100 text-slate-700 hover:bg-rose-50 hover:text-rose-800';
+
+        return `
+          <tr class="hover:bg-slate-50/80 transition ${totalFaltas > 3 ? 'bg-rose-50/40' : ''}">
+            <td class="py-2.5 px-3 text-center font-bold text-slate-400 text-xs">${idx + 1}</td>
+            <td class="py-2.5 px-4">
+              <div class="font-bold text-slate-900 leading-snug">${a.nome}</div>
+              ${a.contato ? `<div class="text-[11px] text-slate-500 mt-0.5">📞 ${a.contato}</div>` : ''}
+            </td>
+            <td class="py-2.5 px-4 text-center">
+              <div class="inline-flex items-center p-1 bg-slate-100 rounded-2xl border border-slate-200 gap-1">
+                <button type="button" onclick="setAlunoChamadaStatus('${a.id}', 'P')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1 ${btnPClass}" title="Registrar Presença">
+                  <span>✓</span> <span>Presença (P)</span>
+                </button>
+                <button type="button" onclick="setAlunoChamadaStatus('${a.id}', 'J')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1 ${btnJClass}" title="Registrar Ausência Justificada (Atestado/Viagem/Saúde)">
+                  <span>ℹ️</span> <span>Justificada (J)</span>
+                </button>
+                <button type="button" onclick="setAlunoChamadaStatus('${a.id}', 'F')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1 ${btnFClass}" title="Registrar Falta">
+                  <span>✕</span> <span>Falta (F)</span>
+                </button>
+              </div>
+            </td>
+            <td class="py-2.5 px-4">
+              <input type="text" value="${just.replace(/"/g, '&quot;')}" onchange="saveAlunoJustificativa('${a.id}', this.value)" placeholder="${status === 'J' ? 'Motivo da ausência justificada...' : 'Observação sobre a presença/falta...'}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none transition">
+            </td>
+            <td class="py-2.5 px-4 text-center">
+              <span class="font-heading font-black text-sm ${totalFaltas > 3 ? 'text-rose-700 font-extrabold' : totalFaltas === 3 ? 'text-amber-700' : 'text-slate-700'}">${totalFaltas}</span>
+              <span class="text-[10px] text-slate-400"> faltas</span>
+              ${totalJustificadas > 0 ? `<div class="text-[10px] text-amber-700 font-medium">(${totalJustificadas} just.)</div>` : ''}
+            </td>
+            <td class="py-2.5 px-4 text-center">
+              ${situacaoBadge}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // VISÃO 2: Renderiza a Matriz Semestral Completa (Alunos × Datas)
+    function renderChamadaMatrizTable() {
+      const thead = document.getElementById('chamada-matriz-thead');
+      const tbody = document.getElementById('chamada-matriz-tbody');
+      if (!thead || !tbody) return;
+
+      const alunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma);
+      const dataTurma = getTurmaChamadasData(currentAlunosEtapa, currentAlunosTurma);
+      const dates = dataTurma.dates || [];
+
+      // Monta Cabeçalho
+      let theadHtml = `
+        <tr class="border-b-2 border-indigo-500 bg-slate-900 text-white">
+          <th class="py-3 px-3 font-heading text-center col-freeze-idx">#</th>
+          <th class="py-3 px-3.5 font-heading col-freeze-name min-w-[200px]">Catequizando</th>
+      `;
+
+      dates.forEach(dStr => {
+        const parts = dStr.split('-');
+        const shortFmt = `${parts[2]}/${parts[1]}`;
+        const isCurrent = dStr === currentChamadaSelectedDate;
+        theadHtml += `
+          <th class="py-2.5 px-2 font-heading text-center text-xs min-w-[55px] ${isCurrent ? 'bg-indigo-800 text-amber-300 font-black' : ''}" title="${_dataFmt(dStr)} (${_diaSemana(dStr)})">
+            <div>${shortFmt}</div>
+            <div class="text-[9px] font-normal text-slate-400">${_diaSemana(dStr).slice(0, 3)}</div>
+          </th>
+        `;
+      });
+
+      theadHtml += `
+          <th class="py-3 px-2.5 font-heading text-center text-xs min-w-[50px] bg-emerald-950 text-emerald-300">P</th>
+          <th class="py-3 px-2.5 font-heading text-center text-xs min-w-[50px] bg-amber-950 text-amber-300">J</th>
+          <th class="py-3 px-2.5 font-heading text-center text-xs min-w-[50px] bg-rose-950 text-rose-300">F</th>
+          <th class="py-3 px-2.5 font-heading text-center text-xs min-w-[65px] bg-slate-800 text-indigo-300">% Pres.</th>
+          <th class="py-3 px-3 font-heading text-center text-xs min-w-[140px]">Situação Pastoral</th>
+        </tr>
+      `;
+      thead.innerHTML = theadHtml;
+
+      // Monta Linhas de Alunos
+      if (alunos.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="${dates.length + 7}" class="py-12 text-center text-slate-400">
+              Nenhum catequizando cadastrado nesta turma.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = alunos.map((a, idx) => {
+        let pres = 0;
+        let just = 0;
+        let falt = 0;
+        let totalAulasRealizadas = 0;
+
+        let cellsHtml = '';
+        dates.forEach(dStr => {
+          const rec = dataTurma.records && dataTurma.records[dStr] && dataTurma.records[dStr][a.id];
+          const st = rec ? rec.status : '';
+          const isSelectedDate = dStr === currentChamadaSelectedDate;
+
+          let badgeContent = '<span class="text-slate-300 font-bold text-xs">—</span>';
+          let badgeClass = 'bg-slate-50 border border-slate-200 text-slate-400 hover:bg-slate-100';
+
+          if (st === 'P') {
+            pres++;
+            totalAulasRealizadas++;
+            badgeContent = '<span class="text-emerald-700 font-black">P</span>';
+            badgeClass = 'bg-emerald-100 border border-emerald-300 shadow-2xs hover:bg-emerald-200';
+          } else if (st === 'J') {
+            just++;
+            falt++; // Regra: conta como falta estatística, mas com justificativa
+            totalAulasRealizadas++;
+            badgeContent = '<span class="text-amber-800 font-black">J</span>';
+            badgeClass = 'bg-amber-100 border border-amber-300 shadow-2xs hover:bg-amber-200';
+          } else if (st === 'F') {
+            falt++;
+            totalAulasRealizadas++;
+            badgeContent = '<span class="text-rose-700 font-black">F</span>';
+            badgeClass = 'bg-rose-100 border border-rose-300 shadow-2xs hover:bg-rose-200';
+          }
+
+          cellsHtml += `
+            <td class="py-2 px-1 text-center ${isSelectedDate ? 'bg-indigo-50/50' : ''}">
+              <button type="button" onclick="cycleMatrizStatus('${a.id}', '${dStr}')" class="w-8 h-8 rounded-lg text-xs font-bold transition inline-flex items-center justify-center ${badgeClass}" title="${st ? `Clique para alterar. Atual: ${st === 'P' ? 'Presença' : st === 'J' ? 'Ausência Justificada' : 'Falta'}${rec && rec.justificativa ? ` (${rec.justificativa})` : ''}` : 'Clique para marcar status'}">
+                ${badgeContent}
+              </button>
+            </td>
+          `;
+        });
+
+        // Totais e % de presença
+        const totalRegistros = pres + falt; // falt já inclui J
+        const taxaPresenca = totalRegistros > 0 ? Math.round((pres / totalRegistros) * 100) : 100;
+
+        // Situação pastoral segundo o limite de 3 faltas
+        let sitHtml = '';
+        if (falt > 3) {
+          sitHtml = `<span class="inline-flex items-center text-[10px] font-black text-rose-800 bg-rose-100 border border-rose-300 px-2 py-0.5 rounded-full animate-pulse">🚨 Alerta (&gt;3 Faltas)</span>`;
+        } else if (falt === 3) {
+          sitHtml = `<span class="inline-flex items-center text-[10px] font-bold text-amber-800 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-full">⚠️ Limite (3 Faltas)</span>`;
+        } else {
+          sitHtml = `<span class="inline-flex items-center text-[10px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">🟢 Regular</span>`;
+        }
+
+        return `
+          <tr class="hover:bg-slate-50/80 transition ${falt > 3 ? 'bg-rose-50/40' : ''}">
+            <td class="py-2 px-3 text-center font-bold text-slate-400 text-xs col-freeze-idx">${idx + 1}</td>
+            <td class="py-2 px-3.5 col-freeze-name">
+              <div class="font-bold text-slate-900 leading-snug">${a.nome}</div>
+            </td>
+            ${cellsHtml}
+            <td class="py-2 px-2 text-center font-bold text-emerald-700 bg-emerald-50/40 text-xs">${pres}</td>
+            <td class="py-2 px-2 text-center font-bold text-amber-700 bg-amber-50/40 text-xs">${just}</td>
+            <td class="py-2 px-2 text-center font-black ${falt > 3 ? 'text-rose-700 font-extrabold' : 'text-rose-600'} bg-rose-50/40 text-xs">${falt}</td>
+            <td class="py-2 px-2 text-center font-black text-xs ${taxaPresenca < 75 ? 'text-rose-700' : 'text-slate-800'}">${taxaPresenca}%</td>
+            <td class="py-2 px-3 text-center">${sitHtml}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Registra Presença, Justificada ou Falta
+    function setAlunoChamadaStatus(alunoId, status) {
+      if (!currentChamadaSelectedDate) {
+        alert('Por favor, selecione uma data de aula primeiro.');
+        return;
+      }
+
+      const db = getChamadasDatabase();
+      const key = getTurmaKey(currentAlunosEtapa, currentAlunosTurma);
+      if (!db[key]) db[key] = { dates: [], records: {} };
+      if (!db[key].records) db[key].records = {};
+      if (!db[key].records[currentChamadaSelectedDate]) db[key].records[currentChamadaSelectedDate] = {};
+
+      const currentRecord = db[key].records[currentChamadaSelectedDate][alunoId] || {};
+      
+      // Se clicou no mesmo status ativo, desmarca para vazio
+      const nextStatus = currentRecord.status === status ? '' : status;
+
+      db[key].records[currentChamadaSelectedDate][alunoId] = {
+        status: nextStatus,
+        justificativa: currentRecord.justificativa || ''
+      };
+
+      saveChamadasDatabase(db);
+      updateChamadaKPIs();
+
+      if (currentChamadaSubMode === 'matriz') {
+        renderChamadaMatrizTable();
+      } else {
+        renderChamadaDiaTable();
+      }
+
+      // Trilha de Auditoria
+      window.ICM_CONFIG.logAuditEvent('UPDATE_CHAMADA', `${currentAlunosEtapa} - ${currentAlunosTurma}`, {
+        alunoId: alunoId,
+        date: currentChamadaSelectedDate,
+        status: nextStatus
+      });
+    }
+
+    // Alterna status ciclicamente ao clicar na célula da matriz: '' -> 'P' -> 'J' -> 'F' -> ''
+    function cycleMatrizStatus(alunoId, date) {
+      const db = getChamadasDatabase();
+      const key = getTurmaKey(currentAlunosEtapa, currentAlunosTurma);
+      if (!db[key]) return;
+      if (!db[key].records) db[key].records = {};
+      if (!db[key].records[date]) db[key].records[date] = {};
+
+      const cur = (db[key].records[date][alunoId] && db[key].records[date][alunoId].status) || '';
+      let next = 'P';
+      if (cur === 'P') next = 'J';
+      else if (cur === 'J') next = 'F';
+      else if (cur === 'F') next = '';
+
+      db[key].records[date][alunoId] = {
+        status: next,
+        justificativa: (db[key].records[date][alunoId] && db[key].records[date][alunoId].justificativa) || ''
+      };
+
+      saveChamadasDatabase(db);
+      updateChamadaKPIs();
+      renderChamadaMatrizTable();
+    }
+
+    // Salva justificativa digitada
+    function saveAlunoJustificativa(alunoId, text) {
+      if (!currentChamadaSelectedDate) return;
+      const db = getChamadasDatabase();
+      const key = getTurmaKey(currentAlunosEtapa, currentAlunosTurma);
+      if (!db[key]) return;
+      if (!db[key].records) db[key].records = {};
+      if (!db[key].records[currentChamadaSelectedDate]) db[key].records[currentChamadaSelectedDate] = {};
+
+      const currentRecord = db[key].records[currentChamadaSelectedDate][alunoId] || { status: '' };
+      db[key].records[currentChamadaSelectedDate][alunoId] = {
+        ...currentRecord,
+        justificativa: (text || '').trim()
+      };
+
+      saveChamadasDatabase(db);
+    }
+
+    // Marca todos os alunos como presentes na data selecionada
+    function marcarTodosPresentes() {
+      if (!currentChamadaSelectedDate) {
+        alert('Por favor, selecione uma data de aula primeiro.');
+        return;
+      }
+
+      const alunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma);
+      if (alunos.length === 0) {
+        alert('Não há catequizandos nesta turma para marcar presença.');
+        return;
+      }
+
+      const db = getChamadasDatabase();
+      const key = getTurmaKey(currentAlunosEtapa, currentAlunosTurma);
+      if (!db[key]) db[key] = { dates: [], records: {} };
+      if (!db[key].records) db[key].records = {};
+      if (!db[key].records[currentChamadaSelectedDate]) db[key].records[currentChamadaSelectedDate] = {};
+
+      alunos.forEach(a => {
+        const prevJust = (db[key].records[currentChamadaSelectedDate][a.id] && db[key].records[currentChamadaSelectedDate][a.id].justificativa) || '';
+        db[key].records[currentChamadaSelectedDate][a.id] = {
+          status: 'P',
+          justificativa: prevJust
+        };
+      });
+
+      saveChamadasDatabase(db);
+      updateChamadaKPIs();
+
+      if (currentChamadaSubMode === 'matriz') {
+        renderChamadaMatrizTable();
+      } else {
+        renderChamadaDiaTable();
+      }
+
+      window.ICM_CONFIG.logAuditEvent('MARCAR_TODOS_PRESENTES', `${currentAlunosEtapa} - ${currentAlunosTurma}`, {
+        date: currentChamadaSelectedDate,
+        totalAlunos: alunos.length
+      });
+    }
+
+    // Adiciona nova data de encontro ao calendário da turma
+    function promptAddChamadaDate() {
+      const inputDate = prompt('Informe a data do encontro (formato: AAAA-MM-DD ou DD/MM/AAAA):', new Date().toISOString().split('T')[0]);
+      if (!inputDate) return;
+
+      let isoDate = inputDate.trim();
+      if (isoDate.includes('/')) {
+        const parts = isoDate.split('/');
+        if (parts.length === 3) {
+          isoDate = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+        }
+      }
+
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(isoDate)) {
+        alert('Data em formato inválido. Use o padrão AAAA-MM-DD (ex: 2026-03-21) ou DD/MM/AAAA.');
+        return;
+      }
+
+      const db = getChamadasDatabase();
+      const key = getTurmaKey(currentAlunosEtapa, currentAlunosTurma);
+      if (!db[key]) db[key] = { dates: [], records: {} };
+      if (!Array.isArray(db[key].dates)) db[key].dates = [];
+
+      if (db[key].dates.includes(isoDate)) {
+        alert('Esta data já existe no calendário da turma.');
+        currentChamadaSelectedDate = isoDate;
+        renderChamadaSection();
+        return;
+      }
+
+      db[key].dates.push(isoDate);
+      db[key].dates.sort(); // Ordena cronologicamente
+      saveChamadasDatabase(db);
+
+      currentChamadaSelectedDate = isoDate;
+      renderChamadaSection();
+
+      window.ICM_CONFIG.logAuditEvent('ADD_CHAMADA_DATE', `${currentAlunosEtapa} - ${currentAlunosTurma}`, {
+        date: isoDate
+      });
+    }
+
+    // Exclui a data de encontro atualmente selecionada
+    function deleteSelectedChamadaDate() {
+      if (!currentChamadaSelectedDate) {
+        alert('Nenhuma data de encontro selecionada para exclusão.');
+        return;
+      }
+
+      if (!confirm(`Deseja realmente remover o encontro de ${_dataFmt(currentChamadaSelectedDate)} do calendário da turma? Todos os registros desta data serão excluídos.`)) {
+        return;
+      }
+
+      const db = getChamadasDatabase();
+      const key = getTurmaKey(currentAlunosEtapa, currentAlunosTurma);
+      if (!db[key] || !Array.isArray(db[key].dates)) return;
+
+      const dateToDelete = currentChamadaSelectedDate;
+      db[key].dates = db[key].dates.filter(d => d !== dateToDelete);
+      if (db[key].records && db[key].records[dateToDelete]) {
+        delete db[key].records[dateToDelete];
+      }
+
+      saveChamadasDatabase(db);
+      currentChamadaSelectedDate = db[key].dates[0] || '';
+      renderChamadaSection();
+
+      window.ICM_CONFIG.logAuditEvent('DELETE_CHAMADA_DATE', `${currentAlunosEtapa} - ${currentAlunosTurma}`, {
+        date: dateToDelete
+      });
+    }
+
+    // =============================================
+    // MODAL & MECANISMO DE IMPRESSÃO / PDF OFICIAL
+    // =============================================
+    function openPrintChamadaModal() {
+      const modal = document.getElementById('modal-print-chamada');
+      if (!modal) {
+        window.print();
+        return;
+      }
+
+      const sub = document.getElementById('print-modal-turma-subtitle');
+      if (sub) {
+        sub.textContent = `${currentAlunosTurma} • ${currentAlunosEtapa}`;
+      }
+
+      updatePrintChamadaPreview();
+      modal.classList.remove('hidden');
+    }
+
+    function closePrintChamadaModal() {
+      const modal = document.getElementById('modal-print-chamada');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    // Gera o HTML do documento impresso conforme o modelo escolhido
+    function generatePrintDocumentHtml() {
+      const modelRadio = document.querySelector('input[name="print-doc-model"]:checked');
+      const model = modelRadio ? modelRadio.value : 'branco';
+
+      const orientationRadio = document.querySelector('input[name="print-doc-orientation"]:checked');
+      const orientation = orientationRadio ? orientationRadio.value : 'landscape';
+
+      const optSignatures = document.getElementById('print-opt-signatures') ? document.getElementById('print-opt-signatures').checked : true;
+      const optKpis = document.getElementById('print-opt-kpis') ? document.getElementById('print-opt-kpis').checked : true;
+
+      const alunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma);
+      const dataTurma = getTurmaChamadasData(currentAlunosEtapa, currentAlunosTurma);
+      let dates = (dataTurma && Array.isArray(dataTurma.dates) && dataTurma.dates.length > 0)
+        ? [...dataTurma.dates]
+        : generateDefaultTurmaDates(currentAlunosEtapa, currentAlunosTurma);
+
+      const info = masterScheduleList.find(t => t.stage === currentAlunosEtapa && t.turma === currentAlunosTurma);
+
+      // Extrai nomes dos catequistas
+      let cat1 = 'Catequista Responsável';
+      let cat2 = 'Catequista / Auxiliar';
+      if (info && info.catechists) {
+        const parts = info.catechists.split(/\s+e\s+|\s*,\s*/i);
+        if (parts.length >= 1 && parts[0].trim()) cat1 = parts[0].trim();
+        if (parts.length >= 2 && parts[1].trim()) cat2 = parts[1].trim();
+      }
+
+      const emitidoEm = new Date().toLocaleDateString('pt-BR') + ' às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+      // Cabeçalho Paroquial Formal
+      let html = `
+        <div class="print-sheet ${orientation === 'portrait' ? 'print-portrait' : 'print-landscape'}" style="font-family: 'Questrial', 'Nunito', sans-serif; color: #0f172a; width: 100%; box-sizing: border-box;">
+          
+          <!-- Cabeçalho Oficial -->
+          <div style="border-bottom: 2px solid #0f172a; padding-bottom: 10px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 40px; height: 40px; border-radius: 8px; background: #0f172a; color: #d4a94f; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: bold; flex-shrink: 0;">✝</div>
+              <div>
+                <div style="font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #475569;">Arquidiocese de Brasília • Santuário Imaculado Coração de Maria</div>
+                <div style="font-size: 16px; font-weight: 900; color: #0f172a; letter-spacing: -0.3px; text-transform: uppercase; margin-top: 1px;">PASTORAL DA CATEQUESE — LISTA OFICIAL DE CHAMADA E FREQUÊNCIA 2026</div>
+                <div style="font-size: 9.5px; color: #64748b;">Paróquia São João Calábria • Setor de Mansões Park Way (SMPW) — Brasília-DF</div>
+              </div>
+            </div>
+            <div style="text-align: right; font-size: 9.5px; color: #64748b; line-height: 1.3;">
+              <div style="background: #f1f5f9; border: 1px solid #cbd5e1; padding: 2px 7px; border-radius: 5px; font-weight: 800; color: #0f172a; display: inline-block;">DOCUMENTO CATEQUÉTICO</div>
+              <div style="margin-top: 3px;">Emissão: ${emitidoEm}</div>
+            </div>
+          </div>
+
+          <!-- Quadro de Informações da Turma -->
+          <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 8px 12px; margin-bottom: 12px; display: grid; grid-template-columns: 1.2fr 1.5fr 1.8fr 1.5fr; gap: 10px; font-size: 10.5px;">
+            <div>
+              <span style="font-size: 8.5px; font-weight: 800; text-transform: uppercase; color: #64748b; display: block;">Etapa Catequética:</span>
+              <strong style="color: #0f172a; font-size: 11.5px;">${currentAlunosEtapa}</strong>
+            </div>
+            <div>
+              <span style="font-size: 8.5px; font-weight: 800; text-transform: uppercase; color: #64748b; display: block;">Turma & Sala:</span>
+              <strong style="color: #0f172a; font-size: 11.5px;">${currentAlunosTurma} • ${info ? info.room : 'Sala'}</strong>
+            </div>
+            <div>
+              <span style="font-size: 8.5px; font-weight: 800; text-transform: uppercase; color: #64748b; display: block;">Catequistas Responsáveis:</span>
+              <strong style="color: #0f172a; font-size: 11.5px;">${info ? info.catechists : '—'}</strong>
+            </div>
+            <div>
+              <span style="font-size: 8.5px; font-weight: 800; text-transform: uppercase; color: #64748b; display: block;">Horário & Encontros:</span>
+              <strong style="color: #0f172a; font-size: 11.5px;">${info ? info.dayTime : '—'}</strong>
+            </div>
+          </div>
+      `;
+
+      // -------------------------------------------------------------
+      // MODELO 1: CADERNETA EM BRANCO (Para preenchimento manual)
+      // -------------------------------------------------------------
+      if (model === 'branco') {
+        html += `
+          <div style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 11.5px; font-weight: 800; text-transform: uppercase; color: #1e293b;">
+              📋 Caderneta de Presença dos Encontros — Preenchimento em Sala
+            </div>
+            <div style="font-size: 9.5px; color: #64748b;">
+              Legenda Paroquial: <strong>P</strong> = Presença • <strong>J</strong> = Ausência Justificada • <strong>F</strong> = Falta
+            </div>
+          </div>
+
+          <table style="width: 100%; max-width: 100%; border-collapse: collapse; font-size: 9.5px; border: 1.5px solid #475569; table-layout: fixed;">
+            <thead>
+              <tr style="background: #0f172a; color: #ffffff;">
+                <th style="border: 1px solid #475569; padding: 5px 2px; text-align: center; width: 26px;">#</th>
+                <th style="border: 1px solid #475569; padding: 5px 6px; text-align: left; width: 220px;">Nome Completo do Catequizando</th>
+        `;
+
+        dates.forEach(d => {
+          const parts = d.split('-');
+          html += `
+            <th style="border: 1px solid #475569; padding: 4px 1px; text-align: center; width: 33px;">
+              <div style="font-size: 8.5px; font-weight: 900;">${parts[2]}/${parts[1]}</div>
+              <div style="font-size: 7.5px; font-weight: normal; opacity: 0.85;">${_diaSemana(d).slice(0, 3)}</div>
+            </th>
+          `;
+        });
+
+        html += `
+                <th style="border: 1px solid #475569; padding: 4px 1px; text-align: center; width: 26px; background: #064e3b; color: #ffffff;" title="Total de Presenças">P</th>
+                <th style="border: 1px solid #475569; padding: 4px 1px; text-align: center; width: 26px; background: #78350f; color: #ffffff;" title="Total de Ausências Justificadas">J</th>
+                <th style="border: 1px solid #475569; padding: 4px 1px; text-align: center; width: 26px; background: #881337; color: #ffffff;" title="Total de Faltas">F</th>
+                <th style="border: 1px solid #475569; padding: 4px 6px; text-align: left;">Anotações / Observações</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        alunos.forEach((a, i) => {
+          const bg = i % 2 === 0 ? '#ffffff' : '#f8fafc';
+          html += `
+            <tr style="background: ${bg}; height: 26px;">
+              <td style="border: 1px solid #cbd5e1; padding: 3px 2px; text-align: center; font-weight: bold; color: #64748b; font-size: 9px;">${i + 1}</td>
+              <td style="border: 1px solid #cbd5e1; padding: 3px 6px; font-weight: 700; color: #0f172a; font-size: 9.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${a.nome}</td>
+          `;
+
+          dates.forEach(() => {
+            html += `
+              <td style="border: 1px solid #cbd5e1; padding: 2px 1px; text-align: center; vertical-align: middle;">
+                <div style="width: 14px; height: 14px; border: 1.5px solid #cbd5e1; border-radius: 2px; margin: 0 auto; background: #ffffff;"></div>
+              </td>
+            `;
+          });
+
+          html += `
+              <td style="border: 1px solid #cbd5e1; padding: 2px 1px; text-align: center;">&nbsp;</td>
+              <td style="border: 1px solid #cbd5e1; padding: 2px 1px; text-align: center;">&nbsp;</td>
+              <td style="border: 1px solid #cbd5e1; padding: 2px 1px; text-align: center;">&nbsp;</td>
+              <td style="border: 1px solid #cbd5e1; padding: 2px 6px; font-size: 8.5px; color: #64748b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${a.observacoes || ''}</td>
+            </tr>
+          `;
+        });
+
+        html += `</tbody></table>`;
+      }
+
+      // -------------------------------------------------------------
+      // MODELO 2: DIÁRIO PREENCHIDO (Com dados do sistema e alertas)
+      // -------------------------------------------------------------
+      else if (model === 'preenchido') {
+        html += `
+          <div style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 11.5px; font-weight: 800; text-transform: uppercase; color: #1e293b;">
+              📊 Relatório Consolidado de Frequência e Alertas Pastorais
+            </div>
+            <div style="font-size: 9.5px; color: #64748b;">
+              Diretriz Paroquial: Limite de 3 faltas no semestre. Acima de 3 (&gt;3), notificar coordenação.
+            </div>
+          </div>
+
+          <table style="width: 100%; max-width: 100%; border-collapse: collapse; font-size: 9.5px; border: 1.5px solid #475569; table-layout: fixed;">
+            <thead>
+              <tr style="background: #0f172a; color: #ffffff;">
+                <th style="border: 1px solid #475569; padding: 5px 2px; text-align: center; width: 26px;">#</th>
+                <th style="border: 1px solid #475569; padding: 5px 6px; text-align: left; width: 200px;">Nome Completo</th>
+        `;
+
+        dates.forEach(d => {
+          const parts = d.split('-');
+          html += `
+            <th style="border: 1px solid #475569; padding: 4px 1px; text-align: center; width: 32px;">
+              <div style="font-size: 8.5px; font-weight: 900;">${parts[2]}/${parts[1]}</div>
+            </th>
+          `;
+        });
+
+        html += `
+                <th style="border: 1px solid #475569; padding: 4px 1px; text-align: center; width: 26px; background: #064e3b; color: #ffffff;">P</th>
+                <th style="border: 1px solid #475569; padding: 4px 1px; text-align: center; width: 26px; background: #78350f; color: #ffffff;">J</th>
+                <th style="border: 1px solid #475569; padding: 4px 1px; text-align: center; width: 26px; background: #881337; color: #ffffff;">F</th>
+                <th style="border: 1px solid #475569; padding: 4px 2px; text-align: center; width: 44px;">% Pres.</th>
+                <th style="border: 1px solid #475569; padding: 4px 4px; text-align: center; width: 110px;">Situação Pastoral</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        let totalGeralPresencas = 0;
+        let totalGeralFaltas = 0;
+        let alunosAlertaCount = 0;
+
+        alunos.forEach((a, i) => {
+          let pCount = 0;
+          let jCount = 0;
+          let fCount = 0;
+
+          let cellVals = '';
+          dates.forEach(d => {
+            const r = dataTurma.records && dataTurma.records[d] && dataTurma.records[d][a.id];
+            const st = r ? r.status : '';
+            if (st === 'P') {
+              pCount++;
+              cellVals += `<td style="border: 1px solid #cbd5e1; padding: 3px 1px; text-align: center; font-weight: bold; color: #15803d; background: #f0fdf4; font-size: 8.5px;">P</td>`;
+            } else if (st === 'J') {
+              jCount++;
+              fCount++; // ausência justificada conta como falta normalmente
+              cellVals += `<td style="border: 1px solid #cbd5e1; padding: 3px 1px; text-align: center; font-weight: bold; color: #b45309; background: #fefce8; font-size: 8.5px;" title="${r.justificativa || 'Justificada'}">J</td>`;
+            } else if (st === 'F') {
+              fCount++;
+              cellVals += `<td style="border: 1px solid #cbd5e1; padding: 3px 1px; text-align: center; font-weight: bold; color: #b91c1c; background: #fef2f2; font-size: 8.5px;">F</td>`;
+            } else {
+              cellVals += `<td style="border: 1px solid #cbd5e1; padding: 3px 1px; text-align: center; color: #cbd5e1; font-size: 8px;">—</td>`;
+            }
+          });
+
+          totalGeralPresencas += pCount;
+          totalGeralFaltas += fCount;
+
+          const tot = pCount + fCount;
+          const pct = tot > 0 ? Math.round((pCount / tot) * 100) : 100;
+
+          let sitLabel = '';
+          let sitStyle = '';
+          if (fCount > 3) {
+            alunosAlertaCount++;
+            sitLabel = '🚨 Alerta (&gt;3 Faltas)';
+            sitStyle = 'background: #ffe4e6; color: #9f1239; font-weight: 900;';
+          } else if (fCount === 3) {
+            sitLabel = '⚠️ Limite (3 Faltas)';
+            sitStyle = 'background: #fef3c7; color: #92400e; font-weight: 700;';
+          } else {
+            sitLabel = '🟢 Regular';
+            sitStyle = 'color: #166534; font-weight: 600;';
+          }
+
+          const rowBg = fCount > 3 ? '#fff1f2' : (i % 2 === 0 ? '#ffffff' : '#f8fafc');
+
+          html += `
+            <tr style="background: ${rowBg}; height: 26px;">
+              <td style="border: 1px solid #cbd5e1; padding: 3px 2px; text-align: center; font-weight: bold; color: #64748b; font-size: 9px;">${i + 1}</td>
+              <td style="border: 1px solid #cbd5e1; padding: 3px 6px; font-weight: 700; color: #0f172a; font-size: 9.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${a.nome}</td>
+              ${cellVals}
+              <td style="border: 1px solid #cbd5e1; padding: 3px 1px; text-align: center; font-weight: bold; color: #15803d; font-size: 9px;">${pCount}</td>
+              <td style="border: 1px solid #cbd5e1; padding: 3px 1px; text-align: center; font-weight: bold; color: #b45309; font-size: 9px;">${jCount}</td>
+              <td style="border: 1px solid #cbd5e1; padding: 3px 1px; text-align: center; font-weight: 900; color: ${fCount > 3 ? '#b91c1c' : '#334155'}; font-size: 9px;">${fCount}</td>
+              <td style="border: 1px solid #cbd5e1; padding: 3px 2px; text-align: center; font-weight: bold; color: ${pct < 75 ? '#b91c1c' : '#0f172a'}; font-size: 9px;">${pct}%</td>
+              <td style="border: 1px solid #cbd5e1; padding: 3px 4px; text-align: center; font-size: 8.5px; ${sitStyle}">${sitLabel}</td>
+            </tr>
+          `;
+        });
+
+        html += `</tbody></table>`;
+      }
+
+      // -------------------------------------------------------------
+      // MODELO 3: FOLHA DO DIA (Com campo de assinatura de presença)
+      // -------------------------------------------------------------
+      else if (model === 'dia') {
+        const dStr = currentChamadaSelectedDate || (dates[0] || '2026-03-07');
+        const sem = _diaSemana(dStr);
+        const fmt = _dataFmt(dStr);
+
+        html += `
+          <div style="background: #f1f5f9; border-left: 4px solid #4f46e5; padding: 8px 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <span style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #475569;">Lista de Presença do Encontro:</span>
+              <strong style="font-size: 13px; color: #1e1b4b; margin-left: 6px;">${fmt} (${sem})</strong>
+            </div>
+            <div style="font-size: 9.5px; color: #64748b;">
+              Cada catequizando ou responsável deve rubricar/assinar no campo correspondente
+            </div>
+          </div>
+
+          <table style="width: 100%; max-width: 100%; border-collapse: collapse; font-size: 10px; border: 1.5px solid #475569; table-layout: fixed;">
+            <thead>
+              <tr style="background: #0f172a; color: #ffffff;">
+                <th style="border: 1px solid #475569; padding: 6px 4px; text-align: center; width: 30px;">#</th>
+                <th style="border: 1px solid #475569; padding: 6px 10px; text-align: left; width: 240px;">Nome do Catequizando</th>
+                <th style="border: 1px solid #475569; padding: 6px 8px; text-align: center; width: 90px;">Status no Sistema</th>
+                <th style="border: 1px solid #475569; padding: 6px 12px; text-align: left; width: 270px;">Assinatura / Rubrica</th>
+                <th style="border: 1px solid #475569; padding: 6px 8px; text-align: left;">Observações / Motivo</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        alunos.forEach((a, i) => {
+          const rec = (dataTurma.records && dataTurma.records[dStr] && dataTurma.records[dStr][a.id]) || {};
+          const st = rec.status || '';
+          let stText = '—';
+          let stColor = '#64748b';
+          if (st === 'P') { stText = 'Presente'; stColor = '#15803d'; }
+          else if (st === 'J') { stText = 'Justificada'; stColor = '#b45309'; }
+          else if (st === 'F') { stText = 'Falta'; stColor = '#b91c1c'; }
+
+          const bg = i % 2 === 0 ? '#ffffff' : '#f8fafc';
+          html += `
+            <tr style="background: ${bg}; height: 32px;">
+              <td style="border: 1px solid #cbd5e1; padding: 4px; text-align: center; font-weight: bold; color: #64748b;">${i + 1}</td>
+              <td style="border: 1px solid #cbd5e1; padding: 4px 8px; font-weight: 700; color: #0f172a;">${a.nome}</td>
+              <td style="border: 1px solid #cbd5e1; padding: 4px 6px; text-align: center; font-weight: bold; color: ${stColor};">${stText}</td>
+              <td style="border: 1px solid #cbd5e1; padding: 4px 8px; border-bottom: 1.5px dotted #64748b;">&nbsp;</td>
+              <td style="border: 1px solid #cbd5e1; padding: 4px 8px; font-size: 9px; color: #475569;">${rec.justificativa || a.observacoes || ''}</td>
+            </tr>
+          `;
+        });
+
+        html += `</tbody></table>`;
+      }
+
+      // Resumo Estatístico da Turma (se selecionado)
+      if (optKpis) {
+        let totalFaltosos = 0;
+        let totalAcimaLimite = 0;
+        alunos.forEach(a => {
+          let fa = 0;
+          dates.forEach(d => {
+            const r = dataTurma.records && dataTurma.records[d] && dataTurma.records[d][a.id];
+            if (r && (r.status === 'F' || r.status === 'J')) fa++;
+          });
+          if (fa > 3) totalAcimaLimite++;
+          else if (fa === 3) totalFaltosos++;
+        });
+
+        html += `
+          <div style="margin-top: 12px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 9.5px; color: #334155;">
+            <div>Total de Catequizandos: <strong>${alunos.length}</strong></div>
+            <div>Encontros Agendados: <strong>${dates.length}</strong></div>
+            <div>No Limite de Tolerância (3 faltas): <strong style="color: #b45309;">${totalFaltosos}</strong></div>
+            <div>Em Alerta Crítico (&gt;3 faltas): <strong style="color: #b91c1c;">${totalAcimaLimite}</strong></div>
+          </div>
+        `;
+      }
+
+      // Bloco de Assinaturas (se selecionado)
+      if (optSignatures) {
+        html += `
+          <div style="margin-top: 25px; page-break-inside: avoid; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; text-align: center; font-size: 9.5px; color: #334155;">
+            <div>
+              <div style="border-top: 1.5px solid #1e293b; padding-top: 5px; margin-top: 25px;">
+                <strong style="color: #0f172a; font-size: 11px;">${cat1}</strong>
+              </div>
+              <div style="color: #64748b; font-size: 8.5px; text-transform: uppercase; font-weight: bold; margin-top: 2px;">Assinatura do(a) Catequista</div>
+            </div>
+            <div>
+              <div style="border-top: 1.5px solid #1e293b; padding-top: 5px; margin-top: 25px;">
+                <strong style="color: #0f172a; font-size: 11px;">${cat2}</strong>
+              </div>
+              <div style="color: #64748b; font-size: 8.5px; text-transform: uppercase; font-weight: bold; margin-top: 2px;">Assinatura do(a) Catequista / Auxiliar</div>
+            </div>
+            <div>
+              <div style="border-top: 1.5px solid #1e293b; padding-top: 5px; margin-top: 25px;">
+                <strong style="color: #0f172a; font-size: 11px;">Coordenação de ${currentAlunosEtapa}</strong>
+              </div>
+              <div style="color: #64748b; font-size: 8.5px; text-transform: uppercase; font-weight: bold; margin-top: 2px;">Visto da Coordenação Pastoral</div>
+            </div>
+          </div>
+        `;
+      }
+
+      html += `</div>`;
+      return html;
+    }
+
+    // Atualiza a pré-visualização no modal
+    function updatePrintChamadaPreview() {
+      const previewPaper = document.getElementById('print-chamada-preview-paper');
+      if (!previewPaper) return;
+
+      const orientationRadio = document.querySelector('input[name="print-doc-orientation"]:checked');
+      const orientation = orientationRadio ? orientationRadio.value : 'landscape';
+
+      if (orientation === 'portrait') {
+        previewPaper.style.maxWidth = '760px';
+      } else {
+        previewPaper.style.maxWidth = '980px';
+      }
+
+      previewPaper.innerHTML = generatePrintDocumentHtml();
+    }
+
+    // Executa a impressão física ou salvamento em PDF nativo
+    function executePrintChamada() {
+      const printableArea = document.getElementById('printable-chamada-area');
+      if (!printableArea) {
+        window.print();
+        return;
+      }
+
+      // Injeta o documento oficial gerado na área de impressão
+      printableArea.innerHTML = generatePrintDocumentHtml();
+      printableArea.classList.remove('hidden');
+
+      // Aplica a classe que isola o documento na folha de impressão
+      document.body.classList.add('printing-chamada');
+
+      // Trilha de auditoria
+      window.ICM_CONFIG.logAuditEvent('PRINT_CHAMADA', `${currentAlunosEtapa} - ${currentAlunosTurma}`, {
+        model: (document.querySelector('input[name="print-doc-model"]:checked') || {}).value,
+        orientation: (document.querySelector('input[name="print-doc-orientation"]:checked') || {}).value
+      });
+
+      // Dispara a impressão nativa
+      setTimeout(() => {
+        window.print();
+
+        // Contingência para restauração após o diálogo fechar
+        setTimeout(() => {
+          document.body.classList.remove('printing-chamada');
+          printableArea.classList.add('hidden');
+        }, 1000);
+      }, 150);
+    }
+
+    // Vincula evento global beforeprint para garantir que a folha oficial seja injetada antes da impressão
+    window.addEventListener('beforeprint', () => {
+      const printableArea = document.getElementById('printable-chamada-area');
+      if (printableArea) {
+        printableArea.innerHTML = generatePrintDocumentHtml();
+        printableArea.classList.remove('hidden');
+        document.body.classList.add('printing-chamada');
+      }
+    });
+
+    // Vincula evento global afterprint para restaurar o DOM
+    window.addEventListener('afterprint', () => {
+      document.body.classList.remove('printing-chamada');
+      const printableArea = document.getElementById('printable-chamada-area');
+      if (printableArea) printableArea.classList.add('hidden');
+    });
+
+    // Função pública chamada pelos botões de tela
     function printTurmaChamada() {
-      window.print();
+      openPrintChamadaModal();
     }
 
     // =============================================
@@ -8566,6 +10122,11 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       }
     });
   </script>
+
+  <!-- ============================================================== -->
+  <!-- ÁREA DE IMPRESSÃO ISOLADA (Filho direto de <body> para @media print) -->
+  <!-- ============================================================== -->
+  <div id="printable-chamada-area" class="hidden"></div>
 
 </body>
 </html>
