@@ -60,6 +60,17 @@ const SEED_AUTHORIZED_USERS = [
     status: 'ativo',
     createdAt: '2026-01-01T00:00:00.000Z',
     approvedBy: 'Sistema Oficial'
+  },
+  {
+    email: 'secretaria@imaculadocoracaodf.com.br',
+    displayName: 'Sandra (Secretaria Paroquial)',
+    role: ROLES.SECRETARIA,
+    turmaId: 'todas',
+    turmaNome: 'Todas as Turmas (Secretaria)',
+    etapa: 'Todas',
+    status: 'ativo',
+    createdAt: '2026-01-01T00:00:00.000Z',
+    approvedBy: 'Sistema Oficial'
   }
 ];
 
@@ -75,7 +86,10 @@ function getAuthorizedUsers() {
       list.unshift(SEED_AUTHORIZED_USERS[0]);
     }
     if (!list.some(u => u.email && u.email.toLowerCase() === COORD_GERAL_EMAIL.toLowerCase())) {
-      list.unshift(SEED_AUTHORIZED_USERS[1]);
+      list.splice(1, 0, SEED_AUTHORIZED_USERS[1]);
+    }
+    if (!list.some(u => u.role === ROLES.SECRETARIA || (u.email && (u.email.toLowerCase().includes('secretaria') || u.email.toLowerCase().includes('sandra'))))) {
+      list.push(SEED_AUTHORIZED_USERS[2]);
     }
     return list;
   } catch (e) {
@@ -130,6 +144,7 @@ function getUserProfile(email) {
   if (found) return found;
   if (clean === MASTER_ADMIN_EMAIL.toLowerCase()) return SEED_AUTHORIZED_USERS[0];
   if (clean === COORD_GERAL_EMAIL.toLowerCase()) return SEED_AUTHORIZED_USERS[1];
+  if (clean.includes('secretaria') || clean.includes('sandra')) return SEED_AUTHORIZED_USERS[2];
   return null;
 }
 

@@ -3451,7 +3451,7 @@
       <div class="p-5 sm:p-6 overflow-y-auto flex-1 space-y-4 text-xs text-slate-700">
         
         <!-- Destaque dos Responsáveis Oficiais -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div class="p-3.5 rounded-2xl bg-amber-50 border border-amber-300 text-amber-950 flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center shadow-xs flex-shrink-0">
               👑
@@ -3470,6 +3470,16 @@
               <span class="text-[10px] font-black uppercase text-indigo-700 tracking-wider">Coordenação Geral</span>
               <div class="font-bold text-sm text-slate-900">Lorena Moraes</div>
               <div class="text-[11px] text-indigo-900 font-mono">Lorenammoraes@gmail.com</div>
+            </div>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-950 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white font-black text-xs flex items-center justify-center shadow-xs flex-shrink-0">
+              🏛️
+            </div>
+            <div>
+              <span class="text-[10px] font-black uppercase text-emerald-800 tracking-wider">Secretaria Paroquial</span>
+              <div class="font-bold text-sm text-slate-900">Sandra / Secretaria</div>
+              <div class="text-[11px] text-emerald-900 font-mono">secretaria@imaculadocoracaodf.com.br</div>
             </div>
           </div>
         </div>
@@ -3551,6 +3561,22 @@
                 <td class="text-center font-bold text-emerald-700">✅ Painel Geral</td>
                 <td class="text-center bg-indigo-50/50 font-bold">✅ Painel Geral</td>
                 <td class="text-center bg-amber-50/50 font-bold">✅ Painel Geral</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 px-3 font-semibold text-slate-900">Diário de Chamadas &amp; Frequência</td>
+                <td class="text-center text-slate-600">Preenchimento da Turma</td>
+                <td class="text-center text-slate-600">Acompanhamento da Etapa</td>
+                <td class="text-center font-semibold text-emerald-700">Consulta &amp; Impressão Geral</td>
+                <td class="text-center bg-indigo-50/50 font-bold text-indigo-700">Acesso Total</td>
+                <td class="text-center bg-amber-50/50 font-bold text-amber-700">Acesso Total</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 px-3 font-semibold text-slate-900">Emissão de Fichas e Comprovantes</td>
+                <td class="text-center text-slate-600">Sua Turma</td>
+                <td class="text-center text-slate-600">Sua Etapa</td>
+                <td class="text-center font-bold text-emerald-700">✅ Todas as Turmas</td>
+                <td class="text-center bg-indigo-50/50 font-bold text-indigo-700">✅ Todas as Turmas</td>
+                <td class="text-center bg-amber-50/50 font-bold text-amber-700">✅ Todas as Turmas</td>
               </tr>
               <tr>
                 <td class="py-2.5 px-3 font-semibold text-slate-900">Disparar WhatsApp / E-mail com Cco</td>
@@ -6209,245 +6235,14 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             <div class="${colors.bg} border-2 ${colors.borderHeader} rounded-xl p-3 text-center shadow-xs relative group/header hover:shadow-md transition">
               <div class="flex items-center justify-between gap-1 mb-1.5">
                 <span class="text-[10px] font-extrabold uppercase tracking-wide ${colors.badge} px-2 py-0.5 rounded-md truncate">${stage.name}</span>
+                ${(window.appAuthState && window.ICM_CONFIG && (window.appAuthState.role === window.ICM_CONFIG.ROLES.MASTER_ADMIN || window.appAuthState.role === window.ICM_CONFIG.ROLES.COORD_GERAL)) ? `
                 <button onclick="openEditCoordinatorsModal('${stage.id}')" class="px-2 py-0.5 bg-white hover:bg-amber-100 text-slate-800 hover:text-amber-950 border border-slate-300 hover:border-amber-400 rounded-lg text-[10px] font-bold shadow-2xs transition flex items-center gap-1 shrink-0" title="Editar Coordenador(a) e Vice de ${stage.name}">
                   <span>✏️</span> <span>Coordenação</span>
-                </button>
+                </button>` : ''}
               </div>
               <p class="text-[11px] text-slate-800 font-bold field-stage-coord text-left sm:text-center mt-1">Coord: <span class="font-semibold text-slate-700">${stage.coord}</span></p>
               <p class="text-[10.5px] text-slate-600 field-stage-vice text-left sm:text-center">Vice: <span class="font-medium text-slate-500">${stage.vice}</span></p>
               <div class="mt-1.5 text-[9.5px] font-bold ${colors.badge} py-0.5 rounded px-1.5 field-stage-criteria">Critério: ${stage.criteria}</div>
-            </div>
-
-            <!-- Turmas -->
-            ${turmasHtml}
-
-            <!-- Botão Adicionar Turma nesta Etapa (visível no modo edição) -->
-            ${orgEditModeActive ? `
-              <button onclick="openAddTurmaModal('${stage.name}')" class="w-full py-2 border-2 border-dashed border-slate-300 hover:border-amber-400 hover:bg-amber-50/50 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1">
-                <span>➕</span> <span>Adicionar Turma</span>
-              </button>
-            ` : ''}
-          </div>
-        `;
-      }).join('');
-    }
-
-    // Ler dados de organogramas do LocalStorage
-    function getOrganogramasData() {
-      try {
-        const stored = localStorage.getItem(STORAGE_KEY_ORGANOGRAMAS);
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
-            return parsed;
-          }
-        }
-      } catch (e) {
-        console.error('Erro ao ler organogramas do localStorage:', e);
-      }
-      saveOrganogramasData(SEED_ORGANOGRAMAS);
-      return JSON.parse(JSON.stringify(SEED_ORGANOGRAMAS));
-    }
-
-    function saveOrganogramasData(data) {
-      try {
-        localStorage.setItem(STORAGE_KEY_ORGANOGRAMAS, JSON.stringify(data));
-      } catch (e) {
-        console.error('Erro ao salvar organogramas:', e);
-      }
-    }
-
-    function getActiveOrganogramaId() {
-      const data = getOrganogramasData();
-      const storedId = localStorage.getItem(STORAGE_KEY_ACTIVE_ORG_ID);
-      if (storedId && data[storedId]) return storedId;
-      const keys = Object.keys(data);
-      const defaultId = keys.includes('org-2026') ? 'org-2026' : keys[0];
-      localStorage.setItem(STORAGE_KEY_ACTIVE_ORG_ID, defaultId);
-      return defaultId;
-    }
-
-    function setActiveOrganogramaId(id) {
-      const data = getOrganogramasData();
-      if (!data[id]) return;
-      localStorage.setItem(STORAGE_KEY_ACTIVE_ORG_ID, id);
-      renderOrganogramaAll();
-    }
-
-    function getActiveOrganograma() {
-      const data = getOrganogramasData();
-      const id = getActiveOrganogramaId();
-      return data[id] || Object.values(data)[0];
-    }
-
-    function syncMasterScheduleList() {
-      const org = getActiveOrganograma();
-      if (!org || !Array.isArray(org.stages)) {
-        masterScheduleList = [];
-        return;
-      }
-      masterScheduleList = [];
-      org.stages.forEach(st => {
-        if (Array.isArray(st.turmas)) {
-          st.turmas.forEach(t => {
-            masterScheduleList.push({
-              ...t,
-              stage: st.name
-            });
-          });
-        }
-      });
-    }
-
-    // Renderizar Pílulas de Alternância de Organograma
-    function renderOrganogramaPills() {
-      const container = document.getElementById('organograma-pills-list');
-      if (!container) return;
-
-      const data = getOrganogramasData();
-      const activeId = getActiveOrganogramaId();
-      const activeOrg = data[activeId] || Object.values(data)[0];
-
-      // Atualiza Badge do Topo
-      const titleBadge = document.getElementById('org-active-badge-title');
-      const statsBadge = document.getElementById('org-active-stats-pill');
-      let totalTurmas = 0;
-      if (activeOrg && activeOrg.stages) {
-        totalTurmas = activeOrg.stages.reduce((acc, st) => acc + (st.turmas ? st.turmas.length : 0), 0);
-      }
-      if (titleBadge) titleBadge.textContent = `Organograma ${activeOrg.name || 'Oficial'}`;
-      if (statsBadge) statsBadge.textContent = `${totalTurmas} turmas`;
-
-      // Renderiza Pílulas
-      container.innerHTML = Object.values(data).map(org => {
-        const isActive = org.id === activeId;
-        const count = (org.stages || []).reduce((acc, st) => acc + (st.turmas ? st.turmas.length : 0), 0);
-        return `
-          <button onclick="setActiveOrganogramaId('${org.id}')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${isActive ? 'bg-gradient-to-r from-[#d4a94f] to-[#b88d36] text-slate-950 shadow-md shadow-amber-500/20 ring-2 ring-amber-300' : 'bg-slate-800/90 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700'}">
-            <span>📅 ${org.name}</span>
-            <span class="text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${isActive ? 'bg-amber-950 text-amber-200' : 'bg-slate-900 text-slate-400'}">${count}</span>
-          </button>
-        `;
-      }).join('');
-    }
-
-    // Renderizar Árvore Gráfica
-    function renderOrganogramaTree() {
-      const org = getActiveOrganograma();
-      if (!org) return;
-
-      const headerTitle = document.getElementById('org-tree-header-title');
-      const headerSubtitle = document.getElementById('org-tree-header-subtitle');
-      const footerYear = document.getElementById('org-tree-footer-year');
-      const treeContent = document.getElementById('organograma-tree-content');
-
-      if (headerTitle) headerTitle.textContent = org.title || `Catequese Paroquial • ${org.name}`;
-      if (headerSubtitle) headerSubtitle.textContent = org.subtitle || 'Organograma Geral das Etapas, Turmas e Salas de Encontro';
-      if (footerYear) footerYear.textContent = `Pastoral da Catequese Oficial • ${org.name}`;
-
-      if (!treeContent) return;
-
-      const colorMap = {
-        rose: {
-          bg: 'bg-rose-50',
-          borderHeader: 'border-rose-300',
-          textHeader: 'text-rose-900',
-          badge: 'text-rose-700 bg-rose-100/80',
-          cardBorder: 'border-rose-200 hover:border-rose-400',
-          accent: 'rose'
-        },
-        emerald: {
-          bg: 'bg-emerald-50',
-          borderHeader: 'border-emerald-300',
-          textHeader: 'text-emerald-900',
-          badge: 'text-emerald-700 bg-emerald-100/80',
-          cardBorder: 'border-emerald-200 hover:border-emerald-400',
-          accent: 'emerald'
-        },
-        sky: {
-          bg: 'bg-sky-50',
-          borderHeader: 'border-sky-300',
-          textHeader: 'text-sky-900',
-          badge: 'text-sky-700 bg-sky-100/80',
-          cardBorder: 'border-sky-200 hover:border-sky-400',
-          accent: 'sky'
-        },
-        amber: {
-          bg: 'bg-amber-50',
-          borderHeader: 'border-amber-300',
-          textHeader: 'text-amber-900',
-          badge: 'text-amber-800 bg-amber-100/80',
-          cardBorder: 'border-amber-200 hover:border-amber-400',
-          accent: 'amber'
-        },
-        purple: {
-          bg: 'bg-purple-50',
-          borderHeader: 'border-purple-300',
-          textHeader: 'text-purple-900',
-          badge: 'text-purple-900 bg-purple-100/90 border border-purple-200',
-          cardBorder: 'border-purple-200 hover:border-purple-400',
-          accent: 'purple'
-        },
-        indigo: {
-          bg: 'bg-indigo-50',
-          borderHeader: 'border-indigo-300',
-          textHeader: 'text-indigo-900',
-          badge: 'text-indigo-800 bg-indigo-100/80',
-          cardBorder: 'border-indigo-200 hover:border-indigo-400',
-          accent: 'indigo'
-        }
-      };
-
-      treeContent.innerHTML = (org.stages || []).map((stage, sIdx) => {
-        const colors = colorMap[stage.colorTheme] || colorMap.sky;
-
-        const turmasHtml = (stage.turmas || []).map(t => {
-          let catechistLabel = t.catechists;
-          if (t.semCatequista) {
-            catechistLabel = `<div class="text-[10.5px] text-amber-800 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 inline-block mb-1">⚠️ Auxiliares em formação</div><div class="text-[11px] text-slate-700 font-medium">${t.catechists}</div>`;
-          } else {
-            catechistLabel = `<div class="text-[11px] text-slate-700 font-medium">Catequistas: ${t.catechists}</div>`;
-          }
-
-          let auxHtml = '';
-          if (t.auxiliares && t.auxiliares.length > 0 && !t.semCatequista) {
-            auxHtml = `<div class="text-[10px] text-slate-400 italic">Aux. em formação: ${t.auxiliares.join(', ')}</div>`;
-          }
-
-          let alunosBtn = '';
-          if (t.alunosBadge) {
-            alunosBtn = `
-              <button onclick="openTurmaAlunos('${stage.name}', '${t.turma}')" class="mt-2 w-full flex items-center justify-center gap-1.5 text-[10.5px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 py-1 rounded-lg transition" title="Ver lista de catequizandos">
-                <span>👥</span> <span>Ver Alunos (${t.alunosBadge})</span>
-              </button>
-            `;
-          }
-
-          return `
-            <div class="relative bg-white border ${colors.cardBorder} rounded-xl p-2.5 shadow-2xs transition org-editable group/card" data-stage-id="${stage.id}" data-turma-id="${t.id}">
-              ${orgEditModeActive ? `
-                <div class="absolute -top-2 -right-2 flex items-center gap-1 z-20">
-                  <button onclick="openEditTurmaModal('${t.id}')" class="w-5 h-5 bg-slate-800 hover:bg-slate-900 text-white rounded-full flex items-center justify-center text-[10px] shadow" title="Editar Turma">✏️</button>
-                  <button onclick="deleteTurma('${t.id}')" class="w-5 h-5 bg-rose-600 hover:bg-rose-700 text-white rounded-full flex items-center justify-center text-[10px] shadow" title="Excluir Turma">✕</button>
-                </div>
-              ` : ''}
-              <div class="text-[11px] font-bold text-slate-900 mb-0.5 field-turma-header">${t.turma} • ${t.dayTime}</div>
-              <div class="field-turma-catechists">${catechistLabel}</div>
-              <div class="field-turma-aux">${auxHtml}</div>
-              <div class="text-[10px] text-slate-500 mt-1 font-semibold field-turma-room">${t.room}</div>
-              ${alunosBtn}
-            </div>
-          `;
-        }).join('');
-
-        return `
-          <div class="flex flex-col space-y-2.5" data-stage-id="${stage.id}">
-            <!-- Header da Etapa -->
-            <div class="${colors.bg} border-2 ${colors.borderHeader} rounded-xl p-3 text-center shadow-xs relative">
-              <h3 class="font-bold font-heading ${colors.textHeader} text-sm field-stage-name">${stage.name}</h3>
-              <p class="text-[11px] text-slate-700 font-semibold mt-0.5 field-stage-coord">Coord: ${stage.coord}</p>
-              <p class="text-[10px] text-slate-500 field-stage-vice">Vice: ${stage.vice}</p>
-              <div class="mt-1 text-[9.5px] font-bold ${colors.badge} py-0.5 rounded px-1 field-stage-criteria">Critério: ${stage.criteria}</div>
             </div>
 
             <!-- Turmas -->
@@ -6503,9 +6298,10 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             <h4 class="font-bold font-heading text-white text-lg mt-2">Coordenadora: ${org.generalCoord ? org.generalCoord.coord : 'Lorena'}</h4>
             <p class="text-sm text-slate-300">Vice Coordenador: ${org.generalCoord ? org.generalCoord.vice : 'Andrés'}</p>
           </div>
+          ${(window.appAuthState && window.ICM_CONFIG && (window.appAuthState.role === window.ICM_CONFIG.ROLES.MASTER_ADMIN || window.appAuthState.role === window.ICM_CONFIG.ROLES.COORD_GERAL)) ? `
           <button onclick="openEditCoordinatorsModal()" class="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-slate-200 border border-slate-700 px-3.5 py-1.5 rounded-xl text-xs font-bold transition self-start sm:self-center">
             <span>✏️ Editar Coordenadores</span>
-          </button>
+          </button>` : ''}
         </div>
 
         <!-- 6 Etapas Cards -->
@@ -6581,6 +6377,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             <td class="py-3 px-4 font-bold text-slate-800">${r.room}</td>
             <td class="py-3 px-4 text-slate-500 text-xs">${r.hall}</td>
             <td class="py-3 px-4 text-center no-print whitespace-nowrap">
+              ${(window.appAuthState && window.ICM_CONFIG && (window.appAuthState.role === window.ICM_CONFIG.ROLES.MASTER_ADMIN || window.appAuthState.role === window.ICM_CONFIG.ROLES.COORD_GERAL)) ? `
               <div class="flex items-center justify-center gap-1">
                 <button onclick="openEditTurmaModal('${r.id}')" class="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition" title="Editar Turma">
                   ✏️
@@ -6588,7 +6385,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
                 <button onclick="deleteTurma('${r.id}')" class="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg transition" title="Excluir Turma">
                   🗑️
                 </button>
-              </div>
+              </div>` : '<span class="text-slate-300 text-xs">—</span>'}
             </td>
           `;
           tbody.appendChild(tr);
@@ -6614,6 +6411,12 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     // GESTÃO DE MÚLTIPLOS ORGANOGRAMAS (Ações)
     // =============================================
     function criarNovoOrganograma() {
+      const role = window.appAuthState ? window.appAuthState.role : null;
+      if (role && role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL) {
+        alert('⚠️ Operação não permitida: A criação de novos organogramas é restrita à Coordenação Geral e ao Master Admin.');
+        return;
+      }
+
       const nome = prompt('📅 Digite o Nome / Ano do novo organograma (ex: 2028):');
       if (!nome || !nome.trim()) return;
 
@@ -6642,6 +6445,12 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     }
 
     function duplicarOrganogramaAtivo() {
+      const role = window.appAuthState ? window.appAuthState.role : null;
+      if (role && role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL) {
+        alert('⚠️ Operação não permitida: A duplicação de organogramas é restrita à Coordenação Geral e ao Master Admin.');
+        return;
+      }
+
       const active = getActiveOrganograma();
       const novoNome = prompt(`📋 Duplicar organograma "${active.name}". Digite o nome da cópia (ex: ${active.name} - Cópia ou 2028):`, `${active.name} - Cópia`);
       if (!novoNome || !novoNome.trim()) return;
@@ -6663,6 +6472,12 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     }
 
     function renomearOrganogramaAtivo() {
+      const role = window.appAuthState ? window.appAuthState.role : null;
+      if (role && role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL) {
+        alert('⚠️ Operação não permitida: A renomeação de organogramas é restrita à Coordenação Geral e ao Master Admin.');
+        return;
+      }
+
       const active = getActiveOrganograma();
       const novoNome = prompt(`✏️ Digite o novo nome para o organograma "${active.name}":`, active.name);
       if (!novoNome || !novoNome.trim() || novoNome.trim() === active.name) return;
@@ -6679,6 +6494,12 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     }
 
     function excluirOrganogramaAtivo() {
+      const role = window.appAuthState ? window.appAuthState.role : null;
+      if (role && role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL) {
+        alert('⚠️ Operação não permitida: A exclusão de organogramas é restrita à Coordenação Geral e ao Master Admin.');
+        return;
+      }
+
       const data = getOrganogramasData();
       const keys = Object.keys(data);
 
@@ -6705,6 +6526,12 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     }
 
     function resetOrganogramaDefault() {
+      const role = window.appAuthState ? window.appAuthState.role : null;
+      if (role && role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL) {
+        alert('⚠️ Operação não permitida: A restauração de organogramas padrão é restrita à Coordenação Geral e ao Master Admin.');
+        return;
+      }
+
       if (!confirm('Deseja restaurar os organogramas padrão oficiais (2026 e 2027)? Todas as alterações locais em todos os organogramas serão redefinidas.')) return;
       saveOrganogramasData(SEED_ORGANOGRAMAS);
       localStorage.setItem(STORAGE_KEY_ACTIVE_ORG_ID, 'org-2026');
@@ -6716,6 +6543,12 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     // MODAIS DE TURMA E COORDENAÇÃO (Planilha & Edição)
     // =============================================
     function openAddTurmaModal(stageName) {
+      const role = window.appAuthState ? window.appAuthState.role : null;
+      if (role && role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL) {
+        alert('⚠️ Operação não permitida: O gerenciamento de turmas do organograma é restrito à Coordenação Geral e ao Master Admin.');
+        return;
+      }
+
       const org = getActiveOrganograma();
       document.getElementById('turma-modal-title').textContent = 'Adicionar Nova Turma';
       document.getElementById('turma-modal-subtitle').textContent = `Organograma ${org.name}`;
@@ -6738,6 +6571,12 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     }
 
     function openEditTurmaModal(turmaId) {
+      const role = window.appAuthState ? window.appAuthState.role : null;
+      if (role && role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL) {
+        alert('⚠️ Operação não permitida: A edição de turmas do organograma é restrita à Coordenação Geral e ao Master Admin.');
+        return;
+      }
+
       const org = getActiveOrganograma();
       let foundTurma = null;
       let foundStage = null;
@@ -6836,6 +6675,12 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     }
 
     function deleteTurma(turmaId) {
+      const role = window.appAuthState ? window.appAuthState.role : null;
+      if (role && role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL) {
+        alert('⚠️ Operação não permitida: A exclusão de turmas do organograma é restrita à Coordenação Geral e ao Master Admin.');
+        return;
+      }
+
       if (!confirm('Deseja realmente remover esta turma deste organograma?')) return;
 
       const data = getOrganogramasData();
@@ -6853,6 +6698,12 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
     // Modal de Edição de Coordenações
     function openEditCoordinatorsModal(targetStageId) {
+      const role = window.appAuthState ? window.appAuthState.role : null;
+      if (role && role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL) {
+        alert('⚠️ Operação não permitida: A edição de coordenadores é restrita à Coordenação Geral e ao Master Admin.');
+        return;
+      }
+
       const org = getActiveOrganograma();
       if (!org) return;
 
@@ -8494,6 +8345,11 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           ? `<span class="text-xs text-slate-700 block max-w-[170px] leading-tight" title="${justVal.replace(/"/g, '&quot;')}">${justVal}</span>`
           : '<span class="text-slate-300">—</span>';
 
+        const canDelete = window.appAuthState && window.ICM_CONFIG && (
+          window.appAuthState.role === window.ICM_CONFIG.ROLES.MASTER_ADMIN ||
+          window.appAuthState.role === window.ICM_CONFIG.ROLES.COORD_GERAL
+        );
+
         return `
           <tr class="hover:bg-slate-50/80 transition group">
             <td class="py-2.5 px-3 text-center font-bold text-slate-400 text-xs col-freeze-idx">${idx + 1}</td>
@@ -8516,9 +8372,10 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
                 <button onclick="editAluno('${a.id}')" class="p-1 rounded text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition" title="Editar Catequizando">
                   ✏️
                 </button>
-                <button onclick="deleteAluno('${a.id}')" class="p-1 rounded text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition" title="Excluir Catequizando">
+                ${canDelete ? `
+                <button onclick="deleteAluno('${a.id}')" class="p-1 rounded text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition" title="Excluir Catequizando (Coordenação/Master Admin)">
                   🗑️
-                </button>
+                </button>` : ''}
               </div>
             </td>
           </tr>
