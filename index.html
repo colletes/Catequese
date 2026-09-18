@@ -4431,6 +4431,14 @@
         firebaseAuth = firebase.auth();
         firebaseDb = firebase.firestore();
         window.firebaseDb = firebaseDb;
+
+        // Inicia sincronização em nuvem de usuários autorizados e pendentes
+        if (typeof window.ICM_CONFIG.syncUsersFromFirestore === 'function') {
+          window.ICM_CONFIG.syncUsersFromFirestore();
+        }
+        if (typeof window.ICM_CONFIG.listenUsersFromFirestore === 'function') {
+          window.ICM_CONFIG.listenUsersFromFirestore();
+        }
       }
     } catch (err) {
       console.warn('Firebase SDK não pôde conectar em modo live. Operando com autenticação institucional protegida:', err);
@@ -4486,8 +4494,21 @@
       return false;
     }
 
-    function handleSessionRestored(userData) {
-      const role = window.ICM_CONFIG.determineUserRole(userData.email);
+    async function handleSessionRestored(userData) {
+      let role = window.ICM_CONFIG.determineUserRole(userData.email);
+
+      // Validação profunda na nuvem se localmente constar como pendente
+      if (role === window.ICM_CONFIG.ROLES.PENDENTE && typeof window.ICM_CONFIG.checkUserRoleAsync === 'function') {
+        role = await window.ICM_CONFIG.checkUserRoleAsync(userData.email);
+      }
+
+      if (role === window.ICM_CONFIG.ROLES.PENDENTE) {
+        const gate = document.getElementById('auth-gate');
+        if (gate) gate.classList.remove('hidden');
+        showAuthFeedback('⏳ <strong>Conta em Análise:</strong> O seu acesso foi registrado com sucesso! Por exigência de conformidade com a LGPD e proteção de menores, novos catequistas devem ser previamente vinculados à sua turma por Thiago Carvalho (Master Admin) ou Lorena Moraes (Coordenação Geral). Assim que liberado, basta entrar novamente.', 'warning');
+        return;
+      }
+
       window.appAuthState.user = userData;
       window.appAuthState.role = role;
 
@@ -4552,7 +4573,7 @@
             displayName: result.user.displayName || result.user.email.split('@')[0],
             photoURL: result.user.photoURL
           };
-          processAuthCandidate(userData);
+          await processAuthCandidate(userData);
           return;
         }
       } catch (authErr) {
@@ -4586,7 +4607,7 @@
     }
 
     // Login com E-mail / Senha
-    function handleEmailAuth(event) {
+    async function handleEmailAuth(event) {
       if (event) event.preventDefault();
       if (!window.appAuthState.turnstileVerified) {
         showAuthFeedback('⚠️ Por favor, conclua a verificação anti-bot antes de prosseguir.', 'error');
@@ -4603,27 +4624,34 @@
 
       // Validação de senha padrão pastoral ou específica
       if (pass === 'Sicm@2026' || pass.length >= 6) {
+        const defaultName = email === 'colletes@gmail.com' ? 'Thiago Carvalho' : (email === 'lorenammoraes@gmail.com' ? 'Lorena Moraes' : (email.includes('larissa') || email.includes('picmbrasilia') ? 'Larissa (PICM)' : email.split('@')[0]));
         const userData = {
           uid: 'user-' + btoa(email).replace(/=/g, ''),
           email: email,
-          displayName: email === 'colletes@gmail.com' ? 'Thiago Carvalho' : (email === 'lorenammoraes@gmail.com' ? 'Lorena Moraes' : email.split('@')[0]),
+          displayName: defaultName,
           photoURL: null
         };
-        processAuthCandidate(userData);
+        await processAuthCandidate(userData);
       } else {
         showAuthFeedback('⚠️ Senha incorreta. Para o primeiro acesso pastoral, utilize a senha autorizada pela coordenação.', 'error');
       }
     }
 
     // Processamento do candidato e checagem de aprovação LGPD
-    function processAuthCandidate(userData) {
-      const role = window.ICM_CONFIG.determineUserRole(userData.email);
+    async function processAuthCandidate(userData) {
+      let role = window.ICM_CONFIG.determineUserRole(userData.email);
+
+      // Se não aprovado localmente, verifica na nuvem (Firestore) antes de bloquear
+      if (role === window.ICM_CONFIG.ROLES.PENDENTE && typeof window.ICM_CONFIG.checkUserRoleAsync === 'function') {
+        showAuthFeedback('⏳ Validando permissões pastorais na nuvem...', 'info');
+        role = await window.ICM_CONFIG.checkUserRoleAsync(userData.email);
+      }
 
       // Verificação de Liberação de Acesso:
       // Se for um novo catequista (role PENDENTE), salva na fila de solicitações e bloqueia
       if (role === window.ICM_CONFIG.ROLES.PENDENTE) {
         if (window.ICM_CONFIG && typeof window.ICM_CONFIG.recordPendingAccessRequest === 'function') {
-          window.ICM_CONFIG.recordPendingAccessRequest(userData);
+          await window.ICM_CONFIG.recordPendingAccessRequest(userData);
         }
         showAuthFeedback('⏳ <strong>Conta em Análise:</strong> O seu acesso foi registrado com sucesso! Por exigência de conformidade com a LGPD e proteção de menores, novos catequistas devem ser previamente vinculados à sua turma por Thiago Carvalho (Master Admin) ou Lorena Moraes (Coordenação Geral). Assim que liberado, basta entrar novamente.', 'warning');
         return;

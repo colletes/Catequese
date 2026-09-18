@@ -71,6 +71,17 @@ const SEED_AUTHORIZED_USERS = [
     status: 'ativo',
     createdAt: '2026-01-01T00:00:00.000Z',
     approvedBy: 'Sistema Oficial'
+  },
+  {
+    email: 'picmbrasilia@gmail.com',
+    displayName: 'Larissa (PICM)',
+    role: ROLES.CATEQUISTA,
+    turmaId: 'todas',
+    turmaNome: 'Catequese ICM (Todas as Turmas)',
+    etapa: 'Geral',
+    status: 'ativo',
+    createdAt: '2026-01-01T00:00:00.000Z',
+    approvedBy: 'Thiago Carvalho (Master Admin)'
   }
 ];
 
@@ -90,6 +101,9 @@ function getAuthorizedUsers() {
     }
     if (!list.some(u => u.role === ROLES.SECRETARIA || (u.email && (u.email.toLowerCase().includes('secretaria') || u.email.toLowerCase().includes('sandra'))))) {
       list.push(SEED_AUTHORIZED_USERS[2]);
+    }
+    if (!list.some(u => u.email && (u.email.toLowerCase().includes('picmbrasilia') || u.email.toLowerCase().includes('larissa')))) {
+      list.push(SEED_AUTHORIZED_USERS[3]);
     }
     return list;
   } catch (e) {
@@ -133,6 +147,7 @@ function determineUserRole(email) {
   if (found && found.role) return found.role;
 
   if (clean.includes('secretaria') || clean.includes('sandra')) return ROLES.SECRETARIA;
+  if (clean.includes('picmbrasilia') || clean.includes('larissa')) return ROLES.CATEQUISTA;
   return ROLES.PENDENTE;
 }
 
@@ -145,6 +160,7 @@ function getUserProfile(email) {
   if (clean === MASTER_ADMIN_EMAIL.toLowerCase()) return SEED_AUTHORIZED_USERS[0];
   if (clean === COORD_GERAL_EMAIL.toLowerCase()) return SEED_AUTHORIZED_USERS[1];
   if (clean.includes('secretaria') || clean.includes('sandra')) return SEED_AUTHORIZED_USERS[2];
+  if (clean.includes('picmbrasilia') || clean.includes('larissa')) return SEED_AUTHORIZED_USERS[3];
   return null;
 }
 
@@ -352,6 +368,183 @@ async function revokeUserAccess(email, revokerName) {
 }
 
 // ==========================================================================
+// ☁️ SINCRONIZAÇÃO EM NUVEM DE USUÁRIOS (FIRESTORE CLOUD SYNC)
+// ==========================================================================
+async function syncUsersFromFirestore() {
+  if (!window.firebaseDb || typeof window.firebaseDb.collection !== 'function') return;
+  try {
+    // 1. Sincroniza usuários autorizados da nuvem
+    const authSnap = await window.firebaseDb.collection('authorized_users').get();
+    if (authSnap && !authSnap.empty) {
+      const currentAuth = getAuthorizedUsers();
+      let changedAuth = false;
+      authSnap.forEach(doc => {
+        const data = doc.data();
+        if (data && data.email && data.status === 'ativo') {
+          const clean = data.email.trim().toLowerCase();
+          const idx = currentAuth.findIndex(u => u.email && u.email.trim().toLowerCase() === clean);
+          if (idx >= 0) {
+            currentAuth[idx] = { ...currentAuth[idx], ...data };
+          } else {
+            currentAuth.push(data);
+          }
+          changedAuth = true;
+        }
+      });
+      if (changedAuth) {
+        saveAuthorizedUsers(currentAuth);
+      }
+    }
+
+    // 2. Sincroniza solicitações pendentes da nuvem
+    const pendSnap = await window.firebaseDb.collection('pending_users').get();
+    if (pendSnap && !pendSnap.empty) {
+      const currentPend = getPendingUsers();
+      const currentAuth = getAuthorizedUsers();
+      let changedPend = false;
+      pendSnap.forEach(doc => {
+        const data = doc.data();
+        if (data && data.email && data.status === 'pendente') {
+          const clean = data.email.trim().toLowerCase();
+          // Não adiciona se já foi aprovado
+          const isAlreadyApproved = currentAuth.some(u => u.email && u.email.trim().toLowerCase() === clean && u.status === 'ativo');
+          if (!isAlreadyApproved) {
+            const idx = currentPend.findIndex(p => p.email && p.email.trim().toLowerCase() === clean);
+            if (idx >= 0) {
+              currentPend[idx] = { ...currentPend[idx], ...data };
+            } else {
+              currentPend.unshift(data);
+            }
+            changedPend = true;
+          }
+        }
+      });
+      if (changedPend) {
+        savePendingUsers(currentPend);
+      }
+    }
+
+    // Atualiza badges na interface se disponível
+    if (typeof window.updateUserMgmtBadges === 'function') {
+      window.updateUserMgmtBadges();
+    }
+  } catch (e) {
+    console.warn('Falha na sincronização de usuários via Firestore:', e);
+  }
+}
+
+// Ouve atualizações em tempo real no Firestore para autorizações imediatas entre dispositivos
+function listenUsersFromFirestore() {
+  if (!window.firebaseDb || typeof window.firebaseDb.collection !== 'function') return;
+  try {
+    // Listener de usuários autorizados
+    window.firebaseDb.collection('authorized_users').onSnapshot(snapshot => {
+      if (!snapshot || snapshot.empty) return;
+      const currentAuth = getAuthorizedUsers();
+      let changed = false;
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        if (data && data.email && data.status === 'ativo') {
+          const clean = data.email.trim().toLowerCase();
+          const idx = currentAuth.findIndex(u => u.email && u.email.trim().toLowerCase() === clean);
+          if (idx >= 0) {
+            currentAuth[idx] = { ...currentAuth[idx], ...data };
+          } else {
+            currentAuth.push(data);
+          }
+          changed = true;
+        }
+      });
+      if (changed) {
+        saveAuthorizedUsers(currentAuth);
+        if (typeof window.updateUserMgmtBadges === 'function') {
+          window.updateUserMgmtBadges();
+        }
+      }
+    }, err => {
+      console.warn('onSnapshot authorized_users:', err);
+    });
+
+    // Listener de solicitações pendentes
+    window.firebaseDb.collection('pending_users').onSnapshot(snapshot => {
+      if (!snapshot) return;
+      const currentPend = [];
+      const currentAuth = getAuthorizedUsers();
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        if (data && data.email && data.status === 'pendente') {
+          const clean = data.email.trim().toLowerCase();
+          const isApproved = currentAuth.some(u => u.email && u.email.trim().toLowerCase() === clean && u.status === 'ativo');
+          if (!isApproved) {
+            currentPend.push(data);
+          }
+        }
+      });
+      savePendingUsers(currentPend);
+      if (typeof window.updateUserMgmtBadges === 'function') {
+        window.updateUserMgmtBadges();
+      }
+    }, err => {
+      console.warn('onSnapshot pending_users:', err);
+    });
+  } catch (e) {
+    console.warn('Erro ao configurar listener de usuários em tempo real:', e);
+  }
+}
+
+// Validação assíncrona profunda no Firestore antes de exibir tela de bloqueio
+async function checkUserRoleAsync(email) {
+  if (!email) return ROLES.PENDENTE;
+  const clean = email.trim().toLowerCase();
+
+  // 1. Checagem síncrona imediata (cache local e seeds fundamentais)
+  const localRole = determineUserRole(clean);
+  if (localRole !== ROLES.PENDENTE) return localRole;
+
+  // 2. Consulta direta à nuvem no Firestore
+  if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
+    try {
+      const sanitizedDocId = clean.replace(/[^a-zA-Z0-9]/g, '_');
+      
+      // Busca direta pelo docId sanitizado
+      let userDoc = await window.firebaseDb.collection('authorized_users').doc(sanitizedDocId).get();
+      let userData = userDoc && userDoc.exists ? userDoc.data() : null;
+
+      // Se não encontrou por docId, tenta buscar por query do campo email
+      if (!userData) {
+        const qSnap = await window.firebaseDb.collection('authorized_users').where('email', '==', clean).limit(1).get();
+        if (qSnap && !qSnap.empty) {
+          userData = qSnap.docs[0].data();
+        }
+      }
+
+      if (userData && userData.status === 'ativo' && userData.role) {
+        // Atualiza armazenamento local imediatamente
+        const authUsers = getAuthorizedUsers();
+        const idx = authUsers.findIndex(u => u.email && u.email.trim().toLowerCase() === clean);
+        if (idx >= 0) {
+          authUsers[idx] = { ...authUsers[idx], ...userData };
+        } else {
+          authUsers.push(userData);
+        }
+        saveAuthorizedUsers(authUsers);
+
+        // Remove de pendentes se constava localmente
+        const pendingList = getPendingUsers();
+        const updatedPending = pendingList.filter(p => p.email && p.email.trim().toLowerCase() !== clean);
+        savePendingUsers(updatedPending);
+
+        return userData.role;
+      }
+    } catch (err) {
+      console.warn('Erro ao consultar permissões na nuvem (Firestore):', err);
+    }
+  }
+
+  return ROLES.PENDENTE;
+}
+
+// ==========================================================================
 // 🔐 CRIPTOGRAFIA DE CAMPOS SENSÍVEIS (LGPD — Web Crypto API AES-GCM 256-bit)
 // ==========================================================================
 // Salva/gera chave simétrica derivada no navegador
@@ -511,6 +704,9 @@ window.ICM_CONFIG = {
   rejectPendingUser,
   preAuthorizeUser,
   revokeUserAccess,
+  syncUsersFromFirestore,
+  listenUsersFromFirestore,
+  checkUserRoleAsync,
   encryptPII,
   decryptPII,
   logAuditEvent,
