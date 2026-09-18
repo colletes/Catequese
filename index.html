@@ -2663,6 +2663,27 @@
                 </div>
               </div>
 
+              <!-- 3. Gerenciamento das Datas da Chamada -->
+              <div class="md:col-span-2 border-t border-slate-200 pt-3">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                    <span>📅</span> <span>3. Datas dos Encontros Incluídos na Folha:</span>
+                    <span id="print-dates-count-badge" class="bg-indigo-100 text-indigo-800 text-[10px] font-black px-2 py-0.5 rounded-full">0 encontros</span>
+                  </label>
+                  <div class="flex items-center gap-2">
+                    <button type="button" onclick="promptAddChamadaDate()" class="inline-flex items-center gap-1 text-[11px] font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 px-2.5 py-1 rounded-lg transition" title="Adicionar novo encontro à folha">
+                      <span>➕</span> <span>Adicionar Data</span>
+                    </button>
+                    <button type="button" onclick="resetDefaultTurmaDates()" class="inline-flex items-center gap-1 text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 px-2 py-1 rounded-lg transition" title="Restaurar 14 encontros padrão de sábado">
+                      <span>↺</span> <span>Restaurar 14 Datas Padrão</span>
+                    </button>
+                  </div>
+                </div>
+                <div id="print-modal-dates-container" class="flex flex-wrap items-center gap-1.5 p-2.5 bg-white border border-slate-200 rounded-xl min-h-[44px]">
+                  <!-- Chips de datas com botão ✕ para excluir gerados via JS -->
+                </div>
+              </div>
+
             </div>
           </div>
 
@@ -5478,6 +5499,9 @@
           const batizadoStatus = (a.batizado || '').toLowerCase();
           const eucaristiaStatus = (a.primeiraEucaristia || '').toLowerCase();
 
+          if (a.statusAprovacao === 'pendente_coordenacao') {
+            faltas.push('Homologação de Inscrição (Secretaria)');
+          }
           if (!batizadoStatus || batizadoStatus.includes('não')) {
             faltas.push('Certidão de Batismo');
           }
@@ -5493,6 +5517,7 @@
               aluno: a,
               etapa: etapa,
               turma: turma,
+              turmaKey: turmaKey,
               pendencias: faltas
             });
           }
@@ -5519,21 +5544,39 @@
         return;
       }
 
+      const isCoord = window.appAuthState && window.ICM_CONFIG && (
+        window.appAuthState.role === window.ICM_CONFIG.ROLES.MASTER_ADMIN ||
+        window.appAuthState.role === window.ICM_CONFIG.ROLES.COORD_GERAL
+      );
+
       tbody.innerHTML = pendencias.map(p => {
         const tagsHtml = p.pendencias.map(f => {
+          if (f.includes('Homologação')) {
+            return `<span class="bg-amber-100 text-amber-900 border border-amber-300 font-black px-2 py-0.5 rounded-md text-[10px] mr-1">⏳ ${f}</span>`;
+          }
           if (f.includes('Impedimento')) {
             return `<span class="bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded-md text-[10px] mr-1">⚠️ ${f}</span>`;
           }
           return `<span class="bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-md text-[10px] mr-1">📄 ${f}</span>`;
         }).join('');
 
+        const isPendenteInscricao = p.aluno.statusAprovacao === 'pendente_coordenacao';
+
         return `
-          <tr class="hover:bg-slate-50 transition">
+          <tr class="hover:bg-slate-50 transition ${isPendenteInscricao ? 'bg-amber-50/50' : ''}">
             <td class="py-2.5 px-3 font-semibold text-slate-900">${p.aluno.nome}</td>
             <td class="py-2.5 px-3 text-slate-600">${p.turma} <span class="text-slate-400 text-[10.5px]">(${p.etapa})</span></td>
             <td class="py-2.5 px-3">${tagsHtml}</td>
             <td class="py-2.5 px-3 text-center">
-              <div class="flex items-center justify-center gap-1.5">
+              <div class="flex items-center justify-center gap-1.5 flex-wrap">
+                ${(isCoord && isPendenteInscricao) ? `
+                <button
+                  onclick="aprovarInscricaoAluno('${p.aluno.id}', '${p.turmaKey}')"
+                  class="p-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition text-[11px] font-black inline-flex items-center gap-1 shadow-2xs"
+                  title="Homologar e aprovar inscrição realizada pela secretaria"
+                >
+                  <span>✓</span> <span>Aprovar Inscrição</span>
+                </button>` : ''}
                 <button
                   onclick="quickNotifyWhatsApp('${p.aluno.contato}', '${p.aluno.nome.replace(/'/g, "\\'")}', '${p.turma}', '${p.pendencias.join(', ')}')"
                   class="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition text-[11px] font-bold inline-flex items-center gap-1"
@@ -8162,8 +8205,40 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     function saveAlunosDatabase(data) {
       try {
         localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(data));
+        // Sincroniza em nuvem no Firestore se disponível
+        if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
+          const key = getTurmaKey(currentAlunosEtapa, currentAlunosTurma);
+          if (data && data[key]) {
+            window.firebaseDb.collection('turma_alunos').doc(key).set({
+              etapa: currentAlunosEtapa,
+              turma: currentAlunosTurma,
+              alunos: data[key],
+              updatedAt: new Date().toISOString()
+            }).catch(err => console.warn('Sync Firestore turma_alunos:', err));
+          }
+        }
       } catch (e) {
         console.error('Erro ao salvar banco de catequizandos:', e);
+      }
+    }
+
+    async function syncTurmaAlunosFromFirestore(etapa, turma) {
+      if (!window.firebaseDb || typeof window.firebaseDb.collection !== 'function') return;
+      const key = getTurmaKey(etapa, turma);
+      try {
+        const doc = await window.firebaseDb.collection('turma_alunos').doc(key).get();
+        if (doc && doc.exists) {
+          const cloudData = doc.data();
+          if (cloudData && Array.isArray(cloudData.alunos)) {
+            const db = getAlunosDatabase();
+            db[key] = cloudData.alunos;
+            localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(db));
+            renderAlunosTable();
+            renderPainelPendencias();
+          }
+        }
+      } catch (e) {
+        console.warn('Sync cloud alunos error:', e);
       }
     }
 
@@ -8196,6 +8271,16 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       currentAlunosTurma = selTurma.value;
       updateTurmaInfoBanner();
       renderAlunosTable();
+      if (typeof syncTurmaAlunosFromFirestore === 'function') {
+        syncTurmaAlunosFromFirestore(currentAlunosEtapa, currentAlunosTurma);
+      }
+      if (typeof syncTurmaChamadasFromFirestore === 'function') {
+        syncTurmaChamadasFromFirestore(currentAlunosEtapa, currentAlunosTurma);
+      }
+      if (currentAlunosSubTab === 'chamada' && typeof renderChamadaSection === 'function') {
+        currentChamadaSelectedDate = '';
+        renderChamadaSection();
+      }
     }
 
     function handleEtapaChange(etapa) {
@@ -8207,6 +8292,16 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       currentAlunosTurma = turma;
       updateTurmaInfoBanner();
       renderAlunosTable();
+      if (typeof syncTurmaAlunosFromFirestore === 'function') {
+        syncTurmaAlunosFromFirestore(currentAlunosEtapa, currentAlunosTurma);
+      }
+      if (typeof syncTurmaChamadasFromFirestore === 'function') {
+        syncTurmaChamadasFromFirestore(currentAlunosEtapa, currentAlunosTurma);
+      }
+      if (currentAlunosSubTab === 'chamada' && typeof renderChamadaSection === 'function') {
+        currentChamadaSelectedDate = '';
+        renderChamadaSection();
+      }
     }
 
     function updateTurmaInfoBanner() {
@@ -8377,12 +8472,24 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           window.appAuthState.role === window.ICM_CONFIG.ROLES.MASTER_ADMIN ||
           window.appAuthState.role === window.ICM_CONFIG.ROLES.COORD_GERAL
         );
+        const canApprove = window.appAuthState && window.ICM_CONFIG && (
+          window.appAuthState.role === window.ICM_CONFIG.ROLES.MASTER_ADMIN ||
+          window.appAuthState.role === window.ICM_CONFIG.ROLES.COORD_GERAL
+        );
+        const isPendenteSecretaria = a.statusAprovacao === 'pendente_coordenacao';
 
         return `
-          <tr class="hover:bg-slate-50/80 transition group">
+          <tr class="hover:bg-slate-50/80 transition group ${isPendenteSecretaria ? 'bg-amber-50/40' : ''}">
             <td class="py-2.5 px-3 text-center font-bold text-slate-400 text-xs col-freeze-idx">${idx + 1}</td>
             <td class="py-2.5 px-3.5 col-freeze-name">
-              <div class="font-bold text-slate-900 leading-snug">${a.nome}</div>
+              <div class="font-bold text-slate-900 leading-snug flex items-center gap-1.5 flex-wrap">
+                <span>${a.nome}</span>
+                ${isPendenteSecretaria ? `
+                  <span class="inline-flex items-center gap-1 text-[10px] font-black text-amber-900 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-full" title="Inscrição enviada pela Secretaria — Aguarda aprovação da Coordenação">
+                    <span>⏳</span> <span>Aguardando Coordenação</span>
+                  </span>
+                ` : ''}
+              </div>
               ${a.observacoes ? `<div class="text-[10px] text-amber-700 mt-0.5">⚠️ ${a.observacoes}</div>` : ''}
             </td>
             <td class="py-2.5 px-2.5 text-center">${cpfHtml}</td>
@@ -8397,6 +8504,10 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             <td class="py-2.5 px-3">${justHtml}</td>
             <td class="py-2.5 px-2.5 text-center no-print">
               <div class="flex items-center justify-center gap-1">
+                ${(canApprove && isPendenteSecretaria) ? `
+                <button onclick="aprovarInscricaoAluno('${a.id}')" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10.5px] font-black transition flex items-center gap-1 shadow-2xs" title="Homologar e Aprovar Inscrição">
+                  <span>✓</span> <span>Aprovar</span>
+                </button>` : ''}
                 <button onclick="editAluno('${a.id}')" class="p-1 rounded text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition" title="Editar Catequizando">
                   ✏️
                 </button>
@@ -8490,7 +8601,41 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
       renderAlunosTable();
       renderPainelPendencias();
-      alert('✅ Catequizando excluído com sucesso. Evento registrado na Trilha de Auditoria.');
+      alert('✅ Catequizando excluído com sucesso.');
+    }
+
+    // Homologa e aprova inscrição realizada pela secretaria
+    function aprovarInscricaoAluno(alunoId, turmaKey = null) {
+      const role = window.appAuthState ? window.appAuthState.role : '';
+      if (role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL) {
+        alert('Apenas a Coordenação Geral (Lorena Moraes) ou o Master Admin (Thiago Carvalho) podem aprovar inscrições.');
+        return;
+      }
+
+      const key = turmaKey || getTurmaKey(currentAlunosEtapa, currentAlunosTurma);
+      const db = getAlunosDatabase();
+      if (!db[key]) return;
+
+      const idx = db[key].findIndex(a => a.id === alunoId);
+      if (idx === -1) return;
+
+      const currentUserName = (window.appAuthState && window.appAuthState.user && (window.appAuthState.user.displayName || window.appAuthState.user.email)) || 'Coordenação Geral';
+
+      db[key][idx].statusAprovacao = 'aprovado';
+      db[key][idx].aprovadoPor = currentUserName;
+      db[key][idx].aprovadoEm = new Date().toISOString();
+
+      saveAlunosDatabase(db);
+      renderAlunosTable();
+      renderPainelPendencias();
+
+      window.ICM_CONFIG.logAuditEvent('APPROVE_ALUNO_INSCRICAO', key, {
+        alunoId: alunoId,
+        alunoNome: db[key][idx].nome,
+        approvedBy: currentUserName
+      });
+
+      alert(`🎉 Inscrição de "${db[key][idx].nome}" homologada e aprovada com sucesso!`);
     }
 
     function handleSaveAluno(event) {
@@ -8524,6 +8669,66 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       const key = getTurmaKey(currentAlunosEtapa, currentAlunosTurma);
       if (!db[key]) db[key] = [];
 
+      const existingAluno = isEdit ? db[key].find(a => a.id === alunoObj.id) : null;
+
+      const currentUser = window.appAuthState ? window.appAuthState.user : null;
+      const userRole = window.appAuthState ? window.appAuthState.role : (window.ICM_CONFIG ? window.ICM_CONFIG.ROLES.PENDENTE : 'pendente');
+      const userEmail = currentUser ? (currentUser.email || '').toLowerCase() : '';
+      const userName = currentUser ? (currentUser.displayName || currentUser.email) : 'Usuário';
+
+      // =========================================================================
+      // REGRA PASTORAL DE APROVAÇÃO POR PERFIL:
+      // 1. Coordenação Geral (Lorena) e Master Admin / Vice-Coord (Thiago) -> Aprovação imediata
+      // 2. Catequistas -> Aprovação imediata para suas próprias turmas
+      // 3. Secretaria -> Envia para homologação da Coordenação Geral
+      // =========================================================================
+      let feedbackMsg = '';
+      const ROLES = window.ICM_CONFIG ? window.ICM_CONFIG.ROLES : {};
+
+      if (userRole === ROLES.MASTER_ADMIN || userRole === ROLES.COORD_GERAL) {
+        alunoObj.statusAprovacao = 'aprovado';
+        alunoObj.aprovadoPor = userRole === ROLES.MASTER_ADMIN ? 'Thiago Carvalho (Master Admin)' : 'Lorena Moraes (Coordenação Geral)';
+        alunoObj.aprovadoEm = new Date().toISOString();
+        feedbackMsg = isEdit ? '✅ Dados do catequizando atualizados com sucesso!' : '✅ Catequizando cadastrado e aprovado com sucesso pela Coordenação!';
+      } else if (userRole === ROLES.CATEQUISTA) {
+        const userProfile = (window.ICM_CONFIG && typeof window.ICM_CONFIG.getUserProfile === 'function') ? window.ICM_CONFIG.getUserProfile(userEmail) : null;
+        const isAllTurmas = userProfile && userProfile.turmaId === 'todas';
+        const isOwnTurma = isAllTurmas || (userProfile && userProfile.turmaNome && (userProfile.turmaNome.includes(currentAlunosTurma) || userProfile.turmaNome.includes(currentAlunosEtapa)));
+
+        const turmaInfo = masterScheduleList.find(t => t.stage === currentAlunosEtapa && t.turma === currentAlunosTurma);
+        const namePart = userName.toLowerCase().split(' ')[0];
+        const isMentionedInSchedule = turmaInfo && turmaInfo.catechists && turmaInfo.catechists.toLowerCase().includes(namePart);
+
+        if (isOwnTurma || isMentionedInSchedule) {
+          alunoObj.statusAprovacao = 'aprovado';
+          alunoObj.aprovadoPor = `Catequista (${userName})`;
+          alunoObj.aprovadoEm = new Date().toISOString();
+          feedbackMsg = isEdit ? '✅ Dados do catequizando atualizados na sua turma!' : '✅ Catequizando cadastrado e aprovado na sua turma com sucesso!';
+        } else {
+          alunoObj.statusAprovacao = 'pendente_coordenacao';
+          alunoObj.enviadoPor = `Catequista (${userName})`;
+          alunoObj.enviadoEm = new Date().toISOString();
+          feedbackMsg = '📋 Inscrição em turma externa registrada! Enviada para validação da Coordenação Geral.';
+        }
+      } else if (userRole === ROLES.SECRETARIA) {
+        alunoObj.statusAprovacao = 'pendente_coordenacao';
+        alunoObj.enviadoPor = `Secretaria Paroquial (${userName})`;
+        alunoObj.enviadoEm = new Date().toISOString();
+        feedbackMsg = '📋 Inscrição cadastrada pela Secretaria! Enviada para homologação e aprovação da Coordenação Geral.';
+      } else {
+        alunoObj.statusAprovacao = 'pendente_coordenacao';
+        alunoObj.enviadoPor = userName;
+        alunoObj.enviadoEm = new Date().toISOString();
+        feedbackMsg = '📋 Inscrição registrada e enviada para análise da Coordenação Geral.';
+      }
+
+      // Se já estava previamente aprovado e está apenas editando, preserva a aprovação
+      if (isEdit && existingAluno && existingAluno.statusAprovacao === 'aprovado') {
+        alunoObj.statusAprovacao = 'aprovado';
+        alunoObj.aprovadoPor = existingAluno.aprovadoPor || alunoObj.aprovadoPor;
+        alunoObj.aprovadoEm = existingAluno.aprovadoEm || alunoObj.aprovadoEm;
+      }
+
       if (isEdit) {
         const idx = db[key].findIndex(a => a.id === alunoObj.id);
         if (idx !== -1) db[key][idx] = alunoObj;
@@ -8534,16 +8739,18 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
       saveAlunosDatabase(db);
 
-      // Registra evento de auditoria
+      // Trilha de auditoria silenciosa e perene (Art. 37 LGPD)
       window.ICM_CONFIG.logAuditEvent(isEdit ? 'UPDATE_ALUNO' : 'CREATE_ALUNO', `${currentAlunosEtapa} - ${currentAlunosTurma}`, {
         alunoId: alunoObj.id,
-        alunoNome: alunoObj.nome
+        alunoNome: alunoObj.nome,
+        statusAprovacao: alunoObj.statusAprovacao,
+        userRole: userRole
       });
 
       closeAlunoModal();
       renderAlunosTable();
       renderPainelPendencias();
-      alert('✅ Dados do catequizando salvos e registrados na Trilha de Auditoria com sucesso!');
+      alert(feedbackMsg);
     }
 
     function exportTurmaCSV() {
@@ -8613,8 +8820,49 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     function saveChamadasDatabase(data) {
       try {
         localStorage.setItem(STORAGE_KEY_CHAMADAS, JSON.stringify(data));
+        // Sincroniza em nuvem no Firestore se disponível
+        if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
+          const key = getTurmaKey(currentAlunosEtapa, currentAlunosTurma);
+          if (data && data[key]) {
+            window.firebaseDb.collection('turma_chamadas').doc(key).set({
+              etapa: currentAlunosEtapa,
+              turma: currentAlunosTurma,
+              dates: data[key].dates || [],
+              records: data[key].records || {},
+              customizedDates: !!data[key].customizedDates,
+              updatedAt: new Date().toISOString()
+            }).catch(e => {
+              console.warn('Sync Firestore chamadas:', e);
+            });
+          }
+        }
       } catch (e) {
         console.error('Erro ao salvar banco de chamadas:', e);
+      }
+    }
+
+    async function syncTurmaChamadasFromFirestore(etapa, turma) {
+      if (!window.firebaseDb || typeof window.firebaseDb.collection !== 'function') return;
+      const key = getTurmaKey(etapa, turma);
+      try {
+        const doc = await window.firebaseDb.collection('turma_chamadas').doc(key).get();
+        if (doc && doc.exists) {
+          const cloudData = doc.data();
+          if (cloudData && Array.isArray(cloudData.dates)) {
+            const db = getChamadasDatabase();
+            db[key] = {
+              dates: cloudData.dates,
+              records: cloudData.records || {},
+              customizedDates: !!cloudData.customizedDates
+            };
+            localStorage.setItem(STORAGE_KEY_CHAMADAS, JSON.stringify(db));
+            if (currentAlunosSubTab === 'chamada') {
+              renderChamadaSection();
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Sync cloud chamadas turma error:', e);
       }
     }
 
@@ -8625,13 +8873,20 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       if (!db[key]) {
         db[key] = {
           dates: generateDefaultTurmaDates(etapa, turma),
-          records: {}
+          records: {},
+          customizedDates: false
         };
         saveChamadasDatabase(db);
-      } else if (!Array.isArray(db[key].dates) || db[key].dates.length === 0) {
-        db[key].dates = generateDefaultTurmaDates(etapa, turma);
-        if (!db[key].records) db[key].records = {};
-        saveChamadasDatabase(db);
+      } else {
+        if (!Array.isArray(db[key].dates)) {
+          db[key].dates = generateDefaultTurmaDates(etapa, turma);
+          if (!db[key].records) db[key].records = {};
+          saveChamadasDatabase(db);
+        } else if (db[key].dates.length === 0 && !db[key].customizedDates) {
+          db[key].dates = generateDefaultTurmaDates(etapa, turma);
+          if (!db[key].records) db[key].records = {};
+          saveChamadasDatabase(db);
+        }
       }
       return db[key];
     }
@@ -9033,8 +9288,11 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         const shortFmt = `${parts[2]}/${parts[1]}`;
         const isCurrent = dStr === currentChamadaSelectedDate;
         theadHtml += `
-          <th class="py-2.5 px-2 font-heading text-center text-xs min-w-[55px] ${isCurrent ? 'bg-indigo-800 text-amber-300 font-black' : ''}" title="${_dataFmt(dStr)} (${_diaSemana(dStr)})">
-            <div>${shortFmt}</div>
+          <th class="py-2 px-1 font-heading text-center text-xs min-w-[58px] group relative ${isCurrent ? 'bg-indigo-800 text-amber-300 font-black' : ''}" title="${_dataFmt(dStr)} (${_diaSemana(dStr)})">
+            <div class="flex items-center justify-center gap-1">
+              <span>${shortFmt}</span>
+              <button type="button" onclick="deleteChamadaDate('${dStr}')" class="opacity-50 hover:opacity-100 hover:bg-rose-600 text-white rounded px-1 py-0.5 text-[9px] transition leading-none font-sans" title="Excluir encontro de ${shortFmt}">✕</button>
+            </div>
             <div class="text-[9px] font-normal text-slate-400">${_diaSemana(dStr).slice(0, 3)}</div>
           </th>
         `;
@@ -9291,44 +9549,91 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
       db[key].dates.push(isoDate);
       db[key].dates.sort(); // Ordena cronologicamente
+      db[key].customizedDates = true; // Impede que o sistema recrie padrões
       saveChamadasDatabase(db);
 
       currentChamadaSelectedDate = isoDate;
       renderChamadaSection();
+
+      const printModal = document.getElementById('modal-print-chamada');
+      if (printModal && !printModal.classList.contains('hidden')) {
+        updatePrintChamadaPreview();
+      }
 
       window.ICM_CONFIG.logAuditEvent('ADD_CHAMADA_DATE', `${currentAlunosEtapa} - ${currentAlunosTurma}`, {
         date: isoDate
       });
     }
 
-    // Exclui a data de encontro atualmente selecionada
-    function deleteSelectedChamadaDate() {
-      if (!currentChamadaSelectedDate) {
+    // Exclui a data de encontro informada ou a atualmente selecionada
+    function deleteChamadaDate(dateToDelete = null) {
+      const dataTurma = getTurmaChamadasData(currentAlunosEtapa, currentAlunosTurma);
+      const selDataEl = document.getElementById('sel-data-chamada');
+      const targetDate = dateToDelete || (selDataEl ? selDataEl.value : null) || currentChamadaSelectedDate;
+
+      if (!targetDate) {
         alert('Nenhuma data de encontro selecionada para exclusão.');
         return;
       }
 
-      if (!confirm(`Deseja realmente remover o encontro de ${_dataFmt(currentChamadaSelectedDate)} do calendário da turma? Todos os registros desta data serão excluídos.`)) {
+      if (!confirm(`Deseja realmente remover o encontro de ${_dataFmt(targetDate)} (${_diaSemana(targetDate)}) do calendário da turma? Todos os registros de presença desta data serão excluídos.`)) {
         return;
       }
 
       const db = getChamadasDatabase();
       const key = getTurmaKey(currentAlunosEtapa, currentAlunosTurma);
-      if (!db[key] || !Array.isArray(db[key].dates)) return;
+      if (!db[key]) db[key] = { dates: [], records: {} };
+      if (!Array.isArray(db[key].dates)) db[key].dates = [];
 
-      const dateToDelete = currentChamadaSelectedDate;
-      db[key].dates = db[key].dates.filter(d => d !== dateToDelete);
-      if (db[key].records && db[key].records[dateToDelete]) {
-        delete db[key].records[dateToDelete];
+      db[key].dates = db[key].dates.filter(d => d !== targetDate);
+      db[key].customizedDates = true; // Impede que o sistema recrie as 14 datas padrão
+
+      if (db[key].records && db[key].records[targetDate]) {
+        delete db[key].records[targetDate];
       }
 
       saveChamadasDatabase(db);
+
+      if (currentChamadaSelectedDate === targetDate) {
+        currentChamadaSelectedDate = db[key].dates[0] || '';
+      }
+
+      renderChamadaSection();
+
+      // Atualiza o modal de impressão se estiver aberto
+      const printModal = document.getElementById('modal-print-chamada');
+      if (printModal && !printModal.classList.contains('hidden')) {
+        updatePrintChamadaPreview();
+      }
+
+      window.ICM_CONFIG.logAuditEvent('DELETE_CHAMADA_DATE', `${currentAlunosEtapa} - ${currentAlunosTurma}`, {
+        date: targetDate
+      });
+    }
+
+    function deleteSelectedChamadaDate() {
+      deleteChamadaDate(null);
+    }
+
+    // Restaura as 14 datas padrão de encontros para a turma
+    function resetDefaultTurmaDates() {
+      if (!confirm(`Deseja restaurar as 14 datas de encontro padrão para a turma ${currentAlunosTurma} (${currentAlunosEtapa})?`)) return;
+      const db = getChamadasDatabase();
+      const key = getTurmaKey(currentAlunosEtapa, currentAlunosTurma);
+      if (!db[key]) db[key] = { records: {} };
+      db[key].dates = generateDefaultTurmaDates(currentAlunosEtapa, currentAlunosTurma);
+      db[key].customizedDates = false;
+      saveChamadasDatabase(db);
+
       currentChamadaSelectedDate = db[key].dates[0] || '';
       renderChamadaSection();
 
-      window.ICM_CONFIG.logAuditEvent('DELETE_CHAMADA_DATE', `${currentAlunosEtapa} - ${currentAlunosTurma}`, {
-        date: dateToDelete
-      });
+      const printModal = document.getElementById('modal-print-chamada');
+      if (printModal && !printModal.classList.contains('hidden')) {
+        updatePrintChamadaPreview();
+      }
+
+      alert('✅ Calendário da turma restaurado para os 14 encontros padrão!');
     }
 
     // =============================================
@@ -9728,6 +10033,40 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       }
 
       previewPaper.innerHTML = generatePrintDocumentHtml();
+
+      // Renderiza os chips de gerenciamento de datas no modal de impressão
+      const datesContainer = document.getElementById('print-modal-dates-container');
+      const badgeCount = document.getElementById('print-dates-count-badge');
+      const dataTurma = getTurmaChamadasData(currentAlunosEtapa, currentAlunosTurma);
+      const dates = dataTurma.dates || [];
+
+      if (badgeCount) {
+        badgeCount.textContent = `${dates.length} encontro(s)`;
+      }
+
+      if (datesContainer) {
+        if (dates.length === 0) {
+          datesContainer.innerHTML = `
+            <div class="text-xs text-slate-400 py-1 flex items-center gap-2">
+              <span>⚠️ Nenhuma data cadastrada.</span>
+              <button type="button" onclick="promptAddChamadaDate()" class="text-indigo-600 underline font-bold">Adicionar data</button> ou 
+              <button type="button" onclick="resetDefaultTurmaDates()" class="text-indigo-600 underline font-bold">Restaurar 14 datas padrão</button>
+            </div>
+          `;
+        } else {
+          datesContainer.innerHTML = dates.map(dStr => {
+            const parts = dStr.split('-');
+            const shortFmt = `${parts[2]}/${parts[1]}`;
+            const sem = _diaSemana(dStr).slice(0, 3);
+            return `
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg text-xs font-bold text-slate-800 transition shadow-2xs">
+                <span>${shortFmt} <span class="text-[10px] font-normal text-slate-500">(${sem})</span></span>
+                <button type="button" onclick="deleteChamadaDate('${dStr}')" class="text-rose-500 hover:text-rose-800 font-black ml-1 text-[11px] leading-none p-0.5 rounded hover:bg-rose-100" title="Remover encontro de ${shortFmt} da folha">✕</button>
+              </span>
+            `;
+          }).join('');
+        }
+      }
     }
 
     // Executa a impressão física ou salvamento em PDF nativo
