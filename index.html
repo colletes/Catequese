@@ -2241,6 +2241,9 @@
                 <button type="button" onclick="deleteSelectedChamadaDate()" class="inline-flex items-center gap-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-semibold px-2.5 py-2 rounded-xl text-xs transition" title="Excluir data de encontro selecionada">
                   <span>🗑️</span>
                 </button>
+                <button type="button" onclick="resetDefaultTurmaDates()" class="inline-flex items-center gap-1 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-semibold px-2.5 py-2 rounded-xl text-xs transition" title="Restaurar datas padrão do cronograma oficial">
+                  <span>🔄</span> <span>Restaurar Datas</span>
+                </button>
               </div>
 
               <div class="pt-4 border-l border-slate-200 pl-3">
@@ -4840,6 +4843,16 @@
 
       // Atualiza contadores da Central de Notificações
       renderPainelPendencias();
+
+      // Se for a Lorena, pré-seleciona sua turma oficial (Crisma Adultos • Turma 03)
+      if (userData && userData.email && userData.email.toLowerCase().includes('lorena')) {
+        const selEtapa = document.getElementById('sel-etapa-alunos');
+        if (selEtapa) selEtapa.value = 'Crisma Adultos';
+        currentAlunosEtapa = 'Crisma Adultos';
+        if (typeof populateTurmasSelect === 'function') {
+          populateTurmasSelect('Crisma Adultos', 'Turma 03');
+        }
+      }
     }
 
     function logoutSite() {
@@ -9074,10 +9087,10 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           const parsed = JSON.parse(stored);
           if (parsed && typeof parsed === 'object') {
             const lorenaKey = 'Crisma Adultos__Turma 03';
-            const currentDates = parsed[lorenaKey] ? parsed[lorenaKey].dates : [];
-            const hasLiturgical = currentDates && currentDates.some(d => ['2027-02-14', '2027-02-21', '2027-02-28', '2027-03-07', '2027-03-14', '2027-03-27', '2027-05-22'].includes(d));
-            // Aplica os 30 encontros regulares de segunda-feira na lista de chamadas
-            if (!parsed[lorenaKey] || !parsed[lorenaKey].customizedDates || currentDates.length === 14 || currentDates.length === 37 || hasLiturgical) {
+            const currentDates = (parsed[lorenaKey] && Array.isArray(parsed[lorenaKey].dates)) ? parsed[lorenaKey].dates : [];
+            const hasLiturgical = currentDates.some(d => ['2027-02-14', '2027-02-21', '2027-02-28', '2027-03-07', '2027-03-14', '2027-03-27', '2027-05-22'].includes(d));
+            // Garante que a Turma 03 da Lorena possua SEMPRE as 30 datas oficiais de segunda-feira
+            if (!parsed[lorenaKey] || currentDates.length !== TURMA_LORENA_DATES_2026_2.length || hasLiturgical) {
               parsed[lorenaKey] = {
                 dates: [...TURMA_LORENA_DATES_2026_2],
                 records: (parsed[lorenaKey] && parsed[lorenaKey].records) || {},
@@ -9135,11 +9148,10 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         const doc = await window.firebaseDb.collection('turma_chamadas').doc(key).get();
         if (doc && doc.exists) {
           const cloudData = doc.data();
-          if (cloudData && Array.isArray(cloudData.dates)) {
+          if (cloudData && Array.isArray(cloudData.dates) && cloudData.dates.length > 0) {
             const db = getChamadasDatabase();
             let cloudDates = cloudData.dates;
-            const hasLit = cloudDates.some(d => ['2027-02-14', '2027-02-21', '2027-02-28', '2027-03-07', '2027-03-14', '2027-03-27', '2027-05-22'].includes(d));
-            if (key === 'Crisma Adultos__Turma 03' && (cloudDates.length === 14 || cloudDates.length === 37 || hasLit || !cloudData.customizedDates)) {
+            if (key === 'Crisma Adultos__Turma 03' && cloudDates.length !== TURMA_LORENA_DATES_2026_2.length) {
               cloudDates = [...TURMA_LORENA_DATES_2026_2];
             }
             db[key] = {
@@ -9152,8 +9164,11 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
               renderChamadaSection();
             }
           }
-        } else if (key === 'Crisma Adultos__Turma 03') {
-          syncAllChamadasToFirestore(getChamadasDatabase());
+        } else {
+          const db = getChamadasDatabase();
+          if (db && db[key] && Array.isArray(db[key].dates) && db[key].dates.length > 0) {
+            syncAllChamadasToFirestore(db);
+          }
         }
       } catch (e) {
         console.warn('Sync cloud chamadas turma error:', e);
@@ -9164,19 +9179,29 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     function getTurmaChamadasData(etapa, turma) {
       const db = getChamadasDatabase();
       const key = getTurmaKey(etapa, turma);
+
+      // Regra estrita e auto-recuperável para a turma da Lorena:
+      if (etapa === 'Crisma Adultos' && turma === 'Turma 03') {
+        if (!db[key] || !Array.isArray(db[key].dates) || db[key].dates.length !== TURMA_LORENA_DATES_2026_2.length) {
+          db[key] = {
+            dates: [...TURMA_LORENA_DATES_2026_2],
+            records: (db[key] && db[key].records) || {},
+            customizedDates: true
+          };
+          saveChamadasDatabase(db);
+        }
+        return db[key];
+      }
+
       if (!db[key]) {
         db[key] = {
           dates: generateDefaultTurmaDates(etapa, turma),
           records: {},
-          customizedDates: (etapa === 'Crisma Adultos' && turma === 'Turma 03')
+          customizedDates: false
         };
         saveChamadasDatabase(db);
       } else {
-        if (!Array.isArray(db[key].dates)) {
-          db[key].dates = generateDefaultTurmaDates(etapa, turma);
-          if (!db[key].records) db[key].records = {};
-          saveChamadasDatabase(db);
-        } else if (db[key].dates.length === 0 && !db[key].customizedDates) {
+        if (!Array.isArray(db[key].dates) || db[key].dates.length === 0) {
           db[key].dates = generateDefaultTurmaDates(etapa, turma);
           if (!db[key].records) db[key].records = {};
           saveChamadasDatabase(db);
@@ -9284,12 +9309,28 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
     // Renderiza a seção principal de Chamada
     function renderChamadaSection() {
-      const dataTurma = getTurmaChamadasData(currentAlunosEtapa, currentAlunosTurma);
+      let dataTurma = getTurmaChamadasData(currentAlunosEtapa, currentAlunosTurma);
+
+      // Auto-cura instantânea: se for Crisma Adultos - Turma 03 e estiver sem datas ou diferente de 30 datas
+      if (currentAlunosEtapa === 'Crisma Adultos' && currentAlunosTurma === 'Turma 03') {
+        if (!dataTurma || !Array.isArray(dataTurma.dates) || dataTurma.dates.length !== TURMA_LORENA_DATES_2026_2.length) {
+          const db = getChamadasDatabase();
+          const key = getTurmaKey(currentAlunosEtapa, currentAlunosTurma);
+          db[key] = {
+            dates: [...TURMA_LORENA_DATES_2026_2],
+            records: (db[key] && db[key].records) || {},
+            customizedDates: true
+          };
+          saveChamadasDatabase(db);
+          dataTurma = db[key];
+        }
+      }
+
       const selData = document.getElementById('sel-data-chamada');
 
       if (selData) {
-        if (dataTurma.dates.length === 0) {
-          selData.innerHTML = '<option value="">Nenhuma data cadastrada</option>';
+        if (!dataTurma || !Array.isArray(dataTurma.dates) || dataTurma.dates.length === 0) {
+          selData.innerHTML = '<option value="">⚠️ Nenhuma data cadastrada (clique em "Restaurar Datas")</option>';
           currentChamadaSelectedDate = '';
         } else {
           // Mantém a data atual se ainda válida, senão usa a primeira
@@ -9912,14 +9953,18 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       deleteChamadaDate(null);
     }
 
-    // Restaura as 14 datas padrão de encontros para a turma
+    // Restaura as datas padrão de encontros para a turma (30 encontros para Crisma Adultos Turma 03 da Lorena)
     function resetDefaultTurmaDates() {
-      if (!confirm(`Deseja restaurar as 14 datas de encontro padrão para a turma ${currentAlunosTurma} (${currentAlunosEtapa})?`)) return;
+      const isLorena = (currentAlunosEtapa === 'Crisma Adultos' && currentAlunosTurma === 'Turma 03');
+      const msg = isLorena ?
+        `Deseja restaurar as 30 datas oficiais de encontros para a turma ${currentAlunosTurma} (${currentAlunosEtapa})?` :
+        `Deseja restaurar as datas de encontro padrão para a turma ${currentAlunosTurma} (${currentAlunosEtapa})?`;
+      if (!confirm(msg)) return;
       const db = getChamadasDatabase();
       const key = getTurmaKey(currentAlunosEtapa, currentAlunosTurma);
       if (!db[key]) db[key] = { records: {} };
       db[key].dates = generateDefaultTurmaDates(currentAlunosEtapa, currentAlunosTurma);
-      db[key].customizedDates = false;
+      db[key].customizedDates = isLorena;
       saveChamadasDatabase(db);
 
       currentChamadaSelectedDate = db[key].dates[0] || '';
@@ -9930,7 +9975,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         updatePrintChamadaPreview();
       }
 
-      alert('✅ Calendário da turma restaurado para os 14 encontros padrão!');
+      alert(isLorena ? '✅ Calendário restaurado para os 30 encontros oficiais da turma!' : '✅ Calendário da turma restaurado com sucesso!');
     }
 
     // =============================================

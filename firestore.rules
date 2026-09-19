@@ -70,5 +70,23 @@ service cloud.firestore {
       allow create: if isAuthenticated();
       allow update, delete: if isCoordOrAdmin();
     }
+
+    // Lista de Chamadas e Frequência das Turmas (Sincronização em Nuvem)
+    match /turma_chamadas/{turmaKey} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // Dados das Turmas de Catequizandos (Sincronização em Nuvem)
+    match /turma_alunos/{turmaKey} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // Configurações Gerais e Cronograma de Eventos
+    match /configuracoes/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isCoordOrAdmin();
+    }
   }
 }
