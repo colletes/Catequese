@@ -658,75 +658,114 @@
         </div>
       </div>
 
-      <!-- Action Buttons & User Status Bar -->
-      <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 no-print w-full md:w-auto justify-end">
+      <!-- Action Buttons & User Status Bar Consolidated into Profile Menu -->
+      <div class="relative no-print flex-shrink-0" id="header-profile-menu-container">
         
-        <!-- User Status Badge -->
-        <div id="user-status-pill" class="flex items-center gap-2 bg-slate-900/90 border border-slate-700/80 px-2.5 py-1.5 rounded-xl shadow-xs text-xs">
-          <div id="user-avatar-badge" class="w-6 h-6 rounded-full bg-gradient-to-br from-amber-400 to-[#d4a94f] text-slate-950 font-black text-[11px] flex items-center justify-center shadow-xs">
-            TC
+        <!-- Profile Button with Initials and Bottom-Right Notification Badge -->
+        <button
+          id="btn-profile-menu"
+          onclick="toggleProfileDropdown()"
+          class="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-gradient-to-br from-amber-400 via-[#d4a94f] to-[#b88d36] text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center shadow-lg border-2 border-amber-300/80 hover:ring-2 hover:ring-[#d4a94f] hover:brightness-105 transition transform active:scale-95 cursor-pointer font-heading select-none"
+          title="Menu do Perfil e Ferramentas"
+          aria-label="Abrir Menu do Usuário"
+          aria-expanded="false"
+        >
+          <!-- Initials (Ready for future avatar photo replacement) -->
+          <span id="user-avatar-badge">TC</span>
+
+          <!-- Red Notification Badge at bottom-right corner -->
+          <span
+            id="profile-btn-notif-badge"
+            class="hidden absolute -bottom-1 -right-1 bg-rose-600 text-white font-black text-[10px] min-w-[19px] h-[19px] rounded-full flex items-center justify-center px-1 border-2 border-slate-950 shadow-md"
+          >0</span>
+        </button>
+
+        <!-- Dropdown Menu -->
+        <div
+          id="profile-dropdown-menu"
+          class="hidden absolute right-0 mt-2 w-72 sm:w-80 bg-slate-900/98 backdrop-blur-xl border border-slate-700/80 rounded-2xl shadow-2xl z-50 overflow-hidden text-slate-200 divide-y divide-slate-800 animate-in fade-in zoom-in-95 duration-150"
+        >
+          <!-- User Profile Info Header -->
+          <div class="p-3.5 bg-gradient-to-b from-slate-800/80 to-slate-900/90 flex items-center gap-3">
+            <div id="dropdown-avatar-badge" class="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 via-[#d4a94f] to-[#b88d36] text-slate-950 font-black text-sm flex items-center justify-center shadow-md flex-shrink-0 font-heading">
+              TC
+            </div>
+            <div class="min-w-0 flex-1">
+              <div id="user-name-text" class="text-white font-bold text-xs sm:text-sm truncate font-heading">Thiago Carvalho</div>
+              <div id="user-email-text" class="text-slate-300 text-[11px] truncate">colletes@gmail.com</div>
+              <div id="user-role-badge" class="text-[#d4a94f] font-bold text-[9.5px] uppercase mt-0.5 tracking-wider">Master Admin</div>
+            </div>
           </div>
-          <div class="text-left hidden lg:block leading-tight">
-            <div id="user-email-text" class="text-slate-200 font-semibold text-[11px] max-w-[140px] truncate">colletes@gmail.com</div>
-            <div id="user-role-badge" class="text-[#d4a94f] font-bold text-[9.5px] uppercase">Master Admin</div>
+
+          <!-- Tools / Actions List -->
+          <div class="py-1.5 font-medium text-xs">
+            <!-- Central de Notificações -->
+            <button
+              id="btn-open-notifications"
+              onclick="closeProfileDropdown(); openCentralNotificacoesModal();"
+              class="w-full flex items-center justify-between px-3.5 py-2.5 hover:bg-slate-800/80 transition text-left text-slate-200 group cursor-pointer"
+            >
+              <span class="flex items-center gap-2.5">
+                <span class="text-base group-hover:scale-110 transition-transform">🔔</span>
+                <span class="font-semibold">Central de Notificações</span>
+              </span>
+              <span id="notif-unread-count" class="bg-rose-500 text-white font-black text-[10px] px-2 py-0.5 rounded-full shadow-xs">0</span>
+            </button>
+
+            <!-- Gestão de Usuários (Master Admin & Coordenação) -->
+            <button
+              id="btn-open-user-mgmt"
+              onclick="closeProfileDropdown(); openUserManagementModal();"
+              class="hidden w-full flex items-center justify-between px-3.5 py-2.5 hover:bg-slate-800/80 transition text-left text-slate-200 group cursor-pointer"
+            >
+              <span class="flex items-center gap-2.5">
+                <span class="text-base group-hover:scale-110 transition-transform">👥</span>
+                <span class="font-semibold">Gestão de Usuários & Acessos</span>
+              </span>
+              <span id="user-mgmt-pending-badge" class="hidden bg-amber-500 text-slate-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow-xs">0</span>
+            </button>
+
+            <!-- Permissões RBAC -->
+            <button
+              onclick="closeProfileDropdown(); openRbacMatrixModal();"
+              class="w-full flex items-center gap-2.5 px-3.5 py-2.5 hover:bg-slate-800/80 transition text-left text-slate-200 group cursor-pointer"
+            >
+              <span class="text-base group-hover:scale-110 transition-transform">📊</span>
+              <span class="font-semibold">Matriz de Permissões RBAC</span>
+            </button>
+
+            <!-- Logs de Auditoria LGPD -->
+            <button
+              id="btn-open-audit-logs"
+              onclick="closeProfileDropdown(); openAuditTrailModal();"
+              class="hidden w-full flex items-center gap-2.5 px-3.5 py-2.5 hover:bg-slate-800/80 transition text-left text-slate-200 group cursor-pointer"
+            >
+              <span class="text-base group-hover:scale-110 transition-transform">🛡️</span>
+              <span class="font-semibold">Logs de Auditoria LGPD</span>
+            </button>
+
+            <!-- Imprimir Tela Ativa -->
+            <button
+              onclick="closeProfileDropdown(); triggerSmartPrint();"
+              class="w-full flex items-center gap-2.5 px-3.5 py-2.5 hover:bg-slate-800/80 transition text-left text-slate-200 group cursor-pointer"
+            >
+              <svg class="w-4 h-4 text-[#d4a94f] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+              <span class="font-semibold">Imprimir Tela Ativa</span>
+            </button>
+          </div>
+
+          <!-- Sair / Logout -->
+          <div class="p-2 bg-slate-950/50">
+            <button
+              onclick="closeProfileDropdown(); logoutSite();"
+              class="w-full flex items-center justify-center gap-2 px-3 py-2 bg-rose-950/60 hover:bg-rose-900/80 text-rose-200 border border-rose-800/70 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
+            >
+              <span>🚪</span>
+              <span>Encerrar Sessão com Segurança</span>
+            </button>
           </div>
         </div>
 
-        <!-- Central de Notificações / Sino com contador -->
-        <button
-          id="btn-open-notifications"
-          onclick="openCentralNotificacoesModal()"
-          class="relative inline-flex items-center gap-1.5 bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 px-2.5 py-1.5 rounded-xl text-xs transition font-semibold"
-          title="Central de Notificações e Pendências Documentais"
-        >
-          <span class="text-sm">🔔</span>
-          <span class="hidden sm:inline">Notificações</span>
-          <span id="notif-unread-count" class="bg-rose-500 text-white font-black text-[9.5px] px-1.5 py-0.2 rounded-full shadow-xs">3</span>
-        </button>
-
-        <!-- Botão Gestão de Usuários (Master Admin & Coordenação) -->
-        <button
-          id="btn-open-user-mgmt"
-          onclick="openUserManagementModal()"
-          class="hidden relative inline-flex items-center gap-1.5 bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 px-2.5 py-1.5 rounded-xl text-xs transition font-semibold"
-          title="Gestão de Usuários, Aprovação de Acessos e Turmas"
-        >
-          <span class="text-sm">👥</span>
-          <span class="hidden xl:inline">Usuários</span>
-          <span id="user-mgmt-pending-badge" class="hidden bg-amber-500 text-slate-950 font-black text-[10px] px-1.5 py-0.2 rounded-full shadow-xs">0</span>
-        </button>
-
-        <!-- Botão Matriz RBAC -->
-        <button
-          onclick="openRbacMatrixModal()"
-          class="inline-flex items-center gap-1 bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 px-2.5 py-1.5 rounded-xl text-xs transition font-semibold"
-          title="Consultar Planilha / Matriz de Permissões RBAC"
-        >
-          <span class="text-sm">👥</span>
-          <span class="hidden xl:inline">Permissões</span>
-        </button>
-
-        <!-- Botão Logs LGPD (Master Admin & Coordenação) -->
-        <button
-          id="btn-open-audit-logs"
-          onclick="openAuditTrailModal()"
-          class="inline-flex items-center gap-1 bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 px-2.5 py-1.5 rounded-xl text-xs transition font-semibold"
-          title="Ver Trilha de Auditoria Perene LGPD"
-        >
-          <span class="text-sm">🛡️</span>
-          <span class="hidden xl:inline">Logs LGPD</span>
-        </button>
-
-        <!-- Imprimir -->
-        <button onclick="triggerSmartPrint()" class="inline-flex items-center gap-1 bg-gradient-to-r from-[#d4a94f] to-[#b88d36] hover:from-[#facf75] hover:to-[#d4a94f] text-slate-950 font-black px-2.5 py-1.5 rounded-xl text-xs shadow-sm transition font-heading" title="Imprimir tela ativa">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-          <span class="hidden sm:inline">Imprimir</span>
-        </button>
-
-        <!-- Logout -->
-        <button onclick="logoutSite()" class="inline-flex items-center gap-1 bg-rose-950/60 hover:bg-rose-900 text-rose-200 border border-rose-800/80 px-2.5 py-1.5 rounded-xl text-xs transition font-semibold" title="Encerrar sessão com segurança">
-          <span>🚪 Sair</span>
-        </button>
       </div>
 
     </div>
@@ -4499,10 +4538,43 @@
       document.body.style.overflow = '';
     }
 
+    // Profile Menu Dropdown Helpers
+    function toggleProfileDropdown() {
+      const dropdown = document.getElementById('profile-dropdown-menu');
+      const btn = document.getElementById('btn-profile-menu');
+      if (!dropdown) return;
+      const isHidden = dropdown.classList.contains('hidden');
+      if (isHidden) {
+        dropdown.classList.remove('hidden');
+        if (btn) btn.setAttribute('aria-expanded', 'true');
+      } else {
+        dropdown.classList.add('hidden');
+        if (btn) btn.setAttribute('aria-expanded', 'false');
+      }
+    }
+
+    function closeProfileDropdown() {
+      const dropdown = document.getElementById('profile-dropdown-menu');
+      const btn = document.getElementById('btn-profile-menu');
+      if (dropdown && !dropdown.classList.contains('hidden')) {
+        dropdown.classList.add('hidden');
+        if (btn) btn.setAttribute('aria-expanded', 'false');
+      }
+    }
+
+    // Fechar ao clicar fora do menu do perfil
+    document.addEventListener('click', (e) => {
+      const container = document.getElementById('header-profile-menu-container');
+      if (container && !container.contains(e.target)) {
+        closeProfileDropdown();
+      }
+    });
+
     // Fechar com a tecla Escape
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         closeSidebarMenu();
+        closeProfileDropdown();
       }
     });
 
@@ -5110,15 +5182,22 @@
 
       // Atualiza Header com status do usuário
       const avatarBadge = document.getElementById('user-avatar-badge');
+      const dropdownAvatar = document.getElementById('dropdown-avatar-badge');
       const emailText = document.getElementById('user-email-text');
+      const userNameText = document.getElementById('user-name-text');
       const roleBadge = document.getElementById('user-role-badge');
       const btnAuditLogs = document.getElementById('btn-open-audit-logs');
 
-      if (avatarBadge) {
+      if (avatarBadge || dropdownAvatar) {
         const initials = userData.displayName
           ? userData.displayName.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
           : userData.email.substring(0, 2).toUpperCase();
-        avatarBadge.textContent = initials;
+        if (avatarBadge) avatarBadge.textContent = initials;
+        if (dropdownAvatar) dropdownAvatar.textContent = initials;
+      }
+
+      if (userNameText) {
+        userNameText.textContent = userData.displayName || (userData.email ? userData.email.split('@')[0] : 'Usuário');
       }
 
       if (emailText) emailText.textContent = userData.email;
@@ -5875,6 +5954,15 @@
         totalNotifs += pendingUsers.length;
       }
       if (headerNotifCount) headerNotifCount.textContent = totalNotifs;
+      const profileNotifBadge = document.getElementById('profile-btn-notif-badge');
+      if (profileNotifBadge) {
+        profileNotifBadge.textContent = totalNotifs;
+        if (totalNotifs > 0) {
+          profileNotifBadge.classList.remove('hidden');
+        } else {
+          profileNotifBadge.classList.add('hidden');
+        }
+      }
       if (typeof updateUserMgmtBadges === 'function') updateUserMgmtBadges();
 
       if (pendencias.length === 0) {
