@@ -1291,11 +1291,12 @@
                 <rect x="105" y="455" width="44" height="26" rx="6" fill="#1e293b"/>
                 <text x="127" y="473" text-anchor="middle" font-family="'Outfit', sans-serif" font-size="13" font-weight="800" fill="#d4a94f">06</text>
                 <text x="160" y="474" font-family="'Questrial', sans-serif" font-size="17" font-weight="700" fill="#0f172a">São Miguel</text>
-                <g transform="translate(105, 500)">
-                  <rect x="0" y="0" width="260" height="60" rx="8" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="1"/>
-                  <text x="8" y="17" font-family="'Nunito', sans-serif" font-size="10.5" font-weight="700" fill="#0369a1">Sáb 8h30 • Lanuzia, Mara, Mariana</text>
-                  <text x="8" y="34" font-family="'Nunito', sans-serif" font-size="10.5" font-weight="700" fill="#0284c7">Sáb 10h30 • Danusa e Glenda</text>
-                  <text x="8" y="51" font-family="'Nunito', sans-serif" font-size="10.5" font-weight="700" fill="#6d28d9">Seg 20h • Anderson e Kéllibe</text>
+                <g transform="translate(105, 495)">
+                  <rect x="0" y="0" width="260" height="74" rx="8" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="1"/>
+                  <text x="8" y="16" font-family="'Nunito', sans-serif" font-size="10.5" font-weight="700" fill="#0369a1">Sáb 8h30 • Lanuzia, Mara, Mariana</text>
+                  <text x="8" y="32" font-family="'Nunito', sans-serif" font-size="10.5" font-weight="700" fill="#0284c7">Sáb 10h30 • Danusa e Glenda</text>
+                  <text x="8" y="48" font-family="'Nunito', sans-serif" font-size="10.5" font-weight="700" fill="#6d28d9">Seg 20h • Anderson e Kéllibe</text>
+                  <text x="8" y="65" font-family="'Nunito', sans-serif" font-size="10.5" font-weight="700" fill="#b45309">Sacr. 03/12 • Thiago e Thais</text>
                 </g>
               </g>
 
@@ -4721,13 +4722,14 @@
 
     // SEARCH SYSTEM
     function handleSearch(query) {
-      query = query.trim().toLowerCase();
+      const norm = str => (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
+      const qClean = norm(query);
       const clearBtn = document.getElementById('clear-search-btn');
       const banner = document.getElementById('search-alert-banner');
       const alertText = document.getElementById('search-alert-text');
       const alertSubtext = document.getElementById('search-alert-subtext');
 
-      if (!query) {
+      if (!qClean) {
         clearSearch();
         return;
       }
@@ -4743,11 +4745,11 @@
 
       Object.values(roomsData).forEach(room => {
         let isMatch = false;
-        if (room.name.toLowerCase().includes(query) || room.number.toLowerCase().includes(query)) {
+        if (norm(room.name).includes(qClean) || norm(room.number).includes(qClean)) {
           isMatch = true;
         }
         room.schedules.forEach(s => {
-          if (s.catechists.toLowerCase().includes(query) || s.stage.toLowerCase().includes(query) || s.turma.toLowerCase().includes(query) || s.day.toLowerCase().includes(query) || s.time.toLowerCase().includes(query)) {
+          if (norm(s.catechists).includes(qClean) || norm(s.stage).includes(qClean) || norm(s.turma).includes(qClean) || norm(s.day).includes(qClean) || norm(s.time).includes(qClean)) {
             isMatch = true;
           }
         });
@@ -4893,16 +4895,12 @@
         card.className = 'room-card bg-slate-50 hover:bg-white p-4 rounded-2xl border border-slate-200 cursor-pointer shadow-xs flex flex-col justify-between';
         card.onclick = () => selectRoom(room.id);
         
-        let schedHtml = room.schedules.slice(0, 3).map(s => `
+        let schedHtml = room.schedules.map(s => `
           <div class="text-[11px] flex justify-between border-t border-slate-200/60 pt-1 mt-1">
-            <span class="font-bold text-amber-700 truncate max-w-[100px]">${s.stage} (${s.turma})</span>
-            <span class="text-slate-600 truncate max-w-[120px]" title="${s.catechists}">${s.catechists}</span>
+            <span class="font-bold text-amber-700 truncate max-w-[105px]">${s.stage} (${s.turma})</span>
+            <span class="text-slate-600 truncate max-w-[125px]" title="${s.catechists}">${s.catechists}</span>
           </div>
         `).join('');
-
-        if (room.schedules.length > 3) {
-          schedHtml += `<div class="text-[10px] text-slate-400 text-right mt-1">+${room.schedules.length - 3} turma(s)</div>`;
-        }
 
         card.innerHTML = `
           <div>
