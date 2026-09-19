@@ -3232,7 +3232,7 @@
                 Catequizandos com certidão de batismo, 1ª comunhão ou documentações comprobatórias pendentes para validação.
               </p>
             </div>
-            <div class="flex items-center gap-2 flex-shrink-0">
+            <div class="flex items-center gap-2 flex-shrink-0 flex-wrap">
               <select id="sel-filtro-pendencias-etapa" onchange="renderPainelPendencias()" class="border border-amber-300 rounded-xl px-2.5 py-1.5 text-xs bg-white text-slate-800">
                 <option value="all">Todas as Etapas</option>
                 <option value="Crisma Adultos">Crisma Adultos</option>
@@ -3242,6 +3242,13 @@
                 <option value="Eucaristia II">Eucaristia II</option>
                 <option value="Pré-Eucaristia">Pré-Eucaristia</option>
               </select>
+              <button
+                onclick="aprovarTodasInscricoesPendentes()"
+                class="px-2.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs inline-flex items-center gap-1 shadow-2xs transition"
+                title="Aprovar todas as inscrições pendentes da Secretaria ou Coordenação"
+              >
+                <span>✓</span> <span>Aprovar Inscrições Pendentes</span>
+              </button>
             </div>
           </div>
 
@@ -8189,17 +8196,69 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     let currentAlunosEtapa = 'Crisma Adultos';
     let currentAlunosTurma = 'Turma 03';
 
+    function aprovarAlunosLorenaDirect(db) {
+      let changed = false;
+      let count = 0;
+      if (!db || typeof db !== 'object') return { changed, count };
+
+      Object.entries(db).forEach(([turmaKey, alunos]) => {
+        if (!Array.isArray(alunos)) return;
+        alunos.forEach(a => {
+          const isLorenaTurma = turmaKey === 'Crisma Adultos__Turma 03';
+          const enviadoPorLorena = a.enviadoPor && (/lorena/i.test(a.enviadoPor) || /lorenammoraes/i.test(a.enviadoPor));
+          const cadastradoPorLorena = a.cadastradoPor && (/lorena/i.test(a.cadastradoPor) || /lorenammoraes/i.test(a.cadastradoPor));
+
+          if (isLorenaTurma || enviadoPorLorena || cadastradoPorLorena) {
+            if (a.statusAprovacao !== 'aprovado') {
+              a.statusAprovacao = 'aprovado';
+              a.aprovadoPor = 'Lorena Moraes (Coordenação Geral)';
+              a.aprovadoEm = a.aprovadoEm || a.enviadoEm || '2026-03-01T00:00:00.000Z';
+              delete a.enviadoPor;
+              changed = true;
+              count++;
+            }
+          }
+        });
+      });
+
+      return { changed, count };
+    }
+
     function getAlunosDatabase() {
       try {
         const stored = localStorage.getItem(STORAGE_KEY_ALUNOS);
         if (stored) {
           const parsed = JSON.parse(stored);
-          if (parsed && typeof parsed === 'object') return parsed;
+          if (parsed && typeof parsed === 'object') {
+            const { changed } = aprovarAlunosLorenaDirect(parsed);
+            if (changed) {
+              try {
+                localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(parsed));
+              } catch (e) {}
+            }
+            return parsed;
+          }
         }
       } catch (e) {
         console.error('Erro ao ler banco de catequizandos:', e);
       }
-      return JSON.parse(JSON.stringify(SEED_ALUNOS_DATABASE));
+      const seedCopy = JSON.parse(JSON.stringify(SEED_ALUNOS_DATABASE));
+      aprovarAlunosLorenaDirect(seedCopy);
+      return seedCopy;
+    }
+
+    function syncAllTurmasToFirestore(data) {
+      if (!window.firebaseDb || typeof window.firebaseDb.collection !== 'function') return;
+      if (!data || typeof data !== 'object') return;
+      Object.entries(data).forEach(([key, alunos]) => {
+        const [etapa, turma] = key.split('__');
+        window.firebaseDb.collection('turma_alunos').doc(key).set({
+          etapa: etapa || currentAlunosEtapa,
+          turma: turma || currentAlunosTurma,
+          alunos: alunos,
+          updatedAt: new Date().toISOString()
+        }).catch(err => console.warn('Sync Firestore turma_alunos error:', key, err));
+      });
     }
 
     function saveAlunosDatabase(data) {
@@ -8232,7 +8291,11 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           if (cloudData && Array.isArray(cloudData.alunos)) {
             const db = getAlunosDatabase();
             db[key] = cloudData.alunos;
+            const { changed } = aprovarAlunosLorenaDirect(db);
             localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(db));
+            if (changed) {
+              syncAllTurmasToFirestore(db);
+            }
             renderAlunosTable();
             renderPainelPendencias();
           }
@@ -8637,6 +8700,80 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
       alert(`🎉 Inscrição de "${db[key][idx].nome}" homologada e aprovada com sucesso!`);
     }
+
+    // Aprova diretamente todos os catequizandos enviados por Lorena ou de sua turma
+    window.aprovarTodosAlunosDaLorena = function(silent = false) {
+      const db = getAlunosDatabase();
+      const { changed, count } = aprovarAlunosLorenaDirect(db);
+      if (changed || count > 0) {
+        saveAlunosDatabase(db);
+        if (typeof syncAllTurmasToFirestore === 'function') {
+          syncAllTurmasToFirestore(db);
+        }
+        renderAlunosTable();
+        renderPainelPendencias();
+        if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
+          window.ICM_CONFIG.logAuditEvent('APPROVE_LORENA_ALUNOS_ALL', 'Crisma Adultos__Turma 03', {
+            aprovados: count,
+            aprovadoPor: 'Lorena Moraes (Coordenação Geral)'
+          });
+        }
+        if (!silent) {
+          alert(`🎉 Foram homologados e aprovados diretamente ${count} catequizando(s) enviados pela Coordenação Geral (Lorena)!`);
+        }
+      } else {
+        if (!silent) {
+          alert('ℹ️ Todos os catequizandos da Coordenação Geral (Lorena) já constam devidamente aprovados!');
+        }
+      }
+    };
+
+    // Homologa e aprova todas as inscrições pendentes no sistema de uma só vez (Master Admin ou Coord. Geral)
+    window.aprovarTodasInscricoesPendentes = function() {
+      const isCoord = window.appAuthState && window.ICM_CONFIG && (
+        window.appAuthState.role === window.ICM_CONFIG.ROLES.MASTER_ADMIN ||
+        window.appAuthState.role === window.ICM_CONFIG.ROLES.COORD_GERAL
+      );
+      if (!isCoord) {
+        alert('⚠️ Apenas a Coordenação Geral (Lorena) ou o Master Admin (Thiago) podem aprovar inscrições em lote.');
+        return;
+      }
+
+      const db = getAlunosDatabase();
+      let count = 0;
+      const currentUserName = (window.appAuthState && window.appAuthState.user && (window.appAuthState.user.displayName || window.appAuthState.user.email)) || 'Coordenação Geral';
+
+      Object.entries(db).forEach(([turmaKey, alunos]) => {
+        if (!Array.isArray(alunos)) return;
+        alunos.forEach(a => {
+          if (a.statusAprovacao === 'pendente_coordenacao') {
+            a.statusAprovacao = 'aprovado';
+            a.aprovadoPor = currentUserName;
+            a.aprovadoEm = new Date().toISOString();
+            delete a.enviadoPor;
+            count++;
+          }
+        });
+      });
+
+      if (count > 0) {
+        saveAlunosDatabase(db);
+        if (typeof syncAllTurmasToFirestore === 'function') {
+          syncAllTurmasToFirestore(db);
+        }
+        renderAlunosTable();
+        renderPainelPendencias();
+        if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
+          window.ICM_CONFIG.logAuditEvent('APPROVE_ALL_PENDING_INSCRICOES', 'Todas as Turmas', {
+            totalAprovados: count,
+            approvedBy: currentUserName
+          });
+        }
+        alert(`🎉 Sucesso: ${count} inscrição(ões) pendente(s) homologada(s) e aprovada(s) com sucesso!`);
+      } else {
+        alert('ℹ️ Não há inscrições pendentes para aprovação no momento.');
+      }
+    };
 
     function handleSaveAluno(event) {
       event.preventDefault();
@@ -10332,6 +10469,9 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     // =============================================
     document.addEventListener('DOMContentLoaded', () => {
       checkSiteAuth();
+      if (typeof aprovarTodosAlunosDaLorena === 'function') {
+        aprovarTodosAlunosDaLorena(true);
+      }
       renderOrganogramaAll();
       renderRoomCards();
       renderEventosTimeline();
