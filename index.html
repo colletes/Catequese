@@ -93,26 +93,46 @@
     }
     .svg-room {
       cursor: pointer;
-      transition: all 0.2s ease-in-out;
+      transition: filter 0.2s ease, transform 0.2s ease;
     }
     .svg-room:hover rect.room-bg {
-      fill: #fef3c7 !important;
-      stroke: #d4a94f !important;
-      stroke-width: 3px !important;
+      fill: #fef3c7;
+      stroke: #d4a94f;
+      stroke-width: 3px;
       filter: drop-shadow(0px 4px 10px rgba(212, 169, 79, 0.35));
     }
     .svg-room.active-room rect.room-bg {
-      fill: #fef08a !important;
-      stroke: #b45309 !important;
-      stroke-width: 3.5px !important;
+      fill: #fef08a;
+      stroke: #b45309;
+      stroke-width: 3.5px;
       filter: drop-shadow(0px 6px 14px rgba(180, 83, 9, 0.45));
     }
-    .svg-room.highlight-pulse rect.room-bg {
-      animation: pulseHighlight 1.4s infinite;
+    .svg-room.highlight-pulse {
+      animation: roomGlowPulse 1.2s ease-in-out infinite alternate !important;
     }
-    @keyframes pulseHighlight {
-      0%, 100% { fill: #fef08a; stroke: #d4a94f; stroke-width: 4px; }
-      50% { fill: #fde047; stroke: #92400e; stroke-width: 5px; }
+    .svg-room.highlight-pulse rect.room-bg,
+    .svg-room.active-room.highlight-pulse rect.room-bg {
+      animation: roomBorderPulse 1.2s ease-in-out infinite alternate !important;
+    }
+    @keyframes roomGlowPulse {
+      0% {
+        filter: drop-shadow(0 0 3px rgba(245, 158, 11, 0.6)) drop-shadow(0 0 8px rgba(217, 119, 6, 0.4));
+      }
+      100% {
+        filter: drop-shadow(0 0 16px rgba(245, 158, 11, 0.95)) drop-shadow(0 0 28px rgba(217, 119, 6, 0.85));
+      }
+    }
+    @keyframes roomBorderPulse {
+      0% {
+        fill: #fef9c3;
+        stroke: #f59e0b;
+        stroke-width: 3.5px;
+      }
+      100% {
+        fill: #fde047;
+        stroke: #b45309;
+        stroke-width: 6.5px;
+      }
     }
     .door-arc {
       stroke-dasharray: 4 2;
@@ -4579,6 +4599,23 @@
       toggleSidebarMenu();
     }
 
+    // HELPER: LOCALIZAR ELEMENTO SVG DA SALA NA PLANTA BAIXA
+    function getRoomSvgElement(roomOrId) {
+      if (!roomOrId) return null;
+      const roomId = typeof roomOrId === 'string' ? roomOrId : (roomOrId.id || '');
+      const room = typeof roomOrId === 'object' ? roomOrId : roomsData[roomId];
+
+      const directId = 'svg-' + roomId;
+      const roomSvgId = 'svg-room-' + roomId.replace(/^sala-/, '');
+
+      let el = document.getElementById(roomSvgId) || document.getElementById(directId) || document.getElementById('svg-room-' + roomId);
+      if (!el && room && room.number) {
+        const numClean = room.number.toLowerCase().replace('sala ', '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+        el = document.getElementById('svg-room-' + numClean) || document.getElementById('svg-' + numClean);
+      }
+      return el;
+    }
+
     // SELECT ROOM AND UPDATE DETAIL PANELS
     function selectRoom(roomId, shouldSwitchTab = true) {
       const room = roomsData[roomId];
@@ -4594,8 +4631,7 @@
 
       document.querySelectorAll('.svg-room').forEach(el => el.classList.remove('active-room'));
       
-      const svgId = 'svg-room-' + room.number.toLowerCase().replace('sala ', '');
-      const targetEl = document.getElementById(svgId) || document.getElementById('svg-' + room.id);
+      const targetEl = getRoomSvgElement(room);
       if (targetEl) targetEl.classList.add('active-room');
 
       // Update Catequético Panel
@@ -4689,6 +4725,7 @@
       const clearBtn = document.getElementById('clear-search-btn');
       const banner = document.getElementById('search-alert-banner');
       const alertText = document.getElementById('search-alert-text');
+      const alertSubtext = document.getElementById('search-alert-subtext');
 
       if (!query) {
         clearSearch();
@@ -4718,8 +4755,7 @@
         if (isMatch) {
           matchCount++;
           matchedRooms.push(room);
-          const svgId = 'svg-room-' + room.number.toLowerCase().replace('sala ', '');
-          const el = document.getElementById(svgId) || document.getElementById('svg-' + room.id);
+          const el = getRoomSvgElement(room);
           if (el) el.classList.add('highlight-pulse');
         }
       });
@@ -4727,27 +4763,53 @@
       if (banner) {
         banner.classList.remove('hidden');
         if (matchCount > 0) {
-          alertText.textContent = `Encontrado(s) ${matchCount} local(is) para "${query}"`;
+          if (alertText) alertText.textContent = `Encontrado(s) ${matchCount} local(is) para "${query}"`;
+          if (alertSubtext) {
+            alertSubtext.textContent = 'Salas encontradas destacadas na planta com animação pulsante.';
+          }
           const inCatequetico = matchedRooms.some(r => r.hall === 'catequetico');
           const inParoquial = matchedRooms.some(r => r.hall === 'paroquial');
-          if (inCatequetico && !inParoquial) switchTab('catequetico');
-          else if (inParoquial && !inCatequetico) switchTab('paroquial');
+          const isParoquialViewActive = !document.getElementById('view-paroquial').classList.contains('hidden');
+
+          if (inCatequetico && !inParoquial) {
+            switchTab('catequetico');
+          } else if (inParoquial && !inCatequetico) {
+            switchTab('paroquial');
+          } else if (inCatequetico && inParoquial && !isParoquialViewActive) {
+            switchTab('catequetico');
+          }
           
-          if (matchedRooms[0]) selectRoom(matchedRooms[0].id);
+          const chosenRoom = isParoquialViewActive && inParoquial ? (matchedRooms.find(r => r.hall === 'paroquial') || matchedRooms[0]) : matchedRooms[0];
+          if (chosenRoom) selectRoom(chosenRoom.id);
         } else {
-          alertText.textContent = `Nenhum resultado encontrado para "${query}". Busque por catequistas (ex: Carla, Polyana, Bruna, Lanuzia, Daniel) ou etapas (Pré, Eucaristia, Crisma).`;
+          if (alertText) alertText.textContent = `Nenhum resultado encontrado para "${query}". Busque por catequistas (ex: Carla, Polyana, Bruna, Lanuzia, Daniel) ou etapas (Pré, Eucaristia, Crisma).`;
         }
       }
     }
 
     function clearSearch() {
-      document.getElementById('global-search').value = '';
-      document.getElementById('clear-search-btn').classList.add('hidden');
-      document.getElementById('search-alert-banner').classList.add('hidden');
+      const searchInput = document.getElementById('global-search');
+      if (searchInput) searchInput.value = '';
+      const clearBtn = document.getElementById('clear-search-btn');
+      if (clearBtn) clearBtn.classList.add('hidden');
+      const banner = document.getElementById('search-alert-banner');
+      if (banner) banner.classList.add('hidden');
+
+      // Reseta botões de filtro para "Todos"
+      document.querySelectorAll('.period-filter-btn').forEach(btn => {
+        if (btn.dataset.period === 'all') {
+          btn.classList.remove('font-medium', 'text-slate-600');
+          btn.classList.add('font-bold', 'bg-white', 'text-slate-800', 'shadow-xs');
+        } else {
+          btn.classList.remove('font-bold', 'bg-white', 'text-slate-800', 'shadow-xs');
+          btn.classList.add('font-medium', 'text-slate-600');
+        }
+      });
+
       document.querySelectorAll('.svg-room').forEach(el => {
         el.classList.remove('highlight-pulse', 'active-room');
       });
-      selectRoom('sala-01');
+      selectRoom('sala-01', false);
     }
 
     // PERIOD FILTER
@@ -4768,19 +4830,52 @@
       }
 
       document.querySelectorAll('.svg-room').forEach(el => el.classList.remove('highlight-pulse', 'active-room'));
-      let firstMatch = null;
+
+      const banner = document.getElementById('search-alert-banner');
+      const alertText = document.getElementById('search-alert-text');
+      const alertSubtext = document.getElementById('search-alert-subtext');
+
+      const periodLabels = {
+        'sab-manha': 'Sábado Manhã (8h30 / 10h30)',
+        'sab-tarde': 'Sábado Tarde (15h)',
+        'seg-noite': 'Segunda-feira Noite (20h)',
+        'quarta': 'Quarta-feira (16h)'
+      };
+
+      let matchedRooms = [];
 
       Object.values(roomsData).forEach(room => {
         const hasMatch = room.schedules.some(s => s.period === period);
         if (hasMatch) {
-          if (!firstMatch) firstMatch = room;
-          const svgId = 'svg-room-' + room.number.toLowerCase().replace('sala ', '');
-          const el = document.getElementById(svgId) || document.getElementById('svg-' + room.id);
+          matchedRooms.push(room);
+          const el = getRoomSvgElement(room);
           if (el) el.classList.add('highlight-pulse');
         }
       });
 
-      if (firstMatch) selectRoom(firstMatch.id);
+      if (banner && alertText) {
+        banner.classList.remove('hidden');
+        if (matchedRooms.length > 0) {
+          alertText.textContent = `Filtro de Horário: ${periodLabels[period] || period} (${matchedRooms.length} salas encontradas)`;
+          if (alertSubtext) {
+            alertSubtext.textContent = 'Salas encontradas destacadas na planta com animação pulsante.';
+          }
+        } else {
+          alertText.textContent = `Nenhuma sala com encontros no horário selecionado (${periodLabels[period] || period}).`;
+        }
+      }
+
+      if (matchedRooms.length > 0) {
+        // Se o usuário já estiver na aba Paroquial e houver salas correspondentes nela, seleciona a sala do Salão Paroquial
+        const isParoquialViewActive = !document.getElementById('view-paroquial').classList.contains('hidden');
+        let chosenRoom = null;
+        if (isParoquialViewActive) {
+          chosenRoom = matchedRooms.find(r => r.hall === 'paroquial') || matchedRooms[0];
+        } else {
+          chosenRoom = matchedRooms.find(r => r.hall === 'catequetico') || matchedRooms[0];
+        }
+        selectRoom(chosenRoom.id);
+      }
     }
 
     // POPULATE ALL ROOM CARDS (Centro Catequético)
