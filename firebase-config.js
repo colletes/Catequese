@@ -689,6 +689,132 @@ function getAuditLogs() {
   }
 }
 
+// ==========================================================================
+// 🛡️ GESTÃO DE EXCLUSÃO DE DADOS (ELIMINAÇÃO LGPD — ART. 18, VI)
+// ==========================================================================
+const LGPD_DELETION_STORAGE_KEY = 'catequese_lgpd_deletion_requests_v1';
+
+function getLgpdDeletionRequests() {
+  try {
+    return JSON.parse(localStorage.getItem(LGPD_DELETION_STORAGE_KEY) || '[]');
+  } catch (e) {
+    return [];
+  }
+}
+
+async function createLgpdDeletionRequest(data) {
+  const requests = getLgpdDeletionRequests();
+  const currentUser = window.appAuthState ? window.appAuthState.user : null;
+  const userRole = window.appAuthState ? window.appAuthState.role : ROLES.PENDENTE;
+
+  const newRequest = {
+    id: 'lgpd-del-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+    titularId: data.titularId,
+    titularNome: data.titularNome,
+    titularTipo: data.titularTipo || 'catequizando', // 'catequizando', 'catequista', 'usuario'
+    titularCpf: data.titularCpf || '',
+    titularTurma: data.titularTurma || '',
+    titularEtapa: data.titularEtapa || '',
+    motivo: data.motivo || 'Revogação de Consentimento',
+    detalhes: data.detalhes || '',
+    dataSolicitacao: new Date().toISOString(),
+    status: 'pendente', // 'pendente', 'aprovado', 'rejeitado'
+    solicitanteNome: currentUser ? (currentUser.displayName || currentUser.email) : 'Solicitante Pastoral',
+    solicitanteEmail: currentUser ? currentUser.email : '',
+    solicitanteRole: userRole
+  };
+
+  requests.unshift(newRequest);
+  localStorage.setItem(LGPD_DELETION_STORAGE_KEY, JSON.stringify(requests));
+
+  if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
+    try {
+      await window.firebaseDb.collection('lgpd_deletion_requests').doc(newRequest.id).set(newRequest);
+    } catch (e) {
+      console.warn('Registro de exclusão LGPD mantido localmente:', e);
+    }
+  }
+
+  await logAuditEvent('LGPD_DELETION_REQUESTED', newRequest.titularNome, {
+    requestId: newRequest.id,
+    titularTipo: newRequest.titularTipo,
+    motivo: newRequest.motivo
+  });
+
+  return newRequest;
+}
+
+async function approveLgpdDeletionRequest(requestId, approverName = 'Thiago Carvalho (Master Admin)') {
+  const requests = getLgpdDeletionRequests();
+  const index = requests.findIndex(r => r.id === requestId);
+  if (index === -1) throw new Error('Solicitação não encontrada');
+
+  const req = requests[index];
+  req.status = 'aprovado';
+  req.dataAprovacao = new Date().toISOString();
+  req.aprovadoPor = approverName;
+
+  requests[index] = req;
+  localStorage.setItem(LGPD_DELETION_STORAGE_KEY, JSON.stringify(requests));
+
+  if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
+    try {
+      await window.firebaseDb.collection('lgpd_deletion_requests').doc(requestId).update({
+        status: 'aprovado',
+        dataAprovacao: req.dataAprovacao,
+        aprovadoPor: approverName
+      });
+    } catch (e) {
+      console.warn('Atualização de solicitação LGPD mantida localmente:', e);
+    }
+  }
+
+  await logAuditEvent('LGPD_DELETION_APPROVED', req.titularNome, {
+    requestId: req.id,
+    titularTipo: req.titularTipo,
+    aprovadoPor: approverName,
+    protocolo: 'LGPD-DEL-' + req.id.toUpperCase()
+  });
+
+  return req;
+}
+
+async function rejectLgpdDeletionRequest(requestId, rejectorName = 'Thiago Carvalho (Master Admin)', justificativa = '') {
+  const requests = getLgpdDeletionRequests();
+  const index = requests.findIndex(r => r.id === requestId);
+  if (index === -1) throw new Error('Solicitação não encontrada');
+
+  const req = requests[index];
+  req.status = 'rejeitado';
+  req.dataRejeicao = new Date().toISOString();
+  req.rejeitadoPor = rejectorName;
+  req.justificativaRejeicao = justificativa;
+
+  requests[index] = req;
+  localStorage.setItem(LGPD_DELETION_STORAGE_KEY, JSON.stringify(requests));
+
+  if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
+    try {
+      await window.firebaseDb.collection('lgpd_deletion_requests').doc(requestId).update({
+        status: 'rejeitado',
+        dataRejeicao: req.dataRejeicao,
+        rejeitadoPor: rejectorName,
+        justificativaRejeicao: justificativa
+      });
+    } catch (e) {
+      console.warn('Atualização de indeferimento LGPD mantida localmente:', e);
+    }
+  }
+
+  await logAuditEvent('LGPD_DELETION_REJECTED', req.titularNome, {
+    requestId: req.id,
+    rejeitadoPor: rejectorName,
+    justificativa: justificativa
+  });
+
+  return req;
+}
+
 // Exporta utilitários globais para uso na interface
 window.ICM_CONFIG = {
   firebaseConfig: FIREBASE_CONFIG,
@@ -711,6 +837,10 @@ window.ICM_CONFIG = {
   encryptPII,
   decryptPII,
   logAuditEvent,
-  getAuditLogs
+  getAuditLogs,
+  getLgpdDeletionRequests,
+  createLgpdDeletionRequest,
+  approveLgpdDeletionRequest,
+  rejectLgpdDeletionRequest
 };
 

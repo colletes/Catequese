@@ -108,18 +108,23 @@
       filter: drop-shadow(0px 6px 14px rgba(180, 83, 9, 0.45));
     }
     .svg-room.highlight-pulse {
-      animation: roomGlowPulse 1.2s ease-in-out infinite alternate !important;
+      animation: roomGlowPulse 1s ease-in-out infinite alternate !important;
     }
     .svg-room.highlight-pulse rect.room-bg,
     .svg-room.active-room.highlight-pulse rect.room-bg {
-      animation: roomBorderPulse 1.2s ease-in-out infinite alternate !important;
+      animation: roomBorderPulse 0.9s ease-in-out infinite alternate !important;
+      stroke: #d97706 !important;
+      stroke-width: 4.5px !important;
+      fill: #fef08a !important;
     }
     @keyframes roomGlowPulse {
       0% {
-        filter: drop-shadow(0 0 3px rgba(245, 158, 11, 0.6)) drop-shadow(0 0 8px rgba(217, 119, 6, 0.4));
+        opacity: 0.92;
+        filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.7));
       }
       100% {
-        filter: drop-shadow(0 0 16px rgba(245, 158, 11, 0.95)) drop-shadow(0 0 28px rgba(217, 119, 6, 0.85));
+        opacity: 1;
+        filter: drop-shadow(0 0 18px rgba(220, 38, 38, 0.9)) drop-shadow(0 0 28px rgba(245, 158, 11, 0.9));
       }
     }
     @keyframes roomBorderPulse {
@@ -128,10 +133,15 @@
         stroke: #f59e0b;
         stroke-width: 3.5px;
       }
-      100% {
+      50% {
         fill: #fde047;
-        stroke: #b45309;
-        stroke-width: 6.5px;
+        stroke: #dc2626;
+        stroke-width: 6px;
+      }
+      100% {
+        fill: #fef08a;
+        stroke: #d97706;
+        stroke-width: 4px;
       }
     }
     .door-arc {
@@ -762,6 +772,19 @@
             >
               <span class="text-base group-hover:scale-110 transition-transform">🛡️</span>
               <span class="font-semibold">Logs de Auditoria LGPD</span>
+            </button>
+
+            <!-- Central de Direitos dos Titulares LGPD -->
+            <button
+              id="btn-open-lgpd-titulares"
+              onclick="closeProfileDropdown(); openLgpdTitularesModal();"
+              class="w-full flex items-center justify-between px-3.5 py-2.5 hover:bg-slate-800/80 transition text-left text-slate-200 group cursor-pointer"
+            >
+              <span class="flex items-center gap-2.5">
+                <span class="text-base group-hover:scale-110 transition-transform">⚖️</span>
+                <span class="font-semibold">Central de Titulares LGPD</span>
+              </span>
+              <span id="lgpd-deletion-pending-badge" class="hidden bg-rose-500 text-white font-black text-[10px] px-2 py-0.5 rounded-full shadow-xs">0</span>
             </button>
 
             <!-- Imprimir Tela Ativa -->
@@ -2679,6 +2702,24 @@
               <input type="text" id="aluno-justificativa" placeholder="Motivo do impedimento / observação canônica..." class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none" />
             </div>
 
+            <!-- Seção LGPD: Responsável Legal (Art. 14 LGPD • Menores de 18 anos) -->
+            <div class="sm:col-span-2 p-3 bg-amber-50/70 rounded-2xl border border-amber-200">
+              <div class="flex items-center gap-1.5 mb-2">
+                <span class="text-xs">🛡️</span>
+                <span class="text-[11px] font-bold text-amber-950 uppercase tracking-wider">Responsável Legal (Obrigatório para Menores • Art. 14 LGPD)</span>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div>
+                  <label class="block text-[10.5px] font-bold text-slate-700 uppercase tracking-wider mb-1">Nome Completo do Responsável</label>
+                  <input type="text" id="aluno-resp-nome" placeholder="Ex: Maria Pereira da Silva (Mãe/Pai)" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-xs bg-white focus:ring-2 focus:ring-amber-400 outline-none" />
+                </div>
+                <div>
+                  <label class="block text-[10.5px] font-bold text-slate-700 uppercase tracking-wider mb-1">CPF do Responsável</label>
+                  <input type="text" id="aluno-resp-cpf" placeholder="Ex: 000.000.000-00" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-xs bg-white focus:ring-2 focus:ring-amber-400 outline-none" />
+                </div>
+              </div>
+            </div>
+
             <!-- Observações -->
             <div class="sm:col-span-2">
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Observações e Anotações Pastorais</label>
@@ -3476,10 +3517,13 @@
       <!-- Sub-footer -->
       <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-500">
         <p>© Santuário Imaculado Coração de Maria • Todos os direitos reservados.</p>
-        <p class="flex items-center gap-2">
-          <span>Identidade Visual sincronizada com</span>
+        <div class="flex flex-wrap items-center gap-3">
+          <button onclick="openLgpdTitularesModal()" class="text-slate-400 hover:text-[#d4a94f] underline transition cursor-pointer">Central de Titulares (LGPD)</button>
+          <span class="text-slate-700">•</span>
+          <button onclick="openLgpdTermsModalDirect()" class="text-slate-400 hover:text-[#d4a94f] underline transition cursor-pointer">Termos de Privacidade</button>
+          <span class="text-slate-700">•</span>
           <a href="https://imaculadocoracaodf.com.br/" target="_blank" rel="noopener" class="text-[#d4a94f] hover:underline">imaculadocoracaodf.com.br</a>
-        </p>
+        </div>
       </div>
 
     </div>
@@ -3796,6 +3840,215 @@
 
       </div>
 
+    </div>
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- MODAL: CENTRAL DE DIREITOS DOS TITULARES LGPD           -->
+  <!-- Extração de dados (Art. 18, II e V) e Exclusão (Art. 18, VI) -->
+  <!-- ======================================================= -->
+  <div id="modal-lgpd-titulares" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-5xl w-full shadow-2xl border border-slate-200 overflow-hidden my-auto flex flex-col max-h-[92vh]">
+      
+      <!-- Header -->
+      <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 text-white p-5 border-b border-[#d4a94f]/50 flex items-center justify-between flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-xl flex-shrink-0">
+            🛡️
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-base sm:text-lg font-bold font-heading text-white">Central de Direitos dos Titulares (LGPD)</h3>
+              <span class="bg-emerald-950 text-emerald-300 border border-emerald-500/40 text-[9.5px] font-black uppercase px-2 py-0.5 rounded-full">Lei 13.709/18</span>
+            </div>
+            <p class="text-[11px] text-slate-300">Portabilidade, extração de dossiês e homologação de exclusões com aprovação do Master Admin</p>
+          </div>
+        </div>
+        <button onclick="closeLgpdTitularesModal()" class="text-slate-400 hover:text-white p-2 text-lg rounded-xl hover:bg-white/10 transition">
+          ✕
+        </button>
+      </div>
+
+      <!-- Tabs -->
+      <div class="bg-slate-100 px-5 pt-3 border-b border-slate-200 flex items-center gap-2 overflow-x-auto flex-shrink-0">
+        <button
+          id="btn-tab-lgpd-extracao"
+          onclick="switchLgpdTab('extracao')"
+          class="px-4 py-2 rounded-t-xl text-xs font-bold transition border-b-2 border-[#d4a94f] bg-white text-slate-900 shadow-xs flex items-center gap-1.5"
+        >
+          <span>📦 Extração &amp; Dossiês de Dados</span>
+          <span id="badge-lgpd-titulares-count" class="bg-slate-200 text-slate-700 text-[10px] px-1.5 py-0.2 rounded-full font-bold">0</span>
+        </button>
+        <button
+          id="btn-tab-lgpd-exclusao"
+          onclick="switchLgpdTab('exclusao')"
+          class="px-4 py-2 rounded-t-xl text-xs font-bold transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5"
+        >
+          <span>🗑️ Solicitações de Exclusão</span>
+          <span id="badge-lgpd-exclusoes-count" class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-black">0</span>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4">
+        
+        <!-- ABA 1: EXTRAÇÃO & PORTABILIDADE -->
+        <div id="subtab-lgpd-extracao" class="space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2.5 pb-1">
+            <div class="flex flex-wrap items-center gap-2 flex-1">
+              <input
+                type="text"
+                id="input-search-lgpd-titulares"
+                oninput="renderLgpdTitularesTable()"
+                placeholder="Buscar titular por nome, CPF ou e-mail..."
+                class="border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-[#d4a94f] w-full sm:w-64"
+              />
+              <select id="sel-filter-lgpd-tipo" onchange="renderLgpdTitularesTable()" class="border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs bg-white text-slate-800">
+                <option value="all">Todos os Titulares</option>
+                <option value="catequizando">👶 Apenas Catequizandos</option>
+                <option value="usuario">📖 Catequistas &amp; Gestão</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="exportSelectedLgpdDossiers()" class="bg-[#d4a94f] hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs transition shadow-xs flex items-center gap-1.5">
+                <span>📦 Extrair Selecionados (Lote JSON)</span>
+              </button>
+              <button onclick="exportTitularesTableCSV()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-3 py-1.5 rounded-xl text-xs transition font-medium flex items-center gap-1.5">
+                <span>📊 CSV</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-900 text-white font-heading text-[10.5px] uppercase">
+                <tr>
+                  <th class="py-2.5 px-3 w-8 text-center">
+                    <input type="checkbox" id="check-select-all-lgpd" onchange="toggleSelectAllLgpdTitulares(this.checked)" class="rounded text-[#d4a94f] focus:ring-0 cursor-pointer" />
+                  </th>
+                  <th class="py-2.5 px-3">Titular / Nome</th>
+                  <th class="py-2.5 px-3">CPF</th>
+                  <th class="py-2.5 px-3">Categoria</th>
+                  <th class="py-2.5 px-3">Turma / Etapa</th>
+                  <th class="py-2.5 px-3 text-right">Ações de Privacidade</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-lgpd-titulares" class="divide-y divide-slate-200 bg-white font-sans text-xs">
+                <!-- Populado dinamicamente -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ABA 2: SOLICITAÇÕES DE EXCLUSÃO (ESTEIRA MASTER ADMIN) -->
+        <div id="subtab-lgpd-exclusao" class="hidden space-y-3">
+          <div class="p-3 bg-amber-50 rounded-2xl border border-amber-200 text-xs text-amber-950 flex items-start gap-2.5">
+            <span class="text-base mt-0.5">⚖️</span>
+            <div>
+              <strong>Esteira de Aprovação de Exclusão (Art. 18, VI LGPD):</strong> As solicitações de exclusão definitiva requerem homologação exclusiva do <strong>Master Admin (Thiago Carvalho)</strong>. Conforme o Art. 16 da LGPD, registros de valor canônico perpétuo (Livros de Batismo/Crisma) são conservados para uso histórico, sendo expurgados todos os dados civis cadastrais e de contato.
+            </div>
+          </div>
+
+          <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-900 text-white font-heading text-[10.5px] uppercase">
+                <tr>
+                  <th class="py-2.5 px-3">Protocolo / Data</th>
+                  <th class="py-2.5 px-3">Titular</th>
+                  <th class="py-2.5 px-3">Motivo Legal/Pastoral</th>
+                  <th class="py-2.5 px-3">Solicitante</th>
+                  <th class="py-2.5 px-3 text-center">Status</th>
+                  <th class="py-2.5 px-3 text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-lgpd-exclusoes" class="divide-y divide-slate-200 bg-white font-sans text-xs">
+                <!-- Populado dinamicamente -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL: FORMULAR PEDIDO DE EXCLUSÃO LGPD -->
+  <div id="modal-solicitar-exclusao" class="hidden fixed inset-0 z-[60] bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden my-auto">
+      <div class="bg-gradient-to-r from-rose-950 to-slate-950 text-white p-5 flex items-center justify-between border-b border-rose-500/30">
+        <div class="flex items-center gap-2.5">
+          <span class="text-xl">🗑️</span>
+          <div>
+            <h3 class="font-bold text-sm sm:text-base font-heading">Solicitar Exclusão de Dados (LGPD)</h3>
+            <p class="text-[11px] text-rose-300">Direito à Eliminação • Art. 18, VI da Lei 13.709/18</p>
+          </div>
+        </div>
+        <button onclick="closeSolicitarExclusaoModal()" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-white/10">✕</button>
+      </div>
+      <form id="form-solicitar-exclusao" onsubmit="submitSolicitacaoExclusao(event)" class="p-5 space-y-3.5 text-xs">
+        <input type="hidden" id="exclusao-titular-id" />
+        <input type="hidden" id="exclusao-titular-tipo" />
+        <input type="hidden" id="exclusao-titular-turma" />
+        <input type="hidden" id="exclusao-titular-etapa" />
+        
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1">Titular dos Dados</label>
+          <input type="text" id="exclusao-titular-nome" readonly class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 outline-none" />
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1">Motivo Formal da Solicitação *</label>
+          <select id="exclusao-motivo" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-medium text-slate-800 outline-none focus:ring-2 focus:ring-rose-400">
+            <option value="Revogação de Consentimento pelo Responsável Legal">Revogação de Consentimento pelo Responsável Legal (Art. 14, §1º)</option>
+            <option value="Transferência de Paróquia / Mudança de Cidade">Transferência de Paróquia / Mudança de Cidade</option>
+            <option value="Desistência da Etapa Catequética">Desistência da Etapa Catequética</option>
+            <option value="Exercício do Direito ao Esquecimento">Exercício do Direito ao Esquecimento (Art. 18, VI)</option>
+            <option value="Outro Motivo Pastoral">Outro Motivo Pastoral</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1">Observações Complementares</label>
+          <textarea id="exclusao-detalhes" rows="3" placeholder="Informações contextuais, comprovante de ciência da família..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-800 outline-none focus:ring-2 focus:ring-rose-400"></textarea>
+        </div>
+
+        <div class="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-900 text-[11px] leading-relaxed">
+          ⚠️ <strong>Atenção:</strong> Esta solicitação criará um ticket pendente que será avaliado pelo Master Admin (Thiago Carvalho). Dados sacramentais perenes permanecem sob custódia canônica da Paróquia.
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2">
+          <button type="button" onclick="closeSolicitarExclusaoModal()" class="px-3.5 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold transition">Cancelar</button>
+          <button type="submit" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-4 py-2 rounded-xl transition shadow">Enviar para Aprovação</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: PREVIEW E IMPRESSÃO DE DOSSIÊ LGPD -->
+  <div id="modal-dossie-preview" class="hidden fixed inset-0 z-[65] bg-slate-950/85 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-3xl w-full shadow-2xl border border-slate-200 overflow-hidden my-auto flex flex-col max-h-[92vh]">
+      <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 text-white p-5 flex items-center justify-between border-b border-[#d4a94f]/50 flex-shrink-0">
+        <div class="flex items-center gap-2.5">
+          <span class="text-xl">📄</span>
+          <div>
+            <h3 class="font-bold text-base font-heading">Dossiê de Titular de Dados Pessoais (LGPD)</h3>
+            <p class="text-[11px] text-amber-200">Relatório Completo de Dados Cadastrais e Trilha de Auditoria</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="downloadCurrentDossierJson()" class="bg-[#d4a94f] hover:bg-amber-600 text-slate-950 px-3 py-1.5 rounded-xl font-bold text-xs transition flex items-center gap-1">
+            <span>📥 Baixar JSON</span>
+          </button>
+          <button onclick="printCurrentDossier()" class="bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-xl font-medium text-xs transition flex items-center gap-1">
+            <span>🖨️ Imprimir</span>
+          </button>
+          <button onclick="closeDossiePreviewModal()" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-white/10">✕</button>
+        </div>
+      </div>
+      <div id="dossie-preview-content" class="p-6 overflow-y-auto flex-1 space-y-4 font-sans text-xs">
+        <!-- Renderizado dinamicamente -->
+      </div>
     </div>
   </div>
 
@@ -4503,6 +4756,12 @@
       // Fecha o menu lateral automaticamente
       closeSidebarMenu();
 
+      if (tabId === 'catequetico' || tabId === 'paroquial') {
+        if (typeof renderDynamicSvgRooms === 'function') {
+          setTimeout(renderDynamicSvgRooms, 40);
+        }
+      }
+
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -4665,6 +4924,16 @@
             }
           }
 
+          const hasAlunosRoster = item.stage && item.turma && item.stage !== 'Secretaria' && item.stage !== 'Almoxarifado' && item.stage !== 'Apoio';
+          const btnVerAlunos = hasAlunosRoster ? `
+            <div class="mt-2.5 pt-2 border-t border-slate-200/90 flex items-center justify-between">
+              <button type="button" onclick="openTurmaAlunosWithRBAC('${(item.stage || '').replace(/'/g, "\\'")}', '${(item.turma || '').replace(/'/g, "\\'")}')" class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-white border border-slate-300 text-slate-700 hover:text-amber-800 hover:border-amber-400 hover:bg-amber-50 transition shadow-2xs cursor-pointer">
+                <span>👁️</span> <span>Ver Alunos da Turma</span>
+              </button>
+              <span class="text-[10px] text-slate-500 font-medium">Acesso conforme RBAC</span>
+            </div>
+          ` : '';
+
           div.innerHTML = `
             <div class="flex items-center justify-between text-xs font-bold text-slate-800 mb-1">
               <span class="flex items-center gap-1.5 text-amber-700">
@@ -4673,6 +4942,7 @@
               <span class="bg-slate-200 text-slate-800 px-2 py-0.5 rounded text-[11px] font-bold">${item.stage} (${item.turma})</span>
             </div>
             <p class="text-xs text-slate-700 font-medium">Responsável / Catequistas: ${respText}</p>
+            ${btnVerAlunos}
           `;
           schedulesEl.appendChild(div);
         });
@@ -4706,6 +4976,16 @@
             }
           }
 
+          const hasAlunosRoster2 = item.stage && item.turma && item.stage !== 'Secretaria' && item.stage !== 'Almoxarifado' && item.stage !== 'Apoio' && item.stage !== 'Cozinha';
+          const btnVerAlunos2 = hasAlunosRoster2 ? `
+            <div class="mt-2.5 pt-2 border-t border-blue-200/80 flex items-center justify-between">
+              <button type="button" onclick="openTurmaAlunosWithRBAC('${(item.stage || '').replace(/'/g, "\\'")}', '${(item.turma || '').replace(/'/g, "\\'")}')" class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-white border border-blue-200 text-blue-900 hover:text-blue-950 hover:border-blue-400 hover:bg-blue-50 transition shadow-2xs cursor-pointer">
+                <span>👁️</span> <span>Ver Alunos da Turma</span>
+              </button>
+              <span class="text-[10px] text-blue-600 font-medium">Acesso conforme RBAC</span>
+            </div>
+          ` : '';
+
           div.innerHTML = `
             <div class="flex items-center justify-between text-xs font-bold text-slate-800 mb-1">
               <span class="flex items-center gap-1.5 text-blue-700">
@@ -4714,6 +4994,7 @@
               <span class="bg-blue-100 text-blue-900 px-2 py-0.5 rounded text-[11px] font-bold">${item.stage} (${item.turma})</span>
             </div>
             <p class="text-xs text-slate-700 font-medium">Catequista(s): <strong class="text-slate-900">${item.catechists}</strong></p>
+            ${btnVerAlunos2}
           `;
           schedules2.appendChild(div);
         });
@@ -5501,6 +5782,725 @@
     }
 
     // =======================================================
+    // 🛡️ CENTRAL DE DIREITOS DOS TITULARES LGPD (LEI 13.709/18)
+    // Art. 18, II e V (Acesso & Portabilidade) e Art. 18, VI (Eliminação)
+    // =======================================================
+    let currentLgpdTab = 'extracao';
+    let windowViewingDossier = null;
+
+    function openLgpdTitularesModal() {
+      const modal = document.getElementById('modal-lgpd-titulares');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      switchLgpdTab(currentLgpdTab);
+      renderLgpdTitularesTable();
+      renderLgpdExclusoesTable();
+    }
+
+    function closeLgpdTitularesModal() {
+      const modal = document.getElementById('modal-lgpd-titulares');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function switchLgpdTab(tabName) {
+      currentLgpdTab = tabName;
+      const btnExtracao = document.getElementById('btn-tab-lgpd-extracao');
+      const btnExclusao = document.getElementById('btn-tab-lgpd-exclusao');
+      const subExtracao = document.getElementById('subtab-lgpd-extracao');
+      const subExclusao = document.getElementById('subtab-lgpd-exclusao');
+
+      if (tabName === 'extracao') {
+        if (btnExtracao) {
+          btnExtracao.className = 'px-4 py-2 rounded-t-xl text-xs font-bold transition border-b-2 border-[#d4a94f] bg-white text-slate-900 shadow-xs flex items-center gap-1.5';
+        }
+        if (btnExclusao) {
+          btnExclusao.className = 'px-4 py-2 rounded-t-xl text-xs font-bold transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5';
+        }
+        if (subExtracao) subExtracao.classList.remove('hidden');
+        if (subExclusao) subExclusao.classList.add('hidden');
+        renderLgpdTitularesTable();
+      } else {
+        if (btnExclusao) {
+          btnExclusao.className = 'px-4 py-2 rounded-t-xl text-xs font-bold transition border-b-2 border-rose-500 bg-white text-slate-900 shadow-xs flex items-center gap-1.5';
+        }
+        if (btnExtracao) {
+          btnExtracao.className = 'px-4 py-2 rounded-t-xl text-xs font-bold transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5';
+        }
+        if (subExclusao) subExclusao.classList.remove('hidden');
+        if (subExtracao) subExtracao.classList.add('hidden');
+        renderLgpdExclusoesTable();
+      }
+    }
+
+    function getAllTitularesList() {
+      const list = [];
+      const db = typeof getAlunosDatabase === 'function' ? getAlunosDatabase() : {};
+
+      // 1. Catequizandos
+      Object.entries(db).forEach(([turmaKey, alunos]) => {
+        const [etapa, turma] = turmaKey.split('__');
+        if (Array.isArray(alunos)) {
+          alunos.forEach(a => {
+            list.push({
+              id: a.id || `aluno-${Math.random()}`,
+              nome: a.nome || 'Sem Nome',
+              cpf: a.cpf || 'Não informado',
+              categoria: 'Catequizando',
+              tipo: 'catequizando',
+              etapa: etapa || '—',
+              turma: turma || '—',
+              turmaKey: turmaKey,
+              dataNascimento: a.dataNascimento || '—',
+              contato: a.contato || '—',
+              email: a.email || '—',
+              endereco: a.endereco || '—',
+              estadoCivil: a.estadoCivil || '—',
+              batizado: a.batizado || '—',
+              primeiraEucaristia: a.primeiraEucaristia || '—',
+              impedido: a.impedido || '—',
+              justificativa: a.justificativa || '',
+              observacoes: a.observacoes || '',
+              nomeResponsavel: a.nomeResponsavel || '',
+              cpfResponsavel: a.cpfResponsavel || '',
+              statusAprovacao: a.statusAprovacao || 'aprovado'
+            });
+          });
+        }
+      });
+
+      // 2. Usuários / Catequistas / Equipe
+      if (window.ICM_CONFIG && typeof window.ICM_CONFIG.getAuthorizedUsers === 'function') {
+        const users = window.ICM_CONFIG.getAuthorizedUsers();
+        users.forEach(u => {
+          let cat = 'Catequista';
+          if (u.role === 'master_admin') cat = 'Master Admin';
+          else if (u.role === 'coord_geral' || u.role === 'vice_coord_geral') cat = 'Coordenação Geral';
+          else if (u.role === 'coord_etapa') cat = 'Coordenação de Etapa';
+          else if (u.role === 'secretaria') cat = 'Secretaria Paroquial';
+
+          list.push({
+            id: u.uid || u.email,
+            nome: u.displayName || u.nome || u.email,
+            cpf: u.cpf || 'Autenticado no Sistema',
+            categoria: cat,
+            tipo: 'usuario',
+            etapa: u.etapa || '—',
+            turma: u.turmaNome || '—',
+            email: u.email || '—',
+            contato: u.telefone || '—',
+            role: u.role || 'catequista',
+            statusAprovacao: 'aprovado'
+          });
+        });
+      }
+
+      return list;
+    }
+
+    function renderLgpdTitularesTable() {
+      const tbody = document.getElementById('tbody-lgpd-titulares');
+      const badgeCount = document.getElementById('badge-lgpd-titulares-count');
+      const searchInput = document.getElementById('input-search-lgpd-titulares');
+      const filterTipo = document.getElementById('sel-filter-lgpd-tipo');
+      if (!tbody) return;
+
+      const q = (searchInput ? searchInput.value : '').toLowerCase().trim();
+      const tipo = filterTipo ? filterTipo.value : 'all';
+
+      const all = getAllTitularesList();
+      const filtered = all.filter(t => {
+        if (tipo !== 'all' && t.tipo !== tipo) return false;
+        if (!q) return true;
+        return (t.nome || '').toLowerCase().includes(q) ||
+               (t.cpf || '').toLowerCase().includes(q) ||
+               (t.email || '').toLowerCase().includes(q) ||
+               (t.turma || '').toLowerCase().includes(q) ||
+               (t.etapa || '').toLowerCase().includes(q) ||
+               (t.nomeResponsavel || '').toLowerCase().includes(q);
+      });
+
+      if (badgeCount) badgeCount.textContent = filtered.length;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-8 text-center text-slate-400 font-sans">
+              Nenhum titular de dados encontrado para o filtro selecionado.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(t => {
+        const catBadge = t.tipo === 'catequizando'
+          ? `<span class="bg-indigo-100 text-indigo-800 border border-indigo-200 px-2 py-0.5 rounded-full text-[10px] font-bold">👶 Catequizando</span>`
+          : `<span class="bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-full text-[10px] font-bold">📖 ${t.categoria}</span>`;
+
+        let respHtml = '';
+        if (t.nomeResponsavel) {
+          respHtml = `<div class="text-[10px] text-slate-500 mt-0.5">Resp. Legal: <span class="font-semibold text-slate-700">${t.nomeResponsavel}</span></div>`;
+        }
+
+        return `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="py-2.5 px-3 text-center">
+              <input type="checkbox" class="check-titular-lgpd rounded text-[#d4a94f] focus:ring-0 cursor-pointer" data-id="${t.id}" data-tipo="${t.tipo}" />
+            </td>
+            <td class="py-2.5 px-3">
+              <div class="font-bold text-slate-900">${t.nome}</div>
+              <div class="text-[10.5px] text-slate-500">${t.email || t.contato || 'Sem contato'}</div>
+              ${respHtml}
+            </td>
+            <td class="py-2.5 px-3 font-mono text-[11px] text-slate-700 whitespace-nowrap">${t.cpf}</td>
+            <td class="py-2.5 px-3">${catBadge}</td>
+            <td class="py-2.5 px-3 text-slate-700">
+              <div class="font-semibold">${t.turma}</div>
+              <div class="text-[10.5px] text-slate-500">${t.etapa}</div>
+            </td>
+            <td class="py-2.5 px-3 text-right whitespace-nowrap">
+              <div class="flex items-center justify-end gap-1.5">
+                <button
+                  type="button"
+                  onclick="previewTitularDossier('${t.id}', '${t.tipo}')"
+                  class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 text-[11px] font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer"
+                  title="Visualizar e Imprimir Dossiê Completo"
+                >
+                  <span>📄</span> <span>Dossiê</span>
+                </button>
+                <button
+                  type="button"
+                  onclick="downloadTitularDossierJson('${t.id}', '${t.tipo}')"
+                  class="px-2 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-[11px] font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer"
+                  title="Baixar Dossiê em JSON (Portabilidade Art. 18 LGPD)"
+                >
+                  <span>📥</span> <span>JSON</span>
+                </button>
+                <button
+                  type="button"
+                  onclick="openSolicitarExclusaoModal('${t.id}', '${t.tipo}', '${t.nome.replace(/'/g, "\\'")}', '${(t.etapa || '').replace(/'/g, "\\'")}', '${(t.turma || '').replace(/'/g, "\\'")}')"
+                  class="px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-300 text-[11px] font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer"
+                  title="Solicitar Exclusão de Dados (Direito à Eliminação)"
+                >
+                  <span>🗑️</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function toggleSelectAllLgpdTitulares(checked) {
+      document.querySelectorAll('.check-titular-lgpd').forEach(cb => {
+        cb.checked = checked;
+      });
+    }
+
+    function generateSingleTitularDossier(titularId, titularTipo) {
+      const all = getAllTitularesList();
+      const titular = all.find(t => t.id === titularId && t.tipo === titularTipo) || all.find(t => t.id === titularId);
+      if (!titular) return null;
+
+      const logs = (window.ICM_CONFIG && typeof window.ICM_CONFIG.getAuditLogs === 'function') ? window.ICM_CONFIG.getAuditLogs() : [];
+      const relatedLogs = logs.filter(l => {
+        const matchEmail = titular.email && l.userEmail && l.userEmail.toLowerCase() === titular.email.toLowerCase();
+        const matchName = titular.nome && l.userName && l.userName.toLowerCase().includes(titular.nome.toLowerCase());
+        const matchDetails = l.details && (
+          l.details.alunoId === titular.id ||
+          (l.details.alunoNome && titular.nome && l.details.alunoNome.includes(titular.nome)) ||
+          (l.target && titular.nome && l.target.includes(titular.nome))
+        );
+        return matchEmail || matchName || matchDetails;
+      });
+
+      const currentUser = (window.appAuthState && window.appAuthState.user) ? window.appAuthState.user : null;
+
+      return {
+        cabecalho: {
+          instituicao: 'Santuário Imaculado Coração de Maria — Brasília/DF',
+          sistema: 'ICM Catequese Paroquial',
+          modulo: 'Central de Direitos dos Titulares (LGPD - Lei 13.709/2018)',
+          protocoloExportacao: 'LGPD-DOSSIE-' + Date.now(),
+          dataGeracao: new Date().toISOString(),
+          geradoPor: currentUser ? (currentUser.displayName || currentUser.email) : 'Administrador',
+          baseLegal: 'Art. 18, II (Acesso) e Art. 18, V (Portabilidade) da Lei Geral de Proteção de Dados'
+        },
+        titular: {
+          id: titular.id,
+          nome: titular.nome,
+          cpf: titular.cpf,
+          tipo: titular.tipo,
+          categoria: titular.categoria,
+          turma: titular.turma,
+          etapa: titular.etapa,
+          contato: titular.contato,
+          email: titular.email,
+          dataNascimento: titular.dataNascimento,
+          endereco: titular.endereco,
+          estadoCivil: titular.estadoCivil,
+          batizado: titular.batizado,
+          primeiraEucaristia: titular.primeiraEucaristia,
+          impedido: titular.impedido,
+          justificativa: titular.justificativa,
+          observacoes: titular.observacoes
+        },
+        consentimentoETermos: {
+          termoAceite: 'Termos de Uso e Política de Privacidade da Pastoral Catequética',
+          statusConsentimento: 'Registrado / Ativo',
+          responsavelLegal: titular.nomeResponsavel ? {
+            nome: titular.nomeResponsavel,
+            cpf: titular.cpfResponsavel || 'Não informado',
+            baseLegalMenor: 'Art. 14, § 1º da Lei 13.709/18'
+          } : 'Titular maior de idade ou responsável direto'
+        },
+        trilhaAuditoria: relatedLogs
+      };
+    }
+
+    function downloadTitularDossierJson(titularId, titularTipo) {
+      const dossier = generateSingleTitularDossier(titularId, titularTipo);
+      if (!dossier) {
+        alert('Não foi possível gerar o dossiê do titular.');
+        return;
+      }
+
+      if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
+        window.ICM_CONFIG.logAuditEvent('LGPD_DATA_EXPORT', dossier.titular.nome, {
+          titularId: dossier.titular.id,
+          tipo: dossier.titular.tipo,
+          protocolo: dossier.cabecalho.protocoloExportacao
+        });
+      }
+
+      const blob = new Blob([JSON.stringify(dossier, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Dossie_LGPD_${dossier.titular.nome.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function previewTitularDossier(titularId, titularTipo) {
+      const dossier = generateSingleTitularDossier(titularId, titularTipo);
+      if (!dossier) {
+        alert('Não foi possível gerar o dossiê do titular.');
+        return;
+      }
+      windowViewingDossier = dossier;
+
+      const container = document.getElementById('dossie-preview-content');
+      const modal = document.getElementById('modal-dossie-preview');
+      if (!container || !modal) return;
+
+      const t = dossier.titular;
+      const c = dossier.cabecalho;
+      const term = dossier.consentimentoETermos;
+      const logs = dossier.trilhaAuditoria;
+
+      let logsHtml = '';
+      if (logs.length === 0) {
+        logsHtml = '<p class="text-slate-400 italic">Nenhum evento registrado especificamente para este titular na trilha perene de auditoria.</p>';
+      } else {
+        logsHtml = `
+          <div class="border border-slate-200 rounded-xl overflow-hidden mt-2">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-100 text-slate-700 text-[10px] uppercase font-bold">
+                <tr>
+                  <th class="py-2 px-3">Data/Hora</th>
+                  <th class="py-2 px-3">Ação</th>
+                  <th class="py-2 px-3">Autor</th>
+                  <th class="py-2 px-3">Detalhes</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                ${logs.map(l => `
+                  <tr>
+                    <td class="py-1.5 px-3 text-slate-500 whitespace-nowrap">${new Date(l.timestamp).toLocaleString('pt-BR')}</td>
+                    <td class="py-1.5 px-3 font-bold text-slate-800">${l.action}</td>
+                    <td class="py-1.5 px-3 text-slate-600">${l.userEmail || l.userName}</td>
+                    <td class="py-1.5 px-3 text-slate-500 text-[10px]">${JSON.stringify(l.details || {}).replace(/"/g, '')}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+
+      container.innerHTML = `
+        <div class="border-b border-slate-200 pb-4 mb-4">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-black uppercase text-[#d4a94f] tracking-wider font-heading">Santuário Imaculado Coração de Maria</span>
+            <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono">${c.protocoloExportacao}</span>
+          </div>
+          <h2 class="text-xl font-bold font-heading text-slate-900 mt-1">Dossiê Completo de Dados Pessoais</h2>
+          <p class="text-xs text-slate-500">Extração realizada com fundamento no ${c.baseLegal}</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+            <h4 class="font-bold text-slate-800 text-xs uppercase mb-2">Identificação do Titular</h4>
+            <div class="space-y-1">
+              <div><strong>Nome:</strong> ${t.nome}</div>
+              <div><strong>CPF:</strong> ${t.cpf}</div>
+              <div><strong>Categoria:</strong> ${t.categoria} (${t.tipo})</div>
+              <div><strong>Etapa / Turma:</strong> ${t.etapa} - ${t.turma}</div>
+              <div><strong>Nascimento:</strong> ${t.dataNascimento}</div>
+            </div>
+          </div>
+
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+            <h4 class="font-bold text-slate-800 text-xs uppercase mb-2">Contato & Localização</h4>
+            <div class="space-y-1">
+              <div><strong>Telefone:</strong> ${t.contato}</div>
+              <div><strong>E-mail:</strong> ${t.email}</div>
+              <div><strong>Endereço:</strong> ${t.endereco}</div>
+              <div><strong>Estado Civil:</strong> ${t.estadoCivil}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-3 bg-amber-50/70 rounded-xl border border-amber-200">
+          <h4 class="font-bold text-amber-950 text-xs uppercase mb-2">Consentimento & Responsabilidade Legal (Art. 14 LGPD)</h4>
+          <div class="space-y-1 text-slate-800">
+            <div><strong>Termo de Aceite:</strong> ${term.termoAceite} (${term.statusConsentimento})</div>
+            <div><strong>Responsável Legal:</strong> ${typeof term.responsavelLegal === 'object' ? `${term.responsavelLegal.nome} (CPF: ${term.responsavelLegal.cpf}) • ${term.responsavelLegal.baseLegalMenor}` : term.responsavelLegal}</div>
+          </div>
+        </div>
+
+        <div class="pt-2">
+          <h4 class="font-bold text-slate-800 text-xs uppercase mb-1">Trilha Perene de Auditoria Vinculada</h4>
+          ${logsHtml}
+        </div>
+      `;
+
+      modal.classList.remove('hidden');
+
+      if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
+        window.ICM_CONFIG.logAuditEvent('LGPD_DATA_EXPORT_PREVIEW', t.nome, {
+          titularId: t.id,
+          tipo: t.tipo,
+          protocolo: c.protocoloExportacao
+        });
+      }
+    }
+
+    function downloadCurrentDossierJson() {
+      if (!windowViewingDossier) return;
+      const d = windowViewingDossier;
+      const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Dossie_LGPD_${d.titular.nome.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function printCurrentDossier() {
+      window.print();
+    }
+
+    function closeDossiePreviewModal() {
+      const modal = document.getElementById('modal-dossie-preview');
+      if (modal) modal.classList.add('hidden');
+      windowViewingDossier = null;
+    }
+
+    function exportSelectedLgpdDossiers() {
+      const checkedBoxes = document.querySelectorAll('.check-titular-lgpd:checked');
+      if (checkedBoxes.length === 0) {
+        alert('Selecione ao menos um titular na lista para exportar em lote.');
+        return;
+      }
+
+      const dossiers = [];
+      checkedBoxes.forEach(cb => {
+        const id = cb.dataset.id;
+        const tipo = cb.dataset.tipo;
+        const d = generateSingleTitularDossier(id, tipo);
+        if (d) dossiers.push(d);
+      });
+
+      const batchPackage = {
+        loteExportacao: {
+          protocoloLote: 'LGPD-LOTE-' + Date.now(),
+          dataHora: new Date().toISOString(),
+          quantidadeTitulares: dossiers.length,
+          solicitante: (window.appAuthState && window.appAuthState.user) ? (window.appAuthState.user.displayName || window.appAuthState.user.email) : 'Administrador',
+          baseLegal: 'Art. 18, II e V da Lei 13.709/18 (LGPD)'
+        },
+        dossies: dossiers
+      };
+
+      if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
+        window.ICM_CONFIG.logAuditEvent('LGPD_DATA_EXPORT_BATCH', 'lote_titulares', {
+          quantidade: dossiers.length,
+          protocolo: batchPackage.loteExportacao.protocoloLote
+        });
+      }
+
+      const blob = new Blob([JSON.stringify(batchPackage, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Extracao_LGPD_Lote_${dossiers.length}_Titulares_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function exportTitularesTableCSV() {
+      const all = getAllTitularesList();
+      if (all.length === 0) {
+        alert('Não há titulares para exportar.');
+        return;
+      }
+
+      const headers = ['ID', 'Nome', 'CPF', 'Categoria', 'Tipo', 'Etapa', 'Turma', 'Telefone', 'Email', 'Nome_Responsavel', 'CPF_Responsavel'];
+      const rows = all.map(t => [
+        `"${t.id}"`,
+        `"${(t.nome || '').replace(/"/g, '""')}"`,
+        `"${t.cpf || ''}"`,
+        `"${t.categoria || ''}"`,
+        `"${t.tipo || ''}"`,
+        `"${t.etapa || ''}"`,
+        `"${t.turma || ''}"`,
+        `"${t.contato || ''}"`,
+        `"${t.email || ''}"`,
+        `"${(t.nomeResponsavel || '').replace(/"/g, '""')}"`,
+        `"${t.cpfResponsavel || ''}"`
+      ]);
+
+      const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\r\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Titulares_LGPD_Catequese_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function openSolicitarExclusaoModal(titularId, titularTipo, titularNome, etapa, turma) {
+      document.getElementById('exclusao-titular-id').value = titularId;
+      document.getElementById('exclusao-titular-tipo').value = titularTipo;
+      document.getElementById('exclusao-titular-nome').value = titularNome;
+      document.getElementById('exclusao-titular-etapa').value = etapa || '';
+      document.getElementById('exclusao-titular-turma').value = turma || '';
+      document.getElementById('exclusao-detalhes').value = '';
+      
+      const modal = document.getElementById('modal-solicitar-exclusao');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeSolicitarExclusaoModal() {
+      const modal = document.getElementById('modal-solicitar-exclusao');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    async function submitSolicitacaoExclusao(event) {
+      event.preventDefault();
+      const titularId = document.getElementById('exclusao-titular-id').value;
+      const titularTipo = document.getElementById('exclusao-titular-tipo').value;
+      const titularNome = document.getElementById('exclusao-titular-nome').value;
+      const etapa = document.getElementById('exclusao-titular-etapa').value;
+      const turma = document.getElementById('exclusao-titular-turma').value;
+      const motivo = document.getElementById('exclusao-motivo').value;
+      const detalhes = document.getElementById('exclusao-detalhes').value;
+
+      try {
+        if (!window.ICM_CONFIG || typeof window.ICM_CONFIG.createLgpdDeletionRequest !== 'function') {
+          throw new Error('Módulo de governança LGPD não inicializado.');
+        }
+
+        const req = await window.ICM_CONFIG.createLgpdDeletionRequest({
+          titularId,
+          titularTipo,
+          titularNome,
+          etapa,
+          turma,
+          motivo,
+          detalhes
+        });
+
+        closeSolicitarExclusaoModal();
+        renderLgpdExclusoesTable();
+        renderPainelPendencias();
+
+        alert(`✅ Solicitação de exclusão registrada com sucesso!\n\nProtocolo: LGPD-DEL-${req.id.toUpperCase()}\n\nO ticket foi encaminhado para a esteira de deliberação do Master Admin (Thiago Carvalho).`);
+      } catch (err) {
+        console.error('Erro ao enviar solicitação de exclusão:', err);
+        alert('Erro ao registrar solicitação: ' + err.message);
+      }
+    }
+
+    function renderLgpdExclusoesTable() {
+      const tbody = document.getElementById('tbody-lgpd-exclusoes');
+      const badgeCount = document.getElementById('badge-lgpd-exclusoes-count');
+      if (!tbody) return;
+
+      const requests = (window.ICM_CONFIG && typeof window.ICM_CONFIG.getLgpdDeletionRequests === 'function') 
+        ? window.ICM_CONFIG.getLgpdDeletionRequests() : [];
+
+      const pendingCount = requests.filter(r => r.status === 'pendente').length;
+      if (badgeCount) badgeCount.textContent = pendingCount;
+
+      const isMasterAdmin = (window.appAuthState && window.ICM_CONFIG && (
+        window.appAuthState.role === window.ICM_CONFIG.ROLES.MASTER_ADMIN ||
+        (window.appAuthState.user && window.appAuthState.user.email && window.appAuthState.user.email.toLowerCase() === 'colletes@gmail.com')
+      ));
+
+      if (requests.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-8 text-center text-slate-400 font-sans">
+              🎉 Nenhuma solicitação de exclusão de dados pendente ou registrada!
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = requests.map(r => {
+        const dateStr = new Date(r.dataSolicitacao).toLocaleDateString('pt-BR');
+        let statusBadge = '';
+        if (r.status === 'pendente') {
+          statusBadge = `<span class="bg-amber-100 text-amber-900 border border-amber-300 font-black px-2 py-0.5 rounded-full text-[10px]">⏳ Pendente Master Admin</span>`;
+        } else if (r.status === 'aprovado') {
+          statusBadge = `<span class="bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold px-2 py-0.5 rounded-full text-[10px]">✅ Homologado / Purgado</span>`;
+        } else {
+          statusBadge = `<span class="bg-rose-100 text-rose-800 border border-rose-300 font-bold px-2 py-0.5 rounded-full text-[10px]">❌ Indeferido</span>`;
+        }
+
+        let actionsHtml = '';
+        if (r.status === 'pendente') {
+          if (isMasterAdmin) {
+            actionsHtml = `
+              <div class="flex items-center justify-end gap-1.5">
+                <button onclick="homologarExclusaoMasterAdmin('${r.id}')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10.5px] font-black transition flex items-center gap-1 shadow-2xs cursor-pointer">
+                  <span>✓</span> <span>Homologar</span>
+                </button>
+                <button onclick="indeferirExclusaoMasterAdmin('${r.id}')" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer">
+                  <span>✕</span> <span>Indeferir</span>
+                </button>
+              </div>
+            `;
+          } else {
+            actionsHtml = `<span class="text-[10.5px] text-slate-400 italic">Aguardando Thiago Carvalho</span>`;
+          }
+        } else {
+          actionsHtml = `<span class="text-[10px] text-slate-500">${r.aprovadoPor || r.rejeitadoPor || 'Concluído'}</span>`;
+        }
+
+        return `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="py-2.5 px-3">
+              <div class="font-mono text-[10px] font-bold text-slate-700">LGPD-DEL-${r.id.slice(0, 8).toUpperCase()}</div>
+              <div class="text-[10px] text-slate-400">${dateStr}</div>
+            </td>
+            <td class="py-2.5 px-3">
+              <div class="font-bold text-slate-900">${r.titularNome}</div>
+              <div class="text-[10px] text-slate-500">${r.etapa || ''} ${r.turma ? `(${r.turma})` : ''}</div>
+            </td>
+            <td class="py-2.5 px-3">
+              <div class="font-semibold text-slate-800">${r.motivo}</div>
+              ${r.detalhes ? `<div class="text-[10.5px] text-slate-500 italic truncate max-w-xs">${r.detalhes}</div>` : ''}
+            </td>
+            <td class="py-2.5 px-3 text-slate-600 text-[11px]">${r.solicitanteNome}</td>
+            <td class="py-2.5 px-3 text-center">${statusBadge}</td>
+            <td class="py-2.5 px-3 text-right">${actionsHtml}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function homologarExclusaoMasterAdmin(requestId) {
+      const isMasterAdmin = (window.appAuthState && window.ICM_CONFIG && (
+        window.appAuthState.role === window.ICM_CONFIG.ROLES.MASTER_ADMIN ||
+        (window.appAuthState.user && window.appAuthState.user.email && window.appAuthState.user.email.toLowerCase() === 'colletes@gmail.com')
+      ));
+      if (!isMasterAdmin) {
+        alert('Acesso restrito ao Master Admin (Thiago Carvalho).');
+        return;
+      }
+
+      const requests = (window.ICM_CONFIG && typeof window.ICM_CONFIG.getLgpdDeletionRequests === 'function')
+        ? window.ICM_CONFIG.getLgpdDeletionRequests() : [];
+      const req = requests.find(r => r.id === requestId);
+      if (!req) return;
+
+      if (!confirm(`CONFIRMAÇÃO DO MASTER ADMIN (Thiago Carvalho):\n\nHomologar a exclusão e purga permanente dos dados civis de "${req.titularNome}"?\n\nConforme a LGPD e o Direito Canônico, dados cadastrais de contato e chamadas civis serão removidos, permanecendo arquivados os registros canônicos perenes.`)) {
+        return;
+      }
+
+      try {
+        // Se for catequizando, purga do banco local
+        if (req.titularTipo === 'catequizando') {
+          const db = getAlunosDatabase();
+          let modified = false;
+          Object.keys(db).forEach(k => {
+            const initial = db[k].length;
+            db[k] = db[k].filter(a => a.id !== req.titularId && a.nome !== req.titularNome);
+            if (db[k].length !== initial) modified = true;
+          });
+          if (modified) {
+            saveAlunosDatabase(db);
+            if (typeof renderAlunosTable === 'function') renderAlunosTable();
+          }
+        }
+
+        await window.ICM_CONFIG.approveLgpdDeletionRequest(requestId, 'Thiago Carvalho (Master Admin)');
+        renderLgpdExclusoesTable();
+        renderLgpdTitularesTable();
+        renderPainelPendencias();
+
+        alert('✅ Exclusão homologada com sucesso!\n\nDados civis purgados e evento formal registrado na Trilha de Auditoria LGPD.');
+      } catch (err) {
+        console.error('Erro ao homologar exclusão:', err);
+        alert('Erro ao homologar exclusão: ' + err.message);
+      }
+    }
+
+    async function indeferirExclusaoMasterAdmin(requestId) {
+      const isMasterAdmin = (window.appAuthState && window.ICM_CONFIG && (
+        window.appAuthState.role === window.ICM_CONFIG.ROLES.MASTER_ADMIN ||
+        (window.appAuthState.user && window.appAuthState.user.email && window.appAuthState.user.email.toLowerCase() === 'colletes@gmail.com')
+      ));
+      if (!isMasterAdmin) {
+        alert('Acesso restrito ao Master Admin (Thiago Carvalho).');
+        return;
+      }
+
+      const just = prompt('Informe a justificativa formal para indeferir a solicitação de exclusão (Art. 16 LGPD):', 'Cumprimento de dever pastoral / preservação histórica canônica');
+      if (!just) return;
+
+      try {
+        await window.ICM_CONFIG.rejectLgpdDeletionRequest(requestId, 'Thiago Carvalho (Master Admin)', just);
+        renderLgpdExclusoesTable();
+        renderPainelPendencias();
+        alert('Solicitação indeferida com justificativa formal registrada.');
+      } catch (err) {
+        console.error('Erro ao indeferir solicitação:', err);
+        alert('Erro: ' + err.message);
+      }
+    }
+
+    function openLgpdTermsModalDirect() {
+      const modal = document.getElementById('modal-termos-lgpd');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    // =======================================================
     // 👥 GESTÃO DE USUÁRIOS, APROVAÇÃO DE ACESSOS E TURMAS (RBAC)
     // =======================================================
     let currentUsermgmtTab = 'pendentes';
@@ -6044,6 +7044,16 @@
       if (window.appAuthState && window.ICM_CONFIG && (window.appAuthState.role === window.ICM_CONFIG.ROLES.MASTER_ADMIN || window.appAuthState.role === window.ICM_CONFIG.ROLES.COORD_GERAL)) {
         const pendingUsers = window.ICM_CONFIG.getPendingUsers ? window.ICM_CONFIG.getPendingUsers() : [];
         totalNotifs += pendingUsers.length;
+      }
+      if (window.appAuthState && window.ICM_CONFIG && window.appAuthState.role === window.ICM_CONFIG.ROLES.MASTER_ADMIN) {
+        const pendingDeletions = window.ICM_CONFIG.getLgpdDeletionRequests ? window.ICM_CONFIG.getLgpdDeletionRequests().filter(r => r.status === 'pendente') : [];
+        totalNotifs += pendingDeletions.length;
+        const lgpdBadge = document.getElementById('lgpd-deletion-pending-badge');
+        if (lgpdBadge) {
+          lgpdBadge.textContent = pendingDeletions.length;
+          if (pendingDeletions.length > 0) lgpdBadge.classList.remove('hidden');
+          else lgpdBadge.classList.add('hidden');
+        }
       }
       if (headerNotifCount) headerNotifCount.textContent = totalNotifs;
       const profileNotifBadge = document.getElementById('profile-btn-notif-badge');
@@ -6792,6 +7802,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           });
         }
       });
+      if (typeof syncRoomsDataWithOrganograma === 'function') syncRoomsDataWithOrganograma();
+      if (typeof renderDynamicSvgRooms === 'function') renderDynamicSvgRooms();
     }
 
     // Renderizar Pílulas de Alternância de Organograma
@@ -9060,6 +10072,310 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       }
     }
 
+    // =========================================================================
+    // RBAC: CONTROLE DE ACESSO A TURMAS E CATEQUIZANDOS
+    // =========================================================================
+    function canUserAccessTurma(stage, turma) {
+      if (!window.appAuthState || !window.appAuthState.user) {
+        return { allowed: false, reason: 'É necessário estar autenticado para acessar a lista de catequizandos.' };
+      }
+      const role = window.appAuthState.role;
+      const ROLES = (window.ICM_CONFIG && window.ICM_CONFIG.ROLES) || {};
+
+      // Master Admin, Coordenação Geral, Vice-Coordenação e Secretaria Paroquial possuem acesso total
+      if (role === ROLES.MASTER_ADMIN || role === ROLES.COORD_GERAL || role === ROLES.VICE_COORD_GERAL || role === ROLES.SECRETARIA) {
+        return { allowed: true };
+      }
+
+      const user = window.appAuthState.user;
+      const userEmail = (user.email || '').toLowerCase();
+      const userName = (user.displayName || user.email || '').toLowerCase();
+      const userProfile = (window.ICM_CONFIG && typeof window.ICM_CONFIG.getUserProfile === 'function') 
+        ? window.ICM_CONFIG.getUserProfile(userEmail) : null;
+
+      // Coordenador de Etapa: visualiza turmas da sua etapa
+      if (role === ROLES.COORD_ETAPA) {
+        if (userProfile) {
+          if (userProfile.etapa && (stage.toLowerCase().includes(userProfile.etapa.toLowerCase()) || userProfile.etapa.toLowerCase().includes(stage.toLowerCase()))) {
+            return { allowed: true };
+          }
+          if (Array.isArray(userProfile.etapas) && userProfile.etapas.some(e => stage.toLowerCase().includes(e.toLowerCase()))) {
+            return { allowed: true };
+          }
+        }
+        return { allowed: true };
+      }
+
+      // Catequista: visualiza sua turma vinculada
+      if (role === ROLES.CATEQUISTA) {
+        if (userProfile && (userProfile.turmaId === 'todas' || userProfile.turmaNome === 'todas')) {
+          return { allowed: true };
+        }
+        if (userProfile && userProfile.turmaNome) {
+          const tNorm = userProfile.turmaNome.toLowerCase();
+          if (tNorm.includes(turma.toLowerCase()) || tNorm.includes(stage.toLowerCase())) {
+            return { allowed: true };
+          }
+        }
+        const turmaInfo = (typeof masterScheduleList !== 'undefined' ? masterScheduleList : []).find(t => t.stage === stage && t.turma === turma);
+        if (turmaInfo) {
+          const allCatechists = ((turmaInfo.catechists || '') + ' ' + (turmaInfo.auxiliares ? turmaInfo.auxiliares.join(' ') : '')).toLowerCase();
+          const nameParts = userName.split(' ').filter(p => p.length >= 3);
+          if (nameParts.some(part => allCatechists.includes(part))) {
+            return { allowed: true };
+          }
+        }
+        return {
+          allowed: false,
+          reason: `Privacidade e LGPD: O perfil de Catequista permite visualizar apenas os catequizandos da sua própria turma (${userProfile && userProfile.turmaNome ? userProfile.turmaNome : 'sua turma vinculada'}). Para acessar outras turmas, solicite autorização à Coordenação Geral.`
+        };
+      }
+
+      return { allowed: false, reason: 'Seu perfil atual não possui autorização para consultar a lista nominal de catequizandos desta turma.' };
+    }
+
+    function openTurmaAlunosWithRBAC(stage, turma) {
+      const check = canUserAccessTurma(stage, turma);
+      if (!check.allowed) {
+        alert('🔒 Acesso Restrito por RBAC / LGPD:\n\n' + check.reason);
+        return;
+      }
+      openTurmaAlunos(stage, turma);
+    }
+
+    // =========================================================================
+    // PLANTAS BAIXAS DINÂMICAS (SVG)
+    // Sincronização automática com roomsData e organograma ativo
+    // =========================================================================
+    const SVG_ROOM_COORDINATES = {
+      // Centro Catequético
+      'sala-secretaria': { schedX: 565, schedY: 105, schedW: 285, schedH: 70, hall: 'catequetico' },
+      'sala-costura': { schedX: 105, schedY: 92, schedW: 380, schedH: 75, hall: 'catequetico' },
+      'sala-08': { schedX: 575, schedY: 98, schedW: 265, schedH: 70, hall: 'catequetico' },
+      'auditorio': { schedX: 575, schedY: 235, schedW: 265, schedH: 170, hall: 'catequetico' },
+      'sala-05': { schedX: 575, schedY: 650, schedW: 265, schedH: 140, hall: 'catequetico' },
+      'sala-03': { schedX: 575, schedY: 860, schedW: 265, schedH: 110, hall: 'catequetico' },
+      'sala-01': { schedX: 575, schedY: 1045, schedW: 265, schedH: 90, hall: 'catequetico' },
+      'sala-07': { schedX: 105, schedY: 245, schedW: 265, schedH: 140, hall: 'catequetico' },
+      'sala-06': { schedX: 105, schedY: 490, schedW: 265, schedH: 165, hall: 'catequetico' },
+      'sala-04': { schedX: 105, schedY: 730, schedW: 265, schedH: 145, hall: 'catequetico' },
+      'sala-02': { schedX: 105, schedY: 970, schedW: 265, schedH: 165, hall: 'catequetico' },
+
+      // Salão Paroquial
+      'sala-cozinha': { schedX: 900, schedY: 220, schedW: 170, schedH: 70, hall: 'paroquial' },
+      'sala-banheiros': { schedX: 900, schedY: 610, schedW: 170, schedH: 70, hall: 'paroquial' },
+      'sala-17': { schedX: 1098, schedY: 530, schedW: 134, schedH: 150, hall: 'paroquial' },
+      'sala-14': { schedX: 728, schedY: 145, schedW: 144, schedH: 85, hall: 'paroquial' },
+      'sala-12': { schedX: 558, schedY: 140, schedW: 144, schedH: 90, hall: 'paroquial' },
+      'sala-13': { schedX: 728, schedY: 605, schedW: 144, schedH: 85, hall: 'paroquial' },
+      'sala-11': { schedX: 558, schedY: 605, schedW: 144, schedH: 85, hall: 'paroquial' },
+      'sala-16': { schedX: 68, schedY: 145, schedW: 164, schedH: 85, hall: 'paroquial' },
+      'sala-15': { schedX: 68, schedY: 605, schedW: 164, schedH: 85, hall: 'paroquial' },
+      'palco': { schedX: 70, schedY: 410, schedW: 160, schedH: 80, hall: 'paroquial' }
+    };
+
+    function getPeriodFromDayTime(dt) {
+      if (!dt) return 'all';
+      const str = dt.toLowerCase();
+      if (str.includes('segunda') || str.includes('20:00') || str.includes('noite')) return 'seg-noite';
+      if (str.includes('quarta')) return 'quarta';
+      if (str.includes('15:00') || str.includes('tarde')) return 'sab-tarde';
+      if (str.includes('08:30') || str.includes('10:30') || str.includes('manhã') || str.includes('manha')) return 'sab-manha';
+      if (str.includes('sacramento')) return 'sacramento';
+      return 'all';
+    }
+
+    function syncRoomsDataWithOrganograma() {
+      if (typeof roomsData === 'undefined' || !Array.isArray(masterScheduleList)) return;
+
+      const roomMatcher = {
+        'sala-01': t => t.room && t.room.includes('01'),
+        'sala-02': t => t.room && t.room.includes('02'),
+        'sala-03': t => t.room && t.room.includes('03'),
+        'sala-04': t => t.room && t.room.includes('04'),
+        'sala-05': t => t.room && t.room.includes('05'),
+        'sala-06': t => t.room && t.room.includes('06'),
+        'sala-07': t => t.room && t.room.includes('07'),
+        'sala-08': t => t.room && t.room.includes('08'),
+        'auditorio': t => t.room && (t.room.toLowerCase().includes('auditório') || t.room.toLowerCase().includes('auditorio')),
+        'sala-11': t => t.room && t.room.includes('11'),
+        'sala-12': t => t.room && t.room.includes('12'),
+        'sala-13': t => t.room && t.room.includes('13'),
+        'sala-14': t => t.room && t.room.includes('14'),
+        'sala-15': t => t.room && t.room.includes('15'),
+        'sala-16': t => t.room && t.room.includes('16'),
+        'sala-17': t => t.room && (t.room.includes('17') || t.room.toLowerCase().includes('bosco'))
+      };
+
+      Object.entries(roomMatcher).forEach(([roomId, matcherFn]) => {
+        if (!roomsData[roomId]) return;
+        const matched = masterScheduleList.filter(matcherFn);
+        if (matched.length > 0) {
+          roomsData[roomId].schedules = matched.map(m => ({
+            stage: m.stage,
+            turma: m.turma,
+            day: m.dayTime ? m.dayTime.split(':')[0] : 'Sábado',
+            time: m.dayTime ? m.dayTime.split(':').slice(1).join(':').trim() : '',
+            catechists: m.catechists || '',
+            auxiliares: m.auxiliares || [],
+            semCatequista: !!m.semCatequista,
+            period: getPeriodFromDayTime(m.dayTime)
+          }));
+        }
+      });
+    }
+
+    function renderDynamicSvgRooms() {
+      if (typeof roomsData === 'undefined') return;
+
+      Object.entries(roomsData).forEach(([roomId, room]) => {
+        const el = getRoomSvgElement(room);
+        if (!el) return;
+
+        const coords = SVG_ROOM_COORDINATES[roomId];
+        if (!coords) return;
+
+        // Oculta blocos estáticos legados do SVG
+        Array.from(el.children).forEach(child => {
+          if (child.classList && child.classList.contains('room-bg')) return;
+          if (child.classList && child.classList.contains('door-arc')) return;
+          if (child.tagName === 'path' || child.tagName === 'line') return;
+          if (child.tagName === 'rect' && (child.getAttribute('fill') === '#1e293b' || child.getAttribute('fill') === '#b45309')) return;
+          if (child.tagName === 'text' && (child.getAttribute('font-family') === "'Outfit', sans-serif" || child.getAttribute('font-family') === "'Questrial', sans-serif")) return;
+          if (child.tagName === 'g' && !child.classList.contains('dynamic-svg-schedules')) {
+            child.style.display = 'none';
+          }
+        });
+
+        // Remove renderização dinâmica anterior se existir
+        const oldDynamic = el.querySelector('.dynamic-svg-schedules');
+        if (oldDynamic) oldDynamic.remove();
+
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.setAttribute('class', 'dynamic-svg-schedules');
+        g.setAttribute('transform', `translate(${coords.schedX}, ${coords.schedY})`);
+        g.style.cursor = 'pointer';
+
+        const schedules = room.schedules || [];
+        const isParoquial = coords.hall === 'paroquial';
+        const cardWidth = coords.schedW;
+        
+        if (schedules.length === 0) {
+          // Sala livre / sem turmas alocadas
+          const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          bg.setAttribute('x', '0');
+          bg.setAttribute('y', '0');
+          bg.setAttribute('width', cardWidth);
+          bg.setAttribute('height', '36');
+          bg.setAttribute('rx', '6');
+          bg.setAttribute('fill', '#ecfdf5');
+          bg.setAttribute('stroke', '#a7f3d0');
+          bg.setAttribute('stroke-width', '1');
+          g.appendChild(bg);
+
+          const t1 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          t1.setAttribute('x', cardWidth / 2);
+          t1.setAttribute('y', '16');
+          t1.setAttribute('text-anchor', 'middle');
+          t1.setAttribute('font-family', "'Nunito', sans-serif");
+          t1.setAttribute('font-size', '10');
+          t1.setAttribute('font-weight', '800');
+          t1.setAttribute('fill', '#065f46');
+          t1.textContent = '🟢 LIVRE / SEM TURMAS';
+          g.appendChild(t1);
+
+          const t2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          t2.setAttribute('x', cardWidth / 2);
+          t2.setAttribute('y', '29');
+          t2.setAttribute('text-anchor', 'middle');
+          t2.setAttribute('font-family', "'Nunito', sans-serif");
+          t2.setAttribute('font-size', '8.5');
+          t2.setAttribute('font-weight', '600');
+          t2.setAttribute('fill', '#047857');
+          t2.textContent = 'Disponível para encontros';
+          g.appendChild(t2);
+        } else {
+          // Altura dinâmica baseada na quantidade de turmas
+          const rowHeight = isParoquial ? 28 : 32;
+          const totalHeight = Math.min(coords.schedH, 20 + schedules.length * rowHeight);
+
+          const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          bg.setAttribute('x', '0');
+          bg.setAttribute('y', '0');
+          bg.setAttribute('width', cardWidth);
+          bg.setAttribute('height', totalHeight);
+          bg.setAttribute('rx', '6');
+          bg.setAttribute('fill', isParoquial ? '#ffffff' : '#f8fafc');
+          bg.setAttribute('stroke', isParoquial ? '#bfdbfe' : '#e2e8f0');
+          bg.setAttribute('stroke-width', '1');
+          g.appendChild(bg);
+
+          // Badge de Quantidade de Turmas
+          const countBadge = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          countBadge.setAttribute('x', '6');
+          countBadge.setAttribute('y', '4');
+          countBadge.setAttribute('width', isParoquial ? '56' : '64');
+          countBadge.setAttribute('height', '13');
+          countBadge.setAttribute('rx', '3');
+          countBadge.setAttribute('fill', isParoquial ? '#dbeafe' : '#fef3c7');
+          g.appendChild(countBadge);
+
+          const countText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          countText.setAttribute('x', isParoquial ? '34' : '38');
+          countText.setAttribute('y', '13.5');
+          countText.setAttribute('text-anchor', 'middle');
+          countText.setAttribute('font-family', "'Nunito', sans-serif");
+          countText.setAttribute('font-size', '8');
+          countText.setAttribute('font-weight', '900');
+          countText.setAttribute('fill', isParoquial ? '#1e40af' : '#92400e');
+          countText.textContent = `${schedules.length} ${schedules.length === 1 ? 'TURMA' : 'TURMAS'}`;
+          g.appendChild(countText);
+
+          // Linhas de cada turma
+          schedules.forEach((item, idx) => {
+            const yOffset = 21 + idx * rowHeight;
+            if (yOffset + 12 > totalHeight) return;
+
+            const txtLine1 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            txtLine1.setAttribute('x', '8');
+            txtLine1.setAttribute('y', yOffset + 9);
+            txtLine1.setAttribute('font-family', "'Nunito', sans-serif");
+            txtLine1.setAttribute('font-size', isParoquial ? '9' : '9.5');
+            txtLine1.setAttribute('font-weight', '800');
+            
+            let color = '#334155';
+            if (item.stage.includes('Eucaristia I')) color = '#047857';
+            else if (item.stage.includes('Eucaristia II')) color = '#0284c7';
+            else if (item.stage.includes('Crisma')) color = '#6d28d9';
+            else if (item.stage.includes('Pré')) color = '#be123c';
+            else if (item.stage.includes('Perseverança')) color = '#b45309';
+
+            txtLine1.setAttribute('fill', color);
+            const timePart = item.time ? (item.time.length > 14 ? item.time.split('às')[0].trim() : item.time) : '';
+            const dayPart = item.day ? item.day.replace('-feira', '').slice(0, 3) : '';
+            txtLine1.textContent = `${dayPart} ${timePart} • ${item.stage} (${item.turma})`;
+            g.appendChild(txtLine1);
+
+            const txtLine2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            txtLine2.setAttribute('x', '8');
+            txtLine2.setAttribute('y', yOffset + 19);
+            txtLine2.setAttribute('font-family', "'Nunito', sans-serif");
+            txtLine2.setAttribute('font-size', isParoquial ? '8' : '8.5');
+            txtLine2.setAttribute('font-weight', '600');
+            txtLine2.setAttribute('fill', '#64748b');
+
+            let respDisplay = item.catechists || '—';
+            if (item.semCatequista) respDisplay = '⚠️ Auxiliares em formação';
+            if (respDisplay.length > 36) respDisplay = respDisplay.substring(0, 34) + '...';
+            txtLine2.textContent = respDisplay;
+            g.appendChild(txtLine2);
+          });
+        }
+
+        el.appendChild(g);
+      });
+    }
+
     function openTurmaAlunos(etapa, turma) {
       switchTab('alunos');
       const selEtapa = document.getElementById('sel-etapa-alunos');
@@ -9289,6 +10605,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         document.getElementById('aluno-impedido').value = alunoData.impedido || '';
         document.getElementById('aluno-justificativa').value = alunoData.justificativa || '';
         document.getElementById('aluno-obs').value = alunoData.observacoes || '';
+        if (document.getElementById('aluno-resp-nome')) document.getElementById('aluno-resp-nome').value = alunoData.nomeResponsavel || '';
+        if (document.getElementById('aluno-resp-cpf')) document.getElementById('aluno-resp-cpf').value = alunoData.cpfResponsavel || '';
       } else {
         if (title) title.textContent = 'Cadastrar Novo Catequizando';
         if (sub) sub.textContent = `${currentAlunosTurma} • ${currentAlunosEtapa}`;
@@ -9474,7 +10792,9 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         primeiraEucaristia: document.getElementById('aluno-eucaristia').value || '',
         impedido: document.getElementById('aluno-impedido').value || '',
         justificativa: (document.getElementById('aluno-justificativa').value || '').trim(),
-        observacoes: (document.getElementById('aluno-obs').value || '').trim()
+        observacoes: (document.getElementById('aluno-obs').value || '').trim(),
+        nomeResponsavel: (document.getElementById('aluno-resp-nome') ? document.getElementById('aluno-resp-nome').value : '').trim(),
+        cpfResponsavel: (document.getElementById('aluno-resp-cpf') ? document.getElementById('aluno-resp-cpf').value : '').trim()
       };
 
       if (!alunoObj.nome) {
@@ -11279,6 +12599,9 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       }
       renderOrganogramaAll();
       renderRoomCards();
+      if (typeof renderDynamicSvgRooms === 'function') {
+        renderDynamicSvgRooms();
+      }
       renderEventosTimeline();
       populateTurmasSelect('Crisma Adultos', 'Turma 03');
       selectRoom('sala-01', false);
