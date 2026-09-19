@@ -5771,12 +5771,73 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     const STORAGE_KEY_EVENTOS = 'catequese_eventos_2026_v2';
     let editModeActive = false;
 
-    // Dados iniciais padrão (Cronograma da Catequese 2026)
+    // Ritos Litúrgicos e Celebrações da Turma de Crisma Adultos (Lorena e Natanai - 2026.2)
+    const LORENA_EVENTOS_LITURGICOS = [
+      {
+        id: 'ev-lit-1',
+        nome: 'Rito de Eleição (1º Domingo da Quaresma)',
+        data: '2027-02-14',
+        hora: '09:00',
+        turmas: 'Crisma Adultos - Turma 03 (Não Batizados e Padrinhos)',
+        externo: false
+      },
+      {
+        id: 'ev-lit-2',
+        nome: 'Entrega do Símbolo da Fé (2º Domingo da Quaresma)',
+        data: '2027-02-21',
+        hora: '09:00',
+        turmas: 'Crisma Adultos - Turma 03 (Não Batizados e Padrinhos)',
+        externo: false
+      },
+      {
+        id: 'ev-lit-3',
+        nome: '1º Escrutínio (3º Domingo da Quaresma)',
+        data: '2027-02-28',
+        hora: '09:00',
+        turmas: 'Crisma Adultos - Turma 03 (Não Batizados e Padrinhos)',
+        externo: false
+      },
+      {
+        id: 'ev-lit-4',
+        nome: '2º Escrutínio (4º Domingo da Quaresma)',
+        data: '2027-03-07',
+        hora: '09:00',
+        turmas: 'Crisma Adultos - Turma 03 (Não Batizados e Padrinhos)',
+        externo: false
+      },
+      {
+        id: 'ev-lit-5',
+        nome: '3º Escrutínio (5º Domingo da Quaresma)',
+        data: '2027-03-14',
+        hora: '09:00',
+        turmas: 'Crisma Adultos - Turma 03 (Não Batizados e Padrinhos)',
+        externo: false
+      },
+      {
+        id: 'ev-lit-6',
+        nome: 'Ritos Preparatórios (Sábado Santo)',
+        data: '2027-03-27',
+        hora: '09:00',
+        turmas: 'Crisma Adultos - Turma 03 (Não Batizados e Padrinhos)',
+        externo: false
+      },
+      {
+        id: 'ev-lit-7',
+        nome: 'Celebração do Sacramento: Eucaristia e Crisma dos Catequizandos',
+        data: '2027-05-22',
+        hora: '10:00',
+        turmas: 'Crisma Adultos - Turma 03 (Lorena e Natanai)',
+        externo: false
+      }
+    ];
+
+    // Dados iniciais padrão (Cronograma da Catequese 2026/2027)
     const SEED_EVENTOS = [
       { id: 'seed-1', nome: 'Retiro Eucaristia I', data: '2026-09-12', hora: 'Manhã e Tarde', turmas: 'Turmas 01, 02, 05 e 06', externo: false },
       { id: 'seed-2', nome: 'Retiro Eucaristia I', data: '2026-09-13', hora: 'Manhã e Tarde', turmas: 'Turmas 03, 04, 07 e 08', externo: false },
       { id: 'seed-3', nome: 'Retiro Crisma Jovem',  data: '2026-10-24', hora: 'Dia Todo',       turmas: 'Todas as Turmas de Crisma Jovem', externo: true },
-      { id: 'seed-4', nome: 'Crisma dos Adultos (Celebração do Sacramento)', data: '2026-11-05', hora: '19:30', turmas: 'Todas as Turmas de Crisma Adultos', externo: false }
+      { id: 'seed-4', nome: 'Crisma dos Adultos (Celebração do Sacramento)', data: '2026-11-05', hora: '19:30', turmas: 'Todas as Turmas de Crisma Adultos', externo: false },
+      ...LORENA_EVENTOS_LITURGICOS
     ];
 
     function _dataFmt(dataISO) {
@@ -5799,7 +5860,22 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         const stored = localStorage.getItem(STORAGE_KEY_EVENTOS);
         if (stored) {
           const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            let modified = false;
+            LORENA_EVENTOS_LITURGICOS.forEach(lev => {
+              if (!parsed.some(ev => ev.id === lev.id || (ev.data === lev.data && ev.nome === lev.nome))) {
+                parsed.push(lev);
+                modified = true;
+              }
+            });
+            if (modified) {
+              parsed.sort((a, b) => (a.data || '').localeCompare(b.data || ''));
+              try {
+                localStorage.setItem(STORAGE_KEY_EVENTOS, JSON.stringify(parsed));
+              } catch (e) {}
+            }
+            return parsed;
+          }
         }
       } catch (e) {
         console.error('Erro ao ler localStorage de eventos:', e);
@@ -5812,6 +5888,13 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     function saveEventosData(list) {
       try {
         localStorage.setItem(STORAGE_KEY_EVENTOS, JSON.stringify(list));
+        // Sincroniza em nuvem no Firestore se disponível
+        if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
+          window.firebaseDb.collection('configuracoes').doc('eventos_cronograma').set({
+            eventos: list,
+            updatedAt: new Date().toISOString()
+          }).catch(err => console.warn('Sync Firestore eventos:', err));
+        }
       } catch (e) {
         console.error('Erro ao salvar eventos no localStorage:', e);
       }
@@ -8941,8 +9024,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     let currentChamadaSubMode = 'dia'; // 'dia' | 'matriz'
     let currentChamadaSelectedDate = '';
 
-    // Cronograma Oficial extraído da planilha (Cronograma Catequese 2026.2 - Lorena e Natanai)
-    // Feriados, recessos e férias desconsiderados conforme regra pastoral
+    // Cronograma Oficial de Encontros de Turma (Crisma Adultos - Turma 03 - Lorena e Natanai)
+    // Apenas os encontros semanais regulares de Segunda-feira (20h às 22h); ritos litúrgicos foram alocados na Timeline de Eventos
     const TURMA_LORENA_DATES_2026_2 = [
       "2026-08-17",
       "2026-08-24",
@@ -8960,18 +9043,12 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       "2026-12-07",
       "2027-01-25",
       "2027-02-01",
-      "2027-02-14",
       "2027-02-15",
-      "2027-02-21",
       "2027-02-22",
-      "2027-02-28",
       "2027-03-01",
-      "2027-03-07",
       "2027-03-08",
-      "2027-03-14",
       "2027-03-15",
       "2027-03-22",
-      "2027-03-27",
       "2027-03-29",
       "2027-04-05",
       "2027-04-12",
@@ -8979,8 +9056,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       "2027-04-26",
       "2027-05-03",
       "2027-05-10",
-      "2027-05-17",
-      "2027-05-22"
+      "2027-05-17"
     ];
 
     const SEED_CHAMADAS_DATABASE = {
@@ -8998,8 +9074,10 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           const parsed = JSON.parse(stored);
           if (parsed && typeof parsed === 'object') {
             const lorenaKey = 'Crisma Adultos__Turma 03';
-            // Aplica o cronograma oficial da planilha para a Turma 03 da Lorena se estiver ausente ou com o padrão inicial de 14 datas
-            if (!parsed[lorenaKey] || !parsed[lorenaKey].customizedDates || (parsed[lorenaKey].dates && parsed[lorenaKey].dates.length === 14)) {
+            const currentDates = parsed[lorenaKey] ? parsed[lorenaKey].dates : [];
+            const hasLiturgical = currentDates && currentDates.some(d => ['2027-02-14', '2027-02-21', '2027-02-28', '2027-03-07', '2027-03-14', '2027-03-27', '2027-05-22'].includes(d));
+            // Aplica os 30 encontros regulares de segunda-feira na lista de chamadas
+            if (!parsed[lorenaKey] || !parsed[lorenaKey].customizedDates || currentDates.length === 14 || currentDates.length === 37 || hasLiturgical) {
               parsed[lorenaKey] = {
                 dates: [...TURMA_LORENA_DATES_2026_2],
                 records: (parsed[lorenaKey] && parsed[lorenaKey].records) || {},
@@ -9060,7 +9138,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           if (cloudData && Array.isArray(cloudData.dates)) {
             const db = getChamadasDatabase();
             let cloudDates = cloudData.dates;
-            if (key === 'Crisma Adultos__Turma 03' && (cloudDates.length === 14 || !cloudData.customizedDates)) {
+            const hasLit = cloudDates.some(d => ['2027-02-14', '2027-02-21', '2027-02-28', '2027-03-07', '2027-03-14', '2027-03-27', '2027-05-22'].includes(d));
+            if (key === 'Crisma Adultos__Turma 03' && (cloudDates.length === 14 || cloudDates.length === 37 || hasLit || !cloudData.customizedDates)) {
               cloudDates = [...TURMA_LORENA_DATES_2026_2];
             }
             db[key] = {
@@ -10555,6 +10634,9 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       }
       if (typeof syncAllChamadasToFirestore === 'function') {
         syncAllChamadasToFirestore(getChamadasDatabase());
+      }
+      if (typeof saveEventosData === 'function') {
+        saveEventosData(getEventosData());
       }
       renderOrganogramaAll();
       renderRoomCards();
