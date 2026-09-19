@@ -3370,10 +3370,6 @@
         </div>
       </div>
 
-      <!-- Nota sobre persistência -->
-      <p class="text-center text-xs text-slate-400 pb-4">
-        🔒 Para adicionar ou excluir eventos deste cronograma, utilize o botão <strong>"Editar Eventos"</strong> com a senha de coordenação (<strong>Sicm@2026</strong>).
-      </p>
 
     </section>
 
@@ -5049,8 +5045,8 @@
         return;
       }
 
-      // Validação de senha padrão pastoral ou específica
-      if (pass === 'Sicm@2026' || pass.length >= 6) {
+      // Validação de senha pastoral
+      if (pass.length >= 6) {
         const defaultName = email === 'colletes@gmail.com' ? 'Thiago Carvalho' : (email === 'lorenammoraes@gmail.com' ? 'Lorena Moraes' : (email.includes('larissa') || email.includes('picmbrasilia') ? 'Larissa (PICM)' : email.split('@')[0]));
         const userData = {
           uid: 'user-' + btoa(email).replace(/=/g, ''),
@@ -5060,7 +5056,7 @@
         };
         await processAuthCandidate(userData);
       } else {
-        showAuthFeedback('⚠️ Senha incorreta. Para o primeiro acesso pastoral, utilize a senha autorizada pela coordenação.', 'error');
+        showAuthFeedback('⚠️ A senha deve conter pelo menos 6 caracteres.', 'error');
       }
     }
 
@@ -5209,6 +5205,9 @@
         } else if (role === window.ICM_CONFIG.ROLES.COORD_GERAL) {
           roleBadge.textContent = '⭐ Coordenação Geral';
           roleBadge.className = 'text-indigo-400 font-bold text-[9.5px] uppercase';
+        } else if (role === window.ICM_CONFIG.ROLES.VICE_COORD_GERAL || role === 'vice_coord_geral') {
+          roleBadge.textContent = '🤝 Vice-Coordenação Geral';
+          roleBadge.className = 'text-amber-300 font-bold text-[9.5px] uppercase';
         } else if (role === window.ICM_CONFIG.ROLES.SECRETARIA) {
           roleBadge.textContent = '🏛️ Secretaria Paroquial';
           roleBadge.className = 'text-emerald-400 font-bold text-[9.5px] uppercase';
@@ -5218,19 +5217,19 @@
         }
       }
 
-      // Botão de Logs LGPD só visível para Master Admin e Coordenação Geral
+      // Botão de Logs LGPD só visível para Master Admin, Coordenação Geral e Vice-Coordenação
       if (btnAuditLogs) {
-        if (role === window.ICM_CONFIG.ROLES.MASTER_ADMIN || role === window.ICM_CONFIG.ROLES.COORD_GERAL) {
+        if (role === window.ICM_CONFIG.ROLES.MASTER_ADMIN || role === window.ICM_CONFIG.ROLES.COORD_GERAL || role === window.ICM_CONFIG.ROLES.VICE_COORD_GERAL) {
           btnAuditLogs.classList.remove('hidden');
         } else {
           btnAuditLogs.classList.add('hidden');
         }
       }
 
-      // Botão de Gestão de Usuários (Master Admin & Coordenação Geral)
+      // Botão de Gestão de Usuários (Master Admin, Coordenação Geral e Vice-Coordenação)
       const btnUserMgmt = document.getElementById('btn-open-user-mgmt');
       if (btnUserMgmt) {
-        if (role === window.ICM_CONFIG.ROLES.MASTER_ADMIN || role === window.ICM_CONFIG.ROLES.COORD_GERAL) {
+        if (role === window.ICM_CONFIG.ROLES.MASTER_ADMIN || role === window.ICM_CONFIG.ROLES.COORD_GERAL || role === window.ICM_CONFIG.ROLES.VICE_COORD_GERAL) {
           btnUserMgmt.classList.remove('hidden');
           if (typeof updateUserMgmtBadges === 'function') updateUserMgmtBadges();
         } else {
@@ -5314,9 +5313,9 @@
     }
 
     function openAuditTrailModal() {
-      const role = window.appAuthState.role;
-      if (role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL) {
-        alert('Acesso restrito ao Master Admin e à Coordenação Geral.');
+      const role = window.appAuthState ? window.appAuthState.role : null;
+      if (role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL && role !== window.ICM_CONFIG.ROLES.VICE_COORD_GERAL) {
+        alert('Acesso restrito ao Master Admin, à Coordenação Geral e à Vice-Coordenação.');
         return;
       }
       const modal = document.getElementById('modal-audit-trail');
@@ -5412,14 +5411,14 @@
     }
 
     // =======================================================
-    // GESTÃO DE USUÁRIOS, CATEQUISTAS E APROVAÇÕES (RBAC & LGPD)
+    // 👥 GESTÃO DE USUÁRIOS, APROVAÇÃO DE ACESSOS E TURMAS (RBAC)
     // =======================================================
     let currentUsermgmtTab = 'pendentes';
 
     function openUserManagementModal() {
-      const role = window.appAuthState.role;
-      if (role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL) {
-        alert('Acesso restrito ao Master Admin (Thiago Carvalho) e à Coordenação Geral (Lorena Moraes).');
+      const role = window.appAuthState ? window.appAuthState.role : null;
+      if (role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL && role !== window.ICM_CONFIG.ROLES.VICE_COORD_GERAL) {
+        alert('Acesso restrito ao Master Admin, à Coordenação Geral e à Vice-Coordenação.');
         return;
       }
       const modal = document.getElementById('modal-user-management');
@@ -5595,6 +5594,7 @@
                   <option value="coord_etapa">📋 Coordenação de Etapa</option>
                   <option value="secretaria">🏛️ Secretaria Paroquial</option>
                   <option value="coord_geral">⭐ Coordenação Geral</option>
+                  <option value="vice_coord_geral">🤝 Vice-Coordenação Geral</option>
                 </select>
               </div>
 
@@ -5705,6 +5705,8 @@
           roleBadge = `<span class="bg-amber-100 text-amber-900 font-bold text-[10px] px-2 py-0.5 rounded-full uppercase">👑 Master Admin</span>`;
         } else if (u.role === window.ICM_CONFIG.ROLES.COORD_GERAL) {
           roleBadge = `<span class="bg-indigo-100 text-indigo-900 font-bold text-[10px] px-2 py-0.5 rounded-full uppercase">⭐ Coord. Geral</span>`;
+        } else if (u.role === window.ICM_CONFIG.ROLES.VICE_COORD_GERAL || u.role === 'vice_coord_geral') {
+          roleBadge = `<span class="bg-amber-100 text-amber-900 font-bold text-[10px] px-2 py-0.5 rounded-full uppercase">🤝 Vice-Coord. Geral</span>`;
         } else if (u.role === window.ICM_CONFIG.ROLES.SECRETARIA) {
           roleBadge = `<span class="bg-emerald-100 text-emerald-900 font-bold text-[10px] px-2 py-0.5 rounded-full uppercase">🏛️ Secretaria</span>`;
         } else if (u.role === window.ICM_CONFIG.ROLES.COORD_ETAPA) {
@@ -6190,9 +6192,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     // =============================================
     // EVENTOS E RETIROS — LocalStorage Standalone
     // Suporte total ao GitHub Pages
-    // Modo de edição protegido pelo PIN Sicm@2026
+    // Edição restrita a Master Admin, Coordenação Geral e Vice-Coordenação
     // =============================================
-    const EDIT_PIN = 'Sicm@2026';
     const STORAGE_KEY_EVENTOS = 'catequese_eventos_2026_v2';
     let editModeActive = false;
 
@@ -6379,8 +6380,25 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       }).join('');
     }
 
+    function canManageEvents() {
+      if (!window.appAuthState) return false;
+      const role = window.appAuthState.role;
+      const email = (window.appAuthState.email || '').toLowerCase();
+      const roles = (window.ICM_CONFIG && window.ICM_CONFIG.ROLES) ? window.ICM_CONFIG.ROLES : {};
+
+      const isMaster = role === roles.MASTER_ADMIN || role === 'master_admin' || (window.ICM_CONFIG && email === (window.ICM_CONFIG.MASTER_ADMIN_EMAIL || '').toLowerCase());
+      const isCoordGeral = role === roles.COORD_GERAL || role === 'coord_geral' || (window.ICM_CONFIG && email === (window.ICM_CONFIG.COORD_GERAL_EMAIL || '').toLowerCase());
+      const isViceCoord = role === roles.VICE_COORD_GERAL || role === 'vice_coord_geral' || role === 'vice_coordenador' || (window.appAuthState.turmaNome && window.appAuthState.turmaNome.toLowerCase().includes('vice'));
+
+      return isMaster || isCoordGeral || isViceCoord;
+    }
+
     function removerEvento(id) {
       if (!editModeActive) return;
+      if (!canManageEvents()) {
+        alert('⚠️ Operação não permitida: Apenas o Master Admin, a Coordenação Geral e o Vice-Coordenador têm permissão para excluir eventos.');
+        return;
+      }
       if (!confirm('Deseja realmente remover este evento?')) return;
       const eventos = getEventosData().filter(e => e.id !== id);
       saveEventosData(eventos);
@@ -6401,21 +6419,26 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         return;
       }
 
-      const pin = prompt('🔒 Digite a senha de administração (Sicm@2026) para editar os eventos:');
-      if (pin === EDIT_PIN) {
-        editModeActive = true;
-        if (btn) {
-          btn.textContent = '🔓 Concluir Edição';
-          btn.className = 'text-xs font-bold text-rose-700 bg-rose-50 border border-rose-300 hover:bg-rose-100 px-4 py-2 rounded-xl transition shadow-xs';
-        }
-        if (form) form.classList.remove('hidden');
-        renderEventosTimeline();
-      } else if (pin !== null) {
-        alert('Senha incorreta.');
+      if (!canManageEvents()) {
+        alert('⚠️ Operação não permitida: Apenas o Master Admin, a Coordenação Geral e o Vice-Coordenador têm permissão para editar eventos.');
+        return;
       }
+
+      editModeActive = true;
+      if (btn) {
+        btn.textContent = '🔓 Concluir Edição';
+        btn.className = 'text-xs font-bold text-rose-700 bg-rose-50 border border-rose-300 hover:bg-rose-100 px-4 py-2 rounded-xl transition shadow-xs';
+      }
+      if (form) form.classList.remove('hidden');
+      renderEventosTimeline();
     }
 
     function adicionarEvento() {
+      if (!canManageEvents()) {
+        alert('⚠️ Operação não permitida: Apenas o Master Admin, a Coordenação Geral e o Vice-Coordenador têm permissão para adicionar eventos.');
+        return;
+      }
+
       const nomeInput = document.getElementById('ev-nome');
       const dataInput = document.getElementById('ev-data');
       const horaInput = document.getElementById('ev-hora');
@@ -7081,8 +7104,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
     function excluirOrganogramaAtivo() {
       const role = window.appAuthState ? window.appAuthState.role : null;
-      if (role && role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL) {
-        alert('⚠️ Operação não permitida: A exclusão de organogramas é restrita à Coordenação Geral e ao Master Admin.');
+      if (role && role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL && role !== window.ICM_CONFIG.ROLES.VICE_COORD_GERAL) {
+        alert('⚠️ Operação não permitida: A exclusão de organogramas é restrita à Coordenação e ao Master Admin.');
         return;
       }
 
@@ -7095,12 +7118,6 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       }
 
       const active = getActiveOrganograma();
-      const pin = prompt(`🔒 Digite a senha de administração (Sicm@2026) para excluir o organograma "${active.name}":`);
-      if (pin !== EDIT_PIN) {
-        if (pin !== null) alert('Senha incorreta. Exclusão cancelada.');
-        return;
-      }
-
       if (!confirm(`Tem certeza absoluta que deseja excluir o organograma "${active.name}" e todas as suas turmas?`)) return;
 
       delete data[active.id];
@@ -7437,17 +7454,18 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         return;
       }
 
-      const pin = prompt('🔒 Digite a senha de administração (Sicm@2026) para editar o gráfico:');
-      if (pin === EDIT_PIN) {
-        orgEditModeActive = true;
-        if (label) label.textContent = '🔓 Concluir Edição';
-        if (btn) btn.className = 'inline-flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 font-bold px-3.5 py-2 rounded-xl text-xs transition';
-        if (btnSave) btnSave.classList.remove('hidden');
-        if (hint) hint.classList.remove('hidden');
-        renderOrganogramaTree();
-      } else if (pin !== null) {
-        alert('Senha incorreta.');
+      const role = window.appAuthState ? window.appAuthState.role : null;
+      if (role && role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL && role !== window.ICM_CONFIG.ROLES.VICE_COORD_GERAL) {
+        alert('⚠️ Operação não permitida: Apenas o Master Admin, a Coordenação Geral e o Vice-Coordenador têm permissão para editar o gráfico do organograma.');
+        return;
       }
+
+      orgEditModeActive = true;
+      if (label) label.textContent = '🔓 Concluir Edição';
+      if (btn) btn.className = 'inline-flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 font-bold px-3.5 py-2 rounded-xl text-xs transition';
+      if (btnSave) btnSave.classList.remove('hidden');
+      if (hint) hint.classList.remove('hidden');
+      renderOrganogramaTree();
     }
 
     function saveOrganogramaEdits() {
@@ -11100,9 +11118,13 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         return;
       }
 
-      const pin = prompt('🔒 Digite a senha de administração (Sicm@2026) para confirmar a importação:');
-      if (pin !== EDIT_PIN) {
-        if (pin !== null) alert('Senha incorreta. Importação cancelada.');
+      const role = window.appAuthState ? window.appAuthState.role : null;
+      if (role && role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL && role !== window.ICM_CONFIG.ROLES.VICE_COORD_GERAL && role !== window.ICM_CONFIG.ROLES.SECRETARIA) {
+        alert('⚠️ Operação não permitida: A importação em lote é restrita à Coordenação e à Secretaria.');
+        return;
+      }
+
+      if (!confirm(`Confirma a importação de ${alunos.length} catequizando(s) para a turma de destino?`)) {
         return;
       }
 

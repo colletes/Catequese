@@ -24,6 +24,7 @@ const TURNSTILE_SITE_KEY = "1x00000000000000000000AA";
 const ROLES = {
   MASTER_ADMIN: 'master_admin',
   COORD_GERAL: 'coord_geral',
+  VICE_COORD_GERAL: 'vice_coord_geral',
   COORD_ETAPA: 'coord_etapa',
   CATEQUISTA: 'catequista',
   SECRETARIA: 'secretaria',
