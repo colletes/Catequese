@@ -133,25 +133,18 @@
         display: none !important;
       }
 
-      /* Esconde absolutamente todos os elementos da interface do portal */
-      #auth-gate,
-      header,
-      nav,
-      main,
-      footer,
-      .tab-view,
-      [id^="modal-"],
-      .fixed {
-        display: none !important;
+      @page {
+        size: landscape;
+        margin: 6mm 6mm 6mm 6mm;
       }
 
-      /* Quando a impressão de chamada estiver ativa */
-      body > *:not(#printable-chamada-area) {
+      /* ======================================================== */
+      /* 1. IMPRESSÃO DA LISTA DE CHAMADA OFICIAL                  */
+      /* ======================================================== */
+      body.printing-chamada > *:not(#printable-chamada-area) {
         display: none !important;
       }
-
-      /* Exibe com perfeição o container de impressão oficial */
-      #printable-chamada-area {
+      body.printing-chamada #printable-chamada-area {
         display: block !important;
         position: static !important;
         width: 100% !important;
@@ -160,37 +153,175 @@
         padding: 0 !important;
         visibility: visible !important;
       }
-      #printable-chamada-area * {
+      body.printing-chamada #printable-chamada-area * {
         visibility: visible !important;
       }
-
-      /* Estilos estruturais da folha de chamada impressa */
-      #printable-chamada-area .print-sheet {
+      body.printing-chamada #printable-chamada-area .print-sheet {
         width: 100% !important;
         max-width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
       }
-      #printable-chamada-area table {
+      body.printing-chamada #printable-chamada-area table {
         width: 100% !important;
         max-width: 100% !important;
         border-collapse: collapse !important;
         page-break-inside: auto !important;
       }
-      #printable-chamada-area tr {
+      body.printing-chamada #printable-chamada-area tr {
         page-break-inside: avoid !important;
         page-break-after: auto !important;
       }
-      #printable-chamada-area thead {
+      body.printing-chamada #printable-chamada-area thead {
         display: table-header-group !important;
       }
-      #printable-chamada-area tfoot {
+      body.printing-chamada #printable-chamada-area tfoot {
         display: table-footer-group !important;
       }
 
-      @page {
-        size: landscape;
-        margin: 6mm 6mm 6mm 6mm;
+      /* ======================================================== */
+      /* 2. IMPRESSÃO DO ORGANOGRAMA (ÁRVORE GRÁFICA)              */
+      /* ======================================================== */
+      body.printing-organograma-tree #printable-chamada-area,
+      body.printing-organograma-tree #auth-gate,
+      body.printing-organograma-tree header,
+      body.printing-organograma-tree nav,
+      body.printing-organograma-tree footer,
+      body.printing-organograma-tree [id^="modal-"],
+      body.printing-organograma-tree .fixed,
+      body.printing-organograma-tree .tab-view:not(#view-guia),
+      body.printing-organograma-tree #org-edit-hint,
+      body.printing-organograma-tree #organograma-actions-toolbar,
+      body.printing-organograma-tree #btn-subtab-arvore,
+      body.printing-organograma-tree #btn-subtab-tabela,
+      body.printing-organograma-tree #organograma-pills-list,
+      body.printing-organograma-tree .no-print {
+        display: none !important;
+      }
+      body.printing-organograma-tree main {
+        display: block !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      body.printing-organograma-tree #view-guia {
+        display: block !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      body.printing-organograma-tree #view-guia > *:not(#subview-arvore) {
+        display: none !important;
+      }
+      body.printing-organograma-tree #subview-arvore {
+        display: block !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      body.printing-organograma-tree #subview-arvore .overflow-x-auto {
+        overflow: visible !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: transparent !important;
+        border: none !important;
+      }
+      body.printing-organograma-tree #organograma-tree-container {
+        display: block !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 4px !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+      body.printing-organograma-tree #organograma-tree-content {
+        grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+        gap: 4px !important;
+      }
+      body.printing-organograma-tree #organograma-tree-content .field-turma-header {
+        font-size: 8.5px !important;
+      }
+      body.printing-organograma-tree #organograma-tree-content .field-turma-catechists,
+      body.printing-organograma-tree #organograma-tree-content .field-turma-catechists div {
+        font-size: 8px !important;
+        line-height: 1.15 !important;
+      }
+      body.printing-organograma-tree #organograma-tree-content .field-turma-room {
+        font-size: 7.5px !important;
+      }
+      body.printing-organograma-tree #organograma-tree-content .field-turma-aux div {
+        font-size: 7.5px !important;
+      }
+      body.printing-organograma-tree #organograma-tree-content .field-stage-coord,
+      body.printing-organograma-tree #organograma-tree-content .field-stage-vice {
+        font-size: 8px !important;
+      }
+      body.printing-organograma-tree #organograma-tree-content .field-stage-criteria {
+        font-size: 7.5px !important;
+      }
+      body.printing-organograma-tree #organograma-tree-container button {
+        display: none !important;
+      }
+
+      /* ======================================================== */
+      /* 3. IMPRESSÃO DO ORGANOGRAMA (PLANILHA / TABELA DE TURMAS)  */
+      /* ======================================================== */
+      body.printing-organograma-table #printable-chamada-area,
+      body.printing-organograma-table #auth-gate,
+      body.printing-organograma-table header,
+      body.printing-organograma-table nav,
+      body.printing-organograma-table footer,
+      body.printing-organograma-table [id^="modal-"],
+      body.printing-organograma-table .fixed,
+      body.printing-organograma-table .tab-view:not(#view-guia),
+      body.printing-organograma-table #org-edit-hint,
+      body.printing-organograma-table #organograma-actions-toolbar,
+      body.printing-organograma-table #btn-subtab-arvore,
+      body.printing-organograma-table #btn-subtab-tabela,
+      body.printing-organograma-table #organograma-pills-list,
+      body.printing-organograma-table .no-print {
+        display: none !important;
+      }
+      body.printing-organograma-table main {
+        display: block !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      body.printing-organograma-table #view-guia {
+        display: block !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      body.printing-organograma-table #view-guia > *:not(#subview-tabela) {
+        display: none !important;
+      }
+      body.printing-organograma-table #subview-tabela {
+        display: block !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      body.printing-organograma-table #subview-tabela table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        page-break-inside: auto !important;
+      }
+      body.printing-organograma-table #subview-tabela tr {
+        page-break-inside: avoid !important;
+      }
+
+      /* ======================================================== */
+      /* 4. IMPRESSÃO PADRÃO (OUTRAS TELAS DO PORTAL)              */
+      /* ======================================================== */
+      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table) #printable-chamada-area {
+        display: none !important;
+      }
+      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table) #auth-gate,
+      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table) header,
+      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table) nav,
+      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table) footer,
+      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table) [id^="modal-"],
+      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table) .fixed,
+      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table) .no-print {
+        display: none !important;
       }
     }
 
@@ -440,7 +571,7 @@
         </button>
 
         <!-- Imprimir -->
-        <button onclick="window.print()" class="inline-flex items-center gap-1 bg-gradient-to-r from-[#d4a94f] to-[#b88d36] hover:from-[#facf75] hover:to-[#d4a94f] text-slate-950 font-black px-2.5 py-1.5 rounded-xl text-xs shadow-sm transition font-heading">
+        <button onclick="triggerSmartPrint()" class="inline-flex items-center gap-1 bg-gradient-to-r from-[#d4a94f] to-[#b88d36] hover:from-[#facf75] hover:to-[#d4a94f] text-slate-950 font-black px-2.5 py-1.5 rounded-xl text-xs shadow-sm transition font-heading" title="Imprimir tela ativa">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
           <span class="hidden sm:inline">Imprimir</span>
         </button>
@@ -1555,6 +1686,10 @@
           <button id="btn-export-img" onclick="exportOrganogramaImage()" class="inline-flex items-center gap-1.5 bg-[#d4a94f] hover:bg-[#e6c27a] text-slate-950 font-bold px-3.5 py-2 rounded-xl text-xs shadow-md transition transform active:scale-95">
             <span>📸 Baixar Imagem (PNG)</span>
           </button>
+          <button id="btn-print-org" onclick="imprimirOrganograma()" class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs border border-slate-700 hover:border-amber-400/50 transition shadow-xs" title="Imprimir o Organograma em visualização paisagem">
+            <svg class="w-3.5 h-3.5 text-[#d4a94f]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+            <span>🖨️ Imprimir Organograma</span>
+          </button>
           <button onclick="openEditCoordinatorsModal()" class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 hover:text-amber-200 border border-amber-500/40 font-bold px-3.5 py-2 rounded-xl text-xs transition shadow-xs" title="Editar Coordenadores Gerais e de cada Etapa">
             <span>👥 Editar Coordenações</span>
           </button>
@@ -1678,7 +1813,7 @@
               <p class="text-xs sm:text-sm text-slate-500" id="org-table-stats-caption">Edite diretamente qualquer turma ou adicione novas turmas neste organograma.</p>
             </div>
             
-            <div class="flex items-center gap-2 flex-wrap">
+            <div class="no-print flex items-center gap-2 flex-wrap">
               <button onclick="openAddTurmaModal()" class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow-md transition transform active:scale-95">
                 <span>➕ Adicionar Turma</span>
               </button>
@@ -1688,7 +1823,7 @@
               <button onclick="exportOrganogramaExcel()" class="inline-flex items-center gap-1.5 bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300 font-bold px-3.5 py-2 rounded-xl text-xs transition">
                 <span>📥 Exportar Planilha</span>
               </button>
-              <button onclick="window.print()" class="no-print inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-2 rounded-xl text-xs transition">
+              <button onclick="imprimirOrganograma()" class="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-2 rounded-xl text-xs transition" title="Imprimir Planilha de Turmas">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                 <span>Imprimir</span>
               </button>
@@ -1696,7 +1831,7 @@
           </div>
 
           <!-- Filtros e Busca da Planilha -->
-          <div class="flex flex-col sm:flex-row items-center gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+          <div class="no-print flex flex-col sm:flex-row items-center gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200">
             <div class="flex-1 w-full relative">
               <input type="text" id="filter-org-table-search" oninput="renderScheduleTable()" placeholder="Buscar por catequista, turma, horário ou sala..." class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-800 placeholder-slate-400 outline-none focus:border-[#d4a94f] focus:ring-1 focus:ring-[#d4a94f]">
             </div>
@@ -3007,19 +3142,19 @@
           <ul class="space-y-1.5 text-slate-300 text-xs">
             <li class="flex items-start gap-2">
               <span class="text-slate-500">🏢</span>
-              <span>QNM 27, Módulo Especial 01, Ceilândia Norte / Park Way • Brasília - DF</span>
+              <span>SMPW Quadra 5, Conjunto 13, Lote 01, Área Especial • Park Way, Brasília - DF • CEP 71735-513</span>
             </li>
             <li class="flex items-center gap-2">
               <span class="text-slate-500">📞</span>
-              <span>Secretaria Paroquial: (61) 3373-3000</span>
+              <span>Secretaria Paroquial: (61) 3382-8625</span>
             </li>
             <li class="flex items-center gap-2">
               <span class="text-slate-500">💬</span>
-              <span>WhatsApp Atendimento: (61) 99826-9733</span>
+              <span>WhatsApp Atendimento: (61) 99982-6973</span>
             </li>
             <li class="flex items-center gap-2">
               <span class="text-slate-500">✉️</span>
-              <span>contato@imaculadocoracaodf.com.br</span>
+              <span>picmbrasilia@gmail.com</span>
             </li>
           </ul>
         </div>
@@ -3122,7 +3257,7 @@
             <span>2.</span> Política de Privacidade (Lei nº 13.709/2018)
           </h4>
           <p>
-            <strong>2.1 Controlador:</strong> Paróquia Santuário Imaculado Coração de Maria — SMPW Quadra 05, Park Way, Brasília-DF.
+            <strong>2.1 Controlador:</strong> Santuário Imaculado Coração de Maria — SMPW Quadra 5, Conjunto 13, Lote 01, Área Especial, Park Way, Brasília-DF, CEP 71735-513.
           </p>
           <p>
             <strong>2.2 Encarregado pelo Tratamento de Dados (DPO):</strong> Thiago Carvalho (<code class="bg-slate-100 px-1 py-0.5 rounded text-[#b88d36]">colletes@gmail.com</code>).
@@ -7120,6 +7255,49 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     }
 
     // =============================================
+    // IMPRESSÃO OFICIAL DO ORGANOGRAMA
+    // =============================================
+    function imprimirOrganograma() {
+      const arvoreView = document.getElementById('subview-arvore');
+      const isArvore = arvoreView && !arvoreView.classList.contains('hidden');
+      const printClass = isArvore ? 'printing-organograma-tree' : 'printing-organograma-table';
+
+      // Se modo de edição estiver aberto no momento, desativa para manter layout limpo
+      if (typeof orgEditModeActive !== 'undefined' && orgEditModeActive) {
+        toggleOrganogramaEdit();
+      }
+
+      // Remove classes anteriores por precaução
+      document.body.classList.remove('printing-chamada', 'printing-organograma-tree', 'printing-organograma-table');
+      document.body.classList.add(printClass);
+
+      setTimeout(() => {
+        window.print();
+        setTimeout(() => {
+          document.body.classList.remove(printClass);
+        }, 1000);
+      }, 150);
+    }
+
+    // Roteador inteligente de impressão para o botão geral do cabeçalho
+    function triggerSmartPrint() {
+      const activeTab = document.querySelector('.tab-view:not(.hidden)');
+      const activeTabId = activeTab ? activeTab.id : '';
+
+      if (activeTabId === 'view-guia') {
+        imprimirOrganograma();
+      } else if (activeTabId === 'view-alunos') {
+        if (typeof printTurmaChamada === 'function') {
+          printTurmaChamada();
+        } else {
+          window.print();
+        }
+      } else {
+        window.print();
+      }
+    }
+
+    // =============================================
     // ZOOM INTERATIVO DAS PLANTAS
     // Centro Catequético e Salão Paroquial
     // =============================================
@@ -10043,7 +10221,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
               <div>
                 <div style="font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #475569;">Arquidiocese de Brasília • Santuário Imaculado Coração de Maria</div>
                 <div style="font-size: 16px; font-weight: 900; color: #0f172a; letter-spacing: -0.3px; text-transform: uppercase; margin-top: 1px;">PASTORAL DA CATEQUESE — LISTA OFICIAL DE CHAMADA E FREQUÊNCIA 2026</div>
-                <div style="font-size: 9.5px; color: #64748b;">Paróquia São João Calábria • Setor de Mansões Park Way (SMPW) — Brasília-DF</div>
+                <div style="font-size: 9.5px; color: #64748b;">Santuário Imaculado Coração de Maria • SMPW Quadra 5, Conjunto 13, Lote 01 — Park Way, Brasília-DF</div>
               </div>
             </div>
             <div style="text-align: right; font-size: 9.5px; color: #64748b; line-height: 1.3;">
@@ -10444,21 +10622,25 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       }, 150);
     }
 
-    // Vincula evento global beforeprint para garantir que a folha oficial seja injetada antes da impressão
+    // Vincula evento global beforeprint apenas se a impressão de chamada estiver explicitamente ativa
     window.addEventListener('beforeprint', () => {
-      const printableArea = document.getElementById('printable-chamada-area');
-      if (printableArea) {
-        printableArea.innerHTML = generatePrintDocumentHtml();
-        printableArea.classList.remove('hidden');
-        document.body.classList.add('printing-chamada');
+      if (document.body.classList.contains('printing-chamada')) {
+        const printableArea = document.getElementById('printable-chamada-area');
+        if (printableArea && !printableArea.innerHTML.trim()) {
+          printableArea.innerHTML = generatePrintDocumentHtml();
+          printableArea.classList.remove('hidden');
+        }
       }
     });
 
     // Vincula evento global afterprint para restaurar o DOM
     window.addEventListener('afterprint', () => {
-      document.body.classList.remove('printing-chamada');
+      document.body.classList.remove('printing-chamada', 'printing-organograma-tree', 'printing-organograma-table');
       const printableArea = document.getElementById('printable-chamada-area');
-      if (printableArea) printableArea.classList.add('hidden');
+      if (printableArea) {
+        printableArea.classList.add('hidden');
+        printableArea.innerHTML = '';
+      }
     });
 
     // Função pública chamada pelos botões de tela
