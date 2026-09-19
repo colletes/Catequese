@@ -2417,20 +2417,44 @@
         <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
           <div class="table-freeze-container">
             <table class="w-full text-left text-xs sm:text-sm border-collapse">
-              <thead class="sticky top-0 z-20 bg-slate-900 text-white">
-                <tr class="border-b-2 border-indigo-500 bg-slate-900">
-                  <th class="py-3 px-3 font-heading text-center col-freeze-idx">#</th>
-                  <th class="py-3 px-3.5 font-heading col-freeze-name">Nome Completo</th>
-                  <th class="py-3 px-2.5 font-heading text-center min-w-[110px]">CPF</th>
-                  <th class="py-3 px-2.5 font-heading text-center min-w-[95px]">Data Nasc.</th>
-                  <th class="py-3 px-3 font-heading min-w-[130px]">Telefone (WhatsApp)</th>
-                  <th class="py-3 px-3 font-heading min-w-[160px]">E-mail</th>
-                  <th class="py-3 px-3.5 font-heading min-w-[210px]">Endereço</th>
-                  <th class="py-3 px-3 font-heading min-w-[150px]">Estado Civil / Afetivo</th>
-                  <th class="py-3 px-2.5 font-heading text-center min-w-[85px]">Batizado?</th>
-                  <th class="py-3 px-2.5 font-heading text-center min-w-[85px]">1ª Eucaristia?</th>
-                  <th class="py-3 px-2.5 font-heading text-center min-w-[95px]">Impedido(a)?</th>
-                  <th class="py-3 px-3 font-heading min-w-[170px]">Justificativa</th>
+              <thead class="sticky top-0 z-20 bg-slate-900 text-white select-none">
+                <tr class="border-b-2 border-indigo-500 bg-slate-900 text-xs">
+                  <th id="th-aluno-idx" onclick="setAlunosSort('idx')" class="py-3 px-3 font-heading text-center col-freeze-idx cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Posição">
+                    <span>#</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
+                  </th>
+                  <th id="th-aluno-nome" onclick="setAlunosSort('nome')" class="py-3 px-3.5 font-heading col-freeze-name cursor-pointer hover:bg-slate-800 transition text-[#d4a94f]" title="Ordenar por Nome (Padrão Alfabético)">
+                    <span>Nome Completo</span><span class="sort-icon text-[10px] text-amber-300"> ▲</span>
+                  </th>
+                  <th id="th-aluno-cpf" onclick="setAlunosSort('cpf')" class="py-3 px-2.5 font-heading text-center min-w-[110px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por CPF">
+                    <span>CPF</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
+                  </th>
+                  <th id="th-aluno-nasc" onclick="setAlunosSort('dataNascimento')" class="py-3 px-2.5 font-heading text-center min-w-[95px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Data de Nascimento">
+                    <span>Data Nasc.</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
+                  </th>
+                  <th id="th-aluno-contato" onclick="setAlunosSort('contato')" class="py-3 px-3 font-heading min-w-[130px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Telefone">
+                    <span>Telefone</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
+                  </th>
+                  <th id="th-aluno-email" onclick="setAlunosSort('email')" class="py-3 px-3 font-heading min-w-[160px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por E-mail">
+                    <span>E-mail</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
+                  </th>
+                  <th id="th-aluno-endereco" onclick="setAlunosSort('endereco')" class="py-3 px-3.5 font-heading min-w-[210px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Endereço">
+                    <span>Endereço</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
+                  </th>
+                  <th id="th-aluno-estado-civil" onclick="setAlunosSort('estadoCivil')" class="py-3 px-3 font-heading min-w-[150px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Estado Civil">
+                    <span>Estado Civil</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
+                  </th>
+                  <th id="th-aluno-batizado" onclick="setAlunosSort('batizado')" class="py-3 px-2.5 font-heading text-center min-w-[85px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Batismo">
+                    <span>Batizado?</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
+                  </th>
+                  <th id="th-aluno-eucaristia" onclick="setAlunosSort('primeiraEucaristia')" class="py-3 px-2.5 font-heading text-center min-w-[85px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por 1ª Eucaristia">
+                    <span>1ª Euc.?</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
+                  </th>
+                  <th id="th-aluno-impedido" onclick="setAlunosSort('impedido')" class="py-3 px-2.5 font-heading text-center min-w-[95px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Impedimento">
+                    <span>Impedido?</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
+                  </th>
+                  <th id="th-aluno-justificativa" onclick="setAlunosSort('justificativa')" class="py-3 px-3 font-heading min-w-[170px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Justificativa">
+                    <span>Justificativa</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
+                  </th>
                   <th class="py-3 px-2.5 font-heading text-center no-print w-16">Ações</th>
                 </tr>
               </thead>
@@ -2552,14 +2576,26 @@
 
           <div class="overflow-x-auto">
             <table class="w-full text-left text-xs sm:text-sm border-collapse">
-              <thead class="bg-slate-100/80 text-slate-700 border-b border-slate-200">
+              <thead class="bg-slate-100/80 text-slate-700 border-b border-slate-200 select-none">
                 <tr>
-                  <th class="py-3 px-3 text-center font-bold w-12">#</th>
-                  <th class="py-3 px-4 font-bold min-w-[200px]">Catequizando</th>
-                  <th class="py-3 px-4 font-bold text-center min-w-[240px]">Status no Encontro</th>
-                  <th class="py-3 px-4 font-bold min-w-[220px]">Justificativa / Motivo</th>
-                  <th class="py-3 px-4 font-bold text-center min-w-[140px]">Faltas Totais</th>
-                  <th class="py-3 px-4 font-bold text-center min-w-[150px]">Situação Pastoral</th>
+                  <th id="th-cham-idx" onclick="setChamadaSort('idx')" class="py-3 px-3 text-center font-bold w-12 cursor-pointer hover:bg-slate-200 transition" title="Ordenar por Posição">
+                    <span>#</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
+                  </th>
+                  <th id="th-cham-nome" onclick="setChamadaSort('nome')" class="py-3 px-4 font-bold min-w-[200px] cursor-pointer hover:bg-slate-200 transition text-indigo-600 font-black" title="Ordenar por Nome (Padrão Alfabético)">
+                    <span>Catequizando</span><span class="sort-icon text-[10px] text-indigo-600 font-bold"> ▲</span>
+                  </th>
+                  <th id="th-cham-status" onclick="setChamadaSort('status')" class="py-3 px-4 font-bold text-center min-w-[240px] cursor-pointer hover:bg-slate-200 transition" title="Ordenar por Status no Encontro">
+                    <span>Status no Encontro</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
+                  </th>
+                  <th id="th-cham-justificativa" onclick="setChamadaSort('justificativa')" class="py-3 px-4 font-bold min-w-[220px] cursor-pointer hover:bg-slate-200 transition" title="Ordenar por Justificativa">
+                    <span>Justificativa / Motivo</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
+                  </th>
+                  <th id="th-cham-faltas" onclick="setChamadaSort('faltas')" class="py-3 px-4 font-bold text-center min-w-[140px] cursor-pointer hover:bg-slate-200 transition" title="Ordenar por Faltas Totais">
+                    <span>Faltas Totais</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
+                  </th>
+                  <th id="th-cham-situacao" onclick="setChamadaSort('situacao')" class="py-3 px-4 font-bold text-center min-w-[150px] cursor-pointer hover:bg-slate-200 transition" title="Ordenar por Situação Pastoral">
+                    <span>Situação Pastoral</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
+                  </th>
                 </tr>
               </thead>
               <tbody id="chamada-table-dia-body" class="divide-y divide-slate-100">
@@ -9888,6 +9924,103 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     let currentAlunosEtapa = 'Crisma Adultos';
     let currentAlunosTurma = 'Turma 03';
 
+    // Estado de Ordenação para Cadastro e Chamada (Padrão: Alfabético asc por Nome)
+    let alunosSortColumn = 'nome';
+    let alunosSortDirection = 'asc';
+    let chamadaSortColumn = 'nome';
+    let chamadaSortDirection = 'asc';
+
+    function setAlunosSort(col) {
+      if (alunosSortColumn === col) {
+        alunosSortDirection = alunosSortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        alunosSortColumn = col;
+        alunosSortDirection = 'asc';
+      }
+      updateAlunosSortHeadersUI();
+      renderAlunosTable();
+    }
+
+    function updateAlunosSortHeadersUI() {
+      const colMap = {
+        'idx': 'th-aluno-idx',
+        'nome': 'th-aluno-nome',
+        'cpf': 'th-aluno-cpf',
+        'dataNascimento': 'th-aluno-nasc',
+        'contato': 'th-aluno-contato',
+        'email': 'th-aluno-email',
+        'endereco': 'th-aluno-endereco',
+        'estadoCivil': 'th-aluno-estado-civil',
+        'batizado': 'th-aluno-batizado',
+        'primeiraEucaristia': 'th-aluno-eucaristia',
+        'impedido': 'th-aluno-impedido',
+        'justificativa': 'th-aluno-justificativa'
+      };
+
+      Object.entries(colMap).forEach(([c, thId]) => {
+        const th = document.getElementById(thId);
+        if (!th) return;
+        const iconSpan = th.querySelector('.sort-icon');
+        if (c === alunosSortColumn) {
+          th.classList.add('text-[#d4a94f]');
+          if (iconSpan) {
+            iconSpan.textContent = alunosSortDirection === 'asc' ? ' ▲' : ' ▼';
+            iconSpan.className = 'sort-icon text-[10px] text-amber-300';
+          }
+        } else {
+          th.classList.remove('text-[#d4a94f]');
+          if (iconSpan) {
+            iconSpan.textContent = ' ↕';
+            iconSpan.className = 'sort-icon text-[10px] text-slate-400';
+          }
+        }
+      });
+    }
+
+    function setChamadaSort(col) {
+      if (chamadaSortColumn === col) {
+        chamadaSortDirection = chamadaSortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        chamadaSortColumn = col;
+        chamadaSortDirection = (col === 'faltas' || col === 'pres' || col === 'pct') ? 'desc' : 'asc';
+      }
+      updateChamadaSortHeadersUI();
+      if (currentAlunosSubTab === 'chamada') {
+        renderChamadaDiaTable();
+        renderChamadaMatrizTable();
+      }
+    }
+
+    function updateChamadaSortHeadersUI() {
+      const colMap = {
+        'idx': 'th-cham-idx',
+        'nome': 'th-cham-nome',
+        'status': 'th-cham-status',
+        'justificativa': 'th-cham-justificativa',
+        'faltas': 'th-cham-faltas',
+        'situacao': 'th-cham-situacao'
+      };
+
+      Object.entries(colMap).forEach(([c, thId]) => {
+        const th = document.getElementById(thId);
+        if (!th) return;
+        const iconSpan = th.querySelector('.sort-icon');
+        if (c === chamadaSortColumn) {
+          th.classList.add('text-indigo-600', 'font-black');
+          if (iconSpan) {
+            iconSpan.textContent = chamadaSortDirection === 'asc' ? ' ▲' : ' ▼';
+            iconSpan.className = 'sort-icon text-[10px] text-indigo-600 font-bold';
+          }
+        } else {
+          th.classList.remove('text-indigo-600', 'font-black');
+          if (iconSpan) {
+            iconSpan.textContent = ' ↕';
+            iconSpan.className = 'sort-icon text-[10px] text-slate-400 font-normal';
+          }
+        }
+      });
+    }
+
     function aprovarAlunosLorenaDirect(db) {
       let changed = false;
       let count = 0;
@@ -10004,7 +10137,9 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     function getTurmaAlunos(etapa, turma) {
       const db = getAlunosDatabase();
       const key = getTurmaKey(etapa, turma);
-      return db[key] || [];
+      const list = (db[key] || []).slice();
+      // Ordenação padrão alfabética por nome (A-Z)
+      return list.sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR', { sensitivity: 'base' }));
     }
 
     function populateTurmasSelect(selectedEtapa, preferredTurma) {
@@ -10389,6 +10524,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       if (!tbody) return;
 
       const alunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma);
+      alunos.forEach((a, i) => { a._originalIdx = i; });
+
       const searchInput = document.getElementById('search-alunos-turma');
       const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
 
@@ -10404,6 +10541,44 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
                (a.impedido || '').toLowerCase().includes(query) ||
                (a.contato || '').toLowerCase().includes(query);
       });
+
+      // Aplica ordenação selecionada pelo usuário
+      filtered.sort((a, b) => {
+        let cmp = 0;
+        if (alunosSortColumn === 'idx') {
+          cmp = (a._originalIdx ?? 0) - (b._originalIdx ?? 0);
+        } else if (alunosSortColumn === 'dataNascimento') {
+          const parseDate = (d) => {
+            if (!d) return 0;
+            const parts = d.split(/[-/]/);
+            if (parts.length === 3) {
+              if (parts[0].length === 4) return new Date(parts[0], parts[1] - 1, parts[2]).getTime();
+              return new Date(parts[2], parts[1] - 1, parts[0]).getTime();
+            }
+            return 0;
+          };
+          cmp = parseDate(a.dataNascimento) - parseDate(b.dataNascimento);
+        } else if (alunosSortColumn === 'cpf') {
+          const valA = (a.cpf || '').replace(/\D/g, '');
+          const valB = (b.cpf || '').replace(/\D/g, '');
+          cmp = valA.localeCompare(valB);
+        } else {
+          const valA = (a[alunosSortColumn] || '').toString().trim();
+          const valB = (b[alunosSortColumn] || '').toString().trim();
+          cmp = valA.localeCompare(valB, 'pt-BR', { sensitivity: 'base' });
+        }
+
+        // Desempate alfabético por nome
+        if (cmp === 0) {
+          cmp = (a.nome || '').localeCompare(b.nome || '', 'pt-BR', { sensitivity: 'base' });
+        }
+
+        return alunosSortDirection === 'asc' ? cmp : -cmp;
+      });
+
+      if (typeof updateAlunosSortHeadersUI === 'function') {
+        updateAlunosSortHeadersUI();
+      }
 
       // Atualiza KPIs
       const kpiTotal = document.getElementById('kpi-total-alunos');
@@ -11417,7 +11592,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
       const records = (dataTurma.records && dataTurma.records[currDate]) || {};
 
-      tbody.innerHTML = alunos.map((a, idx) => {
+      const enrichedAlunos = alunos.map((a, originalIdx) => {
         const rec = records[a.id] || { status: '', justificativa: '' };
         const status = rec.status || '';
         const just = rec.justificativa || '';
@@ -11427,7 +11602,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         let totalPresencas = 0;
         let totalJustificadas = 0;
 
-        dataTurma.dates.forEach(d => {
+        (dataTurma.dates || []).forEach(d => {
           const r = dataTurma.records && dataTurma.records[d] && dataTurma.records[d][a.id];
           if (r) {
             if (r.status === 'P') totalPresencas++;
@@ -11438,6 +11613,63 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             }
           }
         });
+
+        // Peso pastoral: Alerta (>3) = 3, Limite (3) = 2, Regular (<3) = 1
+        const situacaoPeso = totalFaltas > 3 ? 3 : (totalFaltas === 3 ? 2 : 1);
+
+        return {
+          aluno: a,
+          originalIdx,
+          id: a.id,
+          nome: a.nome || '',
+          contato: a.contato || '',
+          status,
+          justificativa: just,
+          totalFaltas,
+          totalPresencas,
+          totalJustificadas,
+          situacaoPeso
+        };
+      });
+
+      // Aplica ordenação
+      enrichedAlunos.sort((a, b) => {
+        let cmp = 0;
+        if (chamadaSortColumn === 'idx') {
+          cmp = a.originalIdx - b.originalIdx;
+        } else if (chamadaSortColumn === 'status') {
+          const stRank = s => s === 'P' ? 1 : s === 'J' ? 2 : s === 'F' ? 3 : 4;
+          cmp = stRank(a.status) - stRank(b.status);
+        } else if (chamadaSortColumn === 'justificativa') {
+          cmp = (a.justificativa || '').localeCompare(b.justificativa || '', 'pt-BR', { sensitivity: 'base' });
+        } else if (chamadaSortColumn === 'faltas') {
+          cmp = a.totalFaltas - b.totalFaltas;
+        } else if (chamadaSortColumn === 'pres') {
+          cmp = a.totalPresencas - b.totalPresencas;
+        } else if (chamadaSortColumn === 'situacao') {
+          cmp = a.situacaoPeso - b.situacaoPeso;
+        } else {
+          cmp = a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' });
+        }
+
+        // Desempate alfabético por nome
+        if (cmp === 0) {
+          cmp = a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' });
+        }
+
+        return chamadaSortDirection === 'asc' ? cmp : -cmp;
+      });
+
+      if (typeof updateChamadaSortHeadersUI === 'function') {
+        updateChamadaSortHeadersUI();
+      }
+
+      tbody.innerHTML = enrichedAlunos.map((item, idx) => {
+        const a = item.aluno;
+        const status = item.status;
+        const just = item.justificativa;
+        const totalFaltas = item.totalFaltas;
+        const totalJustificadas = item.totalJustificadas;
 
         // Determina indicador pastoral segundo a regra de limite de 3 faltas
         let situacaoBadge = '';
@@ -11520,11 +11752,22 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       const dataTurma = getTurmaChamadasData(currentAlunosEtapa, currentAlunosTurma);
       const dates = dataTurma.dates || [];
 
+      const getMatrizSortIcon = (col) => {
+        if (chamadaSortColumn === col) {
+          return `<span class="text-amber-300 text-[10px] font-bold">${chamadaSortDirection === 'asc' ? ' ▲' : ' ▼'}</span>`;
+        }
+        return `<span class="text-slate-400 text-[10px] font-normal"> ↕</span>`;
+      };
+
       // Monta Cabeçalho
       let theadHtml = `
-        <tr class="border-b-2 border-indigo-500 bg-slate-900 text-white">
-          <th class="py-3 px-3 font-heading text-center col-freeze-idx">#</th>
-          <th class="py-3 px-3.5 font-heading col-freeze-name min-w-[200px]">Catequizando</th>
+        <tr class="border-b-2 border-indigo-500 bg-slate-900 text-white select-none">
+          <th onclick="setChamadaSort('idx')" class="py-3 px-3 font-heading text-center col-freeze-idx cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Posição">
+            <span>#</span>${getMatrizSortIcon('idx')}
+          </th>
+          <th onclick="setChamadaSort('nome')" class="py-3 px-3.5 font-heading col-freeze-name min-w-[200px] cursor-pointer hover:bg-slate-800 transition ${chamadaSortColumn === 'nome' ? 'text-[#d4a94f]' : ''}" title="Ordenar por Nome (Padrão Alfabético)">
+            <span>Catequizando</span>${getMatrizSortIcon('nome')}
+          </th>
       `;
 
       dates.forEach(dStr => {
@@ -11543,11 +11786,11 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       });
 
       theadHtml += `
-          <th class="py-3 px-2.5 font-heading text-center text-xs min-w-[50px] bg-emerald-950 text-emerald-300">P</th>
-          <th class="py-3 px-2.5 font-heading text-center text-xs min-w-[50px] bg-amber-950 text-amber-300">J</th>
-          <th class="py-3 px-2.5 font-heading text-center text-xs min-w-[50px] bg-rose-950 text-rose-300">F</th>
-          <th class="py-3 px-2.5 font-heading text-center text-xs min-w-[65px] bg-slate-800 text-indigo-300">% Pres.</th>
-          <th class="py-3 px-3 font-heading text-center text-xs min-w-[140px]">Situação Pastoral</th>
+          <th onclick="setChamadaSort('pres')" class="py-3 px-2.5 font-heading text-center text-xs min-w-[50px] bg-emerald-950 text-emerald-300 cursor-pointer hover:bg-emerald-900 transition" title="Ordenar por Presenças">P${getMatrizSortIcon('pres')}</th>
+          <th onclick="setChamadaSort('just')" class="py-3 px-2.5 font-heading text-center text-xs min-w-[50px] bg-amber-950 text-amber-300 cursor-pointer hover:bg-amber-900 transition" title="Ordenar por Justificadas">J${getMatrizSortIcon('just')}</th>
+          <th onclick="setChamadaSort('faltas')" class="py-3 px-2.5 font-heading text-center text-xs min-w-[50px] bg-rose-950 text-rose-300 cursor-pointer hover:bg-rose-900 transition" title="Ordenar por Faltas">F${getMatrizSortIcon('faltas')}</th>
+          <th onclick="setChamadaSort('pct')" class="py-3 px-2.5 font-heading text-center text-xs min-w-[65px] bg-slate-800 text-indigo-300 cursor-pointer hover:bg-slate-700 transition" title="Ordenar por % Frequência">% Pres.${getMatrizSortIcon('pct')}</th>
+          <th onclick="setChamadaSort('situacao')" class="py-3 px-3 font-heading text-center text-xs min-w-[140px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Situação Pastoral">Situação Pastoral${getMatrizSortIcon('situacao')}</th>
         </tr>
       `;
       thead.innerHTML = theadHtml;
@@ -11564,11 +11807,69 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         return;
       }
 
-      tbody.innerHTML = alunos.map((a, idx) => {
+      // Prepara lista enriquecida com cálculos de frequência
+      const enrichedMatriz = alunos.map((a, originalIdx) => {
         let pres = 0;
         let just = 0;
         let falt = 0;
-        let totalAulasRealizadas = 0;
+
+        dates.forEach(dStr => {
+          const rec = dataTurma.records && dataTurma.records[dStr] && dataTurma.records[dStr][a.id];
+          const st = rec ? rec.status : '';
+          if (st === 'P') pres++;
+          else if (st === 'J') { just++; falt++; }
+          else if (st === 'F') falt++;
+        });
+
+        const totalRegistros = pres + falt;
+        const taxaPresenca = totalRegistros > 0 ? Math.round((pres / totalRegistros) * 100) : 100;
+        const situacaoPeso = falt > 3 ? 3 : (falt === 3 ? 2 : 1);
+
+        return {
+          aluno: a,
+          originalIdx,
+          id: a.id,
+          nome: a.nome || '',
+          pres,
+          just,
+          falt,
+          taxaPresenca,
+          situacaoPeso
+        };
+      });
+
+      // Aplica ordenação
+      enrichedMatriz.sort((a, b) => {
+        let cmp = 0;
+        if (chamadaSortColumn === 'idx') {
+          cmp = a.originalIdx - b.originalIdx;
+        } else if (chamadaSortColumn === 'pres') {
+          cmp = a.pres - b.pres;
+        } else if (chamadaSortColumn === 'just') {
+          cmp = a.just - b.just;
+        } else if (chamadaSortColumn === 'faltas') {
+          cmp = a.falt - b.falt;
+        } else if (chamadaSortColumn === 'pct') {
+          cmp = a.taxaPresenca - b.taxaPresenca;
+        } else if (chamadaSortColumn === 'situacao') {
+          cmp = a.situacaoPeso - b.situacaoPeso;
+        } else {
+          cmp = a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' });
+        }
+
+        if (cmp === 0) {
+          cmp = a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' });
+        }
+
+        return chamadaSortDirection === 'asc' ? cmp : -cmp;
+      });
+
+      tbody.innerHTML = enrichedMatriz.map((item, idx) => {
+        const a = item.aluno;
+        const pres = item.pres;
+        const just = item.just;
+        const falt = item.falt;
+        const taxaPresenca = item.taxaPresenca;
 
         let cellsHtml = '';
         dates.forEach(dStr => {
@@ -11580,19 +11881,12 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           let badgeClass = 'bg-slate-50 border border-slate-200 text-slate-400 hover:bg-slate-100';
 
           if (st === 'P') {
-            pres++;
-            totalAulasRealizadas++;
             badgeContent = '<span class="text-emerald-700 font-black">P</span>';
             badgeClass = 'bg-emerald-100 border border-emerald-300 shadow-2xs hover:bg-emerald-200';
           } else if (st === 'J') {
-            just++;
-            falt++; // Regra: conta como falta estatística, mas com justificativa
-            totalAulasRealizadas++;
             badgeContent = '<span class="text-amber-800 font-black">J</span>';
             badgeClass = 'bg-amber-100 border border-amber-300 shadow-2xs hover:bg-amber-200';
           } else if (st === 'F') {
-            falt++;
-            totalAulasRealizadas++;
             badgeContent = '<span class="text-rose-700 font-black">F</span>';
             badgeClass = 'bg-rose-100 border border-rose-300 shadow-2xs hover:bg-rose-200';
           }
@@ -11605,10 +11899,6 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             </td>
           `;
         });
-
-        // Totais e % de presença
-        const totalRegistros = pres + falt; // falt já inclui J
-        const taxaPresenca = totalRegistros > 0 ? Math.round((pres / totalRegistros) * 100) : 100;
 
         // Situação pastoral segundo o limite de 3 faltas
         let sitHtml = '';
