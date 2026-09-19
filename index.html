@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Catequese Paroquial 2026 • Santuário Imaculado Coração de Maria</title>
+  <title>Catequese Paroquial • Santuário Imaculado Coração de Maria</title>
   
   <!-- Favicon Oficial do Santuário -->
   <link rel="icon" href="https://imaculadocoracaodf.com.br/wp-content/uploads/2024/01/cropped-PICM-BrasAo-para-impressos-32x32.png" sizes="32x32">
@@ -573,7 +573,7 @@
         <span class="w-8 h-8 rounded-xl bg-rose-950 text-rose-400 border border-rose-500/30 flex items-center justify-center text-sm flex-shrink-0">📅</span>
         <div class="flex-1 min-w-0">
           <div class="text-xs font-bold text-slate-200 group-hover:text-rose-300">Eventos & Retiros</div>
-          <div class="text-[10px] text-slate-400 truncate">Calendário pastoral e retiros 2026</div>
+          <div class="text-[10px] text-slate-400 truncate">Calendário pastoral e retiros</div>
         </div>
       </button>
 
@@ -646,7 +646,7 @@
         </a>
         <div>
           <div class="flex items-center gap-2">
-            <span class="text-[10px] font-bold tracking-widest text-[#d4a94f] uppercase bg-amber-950/80 px-2 py-0.5 rounded-md border border-amber-500/30 font-heading">Catequese Paroquial • 2026</span>
+            <span id="header-catequese-year-badge" class="text-[10px] font-bold tracking-widest text-[#d4a94f] uppercase bg-amber-950/80 px-2 py-0.5 rounded-md border border-amber-500/30 font-heading">Pastoral da Catequese</span>
             <span class="text-[10.5px] text-emerald-400 font-semibold hidden sm:inline flex items-center gap-1">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Sistema Privado LGPD
             </span>
@@ -792,6 +792,13 @@
           <div class="flex items-center gap-1.5 text-xs text-slate-500 font-medium pl-1.5 sm:pl-2 border-l border-slate-200">
             <span class="text-slate-400 hidden sm:inline">Aba ativa:</span>
             <span id="current-tab-name" class="font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200/80">Complexo Paroquial</span>
+          </div>
+
+          <div class="flex items-center gap-1.5 text-xs text-slate-500 font-medium pl-1.5 sm:pl-2 border-l border-slate-200">
+            <span class="text-slate-400 hidden sm:inline">Ano:</span>
+            <select id="quick-year-selector" onchange="setActiveOrganogramaId(this.value)" class="bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold px-2 py-0.5 rounded-lg border border-slate-300 text-xs outline-none cursor-pointer" title="Alternar ano do organograma e turmas">
+              <option value="org-2026">2026</option>
+            </select>
           </div>
         </div>
 
@@ -1934,7 +1941,7 @@
           <div>
             <div class="flex items-center gap-2 mb-2">
               <span class="w-3 h-3 rounded-full bg-[#d4a94f]"></span>
-              <span class="text-xs font-bold uppercase tracking-wider text-[#d4a94f] font-heading">Estrutura Organizacional &amp; Atribuições 2026</span>
+              <span class="text-xs font-bold uppercase tracking-wider text-[#d4a94f] font-heading">Estrutura Organizacional &amp; Atribuições</span>
             </div>
             <h2 class="text-2xl sm:text-3xl font-bold font-heading text-white">
               Papéis e Responsabilidades Pastorais
@@ -2252,7 +2259,7 @@
           <div>
             <div class="flex items-center gap-2 mb-2">
               <span class="w-3 h-3 rounded-full bg-indigo-400"></span>
-              <span class="text-xs font-bold uppercase tracking-wider text-indigo-300 font-heading">Gestão de Catequizandos 2026</span>
+              <span class="text-xs font-bold uppercase tracking-wider text-indigo-300 font-heading">Gestão de Catequizandos</span>
             </div>
             <h2 class="text-2xl sm:text-3xl font-bold font-heading text-white flex items-center gap-2">
               <span>📋</span> <span>Listas de Turmas &amp; Chamada</span>
@@ -3055,7 +3062,7 @@
         <div class="relative z-10 max-w-3xl">
           <div class="flex items-center gap-2 text-[#d4a94f] text-xs font-bold uppercase tracking-wider mb-2 font-heading">
             <span class="text-sm">✝</span>
-            <span>Pastoral da Catequese • Ano Pastoral 2026</span>
+            <span>Pastoral da Catequese • Anos Pastorais</span>
           </div>
           <h2 class="text-2xl sm:text-4xl font-black tracking-tight text-white font-heading mb-2">
             Painel Geral da Catequese
@@ -3069,7 +3076,7 @@
               <span>Abrir Menu Completo (7 Abas)</span>
             </button>
             <button onclick="switchTab('guia')" class="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-xl text-xs font-semibold transition">
-              <span>🌳 Ver Organograma 2026</span>
+              <span>🌳 Ver Organograma</span>
             </button>
             <button onclick="switchTab('alunos')" class="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-xl text-xs font-semibold transition">
               <span>📋 Lista de Chamada</span>
@@ -3227,14 +3234,14 @@
                   📅
                 </div>
                 <span class="bg-rose-100 text-rose-900 text-[10.5px] font-extrabold uppercase px-2.5 py-1 rounded-full border border-rose-300/60 font-heading">
-                  Calendário 2026
+                  Eventos &amp; Retiros
                 </span>
               </div>
               <h4 class="text-xl font-bold font-heading text-slate-900 group-hover:text-rose-800 transition-colors mb-2">
                 Eventos &amp; Retiros
               </h4>
               <p class="text-xs text-slate-600 leading-relaxed mb-4">
-                Cronograma anual unificado da Pastoral da Catequese 2026. Datas de encontros com pais e padrinhos, retiros espirituais de crismandos, celebrações litúrgicas e calendário de feriados.
+                Cronograma anual unificado da Pastoral da Catequese. Datas de encontros com pais e padrinhos, retiros espirituais de crismandos, celebrações litúrgicas e calendário de feriados.
               </p>
               <div class="flex flex-wrap gap-1.5 mb-4">
                 <span class="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium">Retiros</span>
@@ -3333,7 +3340,7 @@
         <div>
           <div class="flex items-center gap-2 mb-2">
             <span class="w-3 h-3 rounded-full bg-rose-400"></span>
-            <span class="text-xs font-bold uppercase tracking-wider text-rose-300">Pastoral da Catequese 2026</span>
+            <span class="text-xs font-bold uppercase tracking-wider text-rose-300">Pastoral da Catequese</span>
           </div>
           <h2 class="text-2xl font-black font-heading">Eventos &amp; Retiros</h2>
           <p class="text-sm text-slate-300 mt-1">Cronograma oficial de eventos pastorais • Santuário ICM Park Way</p>
@@ -3393,11 +3400,11 @@
             </div>
           </div>
           <p class="text-slate-400 text-xs leading-relaxed max-w-md">
-            Portal oficial da <strong>Pastoral da Catequese</strong> para organização de turmas, escala de salas, mapa dos complexos pastorais e cronograma formativo de 2026.
+            Portal oficial da <strong>Pastoral da Catequese</strong> para organização de turmas, escala de salas, mapa dos complexos pastorais e cronograma formativo contínuo.
           </p>
           <div class="flex items-center gap-2 pt-1 text-[11px] text-slate-400">
             <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>Ambiente seguro e atualizado para o ano catequético 2026</span>
+            <span>Ambiente pastoral seguro e atualizado</span>
           </div>
         </div>
 
@@ -3457,7 +3464,7 @@
 
       <!-- Sub-footer -->
       <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-500">
-        <p>© 2026 Santuário Imaculado Coração de Maria • Todos os direitos reservados.</p>
+        <p>© Santuário Imaculado Coração de Maria • Todos os direitos reservados.</p>
         <p class="flex items-center gap-2">
           <span>Identidade Visual sincronizada com</span>
           <a href="https://imaculadocoracaodf.com.br/" target="_blank" rel="noopener" class="text-[#d4a94f] hover:underline">imaculadocoracaodf.com.br</a>
@@ -6344,7 +6351,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         const dataFmt = _dataFmt(ev.data);
         const partes = dataFmt.split('/');
         const diaMes = partes.length >= 2 ? `${partes[0]}/${partes[1]}` : dataFmt;
-        const ano = partes.length === 3 ? partes[2] : '2026';
+        const ano = partes.length === 3 ? partes[2] : String(new Date().getFullYear());
         const diaSem = _diaSemana(ev.data);
 
         return `
@@ -6626,6 +6633,13 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     const stPerv27 = SEED_ORGANOGRAMAS['org-2027'].stages.find(s => s.id === 'perv');
     if (stPerv27) { stPerv27.coord = 'Bruna Neto'; stPerv27.vice = 'Rosângela'; }
 
+    // Gera o organograma inicial de 2028 para suporte nativo a anos futuros
+    SEED_ORGANOGRAMAS['org-2028'] = JSON.parse(JSON.stringify(SEED_ORGANOGRAMAS['org-2027']));
+    SEED_ORGANOGRAMAS['org-2028'].id = 'org-2028';
+    SEED_ORGANOGRAMAS['org-2028'].name = '2028';
+    SEED_ORGANOGRAMAS['org-2028'].isDefault = false;
+    SEED_ORGANOGRAMAS['org-2028'].title = 'Catequese Paroquial • 2028';
+
     // Ler dados de organogramas do LocalStorage
     function getOrganogramasData() {
       try {
@@ -6633,6 +6647,10 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         if (stored) {
           const parsed = JSON.parse(stored);
           if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
+            // Garante que anos pré-configurados (como 2027 e 2028) estejam disponíveis
+            Object.keys(SEED_ORGANOGRAMAS).forEach(k => {
+              if (!parsed[k]) parsed[k] = JSON.parse(JSON.stringify(SEED_ORGANOGRAMAS[k]));
+            });
             return parsed;
           }
         }
@@ -6696,28 +6714,38 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     // Renderizar Pílulas de Alternância de Organograma
     function renderOrganogramaPills() {
       const container = document.getElementById('organograma-pills-list');
-      if (!container) return;
-
       const data = getOrganogramasData();
       const activeId = getActiveOrganogramaId();
       const activeOrg = data[activeId] || Object.values(data)[0];
 
-      // Atualiza Badge do Topo
+      // Atualiza Badge do Topo e Selector rápido de anos
       const titleBadge = document.getElementById('org-active-badge-title');
       const statsBadge = document.getElementById('org-active-stats-pill');
+      const headerYearBadge = document.getElementById('header-catequese-year-badge');
+      const quickYearSelector = document.getElementById('quick-year-selector');
+
       let totalTurmas = 0;
       if (activeOrg && activeOrg.stages) {
         totalTurmas = activeOrg.stages.reduce((acc, st) => acc + (st.turmas ? st.turmas.length : 0), 0);
       }
       if (titleBadge) titleBadge.textContent = `Organograma ${activeOrg.name || 'Oficial'}`;
       if (statsBadge) statsBadge.textContent = `${totalTurmas} turmas`;
+      if (headerYearBadge) headerYearBadge.textContent = `Catequese Paroquial • ${activeOrg.name || ''}`;
+
+      if (quickYearSelector) {
+        quickYearSelector.innerHTML = Object.values(data).map(org => `
+          <option value="${org.id}" ${org.id === activeId ? 'selected' : ''}>Ano ${org.name}</option>
+        `).join('');
+      }
+
+      if (!container) return;
 
       // Renderiza Pílulas
       container.innerHTML = Object.values(data).map(org => {
         const isActive = org.id === activeId;
         const count = (org.stages || []).reduce((acc, st) => acc + (st.turmas ? st.turmas.length : 0), 0);
         return `
-          <button onclick="setActiveOrganogramaId('${org.id}')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${isActive ? 'bg-gradient-to-r from-[#d4a94f] to-[#b88d36] text-slate-950 shadow-md shadow-amber-500/20 ring-2 ring-amber-300' : 'bg-slate-800/90 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700'}">
+          <button onclick="setActiveOrganogramaId('${org.id}')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${isActive ? 'bg-gradient-to-r from-[#d4a94f] to-[#b88d36] text-slate-950 shadow-md shadow-amber-500/20 ring-2 ring-amber-300' : 'bg-slate-800/90 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700'}">
             <span>📅 ${org.name}</span>
             <span class="text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${isActive ? 'bg-amber-950 text-amber-200' : 'bg-slate-900 text-slate-400'}">${count}</span>
           </button>
@@ -7021,8 +7049,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     // =============================================
     function criarNovoOrganograma() {
       const role = window.appAuthState ? window.appAuthState.role : null;
-      if (role && role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL) {
-        alert('⚠️ Operação não permitida: A criação de novos organogramas é restrita à Coordenação Geral e ao Master Admin.');
+      if (role && role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL && role !== window.ICM_CONFIG.ROLES.VICE_COORD_GERAL) {
+        alert('⚠️ Operação não permitida: A criação de novos organogramas é restrita à Coordenação e ao Master Admin.');
         return;
       }
 
@@ -7055,8 +7083,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
     function duplicarOrganogramaAtivo() {
       const role = window.appAuthState ? window.appAuthState.role : null;
-      if (role && role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL) {
-        alert('⚠️ Operação não permitida: A duplicação de organogramas é restrita à Coordenação Geral e ao Master Admin.');
+      if (role && role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL && role !== window.ICM_CONFIG.ROLES.VICE_COORD_GERAL) {
+        alert('⚠️ Operação não permitida: A duplicação de organogramas é restrita à Coordenação e ao Master Admin.');
         return;
       }
 
@@ -7082,8 +7110,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
     function renomearOrganogramaAtivo() {
       const role = window.appAuthState ? window.appAuthState.role : null;
-      if (role && role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL) {
-        alert('⚠️ Operação não permitida: A renomeação de organogramas é restrita à Coordenação Geral e ao Master Admin.');
+      if (role && role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL && role !== window.ICM_CONFIG.ROLES.VICE_COORD_GERAL) {
+        alert('⚠️ Operação não permitida: A renomeação de organogramas é restrita à Coordenação e ao Master Admin.');
         return;
       }
 
@@ -7130,12 +7158,12 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
     function resetOrganogramaDefault() {
       const role = window.appAuthState ? window.appAuthState.role : null;
-      if (role && role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL) {
-        alert('⚠️ Operação não permitida: A restauração de organogramas padrão é restrita à Coordenação Geral e ao Master Admin.');
+      if (role && role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL && role !== window.ICM_CONFIG.ROLES.VICE_COORD_GERAL) {
+        alert('⚠️ Operação não permitida: A restauração de organogramas padrão é restrita à Coordenação e ao Master Admin.');
         return;
       }
 
-      if (!confirm('Deseja restaurar os organogramas padrão oficiais (2026 e 2027)? Todas as alterações locais em todos os organogramas serão redefinidas.')) return;
+      if (!confirm('Deseja restaurar os organogramas padrão oficiais? Todas as alterações locais em todos os organogramas serão redefinidas.')) return;
       saveOrganogramasData(SEED_ORGANOGRAMAS);
       localStorage.setItem(STORAGE_KEY_ACTIVE_ORG_ID, 'org-2026');
       renderOrganogramaAll();
@@ -7147,8 +7175,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     // =============================================
     function openAddTurmaModal(stageName) {
       const role = window.appAuthState ? window.appAuthState.role : null;
-      if (role && role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL) {
-        alert('⚠️ Operação não permitida: O gerenciamento de turmas do organograma é restrito à Coordenação Geral e ao Master Admin.');
+      if (role && role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL && role !== window.ICM_CONFIG.ROLES.VICE_COORD_GERAL) {
+        alert('⚠️ Operação não permitida: O gerenciamento de turmas do organograma é restrito à Coordenação e ao Master Admin.');
         return;
       }
 
@@ -7279,8 +7307,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
     function deleteTurma(turmaId) {
       const role = window.appAuthState ? window.appAuthState.role : null;
-      if (role && role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL) {
-        alert('⚠️ Operação não permitida: A exclusão de turmas do organograma é restrita à Coordenação Geral e ao Master Admin.');
+      if (role && role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL && role !== window.ICM_CONFIG.ROLES.VICE_COORD_GERAL) {
+        alert('⚠️ Operação não permitida: A exclusão de turmas do organograma é restrita à Coordenação e ao Master Admin.');
         return;
       }
 
@@ -7302,8 +7330,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     // Modal de Edição de Coordenações
     function openEditCoordinatorsModal(targetStageId) {
       const role = window.appAuthState ? window.appAuthState.role : null;
-      if (role && role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL) {
-        alert('⚠️ Operação não permitida: A edição de coordenadores é restrita à Coordenação Geral e ao Master Admin.');
+      if (role && role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL && role !== window.ICM_CONFIG.ROLES.VICE_COORD_GERAL) {
+        alert('⚠️ Operação não permitida: A edição de coordenadores é restrita à Coordenação e ao Master Admin.');
         return;
       }
 
@@ -9701,9 +9729,11 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         else if (str.includes('domingo')) targetDayOfWeek = 0;
       }
 
-      // Início do semestre pastoral em Março de 2026
+      // Início do semestre pastoral no ano do organograma ativo
+      const org = (typeof getActiveOrganograma === 'function') ? getActiveOrganograma() : null;
+      const baseYear = (org && org.name && !isNaN(parseInt(org.name))) ? parseInt(org.name) : new Date().getFullYear();
       const dates = [];
-      let d = new Date(2026, 2, 1); // 01/03/2026
+      let d = new Date(baseYear, 2, 1); // 01/03 do ano selecionado
       while (d.getDay() !== targetDayOfWeek) {
         d.setDate(d.getDate() + 1);
       }
