@@ -488,12 +488,159 @@
     </div>
   </div>
 
+  <!-- ============================================================== -->
+  <!-- MENU LATERAL COLAPSÁVEL (TODAS AS ABAS DO PORTAL)              -->
+  <!-- ============================================================== -->
+  <aside
+    id="sidebar-drawer"
+    class="fixed inset-y-0 left-0 z-50 w-72 sm:w-80 bg-slate-950 text-white shadow-2xl border-r border-slate-800 flex flex-col transform -translate-x-full transition-transform duration-300 ease-in-out no-print"
+    aria-label="Menu Lateral de Navegação"
+  >
+    <!-- Header do Menu Lateral -->
+    <div class="p-4 border-b border-slate-800/90 flex items-center justify-between bg-slate-900/80">
+      <div class="flex items-center gap-2.5">
+        <div class="bg-white/10 p-1.5 rounded-xl border border-[#d4a94f]/40 backdrop-blur-sm">
+          <img src="https://imaculadocoracaodf.com.br/wp-content/uploads/2024/01/PICM-BrasAo-para-impressos.png" alt="Brasão" class="h-7 w-auto">
+        </div>
+        <div>
+          <h3 class="text-xs font-bold font-heading text-white">Pastoral da Catequese</h3>
+          <p class="text-[10px] text-[#d4a94f] font-semibold">Todas as Abas do Portal</p>
+        </div>
+      </div>
+      <button
+        onclick="closeSidebarMenu()"
+        class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition border border-slate-700 active:scale-95"
+        title="Fechar Menu"
+      >
+        ✕
+      </button>
+    </div>
+
+    <!-- Lista de Abas -->
+    <div class="flex-1 overflow-y-auto p-3 space-y-1 nav-tabs-scroll">
+      <div class="px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-slate-500 font-heading flex items-center justify-between">
+        <span>Navegação Geral</span>
+        <span class="bg-amber-950/80 text-[#d4a94f] border border-amber-500/30 text-[9px] px-1.5 py-0.2 rounded-full font-sans">7 abas</span>
+      </div>
+
+      <!-- 1. Complexo Paroquial (Home) -->
+      <button onclick="switchTab('campus')" id="sidebar-tab-campus" class="sidebar-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition group border border-transparent hover:bg-slate-900">
+        <span class="w-8 h-8 rounded-xl bg-emerald-950 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-sm flex-shrink-0">🏠</span>
+        <div class="flex-1 min-w-0">
+          <div class="text-xs font-bold text-slate-200 group-hover:text-emerald-300">Complexo Paroquial</div>
+          <div class="text-[10px] text-slate-400 truncate">Página inicial e visão geral dos módulos</div>
+        </div>
+      </button>
+
+      <!-- 2. Centro Catequético -->
+      <button onclick="switchTab('catequetico')" id="sidebar-tab-catequetico" class="sidebar-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition group border border-transparent hover:bg-slate-900">
+        <span class="w-8 h-8 rounded-xl bg-amber-950 text-[#d4a94f] border border-amber-500/30 flex items-center justify-center text-sm flex-shrink-0">🏢</span>
+        <div class="flex-1 min-w-0">
+          <div class="text-xs font-bold text-slate-200 group-hover:text-amber-300">Centro Catequético</div>
+          <div class="text-[10px] text-slate-400 truncate">Salas 01 a 08, Costura e Auditório</div>
+        </div>
+      </button>
+
+      <!-- 3. Salão Paroquial (Subsolo) -->
+      <button onclick="switchTab('paroquial')" id="sidebar-tab-paroquial" class="sidebar-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition group border border-transparent hover:bg-slate-900">
+        <span class="w-8 h-8 rounded-xl bg-blue-950 text-blue-400 border border-blue-500/30 flex items-center justify-center text-sm flex-shrink-0">🏛️</span>
+        <div class="flex-1 min-w-0">
+          <div class="text-xs font-bold text-slate-200 group-hover:text-blue-300">Salão Paroquial (Subsolo)</div>
+          <div class="text-[10px] text-slate-400 truncate">Salas 11 a 17 • Subsolo da Matriz</div>
+        </div>
+      </button>
+
+      <!-- 4. Organograma & Turmas -->
+      <button onclick="switchTab('guia')" id="sidebar-tab-guia" class="sidebar-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition group border border-transparent hover:bg-slate-900">
+        <span class="w-8 h-8 rounded-xl bg-teal-950 text-teal-400 border border-teal-500/30 flex items-center justify-center text-sm flex-shrink-0">🌳</span>
+        <div class="flex-1 min-w-0">
+          <div class="text-xs font-bold text-slate-200 group-hover:text-teal-300">Organograma & Turmas</div>
+          <div class="text-[10px] text-slate-400 truncate">Grade por horários, turmas e salas</div>
+        </div>
+      </button>
+
+      <!-- 5. Catequizandos -->
+      <button onclick="switchTab('alunos')" id="sidebar-tab-alunos" class="sidebar-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition group border border-transparent hover:bg-slate-900">
+        <span class="w-8 h-8 rounded-xl bg-indigo-950 text-indigo-400 border border-indigo-500/30 flex items-center justify-center text-sm flex-shrink-0">📋</span>
+        <div class="flex-1 min-w-0">
+          <div class="text-xs font-bold text-slate-200 group-hover:text-indigo-300">Catequizandos & Chamadas</div>
+          <div class="text-[10px] text-slate-400 truncate">Listas de presença e chamada oficial</div>
+        </div>
+      </button>
+
+      <!-- 6. Eventos & Retiros -->
+      <button onclick="switchTab('eventos')" id="sidebar-tab-eventos" class="sidebar-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition group border border-transparent hover:bg-slate-900">
+        <span class="w-8 h-8 rounded-xl bg-rose-950 text-rose-400 border border-rose-500/30 flex items-center justify-center text-sm flex-shrink-0">📅</span>
+        <div class="flex-1 min-w-0">
+          <div class="text-xs font-bold text-slate-200 group-hover:text-rose-300">Eventos & Retiros</div>
+          <div class="text-[10px] text-slate-400 truncate">Calendário pastoral e retiros 2026</div>
+        </div>
+      </button>
+
+      <!-- 7. Papéis & Atribuições -->
+      <button onclick="switchTab('papeis')" id="sidebar-tab-papeis" class="sidebar-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition group border border-transparent hover:bg-slate-900">
+        <span class="w-8 h-8 rounded-xl bg-purple-950 text-purple-400 border border-purple-500/30 flex items-center justify-center text-sm flex-shrink-0">👥</span>
+        <div class="flex-1 min-w-0">
+          <div class="text-xs font-bold text-slate-200 group-hover:text-purple-300">Papéis & Atribuições</div>
+          <div class="text-[10px] text-slate-400 truncate">Coordenação, catequistas e apoios</div>
+        </div>
+      </button>
+
+      <!-- Ações Rápidas do Sistema -->
+      <div class="pt-3 mt-3 border-t border-slate-800/80">
+        <div class="px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-slate-500 font-heading">
+          Gestão & Governança
+        </div>
+        <button onclick="closeSidebarMenu(); openCentralNotificacoesModal();" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left hover:bg-slate-900 transition text-slate-300 text-xs">
+          <span class="text-sm">🔔</span> <span>Central de Notificações</span>
+        </button>
+        <button onclick="closeSidebarMenu(); openUserManagementModal();" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left hover:bg-slate-900 transition text-slate-300 text-xs">
+          <span class="text-sm">👥</span> <span>Gestão de Usuários</span>
+        </button>
+        <button onclick="closeSidebarMenu(); openRbacMatrixModal();" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left hover:bg-slate-900 transition text-slate-300 text-xs">
+          <span class="text-sm">📋</span> <span>Matriz de Permissões RBAC</span>
+        </button>
+        <button onclick="closeSidebarMenu(); openAuditTrailModal();" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left hover:bg-slate-900 transition text-slate-300 text-xs">
+          <span class="text-sm">🛡️</span> <span>Trilha de Auditoria LGPD</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Footer do Menu Lateral -->
+    <div class="p-3.5 border-t border-slate-800 bg-slate-900/90 text-xs text-slate-400 flex items-center justify-between">
+      <span class="text-[11px] text-slate-400">Santuário ICM • Park Way</span>
+      <button onclick="logoutSite()" class="text-rose-400 hover:text-rose-300 font-bold transition flex items-center gap-1">
+        <span>Sair</span> <span>🚪</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- BACKDROP OVERLAY DO MENU LATERAL -->
+  <div
+    id="sidebar-backdrop"
+    onclick="closeSidebarMenu()"
+    class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 hidden opacity-0 transition-opacity duration-300 no-print"
+  ></div>
+
   <!-- TOP BRANDING BAR (Parish Header + User Status & Notification Center) -->
   <header class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 text-white border-b-2 border-[#d4a94f]/80 shadow-xl sticky top-0 z-40">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex flex-col md:flex-row items-center justify-between gap-3">
       
-      <!-- Logo & Title with Official Parish Crest -->
-      <div class="flex items-center gap-3 w-full md:w-auto">
+      <!-- Logo & Title with Official Parish Crest & Sidebar Menu Trigger -->
+      <div class="flex items-center gap-2.5 w-full md:w-auto">
+        
+        <!-- Botão Toggle Menu Lateral (Todas as Abas) -->
+        <button
+          id="btn-toggle-sidebar"
+          onclick="toggleSidebarMenu()"
+          class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-800 text-white border border-slate-700 hover:border-amber-400/60 shadow-sm transition active:scale-95 flex-shrink-0"
+          title="Abrir Menu de Navegação com Todas as Abas"
+          aria-label="Abrir Menu Lateral"
+        >
+          <svg class="w-4 h-4 text-[#d4a94f]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          <span class="text-xs font-bold font-heading hidden sm:inline text-amber-100">Abas</span>
+        </button>
+
         <a href="https://imaculadocoracaodf.com.br/" target="_blank" rel="noopener" class="relative bg-white/10 hover:bg-white/15 p-1 rounded-xl border border-[#d4a94f]/40 backdrop-blur-sm shadow-inner flex-shrink-0 transition group" title="Visitar Site Oficial do Santuário">
           <img src="https://imaculadocoracaodf.com.br/wp-content/uploads/2024/01/PICM-BrasAo-para-impressos.png" alt="Brasão Santuário ICM" class="h-10 sm:h-11 w-auto object-contain drop-shadow group-hover:scale-105 transition">
         </a>
@@ -586,183 +733,47 @@
   </header>
 
 
-  <!-- NAVIGATION TABS & FILTER BAR -->
-  <section class="bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs sticky top-[71px] z-30 no-print">
-    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5">
-      <div class="flex flex-col gap-2.5">
+  <!-- SECONDARY TOP BAR: QUICK TAB INDICATOR & SEARCH / PERIOD FILTERS -->
+  <section class="bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs sticky top-[68px] z-30 no-print">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2">
+      <div class="flex flex-wrap items-center justify-between gap-2.5">
         
-        <!-- Row 1: Primary Tabs Navigation with Lateral Scroll & Quick Access -->
-        <div class="flex items-center gap-2 w-full">
+        <!-- Left: Toggle Sidebar Button & Current Tab Indicator -->
+        <div class="flex items-center gap-2">
+          <button
+            onclick="toggleSidebarMenu()"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition shadow-xs active:scale-95"
+            title="Abrir Menu com Todas as Abas"
+          >
+            <svg class="w-4 h-4 text-[#d4a94f]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            <span>Todas as Abas</span>
+            <span class="bg-amber-400 text-slate-950 text-[9.5px] font-black px-1.5 py-0.2 rounded-full font-heading">7</span>
+          </button>
           
-          <!-- Scrollable Nav Wrapper -->
-          <div class="relative flex items-center flex-1 min-w-0 bg-slate-100/90 rounded-2xl border border-slate-200/80 p-1">
-            
-            <!-- Left Scroll Button -->
-            <button id="nav-scroll-left" onclick="scrollNavTabs('left')" class="flex items-center justify-center w-8 h-8 rounded-xl bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50 shadow-xs transition z-20 flex-shrink-0 disabled:opacity-20 disabled:cursor-not-allowed" title="Rolar para a esquerda" aria-label="Rolar abas para a esquerda">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
-            </button>
-
-            <!-- Left Gradient Fade Indicator -->
-            <div id="nav-fade-left" class="pointer-events-none absolute left-8 top-1 bottom-1 w-10 bg-gradient-to-r from-slate-100 to-transparent opacity-0 transition-opacity duration-200 z-10"></div>
-
-            <!-- Scrollable Tabs Nav -->
-            <nav id="nav-tabs" class="nav-tabs-scroll flex items-center gap-1.5 overflow-x-auto scroll-smooth w-full px-2 py-0.5 select-none">
-              <!-- 1. Complexo Paroquial -->
-              <button id="tab-btn-campus" onclick="switchTab('campus')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition whitespace-nowrap bg-slate-900 text-white shadow-xs border border-slate-800">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                <span>Complexo Paroquial</span>
-              </button>
-
-              <!-- 2. Centro Catequético -->
-              <button id="tab-btn-catequetico" onclick="switchTab('catequetico')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/70">
-                <span class="w-2.5 h-2.5 rounded-full bg-[#d4a94f]"></span>
-                <span>Centro Catequético</span>
-                <span class="bg-amber-950 text-[#d4a94f] border border-amber-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">Salas 01 a 08</span>
-              </button>
-
-              <!-- 3. Salão Paroquial -->
-              <button id="tab-btn-paroquial" onclick="switchTab('paroquial')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/70">
-                <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-                <span>Salão Paroquial (Subsolo)</span>
-                <span class="bg-blue-100 text-blue-900 text-[10px] font-bold px-2 py-0.5 rounded-full">Salas 11 a 17</span>
-              </button>
-
-              <!-- 4. Eventos e Retiros -->
-              <button id="tab-btn-eventos" onclick="switchTab('eventos')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/70">
-                <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-                <span>Eventos &amp; Retiros</span>
-                <span class="bg-rose-100 text-rose-900 text-[10px] font-bold px-2 py-0.5 rounded-full">2026</span>
-              </button>
-
-              <!-- 5. Papéis e Atribuições -->
-              <button id="tab-btn-papeis" onclick="switchTab('papeis')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/70">
-                <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-                <span>Papéis &amp; Atribuições</span>
-                <span class="bg-amber-100 text-amber-900 text-[10px] font-bold px-2 py-0.5 rounded-full">2026</span>
-              </button>
-
-              <!-- 6. Organograma e Turmas -->
-              <button id="tab-btn-guia" onclick="switchTab('guia')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/70">
-                <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                <span>Organograma &amp; Turmas</span>
-              </button>
-
-              <!-- 7. Catequizandos -->
-              <button id="tab-btn-alunos" onclick="switchTab('alunos')" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-white/70">
-                <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
-                <span>Catequizandos</span>
-                <span class="bg-indigo-100 text-indigo-900 text-[10px] font-bold px-2 py-0.5 rounded-full">Turmas</span>
-              </button>
-            </nav>
-
-            <!-- Right Gradient Fade Indicator -->
-            <div id="nav-fade-right" class="pointer-events-none absolute right-8 top-1 bottom-1 w-10 bg-gradient-to-l from-slate-100 to-transparent opacity-100 transition-opacity duration-200 z-10"></div>
-
-            <!-- Right Scroll Button -->
-            <button id="nav-scroll-right" onclick="scrollNavTabs('right')" class="flex items-center justify-center w-8 h-8 rounded-xl bg-white border border-[#d4a94f]/80 text-[#b88d36] hover:bg-amber-50 hover:text-amber-950 shadow-xs transition z-20 flex-shrink-0 animate-pulse-x" title="Rolar para ver mais abas" aria-label="Rolar abas para a direita">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
-            </button>
+          <div class="flex items-center gap-1.5 text-xs text-slate-500 font-medium pl-1.5 sm:pl-2 border-l border-slate-200">
+            <span class="text-slate-400 hidden sm:inline">Aba ativa:</span>
+            <span id="current-tab-name" class="font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200/80">Complexo Paroquial</span>
           </div>
-
-          <!-- Quick Dropdown Menu: "Todas as Abas (7)" -->
-          <div class="relative flex-shrink-0">
-            <button id="btn-all-tabs-dropdown" onclick="toggleTabsDropdown()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-bold bg-slate-100/90 hover:bg-white text-slate-700 hover:text-slate-950 border border-slate-200/90 shadow-xs transition whitespace-nowrap" title="Ver todas as 7 abas disponíveis">
-              <svg class="w-4 h-4 text-[#d4a94f]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-              <span class="hidden md:inline">Todas as Abas</span>
-              <span class="bg-amber-100 text-amber-900 border border-amber-300/60 text-[10px] font-black px-1.5 py-0.5 rounded-full">7</span>
-              <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-            </button>
-
-            <!-- Dropdown Menu -->
-            <div id="tabs-dropdown-menu" class="hidden absolute right-0 mt-1.5 w-72 bg-white rounded-2xl shadow-2xl border border-slate-200 py-2 z-50">
-              <div class="px-3.5 py-2 border-b border-slate-100 flex items-center justify-between">
-                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 font-heading">Navegação Rápida</span>
-                <span class="text-[10px] text-slate-400 font-medium">7 páginas</span>
-              </div>
-              <div class="p-1 space-y-0.5">
-                <button onclick="switchTab('campus')" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 transition text-left group">
-                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 flex-shrink-0"></span>
-                  <div class="flex-1 min-w-0">
-                    <div class="text-xs font-bold text-slate-800 group-hover:text-emerald-700">Complexo Paroquial</div>
-                    <div class="text-[10px] text-slate-400 truncate">Visão geral do Santuário e mapas</div>
-                  </div>
-                </button>
-                <button onclick="switchTab('catequetico')" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 transition text-left group">
-                  <span class="w-2.5 h-2.5 rounded-full bg-[#d4a94f] flex-shrink-0"></span>
-                  <div class="flex-1 min-w-0">
-                    <div class="text-xs font-bold text-slate-800 group-hover:text-amber-700">Centro Catequético</div>
-                    <div class="text-[10px] text-slate-400 truncate">Salas 01 a 08, Costura e Auditório</div>
-                  </div>
-                </button>
-                <button onclick="switchTab('paroquial')" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 transition text-left group">
-                  <span class="w-2.5 h-2.5 rounded-full bg-blue-500 flex-shrink-0"></span>
-                  <div class="flex-1 min-w-0">
-                    <div class="text-xs font-bold text-slate-800 group-hover:text-blue-700">Salão Paroquial (Subsolo)</div>
-                    <div class="text-[10px] text-slate-400 truncate">Salas 11 a 17</div>
-                  </div>
-                </button>
-                <button onclick="switchTab('eventos')" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 transition text-left group">
-                  <span class="w-2.5 h-2.5 rounded-full bg-rose-500 flex-shrink-0"></span>
-                  <div class="flex-1 min-w-0">
-                    <div class="text-xs font-bold text-slate-800 group-hover:text-rose-700">Eventos &amp; Retiros</div>
-                    <div class="text-[10px] text-slate-400 truncate">Calendário de formações e retiros 2026</div>
-                  </div>
-                </button>
-                <button onclick="switchTab('papeis')" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 transition text-left group">
-                  <span class="w-2.5 h-2.5 rounded-full bg-amber-500 flex-shrink-0"></span>
-                  <div class="flex-1 min-w-0">
-                    <div class="text-xs font-bold text-slate-800 group-hover:text-amber-700">Papéis &amp; Atribuições</div>
-                    <div class="text-[10px] text-slate-400 truncate">Coordenação, catequistas e apoios</div>
-                  </div>
-                </button>
-                <button onclick="switchTab('guia')" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 transition text-left group">
-                  <span class="w-2.5 h-2.5 rounded-full bg-slate-500 flex-shrink-0"></span>
-                  <div class="flex-1 min-w-0">
-                    <div class="text-xs font-bold text-slate-800 group-hover:text-slate-900">Organograma &amp; Turmas</div>
-                    <div class="text-[10px] text-slate-400 truncate">Grade por horários, turmas e salas</div>
-                  </div>
-                </button>
-                <button onclick="switchTab('alunos')" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 transition text-left group">
-                  <span class="w-2.5 h-2.5 rounded-full bg-indigo-600 flex-shrink-0"></span>
-                  <div class="flex-1 min-w-0">
-                    <div class="text-xs font-bold text-slate-800 group-hover:text-indigo-700">Catequizandos</div>
-                    <div class="text-[10px] text-slate-400 truncate">Listas nominais de presença e chamadas</div>
-                  </div>
-                </button>
-              </div>
-            </div>
-          </div>
-
         </div>
 
-        <!-- Row 2: Search & Quick Day Filter Bar -->
-        <div class="flex flex-wrap items-center justify-between gap-2 pt-0.5">
-          <!-- Search input -->
-          <div class="relative flex-1 sm:w-80">
+        <!-- Right: Search input & Day filter -->
+        <div class="flex flex-wrap items-center gap-2 flex-1 sm:flex-initial justify-end">
+          <div class="relative flex-1 sm:w-72">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
-            <input type="text" id="global-search" oninput="handleSearch(this.value)" placeholder="Buscar catequista, turma, etapa ou sala..." class="w-full pl-9 pr-8 py-1.5 text-xs sm:text-sm bg-slate-50 border border-slate-200/90 rounded-xl focus:bg-white focus:border-[#d4a94f] focus:ring-2 focus:ring-amber-200/50 outline-none transition placeholder:text-slate-400">
+            <input type="text" id="global-search" oninput="handleSearch(this.value)" placeholder="Buscar catequista, turma ou sala..." class="w-full pl-9 pr-8 py-1.5 text-xs sm:text-sm bg-slate-50 border border-slate-200/90 rounded-xl focus:bg-white focus:border-[#d4a94f] focus:ring-2 focus:ring-amber-200/50 outline-none transition placeholder:text-slate-400">
             <button id="clear-search-btn" onclick="clearSearch()" class="hidden absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
           </div>
 
-          <!-- Quick Day / Period Filter & Scroll Notice -->
-          <div class="flex items-center gap-2 flex-wrap">
-            <div class="flex items-center gap-1 bg-slate-100 p-0.5 rounded-xl border border-slate-200 flex-shrink-0 text-xs overflow-x-auto">
-              <button onclick="filterByPeriod('all')" class="period-filter-btn px-2 py-1 rounded-lg font-bold bg-white text-slate-800 shadow-xs" data-period="all">Todos</button>
-              <button onclick="filterByPeriod('sab-manha')" class="period-filter-btn px-2 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="sab-manha">Sáb 8h30</button>
-              <button onclick="filterByPeriod('sab-tarde')" class="period-filter-btn px-2 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="sab-tarde">Sáb 15h</button>
-              <button onclick="filterByPeriod('seg-noite')" class="period-filter-btn px-2 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="seg-noite">Seg 20h</button>
-              <button onclick="filterByPeriod('quarta')" class="period-filter-btn px-2 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="quarta">Qua 16h</button>
-            </div>
-
-            <!-- Scroll notice pill (visible when scrollable to right, guides new users) -->
-            <div id="nav-scroll-hint" onclick="scrollNavTabs('right')" class="hidden sm:flex items-center gap-1.5 text-[11px] font-semibold text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-300/80 px-2.5 py-1 rounded-xl shadow-2xs cursor-pointer transition select-none" title="Clique para rolar o menu e ver mais opções">
-              <span>Mais abas</span>
-              <span class="animate-pulse">👉</span>
-            </div>
+          <div class="flex items-center gap-1 bg-slate-100 p-0.5 rounded-xl border border-slate-200 flex-shrink-0 text-xs overflow-x-auto">
+            <button onclick="filterByPeriod('all')" class="period-filter-btn px-2 py-1 rounded-lg font-bold bg-white text-slate-800 shadow-xs" data-period="all">Todos</button>
+            <button onclick="filterByPeriod('sab-manha')" class="period-filter-btn px-2 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="sab-manha">Sáb 8h30</button>
+            <button onclick="filterByPeriod('sab-tarde')" class="period-filter-btn px-2 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="sab-tarde">Sáb 15h</button>
+            <button onclick="filterByPeriod('seg-noite')" class="period-filter-btn px-2 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="seg-noite">Seg 20h</button>
+            <button onclick="filterByPeriod('quarta')" class="period-filter-btn px-2 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="quarta">Qua 16h</button>
           </div>
         </div>
 
@@ -2995,61 +3006,282 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- TAB 4: VISÃO DO COMPLEXO / COMO CHEGAR     -->
+    <!-- TAB 4: VISÃO DO COMPLEXO / HOME PAGE       -->
     <!-- ========================================== -->
     <section id="view-campus" class="tab-view space-y-6">
-      <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm">
-        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 font-heading mb-2 flex items-center gap-2">
-          <span class="text-[#d4a94f]">🧭</span> Mapa do Complexo Paroquial
-        </h2>
-        <p class="text-sm text-slate-600 mb-6">Veja como os prédios e espaços se conectam dentro do Santuário para orientar novos catequizandos e suas famílias.</p>
+      
+      <!-- Hero Welcome Header -->
+      <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden border-2 border-[#d4a94f]/60">
+        <div class="absolute right-0 top-0 bottom-0 w-1/3 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-400/10 via-transparent to-transparent pointer-events-none"></div>
+        <div class="relative z-10 max-w-3xl">
+          <div class="flex items-center gap-2 text-[#d4a94f] text-xs font-bold uppercase tracking-wider mb-2 font-heading">
+            <span class="text-sm">✝</span>
+            <span>Pastoral da Catequese • Ano Pastoral 2026</span>
+          </div>
+          <h2 class="text-2xl sm:text-4xl font-black tracking-tight text-white font-heading mb-2">
+            Painel Geral da Catequese
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed mb-4 max-w-2xl">
+            Santuário Imaculado Coração de Maria — Setor de Mansões Park Way (SMPW), Brasília/DF. Selecione qualquer um dos módulos abaixo para acessar as salas, plantas baixas, cronogramas, listas nominais e documentos pastorais:
+          </p>
+          <div class="flex items-center gap-2.5 flex-wrap">
+            <button onclick="toggleSidebarMenu()" class="inline-flex items-center gap-2 bg-gradient-to-r from-[#d4a94f] to-[#b88d36] hover:from-[#facf75] hover:to-[#d4a94f] text-slate-950 font-black px-4 py-2 rounded-xl text-xs transition shadow-md font-heading active:scale-95">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+              <span>Abrir Menu Completo (7 Abas)</span>
+            </button>
+            <button onclick="switchTab('guia')" class="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-xl text-xs font-semibold transition">
+              <span>🌳 Ver Organograma 2026</span>
+            </button>
+            <button onclick="switchTab('alunos')" class="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-xl text-xs font-semibold transition">
+              <span>📋 Lista de Chamada</span>
+            </button>
+          </div>
+        </div>
+      </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Módulos do Sistema em Grid de 3 Colunas -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-xl sm:text-2xl font-bold font-heading text-slate-900 flex items-center gap-2">
+              <span class="text-[#d4a94f]">🧭</span> Módulos &amp; Páginas do Sistema
+            </h3>
+            <p class="text-xs sm:text-sm text-slate-500">Acesse diretamente as áreas operacionais da catequese paroquial</p>
+          </div>
+          <span class="text-xs bg-slate-100 text-slate-700 font-bold px-3 py-1 rounded-full border border-slate-200 hidden sm:inline">
+            6 Módulos Principais
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           
-          <!-- Card 1: Igreja Matriz & Salão Paroquial -->
-          <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 flex flex-col justify-between">
+          <!-- Card 1: Centro Catequético -->
+          <div onclick="switchTab('catequetico')" class="group bg-white hover:bg-slate-50/80 p-6 rounded-3xl border-2 border-slate-200/90 hover:border-amber-400/80 shadow-sm hover:shadow-xl transition-all duration-200 cursor-pointer flex flex-col justify-between relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-28 h-28 bg-amber-400/5 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform"></div>
             <div>
-              <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-lg mb-3">🏛️</div>
-              <h3 class="text-lg font-bold font-heading text-slate-900 mb-1">Igreja Matriz & Subsolo</h3>
-              <p class="text-xs text-slate-600 leading-relaxed mb-3">
-                No piso térreo superior acontecem as Santas Missas. No <strong>subsolo (Salão Paroquial)</strong> ficam as <strong>Salas 11 a 16</strong> e a <strong>Sala 17 (São João Bosco)</strong> como anexo à direita dos banheiros.
+              <div class="flex items-center justify-between gap-2 mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-[#d4a94f] text-slate-950 flex items-center justify-center font-bold text-2xl shadow-md group-hover:scale-105 transition-transform">
+                  🏢
+                </div>
+                <span class="bg-amber-100 text-amber-900 text-[10.5px] font-extrabold uppercase px-2.5 py-1 rounded-full border border-amber-300/60 font-heading">
+                  Salas 01 a 08 • Térreo
+                </span>
+              </div>
+              <h4 class="text-xl font-bold font-heading text-slate-900 group-hover:text-amber-800 transition-colors mb-2">
+                Centro Catequético
+              </h4>
+              <p class="text-xs text-slate-600 leading-relaxed mb-4">
+                Salas de encontro 01 a 07, Auditório, Pastoral da Costura e Sala 08 (Carlo Acutis). Visualização em planta arquitetônica vetorial interativa, ocupação de turmas e zoom de alta precisão.
               </p>
+              <div class="flex flex-wrap gap-1.5 mb-4">
+                <span class="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium">8 Salas</span>
+                <span class="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium">Auditório</span>
+                <span class="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium">Costura</span>
+                <span class="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium">Planta Vetorial</span>
+              </div>
             </div>
-            <button onclick="switchTab('paroquial')" class="text-xs font-bold text-blue-700 bg-white border border-blue-200 hover:bg-blue-50 py-2 rounded-xl text-center transition">
-              Ver Planta do Subsolo →
-            </button>
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#b88d36] group-hover:text-amber-700">
+              <span>Acessar Centro Catequético</span>
+              <span class="transform group-hover:translate-x-1.5 transition-transform">→</span>
+            </div>
           </div>
 
-          <!-- Card 2: Gruta de Nossa Senhora -->
-          <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 flex flex-col justify-between">
+          <!-- Card 2: Salão Paroquial (Subsolo) -->
+          <div onclick="switchTab('paroquial')" class="group bg-white hover:bg-slate-50/80 p-6 rounded-3xl border-2 border-slate-200/90 hover:border-blue-400/80 shadow-sm hover:shadow-xl transition-all duration-200 cursor-pointer flex flex-col justify-between relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-28 h-28 bg-blue-400/5 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform"></div>
             <div>
-              <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-lg mb-3">🌹</div>
-              <h3 class="text-lg font-bold font-heading text-slate-900 mb-1">Gruta de Nossa Senhora</h3>
-              <p class="text-xs text-slate-600 leading-relaxed mb-3">
-                Ponto de referência central nos jardins. Fica exatamente em frente à porta de entrada do <strong>Centro Catequético</strong>.
+              <div class="flex items-center justify-between gap-2 mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 text-white flex items-center justify-center font-bold text-2xl shadow-md group-hover:scale-105 transition-transform">
+                  🏛️
+                </div>
+                <span class="bg-blue-100 text-blue-900 text-[10.5px] font-extrabold uppercase px-2.5 py-1 rounded-full border border-blue-300/60 font-heading">
+                  Salas 11 a 17 • Subsolo
+                </span>
+              </div>
+              <h4 class="text-xl font-bold font-heading text-slate-900 group-hover:text-blue-800 transition-colors mb-2">
+                Salão Paroquial (Subsolo)
+              </h4>
+              <p class="text-xs text-slate-600 leading-relaxed mb-4">
+                Localizado no subsolo da Igreja Matriz. Contém as Salas 11 a 16 e o anexo Sala 17 (São João Bosco), com planta baixa navegável e localização das turmas dos sábados pela manhã.
               </p>
+              <div class="flex flex-wrap gap-1.5 mb-4">
+                <span class="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium">7 Salas</span>
+                <span class="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium">Subsolo Matriz</span>
+                <span class="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium">São João Bosco</span>
+                <span class="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium">Planta Vetorial</span>
+              </div>
             </div>
-            <button onclick="switchTab('catequetico')" class="text-xs font-bold text-emerald-700 bg-white border border-emerald-200 hover:bg-emerald-50 py-2 rounded-xl text-center transition">
-              Ver Centro em Frente à Gruta →
-            </button>
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-blue-600 group-hover:text-blue-800">
+              <span>Acessar Salão Paroquial</span>
+              <span class="transform group-hover:translate-x-1.5 transition-transform">→</span>
+            </div>
           </div>
 
-          <!-- Card 3: Centro Catequético -->
-          <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 flex flex-col justify-between">
+          <!-- Card 3: Organograma & Turmas -->
+          <div onclick="switchTab('guia')" class="group bg-white hover:bg-slate-50/80 p-6 rounded-3xl border-2 border-slate-200/90 hover:border-teal-400/80 shadow-sm hover:shadow-xl transition-all duration-200 cursor-pointer flex flex-col justify-between relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-28 h-28 bg-teal-400/5 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform"></div>
             <div>
-              <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-lg mb-3">🏢</div>
-              <h3 class="text-lg font-bold font-heading text-slate-900 mb-1">Centro Catequético</h3>
-              <p class="text-xs text-slate-600 leading-relaxed mb-3">
-                Prédio com corredor central (<strong>Salas 01 a 07</strong> e <strong>Auditório</strong>), <strong>Pastoral da Costura</strong> nos fundos e <strong>Sala 08 (Carlo Acutis)</strong> no lado direito com porta para fora.
+              <div class="flex items-center justify-between gap-2 mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal-400 to-emerald-600 text-white flex items-center justify-center font-bold text-2xl shadow-md group-hover:scale-105 transition-transform">
+                  🌳
+                </div>
+                <span class="bg-emerald-100 text-emerald-900 text-[10.5px] font-extrabold uppercase px-2.5 py-1 rounded-full border border-emerald-300/60 font-heading">
+                  44 Turmas • 6 Etapas
+                </span>
+              </div>
+              <h4 class="text-xl font-bold font-heading text-slate-900 group-hover:text-teal-800 transition-colors mb-2">
+                Organograma &amp; Turmas
+              </h4>
+              <p class="text-xs text-slate-600 leading-relaxed mb-4">
+                Visão hierárquica oficial das 6 etapas da catequese, coordenações gerais e por etapa, planilha completa de turmas com horários e salas, exportação em PNG/Excel e impressão em paisagem.
               </p>
+              <div class="flex flex-wrap gap-1.5 mb-4">
+                <span class="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium">Árvore Gráfica</span>
+                <span class="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium">Planilha</span>
+                <span class="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium">Exportar PNG/Excel</span>
+                <span class="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium">Imprimir</span>
+              </div>
             </div>
-            <button onclick="switchTab('catequetico')" class="text-xs font-bold text-amber-800 bg-white border border-amber-200 hover:bg-amber-50 py-2 rounded-xl text-center transition">
-              Ver Salas 01 a 08, Costura & Auditório →
-            </button>
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-teal-600 group-hover:text-teal-800">
+              <span>Ver Organograma Geral</span>
+              <span class="transform group-hover:translate-x-1.5 transition-transform">→</span>
+            </div>
+          </div>
+
+          <!-- Card 4: Catequizandos & Chamadas -->
+          <div onclick="switchTab('alunos')" class="group bg-white hover:bg-slate-50/80 p-6 rounded-3xl border-2 border-slate-200/90 hover:border-indigo-400/80 shadow-sm hover:shadow-xl transition-all duration-200 cursor-pointer flex flex-col justify-between relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-28 h-28 bg-indigo-400/5 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform"></div>
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center font-bold text-2xl shadow-md group-hover:scale-105 transition-transform">
+                  📋
+                </div>
+                <span class="bg-indigo-100 text-indigo-900 text-[10.5px] font-extrabold uppercase px-2.5 py-1 rounded-full border border-indigo-300/60 font-heading">
+                  Listas &amp; Frequência
+                </span>
+              </div>
+              <h4 class="text-xl font-bold font-heading text-slate-900 group-hover:text-indigo-800 transition-colors mb-2">
+                Catequizandos &amp; Chamadas
+              </h4>
+              <p class="text-xs text-slate-600 leading-relaxed mb-4">
+                Gestão nominal de catequizandos matriculados, registro encontro a encontro de faltas/presenças, aprovação ágil de cadastros e geração do documento oficial de chamada para impressão em folha A4.
+              </p>
+              <div class="flex flex-wrap gap-1.5 mb-4">
+                <span class="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium">Lista de Chamada</span>
+                <span class="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium">30 Encontros</span>
+                <span class="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium">Impressão Oficial</span>
+                <span class="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium">Auditoria LGPD</span>
+              </div>
+            </div>
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-indigo-600 group-hover:text-indigo-800">
+              <span>Acessar Catequizandos</span>
+              <span class="transform group-hover:translate-x-1.5 transition-transform">→</span>
+            </div>
+          </div>
+
+          <!-- Card 5: Eventos & Retiros -->
+          <div onclick="switchTab('eventos')" class="group bg-white hover:bg-slate-50/80 p-6 rounded-3xl border-2 border-slate-200/90 hover:border-rose-400/80 shadow-sm hover:shadow-xl transition-all duration-200 cursor-pointer flex flex-col justify-between relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-28 h-28 bg-rose-400/5 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform"></div>
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 text-white flex items-center justify-center font-bold text-2xl shadow-md group-hover:scale-105 transition-transform">
+                  📅
+                </div>
+                <span class="bg-rose-100 text-rose-900 text-[10.5px] font-extrabold uppercase px-2.5 py-1 rounded-full border border-rose-300/60 font-heading">
+                  Calendário 2026
+                </span>
+              </div>
+              <h4 class="text-xl font-bold font-heading text-slate-900 group-hover:text-rose-800 transition-colors mb-2">
+                Eventos &amp; Retiros
+              </h4>
+              <p class="text-xs text-slate-600 leading-relaxed mb-4">
+                Cronograma anual unificado da Pastoral da Catequese 2026. Datas de encontros com pais e padrinhos, retiros espirituais de crismandos, celebrações litúrgicas e calendário de feriados.
+              </p>
+              <div class="flex flex-wrap gap-1.5 mb-4">
+                <span class="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium">Retiros</span>
+                <span class="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium">Encontros Pais</span>
+                <span class="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium">Celebrações</span>
+                <span class="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium">Liturgia</span>
+              </div>
+            </div>
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-rose-600 group-hover:text-rose-800">
+              <span>Ver Calendário de Eventos</span>
+              <span class="transform group-hover:translate-x-1.5 transition-transform">→</span>
+            </div>
+          </div>
+
+          <!-- Card 6: Papéis & Atribuições -->
+          <div onclick="switchTab('papeis')" class="group bg-white hover:bg-slate-50/80 p-6 rounded-3xl border-2 border-slate-200/90 hover:border-purple-400/80 shadow-sm hover:shadow-xl transition-all duration-200 cursor-pointer flex flex-col justify-between relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-28 h-28 bg-purple-400/5 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform"></div>
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-700 text-white flex items-center justify-center font-bold text-2xl shadow-md group-hover:scale-105 transition-transform">
+                  👥
+                </div>
+                <span class="bg-purple-100 text-purple-900 text-[10.5px] font-extrabold uppercase px-2.5 py-1 rounded-full border border-purple-300/60 font-heading">
+                  Governança Pastoral
+                </span>
+              </div>
+              <h4 class="text-xl font-bold font-heading text-slate-900 group-hover:text-purple-800 transition-colors mb-2">
+                Papéis &amp; Atribuições
+              </h4>
+              <p class="text-xs text-slate-600 leading-relaxed mb-4">
+                Mapeamento das funções e encargos pastorais: Coordenação Geral (Lorena e Andrés), coordenações de etapa, catequistas titulares, auxiliares em formação, apoio Sandra e fluxos administrativos.
+              </p>
+              <div class="flex flex-wrap gap-1.5 mb-4">
+                <span class="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium">Coordenação Geral</span>
+                <span class="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium">Etapas</span>
+                <span class="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium">Secretaria Sandra</span>
+                <span class="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium">Atribuições</span>
+              </div>
+            </div>
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-purple-600 group-hover:text-purple-800">
+              <span>Consultar Atribuições</span>
+              <span class="transform group-hover:translate-x-1.5 transition-transform">→</span>
+            </div>
           </div>
 
         </div>
       </div>
+
+      <!-- Referência Física dos Prédios do Santuário (Acordeão Secundário) -->
+      <details class="group bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+        <summary class="flex items-center justify-between p-4 cursor-pointer hover:bg-slate-50 transition select-none">
+          <div class="flex items-center gap-2.5">
+            <span class="text-lg">📍</span>
+            <span class="text-xs sm:text-sm font-bold text-slate-800 font-heading">
+              Ver localização física dos prédios no Santuário (Igreja Matriz, Gruta e Centro Catequético)
+            </span>
+          </div>
+          <span class="text-xs text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+        </summary>
+        <div class="p-4 pt-2 border-t border-slate-100 bg-slate-50/50">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200 flex flex-col justify-between">
+              <div>
+                <div class="font-bold text-slate-900 flex items-center gap-1.5 mb-1"><span>🏛️</span> Igreja Matriz &amp; Subsolo</div>
+                <p class="text-slate-600 text-[11px] leading-relaxed">No piso superior acontecem as Santas Missas. No subsolo (Salão Paroquial) ficam as Salas 11 a 16 e o anexo Sala 17 (São João Bosco).</p>
+              </div>
+              <button onclick="switchTab('paroquial')" class="mt-2 text-[11px] font-bold text-blue-600 hover:underline text-left">Ver Planta do Subsolo →</button>
+            </div>
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200 flex flex-col justify-between">
+              <div>
+                <div class="font-bold text-slate-900 flex items-center gap-1.5 mb-1"><span>🌹</span> Gruta de Nossa Senhora</div>
+                <p class="text-slate-600 text-[11px] leading-relaxed">Ponto de referência central nos jardins. Fica localizada exatamente em frente à entrada principal do Centro Catequético.</p>
+              </div>
+              <button onclick="switchTab('catequetico')" class="mt-2 text-[11px] font-bold text-emerald-600 hover:underline text-left">Ver Centro em Frente à Gruta →</button>
+            </div>
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200 flex flex-col justify-between">
+              <div>
+                <div class="font-bold text-slate-900 flex items-center gap-1.5 mb-1"><span>🏢</span> Centro Catequético</div>
+                <p class="text-slate-600 text-[11px] leading-relaxed">Prédio com corredor central (Salas 01 a 07 e Auditório), Pastoral da Costura nos fundos e Sala 08 (Carlo Acutis) à direita.</p>
+              </div>
+              <button onclick="switchTab('catequetico')" class="mt-2 text-[11px] font-bold text-amber-700 hover:underline text-left">Ver Salas 01 a 08 →</button>
+            </div>
+          </div>
+        </div>
+      </details>
+
     </section>
 
     <!-- ========================================== -->
@@ -4179,150 +4411,107 @@
     // Lista mestre dinâmica de horários (sincronizada com o organograma ativo)
     let masterScheduleList = [];
 
+    // Nomes amigáveis das abas para indicador da barra superior
+    const TAB_DISPLAY_NAMES = {
+      campus: 'Complexo Paroquial',
+      catequetico: 'Centro Catequético',
+      paroquial: 'Salão Paroquial (Subsolo)',
+      guia: 'Organograma & Turmas',
+      alunos: 'Catequizandos & Chamadas',
+      eventos: 'Eventos & Retiros',
+      papeis: 'Papéis & Atribuições'
+    };
+
     // TAB SWITCHING
     function switchTab(tabId) {
       document.querySelectorAll('.tab-view').forEach(view => view.classList.add('hidden'));
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('bg-slate-900', 'text-white', 'shadow-xs', 'border-slate-800');
-        btn.classList.add('text-slate-600', 'hover:text-slate-900', 'hover:bg-white/70');
+
+      // Atualiza estilo dos botões no Menu Lateral
+      document.querySelectorAll('.sidebar-tab-btn').forEach(btn => {
+        btn.classList.remove('bg-slate-800', 'border-amber-400/50', 'shadow-sm');
+        btn.classList.add('hover:bg-slate-900');
       });
 
       const selectedView = document.getElementById('view-' + tabId);
-      const selectedBtn = document.getElementById('tab-btn-' + tabId);
+      const selectedSidebarBtn = document.getElementById('sidebar-tab-' + tabId);
 
       if (selectedView) selectedView.classList.remove('hidden');
-      if (selectedBtn) {
-        selectedBtn.classList.remove('text-slate-600', 'hover:text-slate-900', 'hover:bg-white/70');
-        selectedBtn.classList.add('bg-slate-900', 'text-white', 'shadow-xs', 'border', 'border-slate-800');
-        selectedBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      if (selectedSidebarBtn) {
+        selectedSidebarBtn.classList.add('bg-slate-800', 'border-amber-400/50', 'shadow-sm');
+        selectedSidebarBtn.classList.remove('hover:bg-slate-900');
       }
 
-      // Close dropdown if open
-      const dropdown = document.getElementById('tabs-dropdown-menu');
-      if (dropdown && !dropdown.classList.contains('hidden')) {
-        dropdown.classList.add('hidden');
+      // Atualiza indicador de aba ativa na barra superior
+      const tabIndicator = document.getElementById('current-tab-name');
+      if (tabIndicator) {
+        tabIndicator.textContent = TAB_DISPLAY_NAMES[tabId] || tabId;
       }
 
-      setTimeout(updateNavScrollState, 150);
+      // Fecha o menu lateral automaticamente
+      closeSidebarMenu();
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // TOP NAVIGATION LATERAL SCROLL & DROPDOWN UX
-    function scrollNavTabs(direction) {
-      const navTabs = document.getElementById('nav-tabs');
-      if (!navTabs) return;
-      const scrollStep = 240;
-      if (direction === 'left') {
-        navTabs.scrollBy({ left: -scrollStep, behavior: 'smooth' });
+    // =============================================
+    // CONTROLE DO MENU LATERAL COLAPSÁVEL (DRAWER)
+    // =============================================
+    function toggleSidebarMenu() {
+      const sidebar = document.getElementById('sidebar-drawer');
+      if (!sidebar) return;
+      const isClosed = sidebar.classList.contains('-translate-x-full');
+      if (isClosed) {
+        openSidebarMenu();
       } else {
-        navTabs.scrollBy({ left: scrollStep, behavior: 'smooth' });
-      }
-      setTimeout(updateNavScrollState, 260);
-    }
-
-    function updateNavScrollState() {
-      const navTabs = document.getElementById('nav-tabs');
-      const btnLeft = document.getElementById('nav-scroll-left');
-      const btnRight = document.getElementById('nav-scroll-right');
-      const fadeLeft = document.getElementById('nav-fade-left');
-      const fadeRight = document.getElementById('nav-fade-right');
-      const hintBadge = document.getElementById('nav-scroll-hint');
-
-      if (!navTabs) return;
-
-      const maxScroll = navTabs.scrollWidth - navTabs.clientWidth;
-      const canScrollLeft = navTabs.scrollLeft > 6;
-      const canScrollRight = maxScroll > 6 && (navTabs.scrollLeft < maxScroll - 6);
-
-      if (btnLeft) {
-        btnLeft.disabled = !canScrollLeft;
-        btnLeft.style.opacity = canScrollLeft ? '1' : '0.2';
-      }
-      if (btnRight) {
-        btnRight.disabled = !canScrollRight;
-        btnRight.style.opacity = canScrollRight ? '1' : '0.2';
-        if (canScrollRight) {
-          btnRight.classList.add('animate-pulse-x');
-        } else {
-          btnRight.classList.remove('animate-pulse-x');
-        }
-      }
-
-      if (fadeLeft) fadeLeft.style.opacity = canScrollLeft ? '1' : '0';
-      if (fadeRight) fadeRight.style.opacity = canScrollRight ? '1' : '0';
-
-      if (hintBadge) {
-        hintBadge.style.display = canScrollRight ? 'flex' : 'none';
+        closeSidebarMenu();
       }
     }
 
+    function openSidebarMenu() {
+      const sidebar = document.getElementById('sidebar-drawer');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      if (!sidebar) return;
+
+      sidebar.classList.remove('-translate-x-full');
+      sidebar.classList.add('translate-x-0');
+      if (backdrop) {
+        backdrop.classList.remove('hidden');
+        requestAnimationFrame(() => {
+          backdrop.classList.remove('opacity-0');
+        });
+      }
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeSidebarMenu() {
+      const sidebar = document.getElementById('sidebar-drawer');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      if (!sidebar) return;
+
+      sidebar.classList.remove('translate-x-0');
+      sidebar.classList.add('-translate-x-full');
+      if (backdrop) {
+        backdrop.classList.add('opacity-0');
+        setTimeout(() => {
+          backdrop.classList.add('hidden');
+        }, 280);
+      }
+      document.body.style.overflow = '';
+    }
+
+    // Fechar com a tecla Escape
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeSidebarMenu();
+      }
+    });
+
+    // Funções de compatibilidade para evitar referências quebradas
+    function initNavScroll() {}
+    function scrollNavTabs() {}
+    function updateNavScrollState() {}
     function toggleTabsDropdown() {
-      const menu = document.getElementById('tabs-dropdown-menu');
-      if (menu) menu.classList.toggle('hidden');
-    }
-
-    function initNavScroll() {
-      const navTabs = document.getElementById('nav-tabs');
-      if (!navTabs) return;
-
-      // Mouse wheel horizontal scroll over tabs
-      navTabs.addEventListener('wheel', (e) => {
-        if (e.deltaY !== 0) {
-          e.preventDefault();
-          navTabs.scrollLeft += e.deltaY * 0.9;
-          updateNavScrollState();
-        }
-      }, { passive: false });
-
-      // Click and drag mouse support
-      let isDown = false;
-      let startX = 0;
-      let scrollStart = 0;
-
-      navTabs.addEventListener('mousedown', (e) => {
-        isDown = true;
-        startX = e.pageX - navTabs.offsetLeft;
-        scrollStart = navTabs.scrollLeft;
-        navTabs.style.cursor = 'grabbing';
-      });
-
-      window.addEventListener('mouseup', () => {
-        if (isDown) {
-          isDown = false;
-          if (navTabs) navTabs.style.cursor = '';
-        }
-      });
-
-      navTabs.addEventListener('mousemove', (e) => {
-        if (!isDown) return;
-        e.preventDefault();
-        const x = e.pageX - navTabs.offsetLeft;
-        const walk = (x - startX) * 1.5;
-        navTabs.scrollLeft = scrollStart - walk;
-        updateNavScrollState();
-      });
-
-      navTabs.addEventListener('scroll', () => {
-        updateNavScrollState();
-      });
-
-      window.addEventListener('resize', () => {
-        updateNavScrollState();
-      });
-
-      // Close dropdown when clicking outside
-      document.addEventListener('click', (e) => {
-        const dropdown = document.getElementById('tabs-dropdown-menu');
-        const btn = document.getElementById('btn-all-tabs-dropdown');
-        if (dropdown && !dropdown.classList.contains('hidden')) {
-          if (!dropdown.contains(e.target) && !btn.contains(e.target)) {
-            dropdown.classList.add('hidden');
-          }
-        }
-      });
-
-      updateNavScrollState();
+      toggleSidebarMenu();
     }
 
     // SELECT ROOM AND UPDATE DETAIL PANELS
@@ -10875,7 +11064,11 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         const hashTab = window.location.hash.replace('#', '');
         if (document.getElementById('view-' + hashTab)) {
           switchTab(hashTab);
+        } else {
+          switchTab('campus');
         }
+      } else {
+        switchTab('campus');
       }
     });
   </script>
