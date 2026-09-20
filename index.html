@@ -164,8 +164,25 @@
       }
 
       @page {
+        size: auto;
+        margin: 8mm 8mm 8mm 8mm;
+      }
+      @page landscape-print {
         size: landscape;
         margin: 6mm 6mm 6mm 6mm;
+      }
+      @page portrait-print {
+        size: portrait;
+        margin: 8mm 8mm 8mm 8mm;
+      }
+      body.print-mode-landscape,
+      body.printing-organograma-tree,
+      body.printing-organograma-table,
+      body.printing-chamada {
+        page: landscape-print;
+      }
+      body.print-mode-portrait {
+        page: portrait-print;
       }
 
       /* ======================================================== */
@@ -339,11 +356,9 @@
       }
 
       /* ======================================================== */
-      /* 4. IMPRESSÃO PADRÃO (OUTRAS TELAS DO PORTAL)              */
+      /* 4. IMPRESSÃO DAS PÁGINAS DO PORTAL (PLANTAS & GUIAS)      */
       /* ======================================================== */
-      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table) #printable-chamada-area {
-        display: none !important;
-      }
+      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table) #printable-chamada-area,
       body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table) #auth-gate,
       body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table) header,
       body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table) nav,
@@ -352,6 +367,68 @@
       body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table) .fixed,
       body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table) .no-print {
         display: none !important;
+      }
+      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table) main {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table) .tab-view.hidden {
+        display: none !important;
+      }
+      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table) .tab-view:not(.hidden) {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      /* Reset completo de scroll/overflow para blueprints na impressão */
+      #svg-container-catequetico,
+      #svg-container-paroquial {
+        overflow: visible !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        padding: 0 !important;
+        margin: 0 auto !important;
+        display: flex !important;
+        justify-content: center !important;
+      }
+      #svg-blueprint-catequetico,
+      #svg-blueprint-paroquial {
+        transform: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        display: block !important;
+        margin: 0 auto !important;
+      }
+
+      /* Blueprint layouts em impressão */
+      .blueprint-grid {
+        display: block !important;
+      }
+      .blueprint-left-col {
+        width: 100% !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+      }
+      .blueprint-sidebar-col {
+        display: none !important; /* Impressão da planta foca na planta inteira e nítida */
+      }
+
+      /* Formatação limpa de blocos institucionais e diretrizes */
+      #view-papeis .bg-white,
+      #view-campus .bg-white,
+      #view-eventos .bg-white {
+        box-shadow: none !important;
+        border: 1px solid #cbd5e1 !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
       }
     }
 
@@ -398,7 +475,7 @@
 
       <!-- Brasão Oficial do Santuário -->
       <div class="relative mx-auto w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-400/30 to-[#d4a94f]/10 p-1.5 shadow-lg shadow-amber-500/10 mb-3 flex items-center justify-center border border-[#d4a94f]/40 backdrop-blur-sm">
-        <img src="https://imaculadocoracaodf.com.br/wp-content/uploads/2024/01/PICM-BrasAo-para-impressos.png" alt="Brasão Santuário" class="w-full h-full object-contain drop-shadow-md">
+        <img src="./brasao-icm.png" alt="Brasão Santuário" class="w-full h-full object-contain drop-shadow-md">
       </div>
 
       <span class="inline-block text-[10px] sm:text-[10.5px] font-bold tracking-widest text-[#d4a94f] uppercase bg-amber-950/80 px-3.5 py-1 rounded-full border border-amber-500/40 mb-2 font-heading">
@@ -530,7 +607,7 @@
     <div class="p-4 border-b border-slate-800/90 flex items-center justify-between bg-slate-900/80">
       <div class="flex items-center gap-2.5">
         <div class="bg-white/10 p-1.5 rounded-xl border border-[#d4a94f]/40 backdrop-blur-sm">
-          <img src="https://imaculadocoracaodf.com.br/wp-content/uploads/2024/01/PICM-BrasAo-para-impressos.png" alt="Brasão" class="h-7 w-auto">
+          <img src="./brasao-icm.png" alt="Brasão" class="h-7 w-auto">
         </div>
         <div>
           <h3 class="text-xs font-bold font-heading text-white">Pastoral da Catequese</h3>
@@ -654,37 +731,37 @@
 
   <!-- TOP BRANDING BAR (Parish Header + User Status & Notification Center) -->
   <header class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 text-white border-b-2 border-[#d4a94f]/80 shadow-xl sticky top-0 z-40">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex flex-col md:flex-row items-center justify-between gap-3">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-3">
       
       <!-- Logo & Title with Official Parish Crest & Sidebar Menu Trigger -->
-      <div class="flex items-center gap-2.5 w-full md:w-auto">
+      <div class="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
         
         <!-- Botão Toggle Menu Lateral -->
         <button
           id="btn-toggle-sidebar"
           onclick="toggleSidebarMenu()"
-          class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-800 text-white border border-slate-700 hover:border-amber-400/60 shadow-sm transition active:scale-95 flex-shrink-0 cursor-pointer"
+          class="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-slate-800/90 hover:bg-slate-800 text-white border border-slate-700 hover:border-amber-400/60 shadow-sm transition active:scale-95 flex-shrink-0 cursor-pointer"
           title="Abrir Menu de Navegação"
           aria-label="Abrir Menu Lateral"
         >
           <svg class="w-4 h-4 text-[#d4a94f]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-          <span class="text-xs font-bold font-heading text-amber-100">Menu</span>
+          <span class="text-xs font-bold font-heading text-amber-100 hidden xs:inline">Menu</span>
         </button>
 
         <a href="https://imaculadocoracaodf.com.br/" target="_blank" rel="noopener" class="relative bg-white/10 hover:bg-white/15 p-1 rounded-xl border border-[#d4a94f]/40 backdrop-blur-sm shadow-inner flex-shrink-0 transition group" title="Visitar Site Oficial do Santuário">
-          <img src="https://imaculadocoracaodf.com.br/wp-content/uploads/2024/01/PICM-BrasAo-para-impressos.png" alt="Brasão Santuário ICM" class="h-10 sm:h-11 w-auto object-contain drop-shadow group-hover:scale-105 transition">
+          <img src="./brasao-icm.png" alt="Brasão Santuário ICM" class="h-8 sm:h-11 w-auto object-contain drop-shadow group-hover:scale-105 transition">
         </a>
-        <div>
+        <div class="min-w-0 flex-1">
           <div class="flex items-center gap-2">
-            <span id="header-catequese-year-badge" class="text-[10px] font-bold tracking-widest text-[#d4a94f] uppercase bg-amber-950/80 px-2 py-0.5 rounded-md border border-amber-500/30 font-heading">Pastoral da Catequese</span>
-            <span class="text-[10.5px] text-emerald-400 font-semibold hidden sm:inline flex items-center gap-1">
+            <span id="header-catequese-year-badge" class="text-[9px] sm:text-[10px] font-bold tracking-widest text-[#d4a94f] uppercase bg-amber-950/80 px-1.5 sm:px-2 py-0.5 rounded-md border border-amber-500/30 font-heading truncate">Pastoral da Catequese</span>
+            <span class="text-[10.5px] text-emerald-400 font-semibold hidden md:inline-flex items-center gap-1">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Sistema Privado LGPD
             </span>
           </div>
-          <h1 class="text-sm sm:text-lg md:text-xl font-bold tracking-tight text-white font-heading">
+          <h1 class="text-xs sm:text-base md:text-xl font-bold tracking-tight text-white font-heading truncate">
             Santuário Imaculado Coração de Maria
           </h1>
-          <p class="text-[10.5px] text-slate-300 font-medium">Painel Integrado de Turmas, Salas, Formação e Notificações</p>
+          <p class="text-[10px] sm:text-[10.5px] text-slate-300 font-medium hidden sm:block truncate">Painel Integrado de Turmas, Salas, Formação e Notificações</p>
         </div>
       </div>
 
@@ -695,7 +772,7 @@
         <button
           id="btn-profile-menu"
           onclick="toggleProfileDropdown()"
-          class="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-gradient-to-br from-amber-400 via-[#d4a94f] to-[#b88d36] text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center shadow-lg border-2 border-amber-300/80 hover:ring-2 hover:ring-[#d4a94f] hover:brightness-105 transition transform active:scale-95 cursor-pointer font-heading select-none"
+          class="relative w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-gradient-to-br from-amber-400 via-[#d4a94f] to-[#b88d36] text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center shadow-lg border-2 border-amber-300/80 hover:ring-2 hover:ring-[#d4a94f] hover:brightness-105 transition transform active:scale-95 cursor-pointer font-heading select-none"
           title="Menu do Perfil e Ferramentas"
           aria-label="Abrir Menu do Usuário"
           aria-expanded="false"
@@ -816,7 +893,7 @@
 
 
   <!-- SECONDARY TOP BAR: QUICK TAB INDICATOR & SEARCH / PERIOD FILTERS -->
-  <section class="bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs sticky top-[68px] z-30 no-print">
+  <section class="bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs sticky top-[52px] sm:top-[64px] z-30 no-print">
     <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2">
       <div class="flex flex-wrap items-center justify-between gap-2.5">
         
@@ -837,7 +914,7 @@
 
         <!-- Right: Search input & Day filter -->
         <div class="flex flex-wrap items-center gap-2 flex-1 sm:flex-initial justify-end">
-          <div class="relative flex-1 sm:w-72">
+          <div class="relative flex-1 sm:w-72 min-w-[200px]">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
@@ -847,12 +924,12 @@
             </button>
           </div>
 
-          <div class="flex items-center gap-1 bg-slate-100 p-0.5 rounded-xl border border-slate-200 flex-shrink-0 text-xs overflow-x-auto">
-            <button onclick="filterByPeriod('all')" class="period-filter-btn px-2 py-1 rounded-lg font-bold bg-white text-slate-800 shadow-xs" data-period="all">Todos</button>
-            <button onclick="filterByPeriod('sab-manha')" class="period-filter-btn px-2 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="sab-manha">Sáb 8h30</button>
-            <button onclick="filterByPeriod('sab-tarde')" class="period-filter-btn px-2 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="sab-tarde">Sáb 15h</button>
-            <button onclick="filterByPeriod('seg-noite')" class="period-filter-btn px-2 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="seg-noite">Seg 20h</button>
-            <button onclick="filterByPeriod('quarta')" class="period-filter-btn px-2 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="quarta">Qua 16h</button>
+          <div class="flex items-center gap-1 bg-slate-100 p-0.5 rounded-xl border border-slate-200 flex-nowrap overflow-x-auto text-xs max-w-full">
+            <button onclick="filterByPeriod('all')" class="period-filter-btn px-2.5 py-1 rounded-lg font-bold bg-white text-slate-800 shadow-xs flex-shrink-0" data-period="all">Todos</button>
+            <button onclick="filterByPeriod('sab-manha')" class="period-filter-btn px-2.5 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900 flex-shrink-0" data-period="sab-manha">Sáb 8h30</button>
+            <button onclick="filterByPeriod('sab-tarde')" class="period-filter-btn px-2.5 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900 flex-shrink-0" data-period="sab-tarde">Sáb 15h</button>
+            <button onclick="filterByPeriod('seg-noite')" class="period-filter-btn px-2.5 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900 flex-shrink-0" data-period="seg-noite">Seg 20h</button>
+            <button onclick="filterByPeriod('quarta')" class="period-filter-btn px-2.5 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900 flex-shrink-0" data-period="quarta">Qua 16h</button>
           </div>
         </div>
 
@@ -900,10 +977,10 @@
       </div>
 
       <!-- Main Layout Grid: Interactive SVG Blueprint + Info Sidebar -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start blueprint-grid">
         
         <!-- SVG Architectural Blueprint (Left 8 Cols) -->
-        <div class="lg:col-span-8 bg-white p-4 sm:p-6 rounded-3xl border border-slate-200 shadow-sm relative">
+        <div class="lg:col-span-8 bg-white p-4 sm:p-6 rounded-3xl border border-slate-200 shadow-sm relative blueprint-left-col">
           
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3 border-b border-slate-100 pb-3">
             <div class="flex items-center gap-2 text-xs text-slate-500 font-medium">
@@ -911,19 +988,32 @@
               <span>Planta Vetorial Oficial • Clique em qualquer sala para ver os detalhes</span>
             </div>
             
-            <!-- Zoom Toolbar -->
-            <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-2xs self-start sm:self-auto">
-              <span class="text-[11px] font-bold text-slate-500 px-1.5 flex items-center gap-1">🔍 Zoom:</span>
-              <button onclick="changeBlueprintZoom('catequetico', -0.2)" class="w-6 h-6 bg-white hover:bg-slate-200 rounded-lg text-xs font-bold text-slate-700 transition flex items-center justify-center shadow-2xs" title="Diminuir Zoom">➖</button>
-              <span id="zoom-val-catequetico" class="text-xs font-black text-slate-800 w-11 text-center select-none">100%</span>
-              <button onclick="changeBlueprintZoom('catequetico', 0.2)" class="w-6 h-6 bg-white hover:bg-slate-200 rounded-lg text-xs font-bold text-slate-700 transition flex items-center justify-center shadow-2xs" title="Aumentar Zoom">➕</button>
-              <button onclick="resetBlueprintZoom('catequetico')" class="px-2 h-6 bg-white hover:bg-slate-200 rounded-lg text-[10px] font-bold text-slate-700 transition flex items-center justify-center shadow-2xs" title="Redefinir para 100%">↺ 100%</button>
+            <!-- Actions Toolbar: Zoom & Imprimir Planta -->
+            <div class="flex items-center gap-2 flex-wrap self-start sm:self-auto no-print">
+              <button onclick="triggerSmartPrint()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer" title="Imprimir Planta Baixa do Centro Catequético">
+                <span>🖨️</span> <span>Imprimir Planta</span>
+              </button>
+              
+              <!-- Zoom Toolbar -->
+              <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-2xs">
+                <span class="text-[11px] font-bold text-slate-500 px-1.5 flex items-center gap-1">🔍 Zoom:</span>
+                <button onclick="changeBlueprintZoom('catequetico', -0.2)" class="w-8 h-8 sm:w-6 sm:h-6 bg-white hover:bg-slate-200 rounded-lg text-xs font-bold text-slate-700 transition flex items-center justify-center shadow-2xs" title="Diminuir Zoom">➖</button>
+                <span id="zoom-val-catequetico" class="text-xs font-black text-slate-800 w-11 text-center select-none">100%</span>
+                <button onclick="changeBlueprintZoom('catequetico', 0.2)" class="w-8 h-8 sm:w-6 sm:h-6 bg-white hover:bg-slate-200 rounded-lg text-xs font-bold text-slate-700 transition flex items-center justify-center shadow-2xs" title="Aumentar Zoom">➕</button>
+                <button onclick="resetBlueprintZoom('catequetico')" class="px-2 h-8 sm:h-6 bg-white hover:bg-slate-200 rounded-lg text-[10px] font-bold text-slate-700 transition flex items-center justify-center shadow-2xs" title="Redefinir para 100%">↺ 100%</button>
+              </div>
             </div>
           </div>
 
+          <!-- Dica visual para celulares -->
+          <div class="sm:hidden flex items-center gap-1.5 text-[11px] text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 mb-2 no-print">
+            <span>👆</span>
+            <span>Arraste para navegar na planta • Toque na sala para ver detalhes</span>
+          </div>
+
           <!-- Interactive SVG Floor Plan -->
-          <div id="svg-container-catequetico" class="w-full flex justify-center overflow-x-auto overflow-y-hidden py-2" style="touch-action: pan-x pan-y;">
-            <svg id="svg-blueprint-catequetico" viewBox="0 -30 940 1800" class="w-full max-w-[650px] h-auto drop-shadow-sm select-none" xmlns="http://www.w3.org/2000/svg">
+          <div id="svg-container-catequetico" class="w-full flex justify-center overflow-x-auto overflow-y-hidden py-2" style="touch-action: pan-x pan-y; -webkit-overflow-scrolling: touch;">
+            <svg id="svg-blueprint-catequetico" viewBox="0 -30 940 1800" class="w-full min-w-[520px] sm:min-w-0 max-w-[650px] h-auto drop-shadow-sm select-none" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <linearGradient id="wallGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stop-color="#1e293b"/>
@@ -1383,7 +1473,7 @@
         </div>
 
         <!-- Sidebar Details & Room Interactive Card -->
-        <div class="lg:col-span-4 space-y-4">
+        <div class="lg:col-span-4 space-y-4 blueprint-sidebar-col">
           <div id="room-detail-panel" class="bg-white rounded-3xl border-2 border-amber-300 p-6 shadow-md transition-all">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
               <span class="text-xs font-bold uppercase tracking-wider text-[#d4a94f] bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200" id="detail-room-badge">SALA 01</span>
@@ -1580,74 +1670,143 @@
                 <text x="1130" y="480" text-anchor="middle" font-family="'Outfit', sans-serif" font-size="10.5" font-weight="800" fill="#d4a94f">SALA 17</text>
                 <text x="1165" y="515" text-anchor="middle" font-family="'Questrial', sans-serif" font-size="15" font-weight="700" fill="#0f172a">São João Bosco</text>
                 
-                <g transform="translate(1098, 530)">
-                  <rect x="0" y="0" width="134" height="110" rx="8" fill="#ffffff" stroke="#fde68a" stroke-width="1"/>
-                  <text x="6" y="18" font-family="'Nunito', sans-serif" font-size="10.5" font-weight="800" fill="#92400e">Perseverança</text>
-                  <text x="6" y="38" font-family="'Nunito', sans-serif" font-size="10" font-weight="700" fill="#334155">Sáb 8h30 (T01):</text>
-                  <text x="6" y="52" font-family="'Nunito', sans-serif" font-size="9.5" font-weight="700" fill="#b45309">Marcella, Bruna, Sônia</text>
-                  <text x="6" y="74" font-family="'Nunito', sans-serif" font-size="10" font-weight="700" fill="#334155">Sáb 10h30 (T02):</text>
-                  <text x="6" y="88" font-family="'Nunito', sans-serif" font-size="9.5" font-weight="700" fill="#b45309">Alda e Rosângela</text>
+                <g transform="translate(1096, 528)">
+                  <rect x="0" y="0" width="138" height="116" rx="8" fill="#ffffff" stroke="#fde68a" stroke-width="1"/>
+                  <text x="8" y="16" font-family="'Nunito', sans-serif" font-size="10" font-weight="800" fill="#92400e">Perseverança</text>
+                  <text x="8" y="34" font-family="'Nunito', sans-serif" font-size="9" font-weight="800" fill="#0369a1">Sáb 8h30 (T01):</text>
+                  <text x="8" y="48" font-family="'Nunito', sans-serif" font-size="8.5" font-weight="700" fill="#b45309">Marcella, Bruna, Sônia</text>
+                  <line x1="8" y1="56" x2="130" y2="56" stroke="#fef3c7" stroke-width="1"/>
+                  <text x="8" y="72" font-family="'Nunito', sans-serif" font-size="9" font-weight="800" fill="#0369a1">Sáb 10h30 (T02):</text>
+                  <text x="8" y="86" font-family="'Nunito', sans-serif" font-size="8.5" font-weight="700" fill="#b45309">Alda e Rosângela</text>
                 </g>
-                <text x="1165" y="670" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="8.5" font-weight="700" fill="#78350f">📍 Anexo à dir. dos banheiros</text>
+                <text x="1165" y="675" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="8" font-weight="700" fill="#78350f">📍 Anexo à dir. dos banheiros</text>
               </g>
 
               <!-- Sala 14 - São João (Next to Kitchen) -->
               <g id="svg-room-14" class="svg-room" onclick="selectRoom('sala-14')">
-                <rect class="room-bg" x="720" y="60" width="160" height="180" rx="6" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
-                <rect x="735" y="75" width="55" height="24" rx="6" fill="#1e293b"/>
-                <text x="762" y="91" text-anchor="middle" font-family="'Outfit', sans-serif" font-size="11" font-weight="800" fill="#d4a94f">SALA 14</text>
-                <text x="800" y="135" text-anchor="middle" font-family="'Questrial', sans-serif" font-size="16" font-weight="700" fill="#0f172a">São João</text>
-                <text x="800" y="155" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="10" font-weight="700" fill="#6d28d9">Seg 20h: Klebson, Heitor, Beatriz</text>
+                <rect class="room-bg" x="718" y="60" width="168" height="180" rx="6" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+                <rect x="728" y="70" width="55" height="22" rx="5" fill="#1e293b"/>
+                <text x="755" y="85" text-anchor="middle" font-family="'Outfit', sans-serif" font-size="10.5" font-weight="800" fill="#d4a94f">SALA 14</text>
+                <text x="802" y="86" text-anchor="middle" font-family="'Questrial', sans-serif" font-size="15" font-weight="700" fill="#0f172a">São João</text>
+                
+                <!-- Inner structured schedule card -->
+                <g transform="translate(724, 96)">
+                  <rect x="0" y="0" width="156" height="136" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+                  <text x="8" y="18" font-family="'Nunito', sans-serif" font-size="9.5" font-weight="800" fill="#6d28d9">Seg 20h • Turma 10</text>
+                  <text x="8" y="32" font-family="'Nunito', sans-serif" font-size="8.5" font-weight="700" fill="#4338ca">Crisma Jovem</text>
+                  <text x="8" y="50" font-family="'Nunito', sans-serif" font-size="8.5" font-weight="700" fill="#1e293b">Klebson e Heitor</text>
+                  <text x="8" y="65" font-family="'Nunito', sans-serif" font-size="8" font-weight="600" fill="#64748b">Beatriz (Auxiliar)</text>
+                  <line x1="8" y1="75" x2="148" y2="75" stroke="#f1f5f9" stroke-width="1"/>
+                  <text x="78" y="96" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="8.5" font-weight="700" fill="#059669">✓ Sábados: Livre</text>
+                  <text x="78" y="112" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="8" font-weight="600" fill="#94a3b8">Apoio Pastoral ICM</text>
+                </g>
               </g>
 
               <!-- Sala 12 - São Marcos (Beside Top Access Door) -->
               <g id="svg-room-12" class="svg-room" onclick="selectRoom('sala-12')">
-                <rect class="room-bg" x="550" y="60" width="160" height="180" rx="6" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
-                <rect x="565" y="75" width="55" height="24" rx="6" fill="#1e293b"/>
-                <text x="592" y="91" text-anchor="middle" font-family="'Outfit', sans-serif" font-size="11" font-weight="800" fill="#d4a94f">SALA 12</text>
-                <text x="630" y="130" text-anchor="middle" font-family="'Questrial', sans-serif" font-size="16" font-weight="700" fill="#0f172a">São Marcos</text>
-                <text x="630" y="150" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="9.5" font-weight="700" fill="#2563eb">Sáb: Maria Laura / Solange</text>
-                <text x="630" y="165" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="9" font-weight="700" fill="#6d28d9">Seg 20h: Lourival/Thiago</text>
+                <rect class="room-bg" x="545" y="60" width="168" height="180" rx="6" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+                <rect x="555" y="70" width="55" height="22" rx="5" fill="#1e293b"/>
+                <text x="582" y="85" text-anchor="middle" font-family="'Outfit', sans-serif" font-size="10.5" font-weight="800" fill="#d4a94f">SALA 12</text>
+                <text x="635" y="86" text-anchor="middle" font-family="'Questrial', sans-serif" font-size="15" font-weight="700" fill="#0f172a">São Marcos</text>
+                
+                <!-- Inner structured schedule card -->
+                <g transform="translate(551, 96)">
+                  <rect x="0" y="0" width="156" height="136" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+                  <text x="7" y="16" font-family="'Nunito', sans-serif" font-size="9" font-weight="800" fill="#1e40af">Sáb 8h30 • T04 (Euc II)</text>
+                  <text x="7" y="29" font-family="'Nunito', sans-serif" font-size="8.5" font-weight="700" fill="#334155">Maria Laura e Suelene</text>
+                  <line x1="7" y1="36" x2="149" y2="36" stroke="#f1f5f9" stroke-width="1"/>
+                  <text x="7" y="50" font-family="'Nunito', sans-serif" font-size="9" font-weight="800" fill="#1e40af">Sáb 10h30 • T06 (Euc II)</text>
+                  <text x="7" y="63" font-family="'Nunito', sans-serif" font-size="8.5" font-weight="700" fill="#334155">Solange e Núbia</text>
+                  <line x1="7" y1="70" x2="149" y2="70" stroke="#f1f5f9" stroke-width="1"/>
+                  <text x="7" y="84" font-family="'Nunito', sans-serif" font-size="9" font-weight="800" fill="#6d28d9">Seg 20h • T04 (Crisma Ad.)</text>
+                  <text x="7" y="97" font-family="'Nunito', sans-serif" font-size="8.5" font-weight="700" fill="#334155">Lourival e Thiago M.</text>
+                  <line x1="7" y1="104" x2="149" y2="104" stroke="#f1f5f9" stroke-width="1"/>
+                  <text x="78" y="122" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="7.5" font-weight="600" fill="#64748b">Eucaristia II &amp; Crisma Adultos</text>
+                </g>
               </g>
 
               <!-- Sala 13 - São Lucas (Next to Bathrooms) -->
               <g id="svg-room-13" class="svg-room" onclick="selectRoom('sala-13')">
-                <rect class="room-bg" x="720" y="520" width="160" height="180" rx="6" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
-                <rect x="735" y="535" width="55" height="24" rx="6" fill="#1e293b"/>
-                <text x="762" y="551" text-anchor="middle" font-family="'Outfit', sans-serif" font-size="11" font-weight="800" fill="#d4a94f">SALA 13</text>
-                <text x="800" y="590" text-anchor="middle" font-family="'Questrial', sans-serif" font-size="16" font-weight="700" fill="#0f172a">São Lucas</text>
-                <text x="800" y="612" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="9.5" font-weight="700" fill="#2563eb">Sáb: Marilian / Priscila</text>
-                <text x="800" y="628" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="9.5" font-weight="700" fill="#6d28d9">Seg 20h: Lanuzia</text>
+                <rect class="room-bg" x="718" y="520" width="168" height="180" rx="6" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+                <rect x="728" y="530" width="55" height="22" rx="5" fill="#1e293b"/>
+                <text x="755" y="545" text-anchor="middle" font-family="'Outfit', sans-serif" font-size="10.5" font-weight="800" fill="#d4a94f">SALA 13</text>
+                <text x="802" y="546" text-anchor="middle" font-family="'Questrial', sans-serif" font-size="15" font-weight="700" fill="#0f172a">São Lucas</text>
+                
+                <!-- Inner structured schedule card -->
+                <g transform="translate(724, 556)">
+                  <rect x="0" y="0" width="156" height="136" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+                  <text x="7" y="16" font-family="'Nunito', sans-serif" font-size="9" font-weight="800" fill="#1e40af">Sáb 8h30 • T03 (Euc II)</text>
+                  <text x="7" y="29" font-family="'Nunito', sans-serif" font-size="8.5" font-weight="700" fill="#334155">Marilian e Maria Luísa</text>
+                  <line x1="7" y1="36" x2="149" y2="36" stroke="#f1f5f9" stroke-width="1"/>
+                  <text x="7" y="50" font-family="'Nunito', sans-serif" font-size="9" font-weight="800" fill="#1e40af">Sáb 10h30 • T07 (Euc II)</text>
+                  <text x="7" y="63" font-family="'Nunito', sans-serif" font-size="8.5" font-weight="700" fill="#334155">Priscila Ayres e Camila</text>
+                  <line x1="7" y1="70" x2="149" y2="70" stroke="#f1f5f9" stroke-width="1"/>
+                  <text x="7" y="84" font-family="'Nunito', sans-serif" font-size="9" font-weight="800" fill="#6d28d9">Seg 20h • T09 (Crisma J.)</text>
+                  <text x="7" y="97" font-family="'Nunito', sans-serif" font-size="8.5" font-weight="700" fill="#334155">Lanuzia</text>
+                  <line x1="7" y1="104" x2="149" y2="104" stroke="#f1f5f9" stroke-width="1"/>
+                  <text x="78" y="122" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="7.5" font-weight="600" fill="#64748b">Eucaristia II &amp; Crisma Jovem</text>
+                </g>
               </g>
 
               <!-- Sala 11 - São Mateus (Beside Bottom Access Door) -->
               <g id="svg-room-11" class="svg-room" onclick="selectRoom('sala-11')">
-                <rect class="room-bg" x="550" y="520" width="160" height="180" rx="6" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
-                <rect x="565" y="535" width="55" height="24" rx="6" fill="#1e293b"/>
-                <text x="592" y="551" text-anchor="middle" font-family="'Outfit', sans-serif" font-size="11" font-weight="800" fill="#d4a94f">SALA 11</text>
-                <text x="630" y="590" text-anchor="middle" font-family="'Questrial', sans-serif" font-size="16" font-weight="700" fill="#0f172a">São Mateus</text>
-                <text x="630" y="612" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="9.5" font-weight="700" fill="#2563eb">Sáb: Bruna Noleto (Euc II)</text>
-                <text x="630" y="628" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="9" font-weight="700" fill="#6d28d9">Seg 20h: José Bernardo/Priscila</text>
+                <rect class="room-bg" x="545" y="520" width="168" height="180" rx="6" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+                <rect x="555" y="530" width="55" height="22" rx="5" fill="#1e293b"/>
+                <text x="582" y="545" text-anchor="middle" font-family="'Outfit', sans-serif" font-size="10.5" font-weight="800" fill="#d4a94f">SALA 11</text>
+                <text x="635" y="546" text-anchor="middle" font-family="'Questrial', sans-serif" font-size="15" font-weight="700" fill="#0f172a">São Mateus</text>
+                
+                <!-- Inner structured schedule card -->
+                <g transform="translate(551, 556)">
+                  <rect x="0" y="0" width="156" height="136" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+                  <text x="7" y="16" font-family="'Nunito', sans-serif" font-size="9" font-weight="800" fill="#1e40af">Sáb 8h30 • T01 (Euc II)</text>
+                  <text x="7" y="29" font-family="'Nunito', sans-serif" font-size="8.5" font-weight="700" fill="#334155">Bruna N. e Ana Luiza</text>
+                  <line x1="7" y1="36" x2="149" y2="36" stroke="#f1f5f9" stroke-width="1"/>
+                  <text x="7" y="50" font-family="'Nunito', sans-serif" font-size="9" font-weight="800" fill="#1e40af">Sáb 10h30 • T05 (Euc II)</text>
+                  <text x="7" y="63" font-family="'Nunito', sans-serif" font-size="8.5" font-weight="700" fill="#334155">Bruna N., José H., Heitor</text>
+                  <line x1="7" y1="70" x2="149" y2="70" stroke="#f1f5f9" stroke-width="1"/>
+                  <text x="7" y="84" font-family="'Nunito', sans-serif" font-size="9" font-weight="800" fill="#6d28d9">Seg 20h • T08 (Crisma J.)</text>
+                  <text x="7" y="97" font-family="'Nunito', sans-serif" font-size="8.5" font-weight="700" fill="#334155">José Bernardo e Priscila M.</text>
+                  <line x1="7" y1="104" x2="149" y2="104" stroke="#f1f5f9" stroke-width="1"/>
+                  <text x="78" y="122" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="7.5" font-weight="600" fill="#64748b">Eucaristia II &amp; Crisma Jovem</text>
+                </g>
               </g>
 
               <!-- Sala 16 - Santa Teresa de Calcutá (Top Left) -->
               <g id="svg-room-16" class="svg-room" onclick="selectRoom('sala-16')">
                 <rect class="room-bg" x="60" y="60" width="180" height="180" rx="6" fill="#fdfbf7" stroke="#e2e8f0" stroke-width="1.5"/>
-                <rect x="75" y="75" width="55" height="24" rx="6" fill="#1e293b"/>
-                <text x="102" y="91" text-anchor="middle" font-family="'Outfit', sans-serif" font-size="11" font-weight="800" fill="#d4a94f">SALA 16</text>
-                <text x="150" y="135" text-anchor="middle" font-family="'Questrial', sans-serif" font-size="15" font-weight="700" fill="#0f172a">Sta. Teresa de Calcutá</text>
-                <text x="150" y="158" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="10" font-weight="700" fill="#047857">Sáb 8h30: Patrícia e Eliane</text>
-                <text x="150" y="174" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="9.5" font-weight="700" fill="#6d28d9">Seg 20h: Rosilene e Pierre</text>
+                <rect x="70" y="70" width="55" height="22" rx="5" fill="#1e293b"/>
+                <text x="97" y="85" text-anchor="middle" font-family="'Outfit', sans-serif" font-size="10.5" font-weight="800" fill="#d4a94f">SALA 16</text>
+                <text x="145" y="105" text-anchor="middle" font-family="'Questrial', sans-serif" font-size="14.5" font-weight="700" fill="#0f172a">Sta. Teresa de Calcutá</text>
+                
+                <g transform="translate(68, 115)">
+                  <rect x="0" y="0" width="164" height="116" rx="6" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+                  <text x="8" y="18" font-family="'Nunito', sans-serif" font-size="9.5" font-weight="800" fill="#047857">Sáb 8h30 • Turma 01</text>
+                  <text x="8" y="32" font-family="'Nunito', sans-serif" font-size="9" font-weight="700" fill="#334155">Patrícia e Eliane</text>
+                  <line x1="8" y1="42" x2="156" y2="42" stroke="#f1f5f9" stroke-width="1"/>
+                  <text x="8" y="58" font-family="'Nunito', sans-serif" font-size="9.5" font-weight="800" fill="#6d28d9">Seg 20h • Turma 11</text>
+                  <text x="8" y="72" font-family="'Nunito', sans-serif" font-size="9" font-weight="700" fill="#334155">Rosilene e Pierre</text>
+                  <line x1="8" y1="82" x2="156" y2="82" stroke="#f1f5f9" stroke-width="1"/>
+                  <text x="82" y="102" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="8" font-weight="600" fill="#64748b">Pré &amp; Crisma Jovem</text>
+                </g>
               </g>
 
               <!-- Sala 15 - Santo André (Bottom Left) -->
               <g id="svg-room-15" class="svg-room" onclick="selectRoom('sala-15')">
                 <rect class="room-bg" x="60" y="520" width="180" height="180" rx="6" fill="#fdfbf7" stroke="#e2e8f0" stroke-width="1.5"/>
-                <rect x="75" y="535" width="55" height="24" rx="6" fill="#1e293b"/>
-                <text x="102" y="551" text-anchor="middle" font-family="'Outfit', sans-serif" font-size="11" font-weight="800" fill="#d4a94f">SALA 15</text>
-                <text x="150" y="595" text-anchor="middle" font-family="'Questrial', sans-serif" font-size="17" font-weight="700" fill="#0f172a">Santo André</text>
-                <text x="150" y="618" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="10" font-weight="700" fill="#047857">Sáb 8h30: Ana Luísa/Clarice</text>
-                <text x="150" y="635" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="10" font-weight="700" fill="#047857">Sáb 10h30: Bruna/Jullia/Beatris</text>
+                <rect x="70" y="530" width="55" height="22" rx="5" fill="#1e293b"/>
+                <text x="97" y="545" text-anchor="middle" font-family="'Outfit', sans-serif" font-size="10.5" font-weight="800" fill="#d4a94f">SALA 15</text>
+                <text x="145" y="565" text-anchor="middle" font-family="'Questrial', sans-serif" font-size="15" font-weight="700" fill="#0f172a">Santo André</text>
+                
+                <g transform="translate(68, 575)">
+                  <rect x="0" y="0" width="164" height="116" rx="6" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+                  <text x="8" y="18" font-family="'Nunito', sans-serif" font-size="9.5" font-weight="800" fill="#047857">Sáb 8h30 • Turma 02</text>
+                  <text x="8" y="32" font-family="'Nunito', sans-serif" font-size="9" font-weight="700" fill="#334155">Ana Luísa (Aux: Clarice)</text>
+                  <line x1="8" y1="42" x2="156" y2="42" stroke="#f1f5f9" stroke-width="1"/>
+                  <text x="8" y="58" font-family="'Nunito', sans-serif" font-size="9.5" font-weight="800" fill="#047857">Sáb 10h30 • Turma 03</text>
+                  <text x="8" y="72" font-family="'Nunito', sans-serif" font-size="8.5" font-weight="700" fill="#334155">Bruna, Jullia e Beatris</text>
+                  <line x1="8" y1="82" x2="156" y2="82" stroke="#f1f5f9" stroke-width="1"/>
+                  <text x="82" y="102" text-anchor="middle" font-family="'Nunito', sans-serif" font-size="8" font-weight="600" fill="#64748b">Pré-Eucaristia</text>
+                </g>
               </g>
 
               <!-- Palco / Hall Central de Entrada (Between 15 and 16) -->
@@ -1663,7 +1822,7 @@
         </div>
 
         <!-- Sidebar Details & Room Interactive Card for Paroquial Hall -->
-        <div class="lg:col-span-4 space-y-4">
+        <div class="lg:col-span-4 space-y-4 blueprint-sidebar-col">
           <div id="paroquial-detail-panel" class="bg-white rounded-3xl border-2 border-blue-300 p-6 shadow-md transition-all">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
               <span class="text-xs font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200" id="detail2-room-badge">SALA 17</span>
@@ -1770,6 +1929,10 @@
             <span>📋 Planilha &amp; Tabela de Turmas</span>
             <span class="bg-emerald-100 text-emerald-900 text-[10px] font-bold px-2 py-0.5 rounded-full">Planilha</span>
           </button>
+          <button id="btn-subtab-catequistas" onclick="switchOrganogramaSubTab('catequistas')" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+            <span>👥 Dados dos Catequistas</span>
+            <span class="bg-amber-100 text-amber-900 text-[10px] font-black px-2 py-0.5 rounded-full border border-amber-300">76 Cadastrados</span>
+          </button>
         </div>
 
         <!-- Toolbar de Ações (Contextual) -->
@@ -1834,7 +1997,7 @@
               <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 text-white border-2 border-[#d4a94f] px-8 py-3.5 rounded-2xl shadow-xl text-center max-w-xl w-full flex flex-col gap-2 relative">
                 <div class="flex items-center justify-center gap-4">
                   <div class="bg-white/10 p-1 rounded-xl border border-[#d4a94f]/40 backdrop-blur-sm shadow-inner flex-shrink-0">
-                    <img src="https://imaculadocoracaodf.com.br/wp-content/uploads/2024/01/PICM-BrasAo-para-impressos.png" alt="Brasão Santuário" class="h-11 w-auto object-contain drop-shadow">
+                    <img src="./brasao-icm.png" alt="Brasão Santuário" class="h-11 w-auto object-contain drop-shadow">
                   </div>
                   <div class="text-center sm:text-left">
                     <span class="inline-block text-[10px] font-bold tracking-widest text-[#d4a94f] uppercase font-heading">Santuário Imaculado Coração de Maria</span>
@@ -1960,6 +2123,115 @@
 
         </div>
       </div>
+
+      <!-- ========================================================= -->
+      <!-- SUB-TAB 3: DADOS PESSOAIS & CONTATOS DOS CATEQUISTAS     -->
+      <!-- ========================================================= -->
+      <div id="subview-catequistas" class="hidden space-y-6">
+        
+        <!-- Header & Stats Banner -->
+        <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-950 text-white p-6 sm:p-7 rounded-3xl border-2 border-[#d4a94f]/60 shadow-xl relative overflow-hidden">
+          <div class="absolute -top-16 -right-16 w-44 h-44 bg-[#d4a94f]/15 rounded-full blur-3xl pointer-events-none"></div>
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 relative z-10">
+            <div>
+              <div class="flex items-center gap-2 mb-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="text-[11px] font-bold uppercase tracking-wider text-[#d4a94f] font-heading">Cadastro Geral de Catequistas • Ano Pastoral 2026</span>
+              </div>
+              <h3 class="text-2xl sm:text-3xl font-black font-heading text-white flex items-center gap-2.5">
+                <span>Quadro de Catequistas &amp; Contatos</span>
+                <span id="badge-total-catequistas" class="text-xs bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 px-3 py-1 rounded-full font-sans font-bold">76 Cadastrados</span>
+              </h3>
+              <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
+                Dados pessoais completos integrados ao Organograma de Turmas: Nome completo, data de nascimento, WhatsApp com link direto, e-mail, paróquia habitual e turmas atribuídas.
+              </p>
+            </div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <button onclick="exportarCatequistasCSV()" class="inline-flex items-center gap-1.5 bg-[#d4a94f] hover:bg-[#e6c27a] text-slate-950 font-bold px-4 py-2 rounded-xl text-xs shadow-md transition transform active:scale-95 font-heading">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <span>Exportar Planilha (CSV)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Stats Cards -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5 pt-4 border-t border-slate-700/60 text-center">
+            <div class="bg-slate-900/60 p-3 rounded-2xl border border-slate-700/50">
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Total Catequistas</span>
+              <span class="text-xl sm:text-2xl font-black text-amber-300 font-heading" id="stat-total-cats">76</span>
+            </div>
+            <div class="bg-slate-900/60 p-3 rounded-2xl border border-slate-700/50">
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Turmas Vinculadas</span>
+              <span class="text-xl sm:text-2xl font-black text-emerald-300 font-heading">44</span>
+            </div>
+            <div class="bg-slate-900/60 p-3 rounded-2xl border border-slate-700/50">
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Etapas Atendidas</span>
+              <span class="text-xl sm:text-2xl font-black text-sky-300 font-heading">6</span>
+            </div>
+            <div class="bg-slate-900/60 p-3 rounded-2xl border border-slate-700/50">
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">WhatsApp Direto</span>
+              <span class="text-xl sm:text-2xl font-black text-green-400 font-heading">100%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter & Search Controls -->
+        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-3">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div class="relative flex-1">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">🔍</span>
+              <input type="text" id="input-search-catequistas" oninput="filterCatequistasList()" placeholder="Buscar por nome, telefone, email, paróquia ou turma..." class="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium focus:bg-white focus:border-[#d4a94f] focus:ring-2 focus:ring-[#d4a94f]/20 outline-none transition" />
+            </div>
+
+            <div class="flex items-center gap-2 flex-wrap">
+              <select id="sel-filter-catequistas-etapa" onchange="filterCatequistasList()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-700 outline-none focus:border-[#d4a94f]">
+                <option value="all">Todas as Etapas (76)</option>
+                <option value="Pré Eucaristia">Pré Eucaristia</option>
+                <option value="Eucaristia I">Eucaristia I</option>
+                <option value="Eucaristia II">Eucaristia II</option>
+                <option value="Perseverança">Perseverança</option>
+                <option value="Crisma Jovem">Crisma Jovem</option>
+                <option value="Crisma Adultos">Crisma Adultos</option>
+                <option value="Geral">Coordenação Geral / Sem Turma</option>
+              </select>
+
+              <select id="sel-filter-catequistas-paroquia" onchange="filterCatequistasList()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-700 outline-none focus:border-[#d4a94f]">
+                <option value="all">Todas as Paróquias</option>
+                <option value="Santuário">Santuário ICM</option>
+                <option value="outras">Outras Paróquias</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabela Completa de Catequistas -->
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs sm:text-sm border-collapse">
+              <thead>
+                <tr class="bg-slate-900 text-white border-b-2 border-[#d4a94f]">
+                  <th class="py-3 px-4 font-heading">Catequista (Nome Completo)</th>
+                  <th class="py-3 px-4 font-heading">Data Nasc.</th>
+                  <th class="py-3 px-4 font-heading">WhatsApp / Telefone</th>
+                  <th class="py-3 px-4 font-heading">E-mail</th>
+                  <th class="py-3 px-4 font-heading">Paróquia Habitual</th>
+                  <th class="py-3 px-4 font-heading">Etapa &amp; Turma(s) 2026</th>
+                  <th class="py-3 px-4 text-center font-heading" style="width: 100px;">Ficha</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-catequistas-list" class="divide-y divide-slate-100">
+                <!-- Populado dinamicamente -->
+              </tbody>
+            </table>
+          </div>
+          <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+            <span id="catequistas-table-stats">Exibindo 76 catequistas cadastrados.</span>
+            <span class="text-[11px] text-slate-400">Fonte: downloads/Cadastro Catequese 2026 (respostas).xlsx</span>
+          </div>
+        </div>
+
+      </div>
+
 
     </section>
 
@@ -3087,6 +3359,118 @@
       </div>
     </div>
 
+
+    <!-- ========================================== -->
+    <!-- MODAL: FICHA DE DADOS DO CATEQUISTA (2026) -->
+    <!-- ========================================== -->
+    <div id="modal-catequista-detalhes" class="hidden fixed inset-0 z-[60] bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+      <div class="bg-white rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl border border-slate-200 my-auto transform transition-all">
+        <!-- Header com gradiente escuro e borda dourada -->
+        <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 text-white p-6 relative border-b-2 border-[#d4a94f]">
+          <button onclick="closeCatequistaModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white p-2 rounded-xl hover:bg-white/10 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+          
+          <div class="flex items-start gap-4">
+            <div id="modal-cat-avatar" class="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#d4a94f] to-[#b88d36] text-slate-950 flex items-center justify-center font-black text-2xl font-heading shadow-md shrink-0">
+              TC
+            </div>
+            <div class="space-y-1">
+              <span id="modal-cat-funcao-badge" class="inline-block text-[10px] font-bold uppercase tracking-wider text-amber-300 bg-amber-950/80 border border-amber-500/40 px-2.5 py-0.5 rounded-full font-heading">
+                Catequista Titular
+              </span>
+              <h3 id="modal-cat-nome" class="text-xl sm:text-2xl font-black font-heading text-white">
+                Nome do Catequista
+              </h3>
+              <p id="modal-cat-etapa-sub" class="text-xs text-slate-300">
+                Crisma Jovem • Santuário Imaculado Coração de Maria
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Conteúdo do Modal -->
+        <div class="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
+          
+          <!-- Botões Rápidos de Contato -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <a id="modal-cat-btn-wa" href="#" target="_blank" class="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-2xl text-xs sm:text-sm shadow-sm transition">
+              <span>💬 Conversar no WhatsApp</span>
+            </a>
+            <a id="modal-cat-btn-email" href="#" class="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-100 font-bold py-3 px-4 rounded-2xl text-xs sm:text-sm border border-slate-700 transition">
+              <span>✉️ Enviar E-mail</span>
+            </a>
+          </div>
+
+          <!-- Bloco 1: Informações Pessoais -->
+          <div class="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200/80 space-y-3">
+            <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 font-heading flex items-center gap-2">
+              <span>👤</span> <span>Dados Pessoais &amp; Cadastro</span>
+            </h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
+              <div>
+                <span class="text-slate-400 font-bold block">Nome Completo:</span>
+                <span id="modal-cat-nome-completo" class="font-bold text-slate-900 text-sm"></span>
+              </div>
+              <div>
+                <span class="text-slate-400 font-bold block">Data de Nascimento / Idade:</span>
+                <span id="modal-cat-dob" class="font-semibold text-slate-800 text-sm"></span>
+              </div>
+              <div>
+                <span class="text-slate-400 font-bold block">Telefone / WhatsApp:</span>
+                <span id="modal-cat-telefone" class="font-bold text-slate-900 font-mono"></span>
+              </div>
+              <div>
+                <span class="text-slate-400 font-bold block">E-mail:</span>
+                <span id="modal-cat-email" class="font-medium text-slate-800 font-mono"></span>
+              </div>
+              <div>
+                <span class="text-slate-400 font-bold block">Profissão:</span>
+                <span id="modal-cat-profissao" class="font-medium text-slate-800"></span>
+              </div>
+              <div>
+                <span class="text-slate-400 font-bold block">Estado Civil:</span>
+                <span id="modal-cat-estado-civil" class="font-medium text-slate-800"></span>
+              </div>
+              <div class="sm:col-span-2">
+                <span class="text-slate-400 font-bold block">Endereço Residencial:</span>
+                <span id="modal-cat-endereco" class="font-medium text-slate-800"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bloco 2: Paróquia & Vida Comunitária -->
+          <div class="bg-amber-50/60 p-4 sm:p-5 rounded-2xl border border-amber-200/80 space-y-2">
+            <h4 class="text-xs font-black uppercase tracking-wider text-amber-900 font-heading flex items-center gap-2">
+              <span>⛪</span> <span>Paróquia Habitual de Frequência da Missa</span>
+            </h4>
+            <div id="modal-cat-paroquia" class="font-bold text-slate-900 text-sm">
+              Santuário do Imaculado Coração de Maria
+            </div>
+          </div>
+
+          <!-- Bloco 3: Turmas Atribuídas no Organograma 2026 -->
+          <div class="space-y-3">
+            <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 font-heading flex items-center gap-2">
+              <span>📖</span> <span>Turma(s) e Atribuições na Catequese 2026</span>
+            </h4>
+            <div id="modal-cat-turmas-list" class="space-y-2">
+              <!-- Lista de Turmas -->
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
+          <button onclick="closeCatequistaModal()" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs transition">
+            Fechar Ficha
+          </button>
+        </div>
+      </div>
+    </div>
+
+
     <!-- ========================================== -->
     <!-- MODAL: EDITAR COORDENAÇÕES DO ORGANOGRAMA  -->
     <!-- ========================================== -->
@@ -3444,7 +3828,7 @@
         <div class="md:col-span-5 space-y-3">
           <div class="flex items-center gap-3">
             <div class="bg-white/10 p-1.5 rounded-xl border border-[#d4a94f]/40 backdrop-blur-sm shadow-inner flex-shrink-0">
-              <img src="https://imaculadocoracaodf.com.br/wp-content/uploads/2024/01/PICM-BrasAo-para-impressos.png" alt="Brasão Santuário ICM" class="h-12 w-auto object-contain drop-shadow">
+              <img src="./brasao-icm.png" alt="Brasão Santuário ICM" class="h-12 w-auto object-contain drop-shadow">
             </div>
             <div>
               <h3 class="text-base font-bold text-white font-heading">Santuário Imaculado Coração de Maria</h3>
@@ -4999,6 +5383,18 @@
           schedules2.appendChild(div);
         });
       }
+
+      // Rolagem suave automática ao painel de detalhes em telas móveis
+      if (window.innerWidth < 1024) {
+        const detailPanel = room.hall === 'paroquial'
+          ? document.getElementById('paroquial-detail-panel')
+          : document.getElementById('room-detail-panel');
+        if (detailPanel) {
+          setTimeout(() => {
+            detailPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }, 120);
+        }
+      }
     }
 
     // SEARCH SYSTEM
@@ -5891,6 +6287,32 @@
             role: u.role || 'catequista',
             statusAprovacao: 'aprovado'
           });
+        });
+      }
+
+      // 3. Catequistas Oficiais Cadastrados (Formulário 2026)
+      if (typeof getCatequistasRegistrationData === 'function') {
+        const catequistas = getCatequistasRegistrationData();
+        catequistas.forEach(c => {
+          if (!list.some(item => item.email && c.email && item.email.toLowerCase() === c.email.toLowerCase())) {
+            list.push({
+              id: c.id,
+              nome: c.nomeCompleto,
+              cpf: 'Cadastrado no Formulário 2026',
+              categoria: c.funcaoPrincipal || 'Catequista',
+              tipo: 'catequista',
+              etapa: c.etapaPrincipal || '—',
+              turma: (c.turmas || []).map(t => `${t.stage} ${t.turma}`).join(', ') || '—',
+              dataNascimento: c.dataNascimento || '—',
+              email: c.email || '—',
+              contato: c.telefone || '—',
+              endereco: c.endereco || '—',
+              estadoCivil: c.estadoCivil || '—',
+              paroquia: c.paroquia || '—',
+              role: 'catequista',
+              statusAprovacao: 'aprovado'
+            });
+          }
         });
       }
 
@@ -7582,6 +8004,2361 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     // Múltiplos Organogramas, Sincronização Bidirecional
     // Edição via Gráfico em Árvore e via Planilha
     // =============================================
+
+    // =========================================================
+    // DADOS PESSOAIS & CADASTRO DOS CATEQUISTAS (2026)
+    // Extraídos do formulário oficial 'Cadastro Catequese 2026'
+    // Correlacionados com as 44 Turmas do Organograma Oficial
+    // =========================================================
+    const STORAGE_KEY_CATEQUISTAS_2026 = 'catequese_catequistas_2026_v1';
+    const SEED_CATEQUISTAS_2026 = [
+    {
+        "id": "cat-2026-1",
+        "row": 2,
+        "nomeCompleto": "Vinícius Piante Salles Silva",
+        "dataNascimento": "08/05/1998",
+        "telefone": "(61) 99668-1544",
+        "telefoneRaw": "5561996681544",
+        "email": "viniciuspiante@gmail.com",
+        "profissao": "Servidor Público",
+        "endereco": "SHIN QL 06 CONJUNTO 01 CASA 10",
+        "estadoCivil": "Solteiro",
+        "paroquia": "Santuário do Imaculado Coração de Maria",
+        "etapaDeclarada": "Crisma Jovem",
+        "turmas": [
+            {
+                "stage": "Crisma Jovem",
+                "turma": "Turma 07",
+                "funcao": "Catequista Titular",
+                "dayTime": "Segunda: 20:00 às 21:30",
+                "room": "Sala São Miguel (Sala 07 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Crisma Jovem",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-2",
+        "row": 3,
+        "nomeCompleto": "Sônia Cabral Barbosa",
+        "dataNascimento": "09/12/1955",
+        "telefone": "(61) 99366-7900",
+        "telefoneRaw": "5561993667900",
+        "email": "soniacabral85@gmail.com",
+        "profissao": "Funcionária Pública",
+        "endereco": "Rua Manacá Morte lote 3 Ed Real Paris bloco A 405",
+        "estadoCivil": "Viúva",
+        "paroquia": "Santuário do Imaculado Coração de Maria",
+        "etapaDeclarada": "Perseverança",
+        "turmas": [
+            {
+                "stage": "Perseverança",
+                "turma": "Turma 01",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 08:30 às 10:00",
+                "room": "Sala São João Bosco (Sala 17 - Salão Par.)"
+            }
+        ],
+        "etapaPrincipal": "Perseverança",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-3",
+        "row": 4,
+        "nomeCompleto": "DANILO PASCOAL COSTA",
+        "dataNascimento": "25/02/1984",
+        "telefone": "(98) 98921-3111",
+        "telefoneRaw": "5598989213111",
+        "email": "danilo_pascoal@hotmail.com",
+        "profissao": "PRF",
+        "endereco": "Quadra 202, 4, Wolfgang Amadeus Mozart, 502A, Águas Claras",
+        "estadoCivil": "Casado",
+        "paroquia": "Nossa Senhora do Carmo - Taguatinga",
+        "etapaDeclarada": "Crisma de Adultos",
+        "turmas": [
+            {
+                "stage": "Crisma Adultos",
+                "turma": "Turma 01",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 08:30 às 10:15",
+                "room": "Auditório (Centro Catequético)"
+            }
+        ],
+        "etapaPrincipal": "Crisma Adultos",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-4",
+        "row": 5,
+        "nomeCompleto": "Victor Assis Farias",
+        "dataNascimento": "14/03/1987",
+        "telefone": "(61) 99804-6367",
+        "telefoneRaw": "5561998046367",
+        "email": "victor.assisfarias@gmail.com",
+        "profissao": "Analista de sistemas",
+        "endereco": "Shvp rua 1 cj 3 qd 7 ch 20 - Vicente Pires",
+        "estadoCivil": "Casado",
+        "paroquia": "Santuário Imaculado Coração de Maria",
+        "etapaDeclarada": "Crisma de Adultos",
+        "turmas": [
+            {
+                "stage": "Crisma Adultos",
+                "turma": "Turma 08",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sacramento: 03/12/2026 – 19:30",
+                "room": "Sala Santa Jacinta (Sala 05 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Crisma Adultos",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-5",
+        "row": 6,
+        "nomeCompleto": "Elza Ferreira da Mata Gontijo",
+        "dataNascimento": "21/12/1980",
+        "telefone": "(61) 98144-6001",
+        "telefoneRaw": "5561981446001",
+        "email": "elzaf.damata@gmail.com",
+        "profissao": "Empresária",
+        "endereco": "Qd 107 lotes 2/4/6 bloco A apt 203",
+        "estadoCivil": "Casada",
+        "paroquia": "Santuario Imaculado Coração de Maria",
+        "etapaDeclarada": "Eucarístia 1",
+        "turmas": [
+            {
+                "stage": "Eucaristia I",
+                "turma": "Turma 08",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 10:30 às 12:00",
+                "room": "Sala Santa Jacinta (Sala 05 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia I",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-6",
+        "row": 7,
+        "nomeCompleto": "Mara Rúbia de Deus Alvarenga",
+        "dataNascimento": "25/05/1987",
+        "telefone": "(61) 99118-9147",
+        "telefoneRaw": "5561991189147",
+        "email": "mararubia.alvarenga@gmail.com",
+        "profissao": "Servidora pública",
+        "endereco": "Sha conjunto 06 chácara 436 casa 43",
+        "estadoCivil": "Solteiro",
+        "paroquia": "Santuário do Imaculado Coração de Maria",
+        "etapaDeclarada": "Eucarístia 1",
+        "turmas": [
+            {
+                "stage": "Eucaristia I",
+                "turma": "Turma 10",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 08:30 às 10:00",
+                "room": "Sala São Miguel (Sala 06 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia I",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-7",
+        "row": 8,
+        "nomeCompleto": "Rosilene Francelino da Silva",
+        "dataNascimento": "22/01/1981",
+        "telefone": "(81) 99757-3309",
+        "telefoneRaw": "5581997573309",
+        "email": "rosilenerfs@gmail.com",
+        "profissao": "Advogada",
+        "endereco": "Rua 22 norte, lote 2 Águas Claras",
+        "estadoCivil": "Casada na igreja",
+        "paroquia": "Imaculado coração de Maria e Assunção de Maria",
+        "etapaDeclarada": "Crisma Jovem",
+        "turmas": [
+            {
+                "stage": "Crisma Jovem",
+                "turma": "Turma 11",
+                "funcao": "Catequista Titular",
+                "dayTime": "Segunda: 20:00 às 21:30",
+                "room": "Sala Santa Teresa (Sala 16 - Salão Par.)"
+            }
+        ],
+        "etapaPrincipal": "Crisma Jovem",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-8",
+        "row": 9,
+        "nomeCompleto": "Marina de Oliveira Ferreira",
+        "dataNascimento": "08/04/2009",
+        "telefone": "(61) 99833-5387",
+        "telefoneRaw": "5561998335387",
+        "email": "marina.olivef@gmail.com",
+        "profissao": "Estudante",
+        "endereco": "Qnl 2 conjunto J casa 12",
+        "estadoCivil": "Solteira",
+        "paroquia": "Santuário Imaculado Coração de Maria",
+        "etapaDeclarada": "Eucarístia 1",
+        "turmas": [
+            {
+                "stage": "Eucaristia I",
+                "turma": "Turma 06",
+                "funcao": "Auxiliar em Formação",
+                "dayTime": "Sábado: 10:30 às 12:00",
+                "room": "Sala Protomártires (Sala 01 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia I",
+        "funcaoPrincipal": "Auxiliar em Formação"
+    },
+    {
+        "id": "cat-2026-9",
+        "row": 10,
+        "nomeCompleto": "Pierre Silva Cavalcanti",
+        "dataNascimento": "22/04/1978",
+        "telefone": "(61) 99125-3275",
+        "telefoneRaw": "5561991253275",
+        "email": "pierrecavalcanti@gmail.com",
+        "profissao": "Servidor público",
+        "endereco": "Av. Parque Águas Claras, 405, apt 210",
+        "estadoCivil": "Solteiro",
+        "paroquia": "Imaculado Coração de Maria",
+        "etapaDeclarada": "Crisma Jovem",
+        "turmas": [
+            {
+                "stage": "Crisma Jovem",
+                "turma": "Turma 11",
+                "funcao": "Catequista Titular",
+                "dayTime": "Segunda: 20:00 às 21:30",
+                "room": "Sala Santa Teresa (Sala 16 - Salão Par.)"
+            }
+        ],
+        "etapaPrincipal": "Crisma Jovem",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-10",
+        "row": 11,
+        "nomeCompleto": "Hermes da Silva Dantas",
+        "dataNascimento": "18/08/1982",
+        "telefone": "(61) 98116-4440",
+        "telefoneRaw": "5561981164440",
+        "email": "dantashermes@hotmail.com",
+        "profissao": "Delegado de Polícia",
+        "endereco": "Quadra 204, Quattro Mirante, Apt. 1601C, Águas Claras",
+        "estadoCivil": "Casado",
+        "paroquia": "Imaculado Coração de Maria (durante a semana). Cristo Redentor (Domingo).",
+        "etapaDeclarada": "Crisma de Adultos",
+        "turmas": [
+            {
+                "stage": "Crisma Adultos",
+                "turma": "Turma 06",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sacramento: 03/12/2026 – 19:30",
+                "room": "Sala São Francisco Marto (Sala 03 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Crisma Adultos",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-11",
+        "row": 12,
+        "nomeCompleto": "Flávia dos reis couto Tambellini",
+        "dataNascimento": "16/10/1971",
+        "telefone": "(61) 98212-4074",
+        "telefoneRaw": "5561982124074",
+        "email": "avgcouto@gmail.co.",
+        "profissao": "Professora",
+        "endereco": "Sha conj5ch10 lote 8",
+        "estadoCivil": "Cassda",
+        "paroquia": "Santuário Imaculado coração de Maria",
+        "etapaDeclarada": "Crisma Jovem",
+        "turmas": [
+            {
+                "stage": "Crisma Jovem",
+                "turma": "Turma 04",
+                "funcao": "Catequista Titular",
+                "dayTime": "Segunda: 20:00 às 21:30",
+                "room": "Sala Carlo Acutis (Sala 08 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Crisma Jovem",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-12",
+        "row": 13,
+        "nomeCompleto": "Michel Maisonnave de Oliveira",
+        "dataNascimento": "31/03/1978",
+        "telefone": "(61) 99313-9779",
+        "telefoneRaw": "5561993139779",
+        "email": "michelmaiso@gmail.com",
+        "profissao": "Militar",
+        "endereco": "Rua 21 Norte LT 5 Apto 601",
+        "estadoCivil": "Casado",
+        "paroquia": "Santuário Imaculado Coração de Maria",
+        "etapaDeclarada": "Atualmente não estou com turma",
+        "turmas": [
+            {
+                "stage": "Geral",
+                "turma": "Disponível",
+                "funcao": "Sem turma atualmente",
+                "dayTime": "—",
+                "room": "—"
+            }
+        ],
+        "etapaPrincipal": "Geral",
+        "funcaoPrincipal": "Sem turma atualmente"
+    },
+    {
+        "id": "cat-2026-13",
+        "row": 14,
+        "nomeCompleto": "Ricardo Pereira Lino",
+        "dataNascimento": "24/07/2001",
+        "telefone": "(61) 98138-0113",
+        "telefoneRaw": "5561981380113",
+        "email": "ricardo.lino2001@gmail.com",
+        "profissao": "Analista de TI",
+        "endereco": "SHA Conj 5 Ch 22 Cond. Itália Lote 40",
+        "estadoCivil": "Solteiro",
+        "paroquia": "Santuário Imaculado Coração de Maria",
+        "etapaDeclarada": "Crisma de Adultos",
+        "turmas": [
+            {
+                "stage": "Crisma Jovem",
+                "turma": "Coordenação",
+                "funcao": "Vice-Coordenador de Etapa",
+                "dayTime": "Sábado / Segunda",
+                "room": "Centro Catequético"
+            }
+        ],
+        "etapaPrincipal": "Crisma Jovem",
+        "funcaoPrincipal": "Vice-Coordenador de Etapa"
+    },
+    {
+        "id": "cat-2026-14",
+        "row": 15,
+        "nomeCompleto": "Marcelo de Sousa da Silveira",
+        "dataNascimento": "11/05/1976",
+        "telefone": "(61) 99123-4749",
+        "telefoneRaw": "5561991234749",
+        "email": "domsilveira@gmail.com",
+        "profissao": "Servidor público",
+        "endereco": "Quadra 209 Lote 8 apt 1202 B",
+        "estadoCivil": "Casado",
+        "paroquia": "Santuário Imaculado Coração de Maria",
+        "etapaDeclarada": "Crisma de Adultos",
+        "turmas": [
+            {
+                "stage": "Crisma Adultos",
+                "turma": "Turma 02",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 10:15 às 12:00",
+                "room": "Auditório (Centro Catequético)"
+            }
+        ],
+        "etapaPrincipal": "Crisma Adultos",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-15",
+        "row": 16,
+        "nomeCompleto": "Ana Luiza Brasil de Melo Augusto",
+        "dataNascimento": "23/04/1970",
+        "telefone": "(61) 99105-9462",
+        "telefoneRaw": "5561991059462",
+        "email": "analuiza.augusto@gmail.com",
+        "profissao": "Administradora do lar",
+        "endereco": "Av Pau Brasil 11 T 2 apt 301",
+        "estadoCivil": "Casada",
+        "paroquia": "Nossa Senhora da Assunção",
+        "etapaDeclarada": "Eucarístia 1",
+        "turmas": [
+            {
+                "stage": "Eucaristia I",
+                "turma": "Apoio",
+                "funcao": "Catequista Apoio / Substituta",
+                "dayTime": "Sábado: 08:30 às 10:00",
+                "room": "Centro Catequético"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia I",
+        "funcaoPrincipal": "Catequista Apoio / Substituta"
+    },
+    {
+        "id": "cat-2026-16",
+        "row": 17,
+        "nomeCompleto": "Maria Laura Barbosa Chaves",
+        "dataNascimento": "17/01/1987",
+        "telefone": "061993293801",
+        "telefoneRaw": "061993293801",
+        "email": "finigarimpo@gmail.com",
+        "profissao": "Empreendedora",
+        "endereco": "Quadra 201 bloco G lote 04 apt 904",
+        "estadoCivil": "Divorciada",
+        "paroquia": "Nossa Senhora da Assunção (proximidade de casa) e Santuário.",
+        "etapaDeclarada": "Eucarístia 2",
+        "turmas": [
+            {
+                "stage": "Eucaristia II",
+                "turma": "Turma 04",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 08:30 às 10:00",
+                "room": "Sala São Marcos (Sala 12 - Salão Par.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia II",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-17",
+        "row": 18,
+        "nomeCompleto": "Marilian Medeiros de Araújo Silva Sales",
+        "dataNascimento": "06/11/1982",
+        "telefone": "(61) 98214-7878",
+        "telefoneRaw": "5561982147878",
+        "email": "marilianmedeiros@gmail.com",
+        "profissao": "Nutricionista",
+        "endereco": "Rua 21 Norte, lote 1, apto 1802 - Águas Claras",
+        "estadoCivil": "Casada",
+        "paroquia": "Santuário Imaculado Coração de Maria",
+        "etapaDeclarada": "Eucarístia 2",
+        "turmas": [
+            {
+                "stage": "Eucaristia II",
+                "turma": "Turma 03",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 08:30 às 10:00",
+                "room": "Sala São Lucas (Sala 13 - Salão Par.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia II",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-18",
+        "row": 19,
+        "nomeCompleto": "Thiago Malaquias Tomaz",
+        "dataNascimento": "04/01/1988",
+        "telefone": "(61) 99268-5777",
+        "telefoneRaw": "5561992685777",
+        "email": "thiagotmalaquias@gmail.com",
+        "profissao": "Bancario",
+        "endereco": "QSC 05, casa 19, taguatinga",
+        "estadoCivil": "Casado",
+        "paroquia": "Colégio Sursum Corda e Paróquias São João Batista",
+        "etapaDeclarada": "Crisma de Adultos",
+        "turmas": [
+            {
+                "stage": "Crisma Adultos",
+                "turma": "Turma 04",
+                "funcao": "Catequista Titular",
+                "dayTime": "Segunda: 20:00 às 22:00",
+                "room": "Sala São Marcos (Sala 10 - Salão Par.)"
+            },
+            {
+                "stage": "Crisma Adultos",
+                "turma": "Turma 07",
+                "funcao": "Catequista Titular",
+                "dayTime": "Segunda: 20:00 às 22:00",
+                "room": "Sala Santo Afonso (Sala 16 - Salão Par.)"
+            }
+        ],
+        "etapaPrincipal": "Crisma Adultos",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-19",
+        "row": 20,
+        "nomeCompleto": "Leticia Lopes Dos Santos de Araujo",
+        "dataNascimento": "07/05/1980",
+        "telefone": "(61) 99830-3161",
+        "telefoneRaw": "5561998303161",
+        "email": "leticialopes@gmail.com",
+        "profissao": "Administradora, estudante de pedagogia",
+        "endereco": "SHA chácara 14C casa1",
+        "estadoCivil": "Casada",
+        "paroquia": "Santuário Imaculado Coração de Maria",
+        "etapaDeclarada": "Crisma de Adultos",
+        "turmas": [
+            {
+                "stage": "Crisma Adultos",
+                "turma": "Turma 01",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 08:30 às 10:15",
+                "room": "Auditório (Centro Catequético)"
+            }
+        ],
+        "etapaPrincipal": "Crisma Adultos",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-20",
+        "row": 21,
+        "nomeCompleto": "Daniel Marcio Fernandes Andrade",
+        "dataNascimento": "15/12/1979",
+        "telefone": "(61) 98167-6133",
+        "telefoneRaw": "5561981676133",
+        "email": "danielmfa@gmail.com",
+        "profissao": "Servidor Público Federal",
+        "endereco": "Quadra 202, lote 6, apto 1102-C - Águas Claras",
+        "estadoCivil": "Casado",
+        "paroquia": "Santuário Imaculado Coração de Maria",
+        "etapaDeclarada": "Crisma de Adultos",
+        "turmas": [
+            {
+                "stage": "Crisma Adultos",
+                "turma": "Turma 05",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sacramento: 03/12/2026 – 19:30",
+                "room": "Sala São Rafael (Sala 07 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Crisma Adultos",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-21",
+        "row": 22,
+        "nomeCompleto": "Giovanna Lopes de Araujo",
+        "dataNascimento": "31/03/2008",
+        "telefone": "(61) 99603-6414",
+        "telefoneRaw": "5561996036414",
+        "email": "giovannalopes.araujo8@gmail.com",
+        "profissao": "Estudante",
+        "endereco": "SHA chácara 14C casa 1",
+        "estadoCivil": "Solteiro",
+        "paroquia": "Santuário Imaculado Coração de Maria",
+        "etapaDeclarada": "Eucarístia 2",
+        "turmas": [
+            {
+                "stage": "Crisma Jovem",
+                "turma": "Turma 01",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 15:00 às 16:30",
+                "room": "Sala São Rafael (Sala 07 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Crisma Jovem",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-22",
+        "row": 23,
+        "nomeCompleto": "Suelene Pereira da Costa Jochims",
+        "dataNascimento": "04/03/1980",
+        "telefone": "(61) 99269-7857",
+        "telefoneRaw": "5561992697857",
+        "email": "suelene.costa@gmail.com",
+        "profissao": "Analista de sistemas",
+        "endereco": "Rua 5 norte bloco B apto 1202- águas claras",
+        "estadoCivil": "Casado",
+        "paroquia": "Santuário Imaculado Coração de Maria",
+        "etapaDeclarada": "Eucarístia 2",
+        "turmas": [
+            {
+                "stage": "Eucaristia II",
+                "turma": "Turma 04",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 08:30 às 10:00",
+                "room": "Sala São Marcos (Sala 12 - Salão Par.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia II",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-23",
+        "row": 24,
+        "nomeCompleto": "José Henrique Martins da Silva",
+        "dataNascimento": "28/08/1967",
+        "telefone": "(61) 98173-6168",
+        "telefoneRaw": "5561981736168",
+        "email": "henriquepapa2009@gmail.",
+        "profissao": "Militar",
+        "endereco": "Quadra 301 rua A conjunto 1 lotes 9/10 apto 804 residencial Mondeo- Águas Claras DF",
+        "estadoCivil": "Casado",
+        "paroquia": "Santuário do Imaculado Coração de Maria Park Way",
+        "etapaDeclarada": "Eucarístia 2",
+        "turmas": [
+            {
+                "stage": "Eucaristia II",
+                "turma": "Turma 05",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 10:30 às 12:00",
+                "room": "Sala São Mateus (Sala 11 - Salão Par.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia II",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-24",
+        "row": 25,
+        "nomeCompleto": "Andres Gonzalo Reyes Unda",
+        "dataNascimento": "31/12/1974",
+        "telefone": "(61) 98135-2449",
+        "telefoneRaw": "5561981352449",
+        "email": "andresprojetos@gmail.com",
+        "profissao": "Engenheiro Químico",
+        "endereco": "rua 8 norte lote 2 bloco B apto 105",
+        "estadoCivil": "casado",
+        "paroquia": "Santuário Imaculado Coração de Maria",
+        "etapaDeclarada": "Atualmente não estou com turma",
+        "turmas": [
+            {
+                "stage": "Perseverança",
+                "turma": "Coordenação",
+                "funcao": "Coordenador de Etapa / Vice Geral",
+                "dayTime": "Sábado: 08:30 às 10:00",
+                "room": "Salão Paroquial"
+            }
+        ],
+        "etapaPrincipal": "Perseverança",
+        "funcaoPrincipal": "Coordenador de Etapa / Vice Geral"
+    },
+    {
+        "id": "cat-2026-25",
+        "row": 26,
+        "nomeCompleto": "José Bernardo Cavalcante Sampaio Nogueira",
+        "dataNascimento": "25/06/2007",
+        "telefone": "(61) 98335-3620",
+        "telefoneRaw": "5561983353620",
+        "email": "ovnibe@gmail.com",
+        "profissao": "Professor",
+        "endereco": "Quadra 105, Lote 03, Apto 702 - Águas Claras",
+        "estadoCivil": "Solteiro",
+        "paroquia": "Santuário do Imaculado Coração de Maria",
+        "etapaDeclarada": "Crisma Jovem",
+        "turmas": [
+            {
+                "stage": "Crisma Jovem",
+                "turma": "Turma 08",
+                "funcao": "Catequista Titular",
+                "dayTime": "Segunda: 20:00 às 21:30",
+                "room": "Sala São Mateus (Sala 11 - Salão Par.)"
+            }
+        ],
+        "etapaPrincipal": "Crisma Jovem",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-26",
+        "row": 27,
+        "nomeCompleto": "Priscila Ayres da Fonseca Andrade",
+        "dataNascimento": "12/01/1986",
+        "telefone": "061 9 9609-4213",
+        "telefoneRaw": "061996094213",
+        "email": "priscilayres@gmail.com",
+        "profissao": "Servidora pública",
+        "endereco": "Rua Manacá Sul lote 4 apto 903 Águas Claras",
+        "estadoCivil": "Casada",
+        "paroquia": "Santuário do Imaculado Coração de Maria",
+        "etapaDeclarada": "Eucarístia 2",
+        "turmas": [
+            {
+                "stage": "Eucaristia II",
+                "turma": "Turma 07",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 10:30 às 12:00",
+                "room": "Sala São Lucas (Sala 13 - Salão Par.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia II",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-27",
+        "row": 28,
+        "nomeCompleto": "Amanda Couto Tambellini",
+        "dataNascimento": "16/10/1996",
+        "telefone": "(61) 98184-3377",
+        "telefoneRaw": "5561981843377",
+        "email": "actambellini@gmail.com",
+        "profissao": "Bióloga",
+        "endereco": "SHA conjunto 05 chácara 10 lote 08 Residencial Portinari",
+        "estadoCivil": "Casada",
+        "paroquia": "Santuário do Imaculado Coração de ‘atua",
+        "etapaDeclarada": "Atualmente não estou com turma",
+        "turmas": [
+            {
+                "stage": "Crisma Jovem",
+                "turma": "Turma 04",
+                "funcao": "Catequista Titular",
+                "dayTime": "Segunda: 20:00 às 21:30",
+                "room": "Sala Carlo Acutis (Sala 08 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Crisma Jovem",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-28",
+        "row": 29,
+        "nomeCompleto": "Ana Luísa Chaves Ribeiro Nascimento",
+        "dataNascimento": "10/08/2004",
+        "telefone": "(061) 9 9641-5187",
+        "telefoneRaw": "061996415187",
+        "email": "analuisachavesrn@gmail.com",
+        "profissao": "Estudante",
+        "endereco": "Quadra 202, lote 7/9, condomínio sinfonia, Águas Claras - DF",
+        "estadoCivil": "Solteira",
+        "paroquia": "Santuário Imaculado Coração de Maria",
+        "etapaDeclarada": "Pré-Eucarístia",
+        "turmas": [
+            {
+                "stage": "Pré Eucaristia",
+                "turma": "Turma 02",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 08:30 às 10:00",
+                "room": "Sala Santo André (Sala 15 - Salão Par.)"
+            },
+            {
+                "stage": "Eucaristia II",
+                "turma": "Turma 07",
+                "funcao": "Auxiliar em Formação",
+                "dayTime": "Sábado: 10:30 às 12:00",
+                "room": "Sala São Lucas (Sala 13 - Salão Par.)"
+            }
+        ],
+        "etapaPrincipal": "Pré Eucaristia",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-29",
+        "row": 30,
+        "nomeCompleto": "Maria Dulcineide Benvindo da Silva",
+        "dataNascimento": "18/08/1963",
+        "telefone": "(61) 99356-0713",
+        "telefoneRaw": "5561993560713",
+        "email": "dulcineide.silva@gmail.com",
+        "profissao": "Servidora Pública Aposentada",
+        "endereco": "QR 05, CONJ D casa 68 - Candangolândia - DF",
+        "estadoCivil": "Divorciada",
+        "paroquia": "Capela Nsa. Senhora das Graças e Paróquia São José Operário na Candangolândia",
+        "etapaDeclarada": "Eucarístia 1",
+        "turmas": [
+            {
+                "stage": "Eucaristia I",
+                "turma": "Turma 11",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 10:00 às 11:30",
+                "room": "Capela Nossa Senhora das Graças"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia I",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-30",
+        "row": 31,
+        "nomeCompleto": "Patrícia Gomes dos Santos",
+        "dataNascimento": "24/06/1982",
+        "telefone": "(61) 99984-6145",
+        "telefoneRaw": "5561999846145",
+        "email": "patriciasantos.adv@gmail.com",
+        "profissao": "Advogada, estudante",
+        "endereco": "CSB 6, lote 7, ap 501 Taguatinga Sul",
+        "estadoCivil": "Solteira",
+        "paroquia": "Santuário do Imaculado Coração de Maria- Park Way",
+        "etapaDeclarada": "Crisma de Adultos",
+        "turmas": [
+            {
+                "stage": "Crisma Adultos",
+                "turma": "Turma 02",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 10:15 às 12:00",
+                "room": "Auditório (Centro Catequético)"
+            },
+            {
+                "stage": "Crisma Adultos",
+                "turma": "Coordenação",
+                "funcao": "Vice-Coordenadora de Etapa",
+                "dayTime": "Sábado / Segunda",
+                "room": "Centro Catequético"
+            }
+        ],
+        "etapaPrincipal": "Crisma Adultos",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-31",
+        "row": 32,
+        "nomeCompleto": "Rosângela Ferreira dos Santos",
+        "dataNascimento": "27/07/1965",
+        "telefone": "061 98449-9596",
+        "telefoneRaw": "061984499596",
+        "email": "rfguerra@uol.com.br",
+        "profissao": "Aposentada",
+        "endereco": "Quadra 107 Rua E Lote 04 Ap 405 Águas Claras",
+        "estadoCivil": "Divorciada",
+        "paroquia": "Santuário Imaculado Coração de Maria",
+        "etapaDeclarada": "Perseverança",
+        "turmas": [
+            {
+                "stage": "Perseverança",
+                "turma": "Turma 02",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 10:30 às 12:00",
+                "room": "Sala São João Bosco (Sala 17 - Salão Par.)"
+            }
+        ],
+        "etapaPrincipal": "Perseverança",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-32",
+        "row": 33,
+        "nomeCompleto": "Bruna Nogueira Galvão",
+        "dataNascimento": "16/09/2009",
+        "telefone": "(61) 98181-3712",
+        "telefoneRaw": "5561981813712",
+        "email": "unnag.wtr@gmail.com",
+        "profissao": "Estudante",
+        "endereco": "QSD 25 casa 09",
+        "estadoCivil": "Solteira",
+        "paroquia": "Santuário do Imaculado Coração de Maria",
+        "etapaDeclarada": "Pré-Eucarístia",
+        "turmas": [
+            {
+                "stage": "Pré Eucaristia",
+                "turma": "Turma 03",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 10:30 às 12:00",
+                "room": "Sala Santo André (Sala 15 - Salão Par.)"
+            }
+        ],
+        "etapaPrincipal": "Pré Eucaristia",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-33",
+        "row": 34,
+        "nomeCompleto": "Thais Pacheco Calegario Novo",
+        "dataNascimento": "15/08/2000",
+        "telefone": "(61) 99605-1508",
+        "telefoneRaw": "5561996051508",
+        "email": "thaispacheconovo@gmail.com",
+        "profissao": "Professora",
+        "endereco": "Quadra 206 águas claras",
+        "estadoCivil": "Solteira",
+        "paroquia": "Nossa Senhora da Assunção",
+        "etapaDeclarada": "Crisma de Adultos",
+        "turmas": [
+            {
+                "stage": "Crisma Adultos",
+                "turma": "Turma 07",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sacramento: 03/12/2026 – 19:30",
+                "room": "Sala São Miguel (Sala 06 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Crisma Adultos",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-34",
+        "row": 35,
+        "nomeCompleto": "Eliane Pinheiro da Silva Emerick",
+        "dataNascimento": "16/10/1980",
+        "telefone": "(61) 98340-7770",
+        "telefoneRaw": "5561983407770",
+        "email": "pinheiroane@gmail.com",
+        "profissao": "Advogada",
+        "endereco": "Quadra 204, lote 6, residencial Olímpia apto 802-B",
+        "estadoCivil": "Casada",
+        "paroquia": "Santuário e Assunção",
+        "etapaDeclarada": "Pré-Eucarístia",
+        "turmas": [
+            {
+                "stage": "Pré Eucaristia",
+                "turma": "Turma 01",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 08:30 às 10:00",
+                "room": "Sala Santa Teresa (Sala 16 - Salão Par.)"
+            },
+            {
+                "stage": "Eucaristia II",
+                "turma": "Turma 08",
+                "funcao": "Catequista Titular",
+                "dayTime": "Quarta: 16:00 às 17:30",
+                "room": "Sala Santa Jacinta (Sala 05 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Pré Eucaristia",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-35",
+        "row": 36,
+        "nomeCompleto": "Solange Maria Cavalcante Sampaio Nogueira",
+        "dataNascimento": "14/01/1974",
+        "telefone": "(61) 98172-1528",
+        "telefoneRaw": "5561981721528",
+        "email": "cavalcante.solange@gmail.com",
+        "profissao": "Engenheira civil",
+        "endereco": "Quadra 105, lote 03, ap 702, Águas Claras",
+        "estadoCivil": "Casada",
+        "paroquia": "Santuário Imaculado Coração de Maria",
+        "etapaDeclarada": "Eucarístia 2",
+        "turmas": [
+            {
+                "stage": "Eucaristia II",
+                "turma": "Turma 06",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 10:30 às 12:00",
+                "room": "Sala São Marcos (Sala 12 - Salão Par.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia II",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-36",
+        "row": 37,
+        "nomeCompleto": "Jonatan Abdulmacih Viriato",
+        "dataNascimento": "09/11/1982",
+        "telefone": "(61) 99116-5719",
+        "telefoneRaw": "5561991165719",
+        "email": "jonatanviriato@hotmail.com",
+        "profissao": "Vendedor",
+        "endereco": "Rua Babaçu, Res. Art Life Design, Aguas Claras",
+        "estadoCivil": "Casado",
+        "paroquia": "Imaculado Coração de Maria",
+        "etapaDeclarada": "Crisma Jovem",
+        "turmas": [
+            {
+                "stage": "Crisma Jovem",
+                "turma": "Turma 06",
+                "funcao": "Catequista Titular",
+                "dayTime": "Segunda: 20:00 às 21:30",
+                "room": "Sala Protomártires (Sala 01 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Crisma Jovem",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-37",
+        "row": 38,
+        "nomeCompleto": "Lanuzia Morbeck Pellegrini de Mesquita",
+        "dataNascimento": "11/05/1965",
+        "telefone": "(61) 98492-6265",
+        "telefoneRaw": "5561984926265",
+        "email": "mesquitalanuzia@gmail.com",
+        "profissao": "Socióloga",
+        "endereco": "Quadra 204 Lote 3 - Qu4ttro Mirante Residence Bl. C apto 401 - Águas Claras/Brasília/DF",
+        "estadoCivil": "Casada",
+        "paroquia": "Santuário Imaculado Coração de Maria",
+        "etapaDeclarada": "Eucarístia 1, Crisma Jovem",
+        "turmas": [
+            {
+                "stage": "Eucaristia I",
+                "turma": "Turma 10",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 08:30 às 10:00",
+                "room": "Sala São Miguel (Sala 06 - Centro Cat.)"
+            },
+            {
+                "stage": "Crisma Jovem",
+                "turma": "Turma 09",
+                "funcao": "Catequista Titular",
+                "dayTime": "Segunda: 20:00 às 21:30",
+                "room": "Sala Santo Agostinho (Sala 13 - Salão Par.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia I",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-38",
+        "row": 39,
+        "nomeCompleto": "Cauã Albergaria de Sá e Carvalho",
+        "dataNascimento": "07/02/2006",
+        "telefone": "(61) 99439-8922",
+        "telefoneRaw": "5561994398922",
+        "email": "caua07carvalho@gmail.com",
+        "profissao": "Universitário",
+        "endereco": "Quadra 206, lote 5, ap 602, BL A, Residencial Madeira - Águas Claras",
+        "estadoCivil": "Solteiro",
+        "paroquia": "Santuário Imaculada Coração de Maria",
+        "etapaDeclarada": "Crisma de Adultos",
+        "turmas": [
+            {
+                "stage": "Crisma Adultos",
+                "turma": "Turma 01",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 08:30 às 10:15",
+                "room": "Auditório (Centro Catequético)"
+            }
+        ],
+        "etapaPrincipal": "Crisma Adultos",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-39",
+        "row": 40,
+        "nomeCompleto": "Bruna Martins Vilarinho Neto",
+        "dataNascimento": "10/06/1978",
+        "telefone": "(61) 98134-2176",
+        "telefoneRaw": "5561981342176",
+        "email": "brunamneto@gmail.com",
+        "profissao": "Engenheira",
+        "endereco": "Av Pau Brasil Lote 11 apto 1402 torre 3 residencial via azaleas aguas claras df",
+        "estadoCivil": "Casada",
+        "paroquia": "Santuário Imaculado Coração de Maria",
+        "etapaDeclarada": "Eucarístia 2",
+        "turmas": [
+            {
+                "stage": "Eucaristia II",
+                "turma": "Turma 01",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 08:30 às 10:00",
+                "room": "Sala São Pedro (Sala 11 - Salão Par.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia II",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-40",
+        "row": 41,
+        "nomeCompleto": "Jullia Baseggio de Sousa",
+        "dataNascimento": "17/08/2009",
+        "telefone": "(61) 98130-5421",
+        "telefoneRaw": "5561981305421",
+        "email": "julliabaseggio@gmail.com",
+        "profissao": "Estudante",
+        "endereco": "Quadra 107, rua A, Lote 4, apt 802, Águas Claras Norte, CEP 71.920-710\nResidencial Montserrat",
+        "estadoCivil": "Solteira",
+        "paroquia": "Imaculado coração de Maria",
+        "etapaDeclarada": "Pré-Eucarístia",
+        "turmas": [
+            {
+                "stage": "Pré Eucaristia",
+                "turma": "Turma 03",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 10:30 às 12:00",
+                "room": "Sala Santo André (Sala 15 - Salão Par.)"
+            },
+            {
+                "stage": "Pré Eucaristia",
+                "turma": "Turma 03",
+                "funcao": "Auxiliar em Formação",
+                "dayTime": "Sábado: 10:30 às 12:00",
+                "room": "Sala Santo André (Sala 15 - Salão Par.)"
+            }
+        ],
+        "etapaPrincipal": "Pré Eucaristia",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-41",
+        "row": 42,
+        "nomeCompleto": "Eduardo Lima Yung",
+        "dataNascimento": "09/09/1992",
+        "telefone": "(61) 99255-8654",
+        "telefoneRaw": "5561992558654",
+        "email": "eduardo_ly@outlook.com",
+        "profissao": "Eng. Civil",
+        "endereco": "Rua 5 Ch 115 Lt 16 Ap 102 - SHVP Brasília/DF",
+        "estadoCivil": "Casado na Igreja",
+        "paroquia": "Santuário PICM",
+        "etapaDeclarada": "Crisma de Adultos",
+        "turmas": [
+            {
+                "stage": "Crisma Adultos",
+                "turma": "Turma 01",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 08:30 às 10:15",
+                "room": "Auditório (Centro Catequético)"
+            }
+        ],
+        "etapaPrincipal": "Crisma Adultos",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-42",
+        "row": 43,
+        "nomeCompleto": "Ana Luiza Queiroga Yung",
+        "dataNascimento": "14/02/1995",
+        "telefone": "(61) 98135-4551",
+        "telefoneRaw": "5561981354551",
+        "email": "luqueiroga@hotmail.com",
+        "profissao": "Estudante",
+        "endereco": "Rua 5, ch 115, Lt 16, apto 102",
+        "estadoCivil": "Casada",
+        "paroquia": "Santuário do Imaculado Coração de Maria",
+        "etapaDeclarada": "Eucarístia 2",
+        "turmas": [
+            {
+                "stage": "Eucaristia II",
+                "turma": "Turma 01",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 08:30 às 10:00",
+                "room": "Sala São Mateus (Sala 11 - Salão Par.)"
+            },
+            {
+                "stage": "Eucaristia II",
+                "turma": "Turma 07",
+                "funcao": "Auxiliar em Formação",
+                "dayTime": "Sábado: 10:30 às 12:00",
+                "room": "Sala São Lucas (Sala 13 - Salão Par.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia II",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-43",
+        "row": 44,
+        "nomeCompleto": "Camilla de Castro Carvalho",
+        "dataNascimento": "15/11/1992",
+        "telefone": "(61) 99261-0868",
+        "telefoneRaw": "5561992610868",
+        "email": "camilla.dcastro@hotmail.com",
+        "profissao": "Professora",
+        "endereco": "Sha quadra 9 conjunto 1 casa 14",
+        "estadoCivil": "Solteira",
+        "paroquia": "Imaculado coração de Maria",
+        "etapaDeclarada": "Eucarístia 2",
+        "turmas": [
+            {
+                "stage": "Eucaristia II",
+                "turma": "Turma 07",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 10:30 às 12:00",
+                "room": "Sala Santo Agostinho (Sala 13 - Salão Par.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia II",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-44",
+        "row": 45,
+        "nomeCompleto": "Teresa Priscila Mesquita de Oliveira",
+        "dataNascimento": "02/05/1979",
+        "telefone": "(61) 98111-5921",
+        "telefoneRaw": "5561981115921",
+        "email": "pri2mesquita@gmail.com",
+        "profissao": "Orientador Educacional",
+        "endereco": "Rua 36 Norte/ Águas Claras",
+        "estadoCivil": "Casada",
+        "paroquia": "Santuário do Imaculado Coração de Maria",
+        "etapaDeclarada": "Crisma Jovem",
+        "turmas": [
+            {
+                "stage": "Crisma Jovem",
+                "turma": "Turma 08",
+                "funcao": "Catequista Titular",
+                "dayTime": "Segunda: 20:00 às 21:30",
+                "room": "Sala São Mateus (Sala 11 - Salão Par.)"
+            }
+        ],
+        "etapaPrincipal": "Crisma Jovem",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-45",
+        "row": 46,
+        "nomeCompleto": "ARTUR JOSÉ QUEIROZ DE SOUZA",
+        "dataNascimento": "11/01/1968",
+        "telefone": "(61) 99280-4632",
+        "telefoneRaw": "5561992804632",
+        "email": "souza.artur68@gmail.com",
+        "profissao": "Administrador",
+        "endereco": "Rua 28 Sul, condomínio Via Terrazzo, apartamento 1304,Torre 2, Águas Claras",
+        "estadoCivil": "Casado",
+        "paroquia": "Imaculado Coração de Maria Park Way",
+        "etapaDeclarada": "Crisma Jovem",
+        "turmas": [
+            {
+                "stage": "Crisma Jovem",
+                "turma": "Turma 02",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 15:00 às 16:30",
+                "room": "Sala Santa Jacinta (Sala 05 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Crisma Jovem",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-46",
+        "row": 47,
+        "nomeCompleto": "Gllenda Hannah Tragueta Venâncio",
+        "dataNascimento": "28/06/1992",
+        "telefone": "(61) 99690-3025",
+        "telefoneRaw": "5561996903025",
+        "email": "gllendavenancio@gmail.com",
+        "profissao": "Engenheiro civil",
+        "endereco": "Quadra 206 lote 3, Praça Tuim, apto 601 B, Águas claras",
+        "estadoCivil": "Casada",
+        "paroquia": "Santuário imaculado coração de Maria",
+        "etapaDeclarada": "Eucarístia 1",
+        "turmas": [
+            {
+                "stage": "Eucaristia I",
+                "turma": "Turma 09",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 10:30 às 12:00",
+                "room": "Sala São Miguel (Sala 06 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia I",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-47",
+        "row": 48,
+        "nomeCompleto": "Maria Luisa Barbosa Guerra",
+        "dataNascimento": "08/09/2005",
+        "telefone": "(61) 99656-7766",
+        "telefoneRaw": "5561996567766",
+        "email": "marialuisabarbosaguerra@gmail.com",
+        "profissao": "Estudante/estagiária",
+        "endereco": "Rua 4 chácara 292 casa 12 - Vicente Pires",
+        "estadoCivil": "Solteira",
+        "paroquia": "No próprio Santuário",
+        "etapaDeclarada": "Eucarístia 2",
+        "turmas": [
+            {
+                "stage": "Eucaristia II",
+                "turma": "Turma 03",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 08:30 às 10:00",
+                "room": "Sala São Lucas (Sala 13 - Salão Par.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia II",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-48",
+        "row": 49,
+        "nomeCompleto": "Joseline Oliveira Silva",
+        "dataNascimento": "Não informada",
+        "telefone": "(61) 99293-7021",
+        "telefoneRaw": "5561992937021",
+        "email": "josy.lvr@gmail.com",
+        "profissao": "Administradora",
+        "endereco": "QNA 38 lote 13",
+        "estadoCivil": "Solteira",
+        "paroquia": "Santuário Imaculado Coração de Maria",
+        "etapaDeclarada": "Eucarístia 1",
+        "turmas": [
+            {
+                "stage": "Eucaristia I",
+                "turma": "Turma 03",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 08:30 às 10:00",
+                "room": "Sala São Francisco Marto (Sala 03 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia I",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-49",
+        "row": 50,
+        "nomeCompleto": "Silene Aparecida da Silva",
+        "dataNascimento": "22/03/2026",
+        "telefone": "(61) 98188-6459",
+        "telefoneRaw": "5561981886459",
+        "email": "silene48@gmail.com",
+        "profissao": "Professora aposentada",
+        "endereco": "SMPW Quadra 05 conjunto 07 lote 01 casa B",
+        "estadoCivil": "Casada",
+        "paroquia": "Imaculado  coragem de Maria",
+        "etapaDeclarada": "Eucarístia 1",
+        "turmas": [
+            {
+                "stage": "Eucaristia I",
+                "turma": "Turma 03",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 08:30 às 10:00",
+                "room": "Sala São Francisco Marto (Sala 03 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia I",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-50",
+        "row": 51,
+        "nomeCompleto": "Carlos Alberto Costa de Lima",
+        "dataNascimento": "09/06/1964",
+        "telefone": "(61) 99457-9090",
+        "telefoneRaw": "5561994579090",
+        "email": "carlaolimaclima@gmail.com",
+        "profissao": "Servidor público aposentado",
+        "endereco": "Quadra 106 conjunto 6 casa 22 Recanto das Emas",
+        "estadoCivil": "Casado",
+        "paroquia": "Capela Nossa Senhora das Graças",
+        "etapaDeclarada": "Eucarístia 2",
+        "turmas": [
+            {
+                "stage": "Eucaristia II",
+                "turma": "Turma 08",
+                "funcao": "Catequista Titular",
+                "dayTime": "Quarta: 16:00 às 17:30",
+                "room": "Sala Santa Jacinta (Sala 05 - Centro Cat.)"
+            },
+            {
+                "stage": "Eucaristia II",
+                "turma": "Turma 09",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 10:00 às 11:30",
+                "room": "Capela Nossa Senhora das Graças"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia II",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-51",
+        "row": 52,
+        "nomeCompleto": "Natanai Torres de Carvalho",
+        "dataNascimento": "30/12/1982",
+        "telefone": "(61) 98160-1313",
+        "telefoneRaw": "5561981601313",
+        "email": "natanai@gmail.com",
+        "profissao": "Servidor público",
+        "endereco": "SMPW, quadra 5, chácara 63/1",
+        "estadoCivil": "Casado",
+        "paroquia": "Segunda a sexta-feira: Santo Cura D'ars da 914 sul - sábado e domingo na Imaculado Coração de Maria no Parkway",
+        "etapaDeclarada": "Crisma de Adultos",
+        "turmas": [
+            {
+                "stage": "Crisma Adultos",
+                "turma": "Turma 03",
+                "funcao": "Catequista Titular",
+                "dayTime": "Segunda: 20:00 às 22:00",
+                "room": "Auditório (Centro Catequético)"
+            }
+        ],
+        "etapaPrincipal": "Crisma Adultos",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-52",
+        "row": 53,
+        "nomeCompleto": "Shirley Cassimiro",
+        "dataNascimento": "02/03/1950",
+        "telefone": "(61) 99819-7949",
+        "telefoneRaw": "5561998197949",
+        "email": "shirleycassimirodearaujo@gmail.com",
+        "profissao": "Do lar",
+        "endereco": "Rua 30 sul Edifício Déborah Cristina apt 902",
+        "estadoCivil": "Casada",
+        "paroquia": "Santuário da Imaculada",
+        "etapaDeclarada": "Eucarístia 1",
+        "turmas": [
+            {
+                "stage": "Eucaristia I",
+                "turma": "Turma 02",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 08:30 às 10:00",
+                "room": "Sala Anjo da Guarda (Sala 02 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia I",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-53",
+        "row": 54,
+        "nomeCompleto": "Juliana Aparecida de Queiroz",
+        "dataNascimento": "09/12/1980",
+        "telefone": "(61) 98300-3454",
+        "telefoneRaw": "5561983003454",
+        "email": "juli.qrz@gmail.com",
+        "profissao": "Servidora pública",
+        "endereco": "Rua 18 Sul, lote 8, apt 905 Águas Claras Brasília DF",
+        "estadoCivil": "Casada",
+        "paroquia": "Santuário Imaculado Coração de Maria",
+        "etapaDeclarada": "Crisma de Adultos",
+        "turmas": [
+            {
+                "stage": "Crisma Adultos",
+                "turma": "Turma 08",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sacramento: 03/12/2026 – 19:30",
+                "room": "Sala Santa Jacinta (Sala 05 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Crisma Adultos",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-54",
+        "row": 55,
+        "nomeCompleto": "Guilherme Sousa Rocha",
+        "dataNascimento": "18/05/1988",
+        "telefone": "(61) 99621-3151",
+        "telefoneRaw": "5561996213151",
+        "email": "guisousarocha@gmail.com",
+        "profissao": "Jornalista",
+        "endereco": "Não informado",
+        "estadoCivil": "Casado",
+        "paroquia": "Nossa Senhora da Assunção",
+        "etapaDeclarada": "Crisma de Adultos",
+        "turmas": [
+            {
+                "stage": "Crisma Adultos",
+                "turma": "Turma 06",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sacramento: 03/12/2026 – 19:30",
+                "room": "Sala São Francisco Marto (Sala 03 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Crisma Adultos",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-55",
+        "row": 56,
+        "nomeCompleto": "Leide Jane Muniz da Silva Almeida",
+        "dataNascimento": "17/08/1977",
+        "telefone": "(61) 98143-6117",
+        "telefoneRaw": "5561981436117",
+        "email": "leidejane.muniz@gmail.com",
+        "profissao": "Empresária e Assessora de Investimentos",
+        "endereco": "EPTG CHÁCARA 77",
+        "estadoCivil": "Casada",
+        "paroquia": "Santuário Imaculado Coração de Maria",
+        "etapaDeclarada": "Atualmente não estou com turma",
+        "turmas": [
+            {
+                "stage": "Geral",
+                "turma": "Disponível",
+                "funcao": "Sem turma atualmente",
+                "dayTime": "—",
+                "room": "—"
+            }
+        ],
+        "etapaPrincipal": "Geral",
+        "funcaoPrincipal": "Sem turma atualmente"
+    },
+    {
+        "id": "cat-2026-56",
+        "row": 57,
+        "nomeCompleto": "Brenda Tavares",
+        "dataNascimento": "31/08/1982",
+        "telefone": "(61) 99978-0705",
+        "telefoneRaw": "5561999780705",
+        "email": "brendagsilva@yahoo.com.br",
+        "profissao": "Comerciante",
+        "endereco": "SMPW quadra 05, conjunto 07, lote 07, casa H. Park Way",
+        "estadoCivil": "Casada",
+        "paroquia": "Santuário Imaculado Coração de Maria",
+        "etapaDeclarada": "Eucarístia 1",
+        "turmas": [
+            {
+                "stage": "Eucaristia I",
+                "turma": "Turma 04",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 08:30 às 10:00",
+                "room": "Sala São Gabriel (Sala 04 - Centro Cat.)"
+            },
+            {
+                "stage": "Eucaristia I",
+                "turma": "Turma 04",
+                "funcao": "Auxiliar em Formação",
+                "dayTime": "Sábado: 08:30 às 10:00",
+                "room": "Sala São Gabriel (Sala 04 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia I",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-57",
+        "row": 58,
+        "nomeCompleto": "Mariana de Deus Alvarenga",
+        "dataNascimento": "14/10/1990",
+        "telefone": "619925168.0",
+        "telefoneRaw": "619925168",
+        "email": "d.alvarenga.mari@gmail.com",
+        "profissao": "Jornalista",
+        "endereco": "Sha conjunto 6 chácara 436 casa 43",
+        "estadoCivil": "Solteira",
+        "paroquia": "Imaculado Coração de Maria",
+        "etapaDeclarada": "Eucarístia 1",
+        "turmas": [
+            {
+                "stage": "Eucaristia I",
+                "turma": "Turma 05",
+                "funcao": "Auxiliar em Formação",
+                "dayTime": "Sábado: 08:30 às 10:00",
+                "room": "Sala Santa Jacinta (Sala 05 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia I",
+        "funcaoPrincipal": "Auxiliar em Formação"
+    },
+    {
+        "id": "cat-2026-58",
+        "row": 59,
+        "nomeCompleto": "Carla Duarte Costa Alves",
+        "dataNascimento": "26/02/1983",
+        "telefone": "(61) 98361-5087",
+        "telefoneRaw": "5561983615087",
+        "email": "carladuarteca@gmail.com",
+        "profissao": "Bancária",
+        "endereco": "SHA, Conjunto 6, Chácara 31, Casa 20, Arniqueira",
+        "estadoCivil": "Casada",
+        "paroquia": "Imaculado Coração de Maria",
+        "etapaDeclarada": "Eucarístia 2",
+        "turmas": [
+            {
+                "stage": "Eucaristia II",
+                "turma": "Turma 02",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 08:30 às 10:00",
+                "room": "Sala Carlo Acutis (Sala 08 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia II",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-59",
+        "row": 60,
+        "nomeCompleto": "Gabriella Batista Cecilio Negromonte",
+        "dataNascimento": "13/12/2007",
+        "telefone": "(61) 99401-1733",
+        "telefoneRaw": "5561994011733",
+        "email": "gabriella.b.cecilio@gmail.com",
+        "profissao": "Estudante",
+        "endereco": "Trecho 3 - quadra 5, conjunto 6, 21 - SHVP, Condomínio Paraíso",
+        "estadoCivil": "Solteira",
+        "paroquia": "Santuário Imaculado Coração de Maria",
+        "etapaDeclarada": "Eucarístia 2",
+        "turmas": [
+            {
+                "stage": "Eucaristia II",
+                "turma": "Turma 06",
+                "funcao": "Auxiliar em Formação",
+                "dayTime": "Sábado: 10:30 às 12:00",
+                "room": "Sala São Marcos (Sala 12 - Salão Par.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia II",
+        "funcaoPrincipal": "Auxiliar em Formação"
+    },
+    {
+        "id": "cat-2026-60",
+        "row": 61,
+        "nomeCompleto": "Tatyane Guedes Martins Da Silva",
+        "dataNascimento": "25/11/1996",
+        "telefone": "(61) 98462-9512",
+        "telefoneRaw": "5561984629512",
+        "email": "formatei.abnt@gmail.com",
+        "profissao": "Bibliotecária",
+        "endereco": "Quadra 301 Rua A Conjunto 9/10",
+        "estadoCivil": "Solteira",
+        "paroquia": "Santuário Imaculado Coração de Maria",
+        "etapaDeclarada": "Eucarístia 1",
+        "turmas": [
+            {
+                "stage": "Eucaristia I",
+                "turma": "Turma 02",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 08:30 às 10:00",
+                "room": "Sala Anjo da Guarda (Sala 02 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia I",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-61",
+        "row": 62,
+        "nomeCompleto": "Danusa Campos Hipólito",
+        "dataNascimento": "04/03/1973",
+        "telefone": "(61) 98235-8870",
+        "telefoneRaw": "5561982358870",
+        "email": "dancamposhi@gmail.com",
+        "profissao": "Artesã",
+        "endereco": "Condomínio Recanto dos Pássaros II\nSHA - Setor Habitacional Arniqueira\nConjunto 06 Chácara 18G Rua 4 Casa 67",
+        "estadoCivil": "Casada",
+        "paroquia": "Santuário do Imaculado Coração de Maria",
+        "etapaDeclarada": "Eucarístia 1",
+        "turmas": [
+            {
+                "stage": "Eucaristia I",
+                "turma": "Turma 09",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 10:30 às 12:00",
+                "room": "Sala São Miguel (Sala 06 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia I",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-62",
+        "row": 63,
+        "nomeCompleto": "Tiago Artur Milfont de Souza",
+        "dataNascimento": "05/03/2003",
+        "telefone": "(61) 99217-3180",
+        "telefoneRaw": "5561992173180",
+        "email": "tiagoarturmilfont@gmail.com",
+        "profissao": "Estudante",
+        "endereco": "Via Terrazzo, Rua 28 sul",
+        "estadoCivil": "Solteiro",
+        "paroquia": "Imaculado Coração de Maria",
+        "etapaDeclarada": "Crisma de Adultos",
+        "turmas": [
+            {
+                "stage": "Crisma Jovem",
+                "turma": "Turma 07",
+                "funcao": "Catequista Titular",
+                "dayTime": "Segunda: 20:00 às 21:30",
+                "room": "Sala São Miguel (Sala 07 - Centro Cat.)"
+            },
+            {
+                "stage": "Crisma Jovem",
+                "turma": "Coordenação",
+                "funcao": "Coordenador de Etapa",
+                "dayTime": "Sábado / Segunda",
+                "room": "Centro Catequético"
+            }
+        ],
+        "etapaPrincipal": "Crisma Jovem",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-63",
+        "row": 64,
+        "nomeCompleto": "Andréia Soares",
+        "dataNascimento": "24/06/1978",
+        "telefone": "(61) 98622-7115",
+        "telefoneRaw": "5561986227115",
+        "email": "andreiasoares1978@gmail.com",
+        "profissao": "Analista de sistemas",
+        "endereco": "Rua das Figueiras, Qd 101, lote 5 - Ed Soffisticato AP 203 - Bloco A",
+        "estadoCivil": "Solteira",
+        "paroquia": "Santuário Imaculado Coração de Maria",
+        "etapaDeclarada": "Eucarístia 1",
+        "turmas": [
+            {
+                "stage": "Eucaristia I",
+                "turma": "Turma 06",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 10:30 às 12:00",
+                "room": "Sala Protomártires (Sala 01 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia I",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-64",
+        "row": 65,
+        "nomeCompleto": "Bruna Cruvinel Nascimento",
+        "dataNascimento": "13/01/2008",
+        "telefone": "(61) 99179-2812",
+        "telefoneRaw": "5561991792812",
+        "email": "brunacn13@gmail.com",
+        "profissao": "Estudante",
+        "endereco": "Águas Claras, quadra 204, lote 7, apartamento 1304",
+        "estadoCivil": "Solteiro",
+        "paroquia": "Nossa Senhora Assunção",
+        "etapaDeclarada": "Perseverança",
+        "turmas": [
+            {
+                "stage": "Perseverança",
+                "turma": "Turma 01",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 08:30 às 10:00",
+                "room": "Sala São Rafael (Sala 05 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Perseverança",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-65",
+        "row": 66,
+        "nomeCompleto": "Fabio Marcelo degani",
+        "dataNascimento": "06/10/1970",
+        "telefone": "(61) 98635-3439",
+        "telefoneRaw": "5561986353439",
+        "email": "fabio.m.degani@gmail.com",
+        "profissao": "Analista de sistemas",
+        "endereco": "Sqnw 310 blz f ao 301",
+        "estadoCivil": "Casado",
+        "paroquia": "Basilica são Francisco de Assis",
+        "etapaDeclarada": "Crisma de Adultos",
+        "turmas": [
+            {
+                "stage": "Crisma Adultos",
+                "turma": "Turma 02",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 10:15 às 12:00",
+                "room": "Auditório (Centro Catequético)"
+            }
+        ],
+        "etapaPrincipal": "Crisma Adultos",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-66",
+        "row": 67,
+        "nomeCompleto": "Lourival gomes couto Júnior",
+        "dataNascimento": "06/01/1972",
+        "telefone": "61.98226-6299",
+        "telefoneRaw": "61",
+        "email": "loriva.couto@gmail.com",
+        "profissao": "Técnico administrativo",
+        "endereco": "QI 25 bloco L ap 302 Guará 2",
+        "estadoCivil": "Casado",
+        "paroquia": "Santuário Imaculado Coração de Maria",
+        "etapaDeclarada": "Crisma de Adultos",
+        "turmas": [
+            {
+                "stage": "Crisma Adultos",
+                "turma": "Turma 04",
+                "funcao": "Catequista Titular",
+                "dayTime": "Segunda: 20:00 às 22:00",
+                "room": "Sala São Marcos (Sala 12 - Salão Par.)"
+            }
+        ],
+        "etapaPrincipal": "Crisma Adultos",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-67",
+        "row": 68,
+        "nomeCompleto": "Monica Lúcia Milfont de Souza",
+        "dataNascimento": "27/09/1973",
+        "telefone": "(61) 98236-4399",
+        "telefoneRaw": "5561982364399",
+        "email": "monicamilfont73@gmail.com",
+        "profissao": "Eng Civil",
+        "endereco": "Rua 28 sul, lote 6/8, via terrazzo, torre 2, apto 1304",
+        "estadoCivil": "Casada",
+        "paroquia": "Imaculado Coração de Maria",
+        "etapaDeclarada": "Crisma Jovem",
+        "turmas": [
+            {
+                "stage": "Crisma Jovem",
+                "turma": "Turma 03",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 15:00 às 16:30",
+                "room": "Sala Anjo da Guarda (Sala 02 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Crisma Jovem",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-68",
+        "row": 69,
+        "nomeCompleto": "Polyana Carvalho Justino",
+        "dataNascimento": "02/08/1985",
+        "telefone": "(61) 99370-0448",
+        "telefoneRaw": "5561993700448",
+        "email": "polyanacj@yahoo.com.br",
+        "profissao": "Engenheira Civil",
+        "endereco": "Quadra 208, lotes 2 e 4, Ed All",
+        "estadoCivil": "Casada",
+        "paroquia": "Santuário",
+        "etapaDeclarada": "Eucarístia 1",
+        "turmas": [
+            {
+                "stage": "Eucaristia I",
+                "turma": "Turma 01",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 08:30 às 10:00",
+                "room": "Sala Protomártires (Sala 01 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia I",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-69",
+        "row": 70,
+        "nomeCompleto": "Nubia Soares Sales de Moraes",
+        "dataNascimento": "06/02/1980",
+        "telefone": "(61) 98213-5404",
+        "telefoneRaw": "5561982135404",
+        "email": "nubiasales4@gmail.com",
+        "profissao": "Contadora",
+        "endereco": "QN 22 conjunto 3 bloco 7 ap 203 riacho fundo 2",
+        "estadoCivil": "Casada",
+        "paroquia": "SICM",
+        "etapaDeclarada": "Eucarístia 2",
+        "turmas": [
+            {
+                "stage": "Eucaristia II",
+                "turma": "Turma 06",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 10:30 às 12:00",
+                "room": "Sala São Marcos (Sala 12 - Salão Par.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia II",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-70",
+        "row": 71,
+        "nomeCompleto": "Heloisa Fortes de Castro e Castro",
+        "dataNascimento": "10/05/1975",
+        "telefone": "06198155-4472",
+        "telefoneRaw": "061981554472",
+        "email": "hefori@gmail.com",
+        "profissao": "Fonoaudióloga",
+        "endereco": "Qd 203 LT 04 apto 804 BL A",
+        "estadoCivil": "Casada",
+        "paroquia": "Santuário do Imaculado Coração de Maria",
+        "etapaDeclarada": "Crisma Jovem",
+        "turmas": [
+            {
+                "stage": "Crisma Jovem",
+                "turma": "Turma 01",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 15:00 às 16:30",
+                "room": "Sala São Rafael (Sala 07 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Crisma Jovem",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-71",
+        "row": 72,
+        "nomeCompleto": "Ronaldo Buril de Oliveira",
+        "dataNascimento": "30/07/1976",
+        "telefone": "(61) 99922-1300",
+        "telefoneRaw": "5561999221300",
+        "email": "ronaldo.buril@gmail.com",
+        "profissao": "Consultor empresarial e tecnologia",
+        "endereco": "QD 201 BL E AP 1304 - Res Imp I",
+        "estadoCivil": "Divorciado",
+        "paroquia": "Santuário ICM",
+        "etapaDeclarada": "Crisma de Adultos",
+        "turmas": [
+            {
+                "stage": "Crisma Adultos",
+                "turma": "Turma 02",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 10:15 às 12:00",
+                "room": "Auditório (Centro Catequético)"
+            }
+        ],
+        "etapaPrincipal": "Crisma Adultos",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-72",
+        "row": 73,
+        "nomeCompleto": "Ronaldo Buril de Oliveira",
+        "dataNascimento": "30/07/1976",
+        "telefone": "(61) 99922-1300",
+        "telefoneRaw": "5561999221300",
+        "email": "ronaldo.buril@gmail.com",
+        "profissao": "Consultor empresarial e tecnologia",
+        "endereco": "QD 201 BL E AP 1304 - Res. Imp I - Cep 71937-540",
+        "estadoCivil": "Divorciado",
+        "paroquia": "Santuário ICM",
+        "etapaDeclarada": "Crisma de Adultos",
+        "turmas": [
+            {
+                "stage": "Crisma Adultos",
+                "turma": "Turma 02",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 10:15 às 12:00",
+                "room": "Auditório (Centro Catequético)"
+            }
+        ],
+        "etapaPrincipal": "Crisma Adultos",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-73",
+        "row": 74,
+        "nomeCompleto": "Marina Neiva de Alencar",
+        "dataNascimento": "26/10/2009",
+        "telefone": "(61) 99434-7916",
+        "telefoneRaw": "5561994347916",
+        "email": "marina.nalencar26@gmail.com",
+        "profissao": "Não tenho",
+        "endereco": "Rua 28 norte lote 4, Águas Claras",
+        "estadoCivil": "Solteira",
+        "paroquia": "Santuário do Imaculado coração de Maria",
+        "etapaDeclarada": "Eucarístia 1",
+        "turmas": [
+            {
+                "stage": "Eucaristia I",
+                "turma": "Turma 07",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 10:30 às 12:00",
+                "room": "Sala São Gabriel (Sala 04 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia I",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-74",
+        "row": 75,
+        "nomeCompleto": "Nádia Soares Sales",
+        "dataNascimento": "08/05/1984",
+        "telefone": "(061) 9 9882-0009",
+        "telefoneRaw": "061998820009",
+        "email": "nadiacrista222@gmail.com",
+        "profissao": "Professora/Pedagoga",
+        "endereco": "QN 33 conjunto 2 casa 20",
+        "estadoCivil": "Casada",
+        "paroquia": "SICM, Paróquia São Gabriel, Paróquia Nossa Senhora da Medalha Milagrosa (futuro santuário), Paróquia Imaculada Conceição de Maria.",
+        "etapaDeclarada": "Eucarístia 1",
+        "turmas": [
+            {
+                "stage": "Eucaristia I",
+                "turma": "Turma 07",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 10:30 às 12:00",
+                "room": "Sala São Gabriel (Sala 04 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia I",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-75",
+        "row": 76,
+        "nomeCompleto": "Patrícia dos Santos Guimarães Casanova",
+        "dataNascimento": "03/06/1974",
+        "telefone": "(61) 98221-6516",
+        "telefoneRaw": "5561982216516",
+        "email": "patriciaguimaraes2005@gmail.com",
+        "profissao": "Especialista em Gestão de Negócios",
+        "endereco": "SQB 1 BLOCO D APTO 601 GUARÁ I - DF",
+        "estadoCivil": "Casada",
+        "paroquia": "Santuário Santo Antonio Asa Sul ou Capela Nossa Senhora Aparecida Jardim Edite - ABC -  GO",
+        "etapaDeclarada": "Pré-Eucarístia",
+        "turmas": [
+            {
+                "stage": "Pré Eucaristia",
+                "turma": "Turma 01",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 08:30 às 10:00",
+                "room": "Sala Santa Teresa (Sala 16 - Salão Par.)"
+            },
+            {
+                "stage": "Pré Eucaristia",
+                "turma": "Coordenação",
+                "funcao": "Coordenadora de Etapa",
+                "dayTime": "Sábado: 08:30 às 10:00",
+                "room": "Salão Paroquial"
+            }
+        ],
+        "etapaPrincipal": "Pré Eucaristia",
+        "funcaoPrincipal": "Catequista Titular"
+    },
+    {
+        "id": "cat-2026-76",
+        "row": 77,
+        "nomeCompleto": "Fernanda Rafaella Rodrigues Lima",
+        "dataNascimento": "23/10/1981",
+        "telefone": "(61) 99988-5145",
+        "telefoneRaw": "5561999885145",
+        "email": "fe_rodri@hotmail.com",
+        "profissao": "Comércio",
+        "endereco": "Smpw quadra 05 conj 13 lote 03",
+        "estadoCivil": "Casado",
+        "paroquia": "Imaculado Coração de Maria",
+        "etapaDeclarada": "Eucarístia 1",
+        "turmas": [
+            {
+                "stage": "Eucaristia I",
+                "turma": "Turma 06",
+                "funcao": "Catequista Titular",
+                "dayTime": "Sábado: 10:30 às 12:00",
+                "room": "Sala Protomártires (Sala 01 - Centro Cat.)"
+            }
+        ],
+        "etapaPrincipal": "Eucaristia I",
+        "funcaoPrincipal": "Catequista Titular"
+    }
+];
+
+    function getCatequistasRegistrationData() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY_CATEQUISTAS_2026);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (e) {
+        console.warn('Erro ao carregar dados de catequistas do storage:', e);
+      }
+      return SEED_CATEQUISTAS_2026;
+    }
+
+    function saveCatequistasRegistrationData(data) {
+      try {
+        localStorage.setItem(STORAGE_KEY_CATEQUISTAS_2026, JSON.stringify(data));
+      } catch (e) {
+        console.warn('Erro ao salvar dados de catequistas no storage:', e);
+      }
+    }
+
+    function normCatString(str) {
+      if (!str) return '';
+      return str.toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    }
+
+    // Busca inteligente de catequista por nome/apelido e etapa opcional
+    function findCatequistaByName(queryName, stageHint) {
+      if (!queryName) return null;
+      const clean = normCatString(queryName);
+      const list = getCatequistasRegistrationData();
+
+      // 1. Exact match no nome completo ou ID
+      let found = list.find(c => c.id === queryName || normCatString(c.nomeCompleto) === clean);
+      if (found) return found;
+
+      // 2. Busca por palavras
+      const queryWords = clean.split(/\s+/).filter(w => w.length > 2);
+      if (queryWords.length === 0) {
+        const shortMatch = list.filter(c => {
+          const cWords = normCatString(c.nomeCompleto).split(/\s+/);
+          return cWords.includes(clean);
+        });
+        if (shortMatch.length === 1) return shortMatch[0];
+        if (shortMatch.length > 1 && stageHint) {
+          const stageClean = normCatString(stageHint);
+          const stageMatch = shortMatch.find(c => {
+            return normCatString(c.etapaPrincipal).includes(stageClean) || 
+                   (c.turmas && c.turmas.some(t => normCatString(t.stage).includes(stageClean)));
+          });
+          if (stageMatch) return stageMatch;
+        }
+        return shortMatch[0] || null;
+      }
+
+      // Candidatos cujas palavras da busca batem com o nome completo
+      const candidates = list.filter(c => {
+        const cClean = normCatString(c.nomeCompleto);
+        const cWords = cClean.split(/\s+/);
+        return queryWords.every(qw => cClean.includes(qw) || cWords.some(cw => cw.startsWith(qw)));
+      });
+
+      if (candidates.length === 1) return candidates[0];
+
+      if (candidates.length > 1 && stageHint) {
+        const stageClean = normCatString(stageHint);
+        const stageMatch = candidates.find(c => {
+          return normCatString(c.etapaPrincipal).includes(stageClean) || 
+                 (c.turmas && c.turmas.some(t => normCatString(t.stage).includes(stageClean)));
+        });
+        if (stageMatch) return stageMatch;
+      }
+
+      return candidates[0] || null;
+    }
+
+    function formatCatechistChips(nameString, stageName) {
+      if (!nameString) return '—';
+      const parts = nameString.split(/ e |, | e\/ou /).map(s => s.trim()).filter(Boolean);
+      return parts.map(n => {
+        const cat = findCatequistaByName(n, stageName);
+        if (cat) {
+          return `<button onclick="openCatequistaModal('${cat.id}')" class="inline-flex items-center gap-1 font-semibold text-slate-900 hover:text-emerald-700 bg-slate-100 hover:bg-emerald-50 px-2 py-0.5 rounded-md text-xs border border-slate-200 transition mr-1 mb-1" title="Ver dados pessoais e WhatsApp de ${cat.nomeCompleto}"><span>👤</span><span>${n}</span><span class="text-emerald-600 text-[10px]">💬</span></button>`;
+        }
+        return `<span class="font-medium text-slate-800 mr-1">${n}</span>`;
+      }).join(' ');
+    }
+
+    function openCatequistaModal(identifier) {
+      const modal = document.getElementById('modal-catequista-detalhes');
+      if (!modal) return;
+
+      const list = getCatequistasRegistrationData();
+      let cat = list.find(c => c.id === identifier);
+      if (!cat) {
+        cat = findCatequistaByName(identifier);
+      }
+      if (!cat) {
+        alert('Dados cadastrais não encontrados para este catequista.');
+        return;
+      }
+
+      const initials = (cat.nomeCompleto || 'C')
+        .split(' ')
+        .filter(w => w.length > 0)
+        .slice(0, 2)
+        .map(w => w[0].toUpperCase())
+        .join('');
+
+      const avatarEl = document.getElementById('modal-cat-avatar');
+      if (avatarEl) avatarEl.textContent = initials;
+
+      const nomeEl = document.getElementById('modal-cat-nome');
+      if (nomeEl) nomeEl.textContent = cat.nomeCompleto;
+
+      const nomeCompEl = document.getElementById('modal-cat-nome-completo');
+      if (nomeCompEl) nomeCompEl.textContent = cat.nomeCompleto;
+
+      const badgeFuncao = document.getElementById('modal-cat-funcao-badge');
+      if (badgeFuncao) badgeFuncao.textContent = cat.funcaoPrincipal || 'Catequista';
+
+      const etapaSub = document.getElementById('modal-cat-etapa-sub');
+      if (etapaSub) etapaSub.textContent = `${cat.etapaPrincipal || 'Catequese 2026'} • ${cat.paroquia || 'Santuário ICM'}`;
+
+      const dobEl = document.getElementById('modal-cat-dob');
+      if (dobEl) {
+        let ageStr = '';
+        if (cat.dataNascimento && cat.dataNascimento.includes('/')) {
+          const [d, m, y] = cat.dataNascimento.split('/');
+          const birth = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+          if (!isNaN(birth.getTime())) {
+            const age = new Date().getFullYear() - birth.getFullYear();
+            ageStr = ` (${age} anos)`;
+          }
+        }
+        dobEl.textContent = `${cat.dataNascimento || 'Não informada'}${ageStr}`;
+      }
+
+      const telEl = document.getElementById('modal-cat-telefone');
+      if (telEl) telEl.textContent = cat.telefone || 'Não informado';
+
+      const emailEl = document.getElementById('modal-cat-email');
+      if (emailEl) emailEl.textContent = cat.email || 'Não informado';
+
+      const profEl = document.getElementById('modal-cat-profissao');
+      if (profEl) profEl.textContent = cat.profissao || 'Não informada';
+
+      const estEl = document.getElementById('modal-cat-estado-civil');
+      if (estEl) estEl.textContent = cat.estadoCivil || 'Não informado';
+
+      const endEl = document.getElementById('modal-cat-endereco');
+      if (endEl) endEl.textContent = cat.endereco || 'Não informado';
+
+      const parEl = document.getElementById('modal-cat-paroquia');
+      if (parEl) parEl.textContent = cat.paroquia || 'Santuário do Imaculado Coração de Maria';
+
+      // Botão WhatsApp
+      const btnWa = document.getElementById('modal-cat-btn-wa');
+      if (btnWa) {
+        if (cat.telefoneRaw) {
+          const msg = encodeURIComponent(`Olá, ${cat.nomeCompleto}! Mensagem da Coordenação da Pastoral da Catequese (Santuário Imaculado Coração de Maria).`);
+          btnWa.href = `https://wa.me/${cat.telefoneRaw}?text=${msg}`;
+          btnWa.classList.remove('opacity-50', 'pointer-events-none');
+        } else {
+          btnWa.href = '#';
+          btnWa.classList.add('opacity-50', 'pointer-events-none');
+        }
+      }
+
+      // Botão Email
+      const btnEmail = document.getElementById('modal-cat-btn-email');
+      if (btnEmail) {
+        if (cat.email) {
+          btnEmail.href = `mailto:${cat.email}?subject=${encodeURIComponent('Pastoral da Catequese 2026 — Comunicação Oficial')}`;
+          btnEmail.classList.remove('opacity-50', 'pointer-events-none');
+        } else {
+          btnEmail.href = '#';
+          btnEmail.classList.add('opacity-50', 'pointer-events-none');
+        }
+      }
+
+      // Lista de Turmas
+      const turmasContainer = document.getElementById('modal-cat-turmas-list');
+      if (turmasContainer) {
+        if (Array.isArray(cat.turmas) && cat.turmas.length > 0) {
+          turmasContainer.innerHTML = cat.turmas.map(t => {
+            let badgeBg = 'bg-indigo-50 border-indigo-200 text-indigo-900';
+            if (t.stage.includes('Pré')) badgeBg = 'bg-rose-50 border-rose-200 text-rose-900';
+            else if (t.stage.includes('Eucaristia I') && !t.stage.includes('II')) badgeBg = 'bg-emerald-50 border-emerald-200 text-emerald-900';
+            else if (t.stage.includes('Eucaristia II')) badgeBg = 'bg-sky-50 border-sky-200 text-sky-900';
+            else if (t.stage.includes('Perseverança')) badgeBg = 'bg-amber-50 border-amber-200 text-amber-900';
+            else if (t.stage.includes('Crisma Jovem')) badgeBg = 'bg-purple-50 border-purple-200 text-purple-900';
+
+            return `
+              <div class="p-3.5 rounded-xl border ${badgeBg} flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-xs font-heading">${t.stage} — ${t.turma}</span>
+                    <span class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/80 border border-slate-300 text-slate-700">${t.funcao}</span>
+                  </div>
+                  <div class="text-[11px] text-slate-600 mt-1">
+                    📅 <strong>Horário:</strong> ${t.dayTime || '—'}
+                  </div>
+                </div>
+                <div class="text-[11px] text-slate-700 font-semibold bg-white/70 px-2.5 py-1 rounded-lg border border-slate-200 self-start sm:self-center">
+                  📍 ${t.room || 'Espaço a definir'}
+                </div>
+              </div>
+            `;
+          }).join('');
+        } else {
+          turmasContainer.innerHTML = `
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-500">
+              Nenhuma turma regular vinculada no momento (Disponível / Apoio pastoral).
+            </div>
+          `;
+        }
+      }
+
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeCatequistaModal() {
+      const modal = document.getElementById('modal-catequista-detalhes');
+      if (modal) modal.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    function renderCatequistasList() {
+      filterCatequistasList();
+    }
+
+    function filterCatequistasList() {
+      const tbody = document.getElementById('tbody-catequistas-list');
+      if (!tbody) return;
+
+      const searchInput = document.getElementById('input-search-catequistas');
+      const stageFilter = document.getElementById('sel-filter-catequistas-etapa');
+      const parishFilter = document.getElementById('sel-filter-catequistas-paroquia');
+
+      const q = (searchInput ? searchInput.value : '').toLowerCase().trim();
+      const stageVal = stageFilter ? stageFilter.value : 'all';
+      const parishVal = parishFilter ? parishFilter.value : 'all';
+
+      const all = getCatequistasRegistrationData();
+      const filtered = all.filter(c => {
+        if (stageVal !== 'all') {
+          const matchStage = (c.etapaPrincipal && c.etapaPrincipal.includes(stageVal)) ||
+                             (c.turmas && c.turmas.some(t => t.stage.includes(stageVal))) ||
+                             (stageVal === 'Geral' && (c.funcaoPrincipal.includes('Coord') || c.funcaoPrincipal.includes('Sem turma')));
+          if (!matchStage) return false;
+        }
+
+        if (parishVal === 'Santuário') {
+          if (!c.paroquia.toLowerCase().includes('santuário') && !c.paroquia.toLowerCase().includes('imaculado')) return false;
+        } else if (parishVal === 'outras') {
+          if (c.paroquia.toLowerCase().includes('santuário') || c.paroquia.toLowerCase().includes('imaculado')) return false;
+        }
+
+        if (q) {
+          const matchQuery = c.nomeCompleto.toLowerCase().includes(q) ||
+                             c.telefone.toLowerCase().includes(q) ||
+                             c.email.toLowerCase().includes(q) ||
+                             c.paroquia.toLowerCase().includes(q) ||
+                             c.etapaPrincipal.toLowerCase().includes(q) ||
+                             (c.turmas && c.turmas.some(t => `${t.stage} ${t.turma}`.toLowerCase().includes(q)));
+          if (!matchQuery) return false;
+        }
+
+        return true;
+      });
+
+      const statsEl = document.getElementById('catequistas-table-stats');
+      if (statsEl) {
+        statsEl.innerHTML = `Exibindo <strong>${filtered.length}</strong> de <strong>${all.length}</strong> catequistas cadastrados.`;
+      }
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="py-8 text-center text-slate-400">
+              Nenhum catequista encontrado com os filtros selecionados.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(c => {
+        const turmasHtml = c.turmas && c.turmas.length > 0
+          ? c.turmas.map(t => `<span class="inline-block px-2 py-0.5 text-[10px] font-bold rounded-md bg-slate-100 text-slate-700 border border-slate-200 mr-1 mb-1">${t.stage} - ${t.turma}</span>`).join('')
+          : `<span class="text-slate-400 text-xs italic">Sem turma regular</span>`;
+
+        const waLink = c.telefoneRaw ? `
+          <a href="https://wa.me/${c.telefoneRaw}?text=${encodeURIComponent(`Olá, ${c.nomeCompleto}!`)}" target="_blank" class="inline-flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-lg text-xs font-mono font-bold transition" title="Abrir WhatsApp">
+            <span>💬</span> <span>${c.telefone}</span>
+          </a>
+        ` : `<span class="text-slate-400 text-xs">Sem telefone</span>`;
+
+        const emailLink = c.email ? `
+          <a href="mailto:${c.email}" class="text-slate-600 hover:text-indigo-600 font-mono text-xs underline truncate max-w-[160px] inline-block" title="${c.email}">
+            ${c.email}
+          </a>
+        ` : `<span class="text-slate-400 text-xs">—</span>`;
+
+        return `
+          <tr class="hover:bg-amber-50/40 transition">
+            <td class="py-3 px-4">
+              <div class="font-bold text-slate-900 text-sm hover:text-[#b88d36] cursor-pointer" onclick="openCatequistaModal('${c.id}')">${c.nomeCompleto}</div>
+              <div class="text-[11px] text-slate-400 mt-0.5 font-medium flex items-center gap-1.5">
+                <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                <span>${c.funcaoPrincipal}</span>
+              </div>
+            </td>
+            <td class="py-3 px-4 whitespace-nowrap font-mono text-xs text-slate-700">${c.dataNascimento}</td>
+            <td class="py-3 px-4 whitespace-nowrap">${waLink}</td>
+            <td class="py-3 px-4">${emailLink}</td>
+            <td class="py-3 px-4 text-xs text-slate-600 max-w-[170px] truncate" title="${c.paroquia}">${c.paroquia}</td>
+            <td class="py-3 px-4">
+              <div>${turmasHtml}</div>
+            </td>
+            <td class="py-3 px-4 text-center">
+              <button onclick="openCatequistaModal('${c.id}')" class="p-1.5 bg-slate-100 hover:bg-[#d4a94f] hover:text-slate-950 text-slate-600 rounded-lg transition text-xs font-bold" title="Ver ficha completa">
+                👁️ Ficha
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function exportarCatequistasCSV() {
+      const all = getCatequistasRegistrationData();
+      if (!all || all.length === 0) {
+        alert('Nenhum catequista para exportar.');
+        return;
+      }
+
+      const headers = ['ID', 'Nome Completo', 'Data de Nascimento', 'Telefone', 'E-mail', 'Paróquia Habitual', 'Etapa Principal', 'Função', 'Turmas Atribuídas', 'Profissão', 'Endereço', 'Estado Civil'];
+      const rows = all.map(c => [
+        `"${c.id}"`,
+        `"${(c.nomeCompleto || '').replace(/"/g, '""')}"`,
+        `"${c.dataNascimento || ''}"`,
+        `"${c.telefone || ''}"`,
+        `"${c.email || ''}"`,
+        `"${(c.paroquia || '').replace(/"/g, '""')}"`,
+        `"${c.etapaPrincipal || ''}"`,
+        `"${c.funcaoPrincipal || ''}"`,
+        `"${(c.turmas || []).map(t => `${t.stage} - ${t.turma} (${t.funcao})`).join('; ').replace(/"/g, '""')}"`,
+        `"${(c.profissao || '').replace(/"/g, '""')}"`,
+        `"${(c.endereco || '').replace(/"/g, '""')}"`,
+        `"${(c.estadoCivil || '').replace(/"/g, '""')}"`
+      ]);
+
+      const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\r\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Catequistas_Cadastro_2026_Completo_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+
     const STORAGE_KEY_ORGANOGRAMAS = 'catequese_organogramas_v7';
     const STORAGE_KEY_ACTIVE_ORG_ID = 'catequese_active_org_id_v7';
     let orgEditModeActive = false;
@@ -7925,14 +10702,14 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         const turmasHtml = (stage.turmas || []).map(t => {
           let catechistLabel = t.catechists;
           if (t.semCatequista) {
-            catechistLabel = `<div class="text-[10.5px] text-amber-800 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 inline-block mb-1">⚠️ Auxiliares em formação</div><div class="text-[11px] text-slate-700 font-medium">${t.catechists}</div>`;
+            catechistLabel = `<div class="text-[10.5px] text-amber-800 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 inline-block mb-1">⚠️ Auxiliares em formação</div><div class="text-[11px] text-slate-700 font-medium mt-0.5">${formatCatechistChips(t.catechists, stage.name)}</div>`;
           } else {
-            catechistLabel = `<div class="text-[11px] text-slate-700 font-medium">Catequistas: ${t.catechists}</div>`;
+            catechistLabel = `<div class="text-[11px] text-slate-700 font-medium flex items-center gap-1 flex-wrap"><span class="text-[10px] text-slate-400 uppercase font-bold">Cat:</span> ${formatCatechistChips(t.catechists, stage.name)}</div>`;
           }
 
           let auxHtml = '';
           if (t.auxiliares && t.auxiliares.length > 0 && !t.semCatequista) {
-            auxHtml = `<div class="text-[10px] text-slate-400 italic">Aux. em formação: ${t.auxiliares.join(', ')}</div>`;
+            auxHtml = `<div class="text-[10px] text-slate-400 italic mt-0.5 flex items-center gap-1 flex-wrap"><span>Aux:</span> ${formatCatechistChips(t.auxiliares.join(', '), stage.name)}</div>`;
           }
 
           let alunosBtn = '';
@@ -8091,11 +10868,11 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
           let catechistsHtml = '';
           if (r.semCatequista) {
-            catechistsHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-yellow-100 text-yellow-800 border border-yellow-300">⚠️ Auxiliares em formação</span><div class="text-xs font-semibold text-slate-800 mt-0.5">${r.catechists}</div>`;
+            catechistsHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-yellow-100 text-yellow-800 border border-yellow-300">⚠️ Auxiliares em formação</span><div class="text-xs font-semibold text-slate-800 mt-1">${formatCatechistChips(r.catechists, st.name)}</div>`;
           } else {
-            catechistsHtml = `<span class="font-medium text-slate-900">${r.catechists}</span>`;
+            catechistsHtml = `<div>${formatCatechistChips(r.catechists, st.name)}</div>`;
             if (r.auxiliares && r.auxiliares.length > 0) {
-              catechistsHtml += `<div class="text-[11px] text-slate-400 italic mt-0.5">Aux. em formação: ${r.auxiliares.join(', ')}</div>`;
+              catechistsHtml += `<div class="text-[11px] text-slate-400 italic mt-1 flex items-center gap-1 flex-wrap"><span>Aux.:</span> ${formatCatechistChips(r.auxiliares.join(', '), st.name)}</div>`;
             }
           }
 
@@ -8601,32 +11378,36 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     function switchOrganogramaSubTab(tab) {
       const viewArvore = document.getElementById('subview-arvore');
       const viewTabela = document.getElementById('subview-tabela');
+      const viewCatequistas = document.getElementById('subview-catequistas');
       const btnArvore = document.getElementById('btn-subtab-arvore');
       const btnTabela = document.getElementById('btn-subtab-tabela');
+      const btnCatequistas = document.getElementById('btn-subtab-catequistas');
       const toolbar = document.getElementById('organograma-actions-toolbar');
+
+      if (viewArvore) viewArvore.classList.add('hidden');
+      if (viewTabela) viewTabela.classList.add('hidden');
+      if (viewCatequistas) viewCatequistas.classList.add('hidden');
+
+      const activeBtn = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition bg-slate-900 text-white shadow-xs';
+      const inactiveBtn = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition text-slate-600 hover:text-slate-900 hover:bg-slate-100';
+
+      if (btnArvore) btnArvore.className = inactiveBtn;
+      if (btnTabela) btnTabela.className = inactiveBtn;
+      if (btnCatequistas) btnCatequistas.className = inactiveBtn;
 
       if (tab === 'arvore') {
         if (viewArvore) viewArvore.classList.remove('hidden');
-        if (viewTabela) viewTabela.classList.add('hidden');
         if (toolbar) toolbar.classList.remove('hidden');
-
-        if (btnArvore) {
-          btnArvore.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition bg-slate-900 text-white shadow-xs';
-        }
-        if (btnTabela) {
-          btnTabela.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition text-slate-600 hover:text-slate-900 hover:bg-slate-100';
-        }
-      } else {
-        if (viewArvore) viewArvore.classList.add('hidden');
+        if (btnArvore) btnArvore.className = activeBtn;
+      } else if (tab === 'tabela') {
         if (viewTabela) viewTabela.classList.remove('hidden');
         if (toolbar) toolbar.classList.remove('hidden');
-
-        if (btnArvore) {
-          btnArvore.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition text-slate-600 hover:text-slate-900 hover:bg-slate-100';
-        }
-        if (btnTabela) {
-          btnTabela.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition bg-slate-900 text-white shadow-xs';
-        }
+        if (btnTabela) btnTabela.className = activeBtn;
+      } else if (tab === 'catequistas') {
+        if (viewCatequistas) viewCatequistas.classList.remove('hidden');
+        if (toolbar) toolbar.classList.add('hidden');
+        if (btnCatequistas) btnCatequistas.className = activeBtn;
+        if (typeof renderCatequistasList === 'function') renderCatequistasList();
       }
     }
 
@@ -10261,16 +13042,16 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       'sala-02': { schedX: 105, schedY: 970, schedW: 265, schedH: 165, hall: 'catequetico' },
 
       // Salão Paroquial
-      'sala-cozinha': { schedX: 900, schedY: 220, schedW: 170, schedH: 70, hall: 'paroquial' },
-      'sala-banheiros': { schedX: 900, schedY: 610, schedW: 170, schedH: 70, hall: 'paroquial' },
-      'sala-17': { schedX: 1098, schedY: 530, schedW: 134, schedH: 150, hall: 'paroquial' },
-      'sala-14': { schedX: 728, schedY: 145, schedW: 144, schedH: 85, hall: 'paroquial' },
-      'sala-12': { schedX: 558, schedY: 140, schedW: 144, schedH: 90, hall: 'paroquial' },
-      'sala-13': { schedX: 728, schedY: 605, schedW: 144, schedH: 85, hall: 'paroquial' },
-      'sala-11': { schedX: 558, schedY: 605, schedW: 144, schedH: 85, hall: 'paroquial' },
-      'sala-16': { schedX: 68, schedY: 145, schedW: 164, schedH: 85, hall: 'paroquial' },
-      'sala-15': { schedX: 68, schedY: 605, schedW: 164, schedH: 85, hall: 'paroquial' },
-      'palco': { schedX: 70, schedY: 410, schedW: 160, schedH: 80, hall: 'paroquial' }
+      'sala-cozinha': { schedX: 896, schedY: 175, schedW: 178, schedH: 70, hall: 'paroquial' },
+      'sala-banheiros': { schedX: 896, schedY: 570, schedW: 178, schedH: 70, hall: 'paroquial' },
+      'sala-17': { schedX: 1096, schedY: 528, schedW: 138, schedH: 116, hall: 'paroquial' },
+      'sala-14': { schedX: 724, schedY: 96, schedW: 156, schedH: 136, hall: 'paroquial' },
+      'sala-12': { schedX: 551, schedY: 96, schedW: 156, schedH: 136, hall: 'paroquial' },
+      'sala-13': { schedX: 724, schedY: 556, schedW: 156, schedH: 136, hall: 'paroquial' },
+      'sala-11': { schedX: 551, schedY: 556, schedW: 156, schedH: 136, hall: 'paroquial' },
+      'sala-16': { schedX: 68, schedY: 115, schedW: 164, schedH: 116, hall: 'paroquial' },
+      'sala-15': { schedX: 68, schedY: 575, schedW: 164, schedH: 116, hall: 'paroquial' },
+      'palco': { schedX: 68, schedY: 410, schedW: 164, schedH: 80, hall: 'paroquial' }
     };
 
     function getPeriodFromDayTime(dt) {
@@ -10395,8 +13176,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           g.appendChild(t2);
         } else {
           // Altura dinâmica baseada na quantidade de turmas
-          const rowHeight = isParoquial ? 28 : 32;
-          const totalHeight = Math.min(coords.schedH, 20 + schedules.length * rowHeight);
+          const rowHeight = isParoquial ? 36 : 32;
+          const totalHeight = Math.min(coords.schedH, 18 + schedules.length * rowHeight);
 
           const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
           bg.setAttribute('x', '0');
@@ -10405,7 +13186,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           bg.setAttribute('height', totalHeight);
           bg.setAttribute('rx', '6');
           bg.setAttribute('fill', isParoquial ? '#ffffff' : '#f8fafc');
-          bg.setAttribute('stroke', isParoquial ? '#bfdbfe' : '#e2e8f0');
+          bg.setAttribute('stroke', isParoquial ? '#cbd5e1' : '#e2e8f0');
           bg.setAttribute('stroke-width', '1');
           g.appendChild(bg);
 
@@ -10414,17 +13195,17 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           countBadge.setAttribute('x', '6');
           countBadge.setAttribute('y', '4');
           countBadge.setAttribute('width', isParoquial ? '56' : '64');
-          countBadge.setAttribute('height', '13');
+          countBadge.setAttribute('height', '12');
           countBadge.setAttribute('rx', '3');
           countBadge.setAttribute('fill', isParoquial ? '#dbeafe' : '#fef3c7');
           g.appendChild(countBadge);
 
           const countText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
           countText.setAttribute('x', isParoquial ? '34' : '38');
-          countText.setAttribute('y', '13.5');
+          countText.setAttribute('y', '13');
           countText.setAttribute('text-anchor', 'middle');
           countText.setAttribute('font-family', "'Nunito', sans-serif");
-          countText.setAttribute('font-size', '8');
+          countText.setAttribute('font-size', '7.5');
           countText.setAttribute('font-weight', '900');
           countText.setAttribute('fill', isParoquial ? '#1e40af' : '#92400e');
           countText.textContent = `${schedules.length} ${schedules.length === 1 ? 'TURMA' : 'TURMAS'}`;
@@ -10432,40 +13213,68 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
           // Linhas de cada turma
           schedules.forEach((item, idx) => {
-            const yOffset = 21 + idx * rowHeight;
+            const yOffset = 18 + idx * rowHeight;
             if (yOffset + 12 > totalHeight) return;
 
+            // Linha divisória sutil entre turmas no Salão Paroquial
+            if (isParoquial && idx > 0) {
+              const divLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+              divLine.setAttribute('x1', '6');
+              divLine.setAttribute('y1', yOffset - 1);
+              divLine.setAttribute('x2', cardWidth - 6);
+              divLine.setAttribute('y2', yOffset - 1);
+              divLine.setAttribute('stroke', '#f1f5f9');
+              divLine.setAttribute('stroke-width', '1');
+              g.appendChild(divLine);
+            }
+
             const txtLine1 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            txtLine1.setAttribute('x', '8');
-            txtLine1.setAttribute('y', yOffset + 9);
+            txtLine1.setAttribute('x', '7');
+            txtLine1.setAttribute('y', yOffset + 10);
             txtLine1.setAttribute('font-family', "'Nunito', sans-serif");
-            txtLine1.setAttribute('font-size', isParoquial ? '9' : '9.5');
+            txtLine1.setAttribute('font-size', isParoquial ? '8.5' : '9.5');
             txtLine1.setAttribute('font-weight', '800');
             
             let color = '#334155';
             if (item.stage.includes('Eucaristia I')) color = '#047857';
-            else if (item.stage.includes('Eucaristia II')) color = '#0284c7';
+            else if (item.stage.includes('Eucaristia II')) color = '#1e40af';
             else if (item.stage.includes('Crisma')) color = '#6d28d9';
-            else if (item.stage.includes('Pré')) color = '#be123c';
+            else if (item.stage.includes('Pré')) color = '#047857';
             else if (item.stage.includes('Perseverança')) color = '#b45309';
 
             txtLine1.setAttribute('fill', color);
-            const timePart = item.time ? (item.time.length > 14 ? item.time.split('às')[0].trim() : item.time) : '';
+
+            let stageAbbr = item.stage;
+            if (isParoquial) {
+              stageAbbr = stageAbbr.replace('Eucaristia II', 'Euc II')
+                                   .replace('Eucaristia I', 'Euc I')
+                                   .replace('Crisma Adultos', 'Crisma Ad.')
+                                   .replace('Crisma Jovem', 'Crisma J.')
+                                   .replace('Pré Eucaristia', 'Pré')
+                                   .replace('Perseverança', 'Persev.');
+            }
+            const turmaAbbr = item.turma ? item.turma.replace('Turma ', 'T') : '';
+            let rawTime = item.time ? (item.time.includes('às') ? item.time.split('às')[0].trim() : item.time) : '';
+            rawTime = rawTime.replace(':00', 'h').replace('08:30', '8h30').replace('10:30', '10h30').replace('20:00', '20h').replace('15:00', '15h');
             const dayPart = item.day ? item.day.replace('-feira', '').slice(0, 3) : '';
-            txtLine1.textContent = `${dayPart} ${timePart} • ${item.stage} (${item.turma})`;
+
+            txtLine1.textContent = isParoquial
+              ? `${dayPart} ${rawTime} • ${turmaAbbr} (${stageAbbr})`
+              : `${dayPart} ${rawTime} • ${item.stage} (${item.turma})`;
             g.appendChild(txtLine1);
 
             const txtLine2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            txtLine2.setAttribute('x', '8');
-            txtLine2.setAttribute('y', yOffset + 19);
+            txtLine2.setAttribute('x', '7');
+            txtLine2.setAttribute('y', yOffset + 22);
             txtLine2.setAttribute('font-family', "'Nunito', sans-serif");
             txtLine2.setAttribute('font-size', isParoquial ? '8' : '8.5');
             txtLine2.setAttribute('font-weight', '600');
-            txtLine2.setAttribute('fill', '#64748b');
+            txtLine2.setAttribute('fill', '#334155');
 
             let respDisplay = item.catechists || '—';
-            if (item.semCatequista) respDisplay = '⚠️ Auxiliares em formação';
-            if (respDisplay.length > 36) respDisplay = respDisplay.substring(0, 34) + '...';
+            if (item.semCatequista) respDisplay = '⚠️ Aux. em formação';
+            const maxLen = isParoquial ? 25 : 36;
+            if (respDisplay.length > maxLen) respDisplay = respDisplay.substring(0, maxLen - 2) + '...';
             txtLine2.textContent = respDisplay;
             g.appendChild(txtLine2);
           });
