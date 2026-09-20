@@ -2256,7 +2256,7 @@
               Mapeamento oficial de funções, encargos comunitários, fluxos administrativos e atribuições de cada responsável na Pastoral da Catequese do Santuário.
             </p>
           </div>
-          <button onclick="window.print()" class="no-print inline-flex items-center gap-2 bg-white/10 hover:bg-white/15 text-slate-200 border border-slate-700 px-4 py-2 rounded-xl text-xs sm:text-sm transition font-medium self-start sm:self-center">
+          <button onclick="triggerSmartPrint()" class="no-print inline-flex items-center gap-2 bg-white/10 hover:bg-white/15 text-slate-200 border border-slate-700 px-4 py-2 rounded-xl text-xs sm:text-sm transition font-medium self-start sm:self-center">
             <svg class="w-4 h-4 text-[#d4a94f]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
             <span>Imprimir Guia</span>
           </button>
@@ -11432,18 +11432,57 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         const canvas = await html2canvas(container, {
           scale: 2,
           useCORS: true,
+          allowTaint: false,
           logging: false,
           backgroundColor: '#ffffff',
-          windowWidth: 1600
+          windowWidth: 1600,
+          onclone: (clonedDoc) => {
+            const clonedContainer = clonedDoc.getElementById('organograma-tree-container');
+            if (clonedContainer) {
+              clonedContainer.style.transform = 'none';
+              clonedContainer.style.width = '1560px';
+              clonedContainer.style.maxWidth = '1560px';
+              clonedContainer.style.overflow = 'visible';
+            }
+            // Remove botões de ação e dicas no clone
+            const buttons = clonedDoc.querySelectorAll('#organograma-tree-container button, .no-print');
+            buttons.forEach(b => b.style.display = 'none');
+          }
         });
 
-        const imageUri = canvas.toDataURL('image/png');
-        const link = document.createElement('a');
-        link.download = `organograma-catequese-icm-${org ? org.name : '2026'}.png`;
-        link.href = imageUri;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        const filename = `organograma-catequese-icm-${org ? org.name.toLowerCase().replace(/\s+/g, '-') : '2026'}.png`;
+
+        if (canvas.toBlob) {
+          canvas.toBlob((blob) => {
+            if (!blob) {
+              // Fallback para toDataURL se blob falhar
+              const imageUri = canvas.toDataURL('image/png');
+              const link = document.createElement('a');
+              link.download = filename;
+              link.href = imageUri;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              return;
+            }
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = url;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(() => URL.revokeObjectURL(url), 2000);
+          }, 'image/png');
+        } else {
+          const imageUri = canvas.toDataURL('image/png');
+          const link = document.createElement('a');
+          link.download = filename;
+          link.href = imageUri;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
       } catch (err) {
         console.error('Erro ao exportar imagem:', err);
         alert('Ocorreu um erro ao gerar a imagem PNG. Você também pode usar a opção Imprimir / Salvar PDF.');
@@ -11478,7 +11517,21 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       }, 150);
     }
 
-    // Roteador inteligente de impressão para o botão geral do cabeçalho
+    // Imprime a página atual aplicando classe de orientação no body
+    function printCurrentPageWithOrientation(orientation = 'portrait') {
+      document.body.classList.remove('print-mode-portrait', 'print-mode-landscape');
+      document.body.classList.add(orientation === 'landscape' ? 'print-mode-landscape' : 'print-mode-portrait');
+
+      // Aguarda reflow breve para que o motor de impressão do browser leia a @page correta
+      setTimeout(() => {
+        window.print();
+        setTimeout(() => {
+          document.body.classList.remove('print-mode-portrait', 'print-mode-landscape');
+        }, 1000);
+      }, 150);
+    }
+
+    // Roteador inteligente de impressão para o botão geral do cabeçalho e páginas
     function triggerSmartPrint() {
       const activeTab = document.querySelector('.tab-view:not(.hidden)');
       const activeTabId = activeTab ? activeTab.id : '';
@@ -11486,13 +11539,27 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       if (activeTabId === 'view-guia') {
         imprimirOrganograma();
       } else if (activeTabId === 'view-alunos') {
-        if (typeof printTurmaChamada === 'function') {
-          printTurmaChamada();
+        // Se estiver com modal de chamada ou turma pronta para imprimir
+        if (document.getElementById('printable-chamada-area')?.querySelector('table')) {
+          if (typeof printTurmaChamada === 'function') {
+            printTurmaChamada();
+          } else {
+            printCurrentPageWithOrientation('landscape');
+          }
         } else {
-          window.print();
+          printCurrentPageWithOrientation('landscape');
         }
+      } else if (activeTabId === 'view-paroquial') {
+        // Salão Paroquial tem proporção horizontal (1400x820) -> Landscape
+        printCurrentPageWithOrientation('landscape');
+      } else if (activeTabId === 'view-catequetico') {
+        // Centro Catequético tem proporção vertical (940x1800) -> Portrait
+        printCurrentPageWithOrientation('portrait');
+      } else if (activeTabId === 'view-papeis' || activeTabId === 'view-campus' || activeTabId === 'view-eventos') {
+        // Diretrizes, papéis, campus e eventos -> Portrait
+        printCurrentPageWithOrientation('portrait');
       } else {
-        window.print();
+        printCurrentPageWithOrientation('portrait');
       }
     }
 
