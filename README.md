@@ -13,7 +13,7 @@ Este projeto disponibiliza para catequizandos, familiares e catequistas:
 - **🔍 Busca em tempo real** por catequista, turma, etapa ou sala
 - **📅 Filtros por período** (Sáb 8h30, Sáb 15h, Seg 20h, Qua 16h)
 - **📋 Organograma & Tabela completa** de todas as 44 turmas cruzadas com o Organograma Oficial
-- **🧭 Guia do Complexo Paroquial** para orientação de novos catequizandos
+- **🧭 Guia da Página inicial** para orientação de novos catequizandos
 
 ---
 
