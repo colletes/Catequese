@@ -15,6 +15,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
+  <!-- Cropper.js (Upload e Enquadramento 3x4 de Fotos de Catequistas) -->
+  <link rel="stylesheet" href="cropper.min.css">
+  <script src="cropper.min.js"></script>
+
   <!-- Cloudflare Turnstile (Anti-Bot) -->
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
@@ -3374,13 +3378,27 @@
           </button>
           
           <div class="flex items-start gap-4 sm:gap-5">
-            <div class="relative shrink-0">
-              <div id="modal-cat-avatar" class="w-20 sm:w-24 h-28 sm:h-32 rounded-2xl bg-gradient-to-br from-[#d4a94f] to-[#b88d36] text-slate-950 flex items-center justify-center font-black text-2xl sm:text-3xl font-heading shadow-xl border-2 border-[#d4a94f]/80 overflow-hidden">
-                TC
+            <div class="relative shrink-0 flex flex-col items-center">
+              <div class="relative group cursor-pointer" onclick="triggerCatequistaPhotoUpload()" title="Alterar foto oficial 3x4">
+                <div id="modal-cat-avatar" class="w-20 sm:w-24 h-28 sm:h-32 rounded-2xl bg-gradient-to-br from-[#d4a94f] to-[#b88d36] text-slate-950 flex items-center justify-center font-black text-2xl sm:text-3xl font-heading shadow-xl border-2 border-[#d4a94f]/80 overflow-hidden transition group-hover:border-amber-300">
+                  TC
+                </div>
+                <div id="modal-cat-avatar-overlay" class="absolute inset-0 bg-slate-950/60 rounded-2xl opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-amber-300 transition gap-1 pointer-events-none">
+                  <span class="text-xl">📷</span>
+                  <span class="text-[9px] font-bold uppercase tracking-wider text-white">Alterar Foto</span>
+                </div>
+                <span id="modal-cat-foto-badge" class="hidden absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap bg-emerald-950 text-emerald-300 border border-emerald-500/60 text-[9px] font-bold px-2 py-0.5 rounded-full shadow-md font-sans">
+                  📸 3x4 Oficial
+                </span>
               </div>
-              <span id="modal-cat-foto-badge" class="hidden absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap bg-emerald-950 text-emerald-300 border border-emerald-500/60 text-[9px] font-bold px-2 py-0.5 rounded-full shadow-md font-sans">
-                📸 3x4 Oficial
-              </span>
+              <div id="modal-cat-photo-controls" class="mt-3 flex flex-col gap-1 w-full text-center">
+                <button type="button" onclick="triggerCatequistaPhotoUpload()" class="inline-flex items-center justify-center gap-1.5 bg-[#d4a94f]/20 hover:bg-[#d4a94f]/30 text-amber-200 border border-[#d4a94f]/40 text-[10.5px] font-bold py-1 px-2 rounded-xl transition shadow-xs" title="Fazer upload de nova foto">
+                  <span>📤</span> <span>Subir Foto 3x4</span>
+                </button>
+                <button type="button" id="modal-cat-btn-remove-foto" onclick="removeCatequistaPhoto()" class="hidden text-rose-300/80 hover:text-rose-200 text-[9.5px] font-semibold py-0.5 hover:underline transition">
+                  Remover foto
+                </button>
+              </div>
             </div>
             <div class="space-y-1.5 flex-1 min-w-0">
               <div class="flex flex-wrap items-center gap-2">
@@ -3479,6 +3497,80 @@
             Fechar Ficha
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- Input oculto para upload de foto de catequistas -->
+    <input type="file" id="input-catequista-foto" accept="image/png,image/jpeg,image/webp,image/jpg" class="hidden" onchange="handleCatequistaPhotoSelected(event)">
+
+    <!-- ========================================== -->
+    <!-- MODAL: CROPPER / ENQUADRAMENTO DE FOTO 3X4 -->
+    <!-- ========================================== -->
+    <div id="modal-crop-foto-catequista" class="hidden fixed inset-0 z-[70] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+      <div class="bg-slate-900 rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl border border-amber-500/40 my-auto flex flex-col text-slate-100">
+        
+        <!-- Header do Crop Modal -->
+        <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 p-5 border-b border-amber-500/30 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 text-lg shadow-inner">
+              ✂️
+            </div>
+            <div>
+              <h3 class="text-base sm:text-lg font-bold font-heading text-white">Enquadrar Foto 3x4 do Catequista</h3>
+              <p id="crop-modal-cat-name" class="text-xs text-amber-300/90 font-medium">Ajuste o corte para o perfil oficial</p>
+            </div>
+          </div>
+          <button onclick="closeCropModal()" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-white/10 transition" title="Fechar">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <!-- Área de Enquadramento (Cropper) -->
+        <div class="p-4 sm:p-6 space-y-4">
+          <div class="relative bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 flex items-center justify-center" style="max-height: 52vh; min-height: 280px;">
+            <img id="crop-image-target" src="" alt="Imagem para recorte" class="max-w-full block" />
+          </div>
+
+          <!-- Barra de Controles do Cropper -->
+          <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-950/70 p-2.5 rounded-2xl border border-slate-800/80 text-xs">
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="cropperZoom(0.1)" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold transition flex items-center gap-1" title="Aproximar">
+                <span>➕</span> <span class="hidden sm:inline">Zoom</span>
+              </button>
+              <button type="button" onclick="cropperZoom(-0.1)" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold transition flex items-center gap-1" title="Afastar">
+                <span>➖</span> <span class="hidden sm:inline">Zoom</span>
+              </button>
+              <button type="button" onclick="cropperRotate(-90)" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold transition flex items-center gap-1" title="Girar 90° à esquerda">
+                <span>↺</span> <span class="hidden sm:inline">-90°</span>
+              </button>
+              <button type="button" onclick="cropperRotate(90)" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold transition flex items-center gap-1" title="Girar 90° à direita">
+                <span>↻</span> <span class="hidden sm:inline">+90°</span>
+              </button>
+              <button type="button" onclick="cropperReset()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-bold transition" title="Redefinir enquadramento original">
+                <span>🔁 Redefinir</span>
+              </button>
+            </div>
+            
+            <div class="inline-flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-bold px-3 py-1 rounded-xl">
+              <span>📐</span> <span>Proporção 3x4 Travada</span>
+            </div>
+          </div>
+
+          <p class="text-[11px] text-slate-400 text-center">
+            💡 Arraste e redimensione o retângulo de seleção para focalizar o rosto do catequista. A imagem será salva em padrão 3x4 no banco protegido por LGPD.
+          </p>
+        </div>
+
+        <!-- Footer com Ações -->
+        <div class="p-4 bg-slate-950 border-t border-slate-800 flex items-center justify-between gap-3">
+          <button type="button" onclick="closeCropModal()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-xs transition">
+            Cancelar
+          </button>
+          <button type="button" id="btn-save-crop-photo" onclick="saveCroppedPhoto()" class="px-5 py-2.5 bg-gradient-to-r from-[#d4a94f] to-[#b88d36] hover:brightness-110 text-slate-950 font-black rounded-xl text-xs sm:text-sm shadow-lg transition flex items-center gap-2">
+            <span>💾</span> <span>Salvar Foto 3x4 no Perfil</span>
+          </button>
+        </div>
+
       </div>
     </div>
 
@@ -8194,6 +8286,273 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       }).join(' ');
     }
 
+    let currentCatequistaForPhoto = null;
+    let currentCropper = null;
+
+    function canManageCatequistasPhotos() {
+      // Se não há autenticação ativa (ou modo offline / dev), permite gerenciar fotos
+      if (!window.appAuthState || !window.appAuthState.user) {
+        return true;
+      }
+      const role = window.appAuthState.role;
+      const email = ((window.appAuthState.user && window.appAuthState.user.email) || '').toLowerCase();
+      const roles = (window.ICM_CONFIG && window.ICM_CONFIG.ROLES) ? window.ICM_CONFIG.ROLES : {};
+
+      const isMaster = role === roles.MASTER_ADMIN || role === 'master_admin' || email === (window.ICM_CONFIG && (window.ICM_CONFIG.MASTER_ADMIN_EMAIL || '').toLowerCase());
+      const isCoordGeral = role === roles.COORD_GERAL || role === 'coord_geral' || email === (window.ICM_CONFIG && (window.ICM_CONFIG.COORD_GERAL_EMAIL || '').toLowerCase());
+      const isViceCoord = role === roles.VICE_COORD_GERAL || role === 'vice_coord_geral' || role === 'vice_coordenador' || (window.appAuthState.turmaNome && window.appAuthState.turmaNome.toLowerCase().includes('vice')) || email === (window.ICM_CONFIG && (window.ICM_CONFIG.VICE_COORD_GERAL_EMAIL || '').toLowerCase());
+
+      return isMaster || isCoordGeral || isViceCoord;
+    }
+
+    function triggerCatequistaPhotoUpload() {
+      if (!canManageCatequistasPhotos()) {
+        alert('⚠️ Operação não permitida: Apenas o Master Admin (Thiago), a Coordenação Geral (Lorena) e a Vice-Coordenação (Andres) têm permissão para atualizar fotos de catequistas.');
+        return;
+      }
+      const input = document.getElementById('input-catequista-foto');
+      if (input) {
+        input.value = '';
+        input.click();
+      }
+    }
+
+    function handleCatequistaPhotoSelected(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        alert('Por favor, selecione um arquivo de imagem válido (JPG, PNG ou WebP).');
+        return;
+      }
+
+      if (file.size > 15 * 1024 * 1024) {
+        alert('A imagem selecionada é muito pesada (máximo 15MB). Por favor, selecione outra foto.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        openCropModal(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function openCropModal(imageSrc) {
+      const modal = document.getElementById('modal-crop-foto-catequista');
+      const img = document.getElementById('crop-image-target');
+      const nameEl = document.getElementById('crop-modal-cat-name');
+      if (!modal || !img) return;
+
+      if (currentCatequistaForPhoto && nameEl) {
+        nameEl.textContent = `Ajuste o corte para o perfil oficial de ${currentCatequistaForPhoto.nomeCompleto}`;
+      }
+
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+
+      if (currentCropper) {
+        currentCropper.destroy();
+        currentCropper = null;
+      }
+
+      img.onload = function() {
+        if (typeof Cropper !== 'undefined') {
+          currentCropper = new Cropper(img, {
+            aspectRatio: 3 / 4,
+            viewMode: 1,
+            dragMode: 'move',
+            autoCropArea: 0.88,
+            restore: false,
+            guides: true,
+            center: true,
+            highlight: true,
+            cropBoxMovable: true,
+            cropBoxResizable: true,
+            toggleDragModeOnDblclick: false,
+            responsive: true
+          });
+        }
+      };
+
+      img.src = imageSrc;
+    }
+
+    function closeCropModal() {
+      const modal = document.getElementById('modal-crop-foto-catequista');
+      if (modal) modal.classList.add('hidden');
+      if (currentCropper) {
+        currentCropper.destroy();
+        currentCropper = null;
+      }
+      const input = document.getElementById('input-catequista-foto');
+      if (input) input.value = '';
+
+      const catModal = document.getElementById('modal-catequista-detalhes');
+      if (!catModal || catModal.classList.contains('hidden')) {
+        document.body.style.overflow = '';
+      }
+    }
+
+    function cropperZoom(delta) {
+      if (currentCropper) currentCropper.zoom(delta);
+    }
+
+    function cropperRotate(degrees) {
+      if (currentCropper) currentCropper.rotate(degrees);
+    }
+
+    function cropperReset() {
+      if (currentCropper) currentCropper.reset();
+    }
+
+    function saveCroppedPhoto() {
+      if (!currentCropper || !currentCatequistaForPhoto) {
+        alert('Erro: Nenhum corte ativo ou catequista não identificado.');
+        return;
+      }
+
+      const saveBtn = document.getElementById('btn-save-crop-photo');
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = `<span>⏳</span> <span>Processando 3x4...</span>`;
+      }
+
+      try {
+        const canvas = currentCropper.getCroppedCanvas({
+          width: 360,
+          height: 480,
+          imageSmoothingQuality: 'high'
+        });
+
+        if (!canvas) {
+          throw new Error('Falha ao processar o recorte do canvas.');
+        }
+
+        const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.88);
+
+        // Atualiza a base de catequistas
+        const list = getCatequistasRegistrationData();
+        const catIdx = list.findIndex(c => c.id === currentCatequistaForPhoto.id);
+        if (catIdx !== -1) {
+          list[catIdx].foto = croppedDataUrl;
+          list[catIdx].fotoFaceDetected = true;
+          list[catIdx].updatedAt = new Date().toISOString();
+          saveCatequistasRegistrationData(list);
+          currentCatequistaForPhoto = list[catIdx];
+        }
+
+        // Sincroniza com Firestore se disponível
+        if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
+          window.firebaseDb.collection('catequistas').doc(currentCatequistaForPhoto.id).set({
+            foto: croppedDataUrl,
+            fotoFaceDetected: true,
+            updatedAt: new Date().toISOString()
+          }, { merge: true }).catch(err => {
+            console.warn('Sync foto Firestore mantido localmente:', err);
+          });
+        }
+
+        // Registro de Auditoria Perene LGPD (Art. 37)
+        if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
+          const currentUserName = (window.appAuthState && window.appAuthState.user && (window.appAuthState.user.displayName || window.appAuthState.user.email)) || 'Coordenação Geral';
+          window.ICM_CONFIG.logAuditEvent('CATEQUISTA_PHOTO_UPDATE', `catequista:${currentCatequistaForPhoto.nomeCompleto}`, {
+            catId: currentCatequistaForPhoto.id,
+            updatedBy: currentUserName,
+            aspectRatio: '3x4',
+            timestamp: new Date().toISOString()
+          });
+        }
+
+        // Atualiza elementos do modal ativo
+        const avatarEl = document.getElementById('modal-cat-avatar');
+        const fotoBadge = document.getElementById('modal-cat-foto-badge');
+        const btnRemove = document.getElementById('modal-cat-btn-remove-foto');
+        if (avatarEl) {
+          avatarEl.innerHTML = `<img src="${croppedDataUrl}" alt="${currentCatequistaForPhoto.nomeCompleto}" class="w-full h-full object-cover" style="aspect-ratio: 3/4;" />`;
+          avatarEl.classList.remove('bg-gradient-to-br', 'from-[#d4a94f]', 'to-[#b88d36]', 'text-slate-950');
+          avatarEl.classList.add('bg-slate-900');
+        }
+        if (fotoBadge) fotoBadge.classList.remove('hidden');
+        if (btnRemove) btnRemove.classList.remove('hidden');
+
+        // Atualiza a tabela na hora
+        filterCatequistasList();
+
+        closeCropModal();
+        alert(`✅ Foto 3x4 de ${currentCatequistaForPhoto.nomeCompleto} enquadrada e salva com sucesso no perfil!`);
+      } catch (err) {
+        console.error('Erro ao salvar recorte da foto:', err);
+        alert('Erro ao salvar a foto: ' + err.message);
+      } finally {
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = `<span>💾</span> <span>Salvar Foto 3x4 no Perfil</span>`;
+        }
+      }
+    }
+
+    function removeCatequistaPhoto() {
+      if (!currentCatequistaForPhoto) return;
+      if (!canManageCatequistasPhotos()) {
+        alert('⚠️ Operação não permitida: Apenas o Master Admin, Coordenação Geral e Vice-Coordenação têm permissão para gerenciar fotos.');
+        return;
+      }
+
+      if (!confirm(`Deseja realmente remover a foto de ${currentCatequistaForPhoto.nomeCompleto}? O cadastro voltará a exibir as iniciais.`)) {
+        return;
+      }
+
+      const list = getCatequistasRegistrationData();
+      const catIdx = list.findIndex(c => c.id === currentCatequistaForPhoto.id);
+      if (catIdx !== -1) {
+        list[catIdx].foto = null;
+        list[catIdx].fotoFaceDetected = false;
+        list[catIdx].updatedAt = new Date().toISOString();
+        saveCatequistasRegistrationData(list);
+        currentCatequistaForPhoto = list[catIdx];
+      }
+
+      if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
+        window.firebaseDb.collection('catequistas').doc(currentCatequistaForPhoto.id).update({
+          foto: null,
+          fotoFaceDetected: false,
+          updatedAt: new Date().toISOString()
+        }).catch(err => console.warn('Remoção de foto Firestore local:', err));
+      }
+
+      if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
+        const currentUserName = (window.appAuthState && window.appAuthState.user && (window.appAuthState.user.displayName || window.appAuthState.user.email)) || 'Coordenação Geral';
+        window.ICM_CONFIG.logAuditEvent('CATEQUISTA_PHOTO_REMOVE', `catequista:${currentCatequistaForPhoto.nomeCompleto}`, {
+          catId: currentCatequistaForPhoto.id,
+          removedBy: currentUserName,
+          timestamp: new Date().toISOString()
+        });
+      }
+
+      const initials = (currentCatequistaForPhoto.nomeCompleto || 'C')
+        .split(' ')
+        .filter(w => w.length > 0)
+        .slice(0, 2)
+        .map(w => w[0].toUpperCase())
+        .join('');
+
+      const avatarEl = document.getElementById('modal-cat-avatar');
+      const fotoBadge = document.getElementById('modal-cat-foto-badge');
+      const btnRemove = document.getElementById('modal-cat-btn-remove-foto');
+
+      if (avatarEl) {
+        avatarEl.innerHTML = initials;
+        avatarEl.classList.add('bg-gradient-to-br', 'from-[#d4a94f]', 'to-[#b88d36]', 'text-slate-950');
+        avatarEl.classList.remove('bg-slate-900');
+      }
+      if (fotoBadge) fotoBadge.classList.add('hidden');
+      if (btnRemove) btnRemove.classList.add('hidden');
+
+      filterCatequistasList();
+      alert(`Foto removida com sucesso. O perfil agora exibe as iniciais.`);
+    }
+
     function openCatequistaModal(identifier) {
       const modal = document.getElementById('modal-catequista-detalhes');
       if (!modal) return;
@@ -8208,6 +8567,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         return;
       }
 
+      currentCatequistaForPhoto = cat;
+
       const initials = (cat.nomeCompleto || 'C')
         .split(' ')
         .filter(w => w.length > 0)
@@ -8217,17 +8578,31 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
       const avatarEl = document.getElementById('modal-cat-avatar');
       const fotoBadge = document.getElementById('modal-cat-foto-badge');
+      const btnRemoveFoto = document.getElementById('modal-cat-btn-remove-foto');
+      const photoControls = document.getElementById('modal-cat-photo-controls');
+      const avatarOverlay = document.getElementById('modal-cat-avatar-overlay');
+
+      const canEditPhotos = canManageCatequistasPhotos();
+      if (photoControls) {
+        photoControls.style.display = canEditPhotos ? 'flex' : 'none';
+      }
+      if (avatarOverlay) {
+        avatarOverlay.style.display = canEditPhotos ? 'flex' : 'none';
+      }
+
       if (avatarEl) {
         if (cat.foto) {
           avatarEl.innerHTML = `<img src="${cat.foto}" alt="${cat.nomeCompleto}" class="w-full h-full object-cover" style="aspect-ratio: 3/4;" />`;
           avatarEl.classList.remove('bg-gradient-to-br', 'from-[#d4a94f]', 'to-[#b88d36]', 'text-slate-950');
           avatarEl.classList.add('bg-slate-900');
           if (fotoBadge) fotoBadge.classList.remove('hidden');
+          if (btnRemoveFoto && canEditPhotos) btnRemoveFoto.classList.remove('hidden');
         } else {
           avatarEl.innerHTML = initials;
           avatarEl.classList.add('bg-gradient-to-br', 'from-[#d4a94f]', 'to-[#b88d36]', 'text-slate-950');
           avatarEl.classList.remove('bg-slate-900');
           if (fotoBadge) fotoBadge.classList.add('hidden');
+          if (btnRemoveFoto) btnRemoveFoto.classList.add('hidden');
         }
       }
 
@@ -8368,7 +8743,10 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     function closeCatequistaModal() {
       const modal = document.getElementById('modal-catequista-detalhes');
       if (modal) modal.classList.add('hidden');
-      document.body.style.overflow = '';
+      const cropModal = document.getElementById('modal-crop-foto-catequista');
+      if (!cropModal || cropModal.classList.contains('hidden')) {
+        document.body.style.overflow = '';
+      }
     }
 
     function renderCatequistasList() {

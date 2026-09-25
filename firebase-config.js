@@ -33,6 +33,7 @@ const ROLES = {
 
 const MASTER_ADMIN_EMAIL = 'colletes@gmail.com'; // Thiago Carvalho
 const COORD_GERAL_EMAIL = 'Lorenammoraes@gmail.com'; // Lorena
+const VICE_COORD_GERAL_EMAIL = 'andresprojetos@gmail.com'; // Andres Gonzalo Reyes Unda
 
 // Chaves locais para persistência e sincronização de usuários
 const STORAGE_KEY_AUTHORIZED_USERS = 'catequese_authorized_users_v2';
@@ -57,6 +58,17 @@ const SEED_AUTHORIZED_USERS = [
     role: ROLES.COORD_GERAL,
     turmaId: 'todas',
     turmaNome: 'Todas as Turmas (Coordenação)',
+    etapa: 'Todas',
+    status: 'ativo',
+    createdAt: '2026-01-01T00:00:00.000Z',
+    approvedBy: 'Sistema Oficial'
+  },
+  {
+    email: 'andresprojetos@gmail.com',
+    displayName: 'Andres Gonzalo Reyes Unda',
+    role: ROLES.VICE_COORD_GERAL,
+    turmaId: 'todas',
+    turmaNome: 'Todas as Turmas (Vice-Coordenação Geral)',
     etapa: 'Todas',
     status: 'ativo',
     createdAt: '2026-01-01T00:00:00.000Z',
@@ -100,11 +112,14 @@ function getAuthorizedUsers() {
     if (!list.some(u => u.email && u.email.toLowerCase() === COORD_GERAL_EMAIL.toLowerCase())) {
       list.splice(1, 0, SEED_AUTHORIZED_USERS[1]);
     }
+    if (!list.some(u => u.email && u.email.toLowerCase() === VICE_COORD_GERAL_EMAIL.toLowerCase())) {
+      list.splice(2, 0, SEED_AUTHORIZED_USERS[2]);
+    }
     if (!list.some(u => u.role === ROLES.SECRETARIA || (u.email && (u.email.toLowerCase().includes('secretaria') || u.email.toLowerCase().includes('sandra'))))) {
-      list.push(SEED_AUTHORIZED_USERS[2]);
+      list.push(SEED_AUTHORIZED_USERS[3]);
     }
     if (!list.some(u => u.email && (u.email.toLowerCase().includes('picmbrasilia') || u.email.toLowerCase().includes('larissa')))) {
-      list.push(SEED_AUTHORIZED_USERS[3]);
+      list.push(SEED_AUTHORIZED_USERS[4]);
     }
     return list;
   } catch (e) {
@@ -142,6 +157,7 @@ function determineUserRole(email) {
   const clean = email.trim().toLowerCase();
   if (clean === MASTER_ADMIN_EMAIL.toLowerCase()) return ROLES.MASTER_ADMIN;
   if (clean === COORD_GERAL_EMAIL.toLowerCase()) return ROLES.COORD_GERAL;
+  if (clean === VICE_COORD_GERAL_EMAIL.toLowerCase()) return ROLES.VICE_COORD_GERAL;
 
   const users = getAuthorizedUsers();
   const found = users.find(u => u.email && u.email.trim().toLowerCase() === clean && u.status === 'ativo');
@@ -160,8 +176,9 @@ function getUserProfile(email) {
   if (found) return found;
   if (clean === MASTER_ADMIN_EMAIL.toLowerCase()) return SEED_AUTHORIZED_USERS[0];
   if (clean === COORD_GERAL_EMAIL.toLowerCase()) return SEED_AUTHORIZED_USERS[1];
-  if (clean.includes('secretaria') || clean.includes('sandra')) return SEED_AUTHORIZED_USERS[2];
-  if (clean.includes('picmbrasilia') || clean.includes('larissa')) return SEED_AUTHORIZED_USERS[3];
+  if (clean === VICE_COORD_GERAL_EMAIL.toLowerCase()) return SEED_AUTHORIZED_USERS[2];
+  if (clean.includes('secretaria') || clean.includes('sandra')) return SEED_AUTHORIZED_USERS[3];
+  if (clean.includes('picmbrasilia') || clean.includes('larissa')) return SEED_AUTHORIZED_USERS[4];
   return null;
 }
 
@@ -822,6 +839,7 @@ window.ICM_CONFIG = {
   ROLES,
   MASTER_ADMIN_EMAIL,
   COORD_GERAL_EMAIL,
+  VICE_COORD_GERAL_EMAIL,
   determineUserRole,
   getUserProfile,
   getAuthorizedUsers,
