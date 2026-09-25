@@ -88,5 +88,11 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow write: if isCoordOrAdmin();
     }
+
+    // Cadastro Oficial e Fotos de Catequistas (LGPD — Acesso Restrito e Auditado)
+    match /catequistas/{catId} {
+      allow read: if isAuthenticated();
+      allow write: if isCoordOrAdmin();
+    }
   }
 }
