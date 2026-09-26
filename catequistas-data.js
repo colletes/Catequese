@@ -2679,13 +2679,21 @@ window.SEED_CATEQUISTAS_2026 = [
     "estadoCivil": "Viuva",
     "paroquia": "Santuário Imaculado Coração  de Maria e Matia Imaculada",
     "etapaDeclarada": "Eucarístia 1",
-    "turmas": [],
-    "etapaPrincipal": "Eucarístia 1",
-    "funcaoPrincipal": "Catequista",
+    "turmas": [
+      {
+        "stage": "Eucaristia I",
+        "turma": "Turma 07",
+        "funcao": "Catequista Titular",
+        "dayTime": "Sábado: 10:30 às 12:00",
+        "room": "Sala São Gabriel (Sala 04 - Centro Cat.)"
+      }
+    ],
+    "etapaPrincipal": "Eucaristia I",
+    "funcaoPrincipal": "Catequista Titular",
     "foto": null,
     "fotoFaceDetected": false,
     "funcoes": [
-      "Catequista"
+      "Catequista Titular — Eucaristia I (Turma 07)"
     ]
   },
   {
