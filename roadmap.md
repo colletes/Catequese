@@ -10,8 +10,8 @@ Este documento registra a quebra do projeto em **incrementos testáveis e de alt
 | :---: | :--- | :---: | :---: |
 | **Inc 1** | **Interface Confluence no SPA**: Nova aba, sidebar em árvore, leitor de Markdown com estilo visual do site e dados semente | 🟢 Concluído | 01/10/2026 |
 | **Inc 2** | **Persistência Firestore & Regras de Acesso**: Serviço `knowledge-service.js`, schema de nós, cache e regras RBAC | 🟢 Concluído | 01/10/2026 |
-| **Inc 3** | **Visualizador Multimídia**: Players embutidos de Áudio e Vídeo, visualizador de PPTX e lightbox de imagens | 🟡 Próximo (Em foco) | — |
-| **Inc 4** | **Seção de Referências & Motor Gemini**: Identificação de citações bíblicas, CIC, Vaticano.va e Google Livros com revisão | ⚪ Aguardando Inc 3 | — |
+| **Inc 3** | **Visualizador Multimídia**: Players embutidos de Áudio e Vídeo, visualizador de PPTX e lightbox de imagens | 🟢 Concluído | 01/10/2026 |
+| **Inc 4** | **Seção de Referências & Motor Gemini**: Identificação de citações bíblicas, CIC, Vaticano.va e Google Livros com revisão | 🟡 Próximo (Em foco) | — |
 | **Inc 5** | **Painel Web de Upload & Gestão**: Modal de upload (PDF/DOCX/mídias), conversão cliente e criação de pastas para Coordenação | ⚪ Aguardando Inc 4 | — |
 | **Inc 6** | **Assistente Local do OneDrive**: Script Python com interface visual local para importação em lote da pasta `Catequese 1` | ⚪ Aguardando Inc 5 | — |
 

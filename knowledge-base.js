@@ -1163,10 +1163,20 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
           ${this.buildReferencesSectionHtml(docNode.references)}
         </article>
       `;
+
+      // Anexa evento de Lightbox em todas as imagens do Markdown
+      setTimeout(() => {
+        const imgs = viewer.querySelectorAll('.wiki-prose img');
+        imgs.forEach(img => {
+          img.addEventListener('click', () => {
+            window.WikiKB.openImageLightbox(img.src, img.alt || img.title || docNode.title);
+          });
+        });
+      }, 40);
     },
 
     // ========================================================================
-    // 8. VISÃO DE MÍDIA E APRESENTAÇÕES (ÁUDIO, VÍDEO E PPTX)
+    // 8. VISÃO DE MÍDIA E APRESENTAÇÕES (ÁUDIO, VÍDEO E PPTX - INCREMENTO 3)
     // ========================================================================
     renderMediaViewer: function (mediaNode) {
       const viewer = document.getElementById('wiki-content-viewer');
@@ -1176,52 +1186,228 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
       const isAudio = mediaNode.extension === 'mp3' || mediaNode.extension === 'wav' || mediaNode.extension === 'm4a';
       const isPpt = mediaNode.type === 'presentation' || mediaNode.extension === 'pptx' || mediaNode.extension === 'ppt';
 
+      const fileSizeStr = mediaNode.fileSizeBytes
+        ? (mediaNode.fileSizeBytes / (1024 * 1024)).toFixed(1) + ' MB'
+        : '';
+
+      const etapaBadge = mediaNode.etapa ? `
+        <span class="bg-emerald-100 text-emerald-900 border border-emerald-200/80 px-2.5 py-0.5 rounded-full text-xs font-bold">
+          ${mediaNode.etapa}
+        </span>
+      ` : '';
+
       let playerHtml = '';
+
+      // --- PLAYER DE VÍDEO ---
       if (isVideo) {
         playerHtml = `
-          <div class="bg-black rounded-2xl overflow-hidden shadow-lg border border-slate-800">
-            <video controls class="w-full max-h-[480px]" preload="metadata">
-              <source src="${mediaNode.mediaUrl}" type="video/mp4">
-              Seu navegador não suporta a reprodução deste vídeo.
-            </video>
-          </div>
-        `;
-      } else if (isAudio) {
-        playerHtml = `
-          <div class="bg-gradient-to-r from-slate-900 to-slate-800 p-6 sm:p-8 rounded-2xl text-white shadow-md border border-slate-700">
-            <div class="flex items-center gap-4 mb-4">
-              <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-2xl">
-                🎵
+          <div class="space-y-4">
+            <div class="relative bg-black rounded-3xl overflow-hidden shadow-2xl border border-slate-800">
+              <video
+                id="wiki-active-video"
+                controls
+                playsinline
+                class="w-full max-h-[500px] object-contain"
+                preload="metadata"
+              >
+                <source src="${mediaNode.mediaUrl}" type="video/mp4">
+                Seu navegador não suporta a reprodução deste vídeo.
+              </video>
+            </div>
+
+            <!-- Barra de Controles Complementares do Vídeo -->
+            <div class="bg-slate-900 text-white p-3.5 rounded-2xl border border-slate-800 flex flex-wrap items-center justify-between gap-3 shadow-md">
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Velocidade:</span>
+                <div class="flex items-center gap-1">
+                  <button onclick="window.WikiKB.setVideoPlaybackRate(1.0)" class="wiki-video-speed-btn wiki-speed-btn active" data-rate="1">1x</button>
+                  <button onclick="window.WikiKB.setVideoPlaybackRate(1.25)" class="wiki-video-speed-btn wiki-speed-btn" data-rate="1.25">1.25x</button>
+                  <button onclick="window.WikiKB.setVideoPlaybackRate(1.5)" class="wiki-video-speed-btn wiki-speed-btn" data-rate="1.5">1.5x</button>
+                  <button onclick="window.WikiKB.setVideoPlaybackRate(2.0)" class="wiki-video-speed-btn wiki-speed-btn" data-rate="2">2x</button>
+                </div>
               </div>
-              <div>
-                <h4 class="font-bold font-heading text-lg text-white">${mediaNode.title}</h4>
-                <p class="text-xs text-slate-300">Reprodução de áudio pastoral de formação e oração</p>
+
+              <div class="flex items-center gap-2">
+                <button
+                  onclick="window.WikiKB.toggleVideoFullscreen()"
+                  class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  title="Tela cheia"
+                >
+                  <span>⛶</span> <span>Tela Cheia</span>
+                </button>
+                <a
+                  href="${mediaNode.mediaUrl}"
+                  download
+                  target="_blank"
+                  class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                >
+                  <span>📥</span> <span>Baixar Vídeo</span>
+                </a>
               </div>
             </div>
-            <audio controls class="w-full mt-2" preload="metadata">
-              <source src="${mediaNode.mediaUrl}" type="audio/mpeg">
-              Seu navegador não suporta o reprodutor de áudio.
-            </audio>
           </div>
         `;
-      } else if (isPpt) {
-        // Office Online Web Viewer embed
-        const encodedUrl = encodeURIComponent(mediaNode.mediaUrl);
-        const embedUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodedUrl}`;
+      }
+      // --- PLAYER DE ÁUDIO CUSTOMIZADO ---
+      else if (isAudio) {
         playerHtml = `
-          <div class="space-y-3">
-            <div class="w-full h-[520px] bg-slate-100 rounded-2xl overflow-hidden border border-slate-200 shadow-inner flex flex-col items-center justify-center relative">
+          <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 p-6 sm:p-8 rounded-3xl text-white shadow-xl border border-slate-800 space-y-6">
+            <audio id="wiki-active-audio" src="${mediaNode.mediaUrl}" preload="metadata"></audio>
+
+            <!-- Card Superior do Áudio -->
+            <div class="flex items-center gap-4">
+              <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 text-white flex items-center justify-center text-3xl shadow-lg flex-shrink-0">
+                🎵
+              </div>
+              <div class="min-w-0 flex-1">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                  Formação em Áudio
+                </span>
+                <h3 class="text-lg sm:text-xl font-bold font-heading text-white truncate mt-1">
+                  ${mediaNode.title}
+                </h3>
+                <p class="text-xs text-slate-400 truncate mt-0.5">
+                  Pastoral da Catequese • Santuário Imaculado Coração de Maria
+                </p>
+              </div>
+            </div>
+
+            <!-- Scrubber e Barra de Progresso Interativa -->
+            <div class="space-y-1.5">
+              <input
+                type="range"
+                id="wiki-audio-scrubber"
+                min="0"
+                max="100"
+                value="0"
+                step="0.1"
+                class="wiki-audio-scrubber"
+                title="Arraste para avançar ou retroceder no áudio"
+              />
+              <div class="flex items-center justify-between text-xs text-slate-400 font-mono">
+                <span id="wiki-audio-cur-time">00:00</span>
+                <span id="wiki-audio-dur-time">--:--</span>
+              </div>
+            </div>
+
+            <!-- Painel de Controles: Play, Seek, Velocidade e Volume -->
+            <div class="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-slate-800">
+              <!-- Botões Principais de Reprodução -->
+              <div class="flex items-center gap-3">
+                <button
+                  type="button"
+                  onclick="window.WikiKB.seekAudio(-10)"
+                  class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center text-xs font-bold transition border border-slate-700 active:scale-95 cursor-pointer"
+                  title="Voltar 10 segundos"
+                >
+                  -10s
+                </button>
+
+                <button
+                  type="button"
+                  id="wiki-audio-play-btn"
+                  onclick="window.WikiKB.toggleAudioPlay()"
+                  class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black text-sm flex items-center gap-2 shadow-lg transition active:scale-95 cursor-pointer font-heading"
+                >
+                  <span id="wiki-audio-play-icon">▶</span>
+                  <span id="wiki-audio-play-label">Reproduzir</span>
+                </button>
+
+                <button
+                  type="button"
+                  onclick="window.WikiKB.seekAudio(10)"
+                  class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center text-xs font-bold transition border border-slate-700 active:scale-95 cursor-pointer"
+                  title="Avançar 10 segundos"
+                >
+                  +10s
+                </button>
+              </div>
+
+              <!-- Controle de Velocidade -->
+              <div class="flex items-center gap-1.5">
+                <span class="text-[11px] font-bold text-slate-400 hidden sm:inline">Velocidade:</span>
+                <button onclick="window.WikiKB.setAudioPlaybackRate(1.0)" class="wiki-audio-speed-btn wiki-speed-btn active" data-rate="1">1x</button>
+                <button onclick="window.WikiKB.setAudioPlaybackRate(1.25)" class="wiki-audio-speed-btn wiki-speed-btn" data-rate="1.25">1.25x</button>
+                <button onclick="window.WikiKB.setAudioPlaybackRate(1.5)" class="wiki-audio-speed-btn wiki-speed-btn" data-rate="1.5">1.5x</button>
+                <button onclick="window.WikiKB.setAudioPlaybackRate(2.0)" class="wiki-audio-speed-btn wiki-speed-btn" data-rate="2">2x</button>
+              </div>
+
+              <!-- Mute & Download -->
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  id="wiki-audio-mute-btn"
+                  onclick="window.WikiKB.toggleAudioMute()"
+                  class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition border border-slate-700 cursor-pointer"
+                  title="Silenciar / Ativar Som"
+                >
+                  🔊
+                </button>
+                <a
+                  href="${mediaNode.mediaUrl}"
+                  download
+                  target="_blank"
+                  class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center gap-1.5 border border-slate-700 shadow-2xs cursor-pointer"
+                  title="Baixar MP3"
+                >
+                  <span>📥</span> <span>Baixar Áudio</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      // --- VISUALIZADOR DE APRESENTAÇÃO PPTX ---
+      else if (isPpt) {
+        const encodedUrl = encodeURIComponent(mediaNode.mediaUrl);
+        const officeEmbed = `https://view.officeapps.live.com/op/embed.aspx?src=${encodedUrl}`;
+
+        playerHtml = `
+          <div class="space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-100 p-3 rounded-2xl border border-slate-200 text-xs">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-slate-700">Visualizador ativo:</span>
+                <span id="wiki-ppt-provider-label" class="bg-white px-2.5 py-1 rounded-lg border border-slate-300 font-semibold text-slate-800">
+                  Microsoft Office Online
+                </span>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  onclick="window.WikiKB.togglePptProvider('${mediaNode.mediaUrl}')"
+                  class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-200 text-slate-800 font-bold border border-slate-300 shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
+                  title="Alternar entre Microsoft Office Viewer e Google Docs Viewer"
+                >
+                  <span>🔄</span> <span>Alternar Visualizador</span>
+                </button>
+                <button
+                  type="button"
+                  onclick="window.WikiKB.toggleIframeFullscreen('wiki-ppt-iframe')"
+                  class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
+                  title="Tela cheia"
+                >
+                  <span>⛶</span> <span>Tela Cheia</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Container do Iframe -->
+            <div id="wiki-ppt-container" class="w-full h-[580px] bg-slate-900 rounded-3xl overflow-hidden border border-slate-200 shadow-xl relative">
               <iframe
-                src="${embedUrl}"
+                id="wiki-ppt-iframe"
+                src="${officeEmbed}"
                 class="w-full h-full border-0"
-                title="Pré-visualização do Slide"
+                title="Pré-visualização da Apresentação"
+                allowfullscreen="true"
                 loading="lazy"
               ></iframe>
             </div>
+
             <div class="flex items-center justify-between text-xs text-slate-500 px-2">
-              <span>Visualizador oficial Microsoft Office Online</span>
+              <span>Caso a prévia não carregue na sua rede, utilize o botão de download direto.</span>
               <a href="${mediaNode.mediaUrl}" download target="_blank" class="font-bold text-amber-700 hover:underline">
-                Baixar arquivo original (${mediaNode.extension ? mediaNode.extension.toUpperCase() : 'PPTX'}) ↓
+                Baixar arquivo original (${mediaNode.extension ? mediaNode.extension.toUpperCase() : 'PPTX'} ${fileSizeStr}) ↓
               </a>
             </div>
           </div>
@@ -1232,34 +1418,229 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
         <article class="bg-white rounded-3xl border border-slate-200/90 shadow-sm p-6 sm:p-8 space-y-6 animate-in fade-in duration-200">
           <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
             <div>
-              <span class="text-[10.5px] uppercase font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full font-heading">
-                ${mediaNode.type === 'presentation' ? 'Apresentação de Slides' : 'Arquivo de Mídia'}
-              </span>
-              <h2 class="text-2xl font-bold font-heading text-slate-900 mt-1">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-[10.5px] uppercase font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full font-heading">
+                  ${mediaNode.type === 'presentation' ? 'Apresentação de Slides' : (isVideo ? 'Vídeo Oficial' : 'Áudio Pastoral')}
+                </span>
+                ${etapaBadge}
+                ${fileSizeStr ? `<span class="text-xs text-slate-400 font-medium">• ${fileSizeStr}</span>` : ''}
+              </div>
+              <h2 class="text-2xl font-bold font-heading text-slate-900">
                 ${mediaNode.title}
               </h2>
             </div>
 
-            <a
-              href="${mediaNode.mediaUrl}"
-              target="_blank"
-              download
-              class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center gap-2 shadow-xs cursor-pointer"
-            >
-              <span>📥</span> <span>Baixar Arquivo</span>
-            </a>
+            <div class="flex items-center gap-2 no-print">
+              <button
+                onclick="window.WikiKB.copyLink('${mediaNode.id}')"
+                class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                title="Copiar link"
+              >
+                <span>🔗</span> <span>Copiar Link</span>
+              </button>
+              <a
+                href="${mediaNode.mediaUrl}"
+                target="_blank"
+                download
+                class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center gap-2 shadow-xs cursor-pointer"
+              >
+                <span>📥</span> <span>Baixar Arquivo</span>
+              </a>
+            </div>
           </div>
 
           ${playerHtml}
 
           ${mediaNode.description ? `
-            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs sm:text-sm text-slate-600 leading-relaxed">
-              <strong class="text-slate-800 block mb-1">Notas do Catequista / Coordenação:</strong>
-              ${mediaNode.description}
+            <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 text-xs sm:text-sm text-slate-600 leading-relaxed space-y-1">
+              <strong class="text-slate-900 font-heading block text-sm">Orientações do Material:</strong>
+              <p>${mediaNode.description}</p>
             </div>
           ` : ''}
         </article>
       `;
+
+      // Inicializa eventos do áudio customizado se for áudio
+      if (isAudio) {
+        setTimeout(() => this.initCustomAudioPlayer(), 50);
+      }
+    },
+
+    // --- CONTROLES DE ÁUDIO CUSTOMIZADO ---
+    initCustomAudioPlayer: function () {
+      const audio = document.getElementById('wiki-active-audio');
+      const scrubber = document.getElementById('wiki-audio-scrubber');
+      const curTime = document.getElementById('wiki-audio-cur-time');
+      const durTime = document.getElementById('wiki-audio-dur-time');
+      if (!audio) return;
+
+      const formatTime = sec => {
+        if (!sec || isNaN(sec)) return '00:00';
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60);
+        return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+      };
+
+      audio.addEventListener('loadedmetadata', () => {
+        if (durTime) durTime.textContent = formatTime(audio.duration);
+      });
+
+      audio.addEventListener('timeupdate', () => {
+        if (curTime) curTime.textContent = formatTime(audio.currentTime);
+        if (scrubber && audio.duration) {
+          scrubber.value = (audio.currentTime / audio.duration) * 100;
+        }
+      });
+
+      audio.addEventListener('ended', () => {
+        const playBtn = document.getElementById('wiki-audio-play-label');
+        const playIcon = document.getElementById('wiki-audio-play-icon');
+        if (playBtn) playBtn.textContent = 'Reproduzir';
+        if (playIcon) playIcon.textContent = '▶';
+        if (scrubber) scrubber.value = 0;
+      });
+
+      if (scrubber) {
+        scrubber.addEventListener('input', e => {
+          if (audio.duration) {
+            audio.currentTime = (e.target.value / 100) * audio.duration;
+          }
+        });
+      }
+    },
+
+    toggleAudioPlay: function () {
+      const audio = document.getElementById('wiki-active-audio');
+      const playBtn = document.getElementById('wiki-audio-play-label');
+      const playIcon = document.getElementById('wiki-audio-play-icon');
+      if (!audio) return;
+
+      if (audio.paused) {
+        audio.play().then(() => {
+          if (playBtn) playBtn.textContent = 'Pausar';
+          if (playIcon) playIcon.textContent = '⏸';
+        }).catch(console.warn);
+      } else {
+        audio.pause();
+        if (playBtn) playBtn.textContent = 'Reproduzir';
+        if (playIcon) playIcon.textContent = '▶';
+      }
+    },
+
+    seekAudio: function (seconds) {
+      const audio = document.getElementById('wiki-active-audio');
+      if (!audio) return;
+      audio.currentTime = Math.max(0, Math.min(audio.currentTime + seconds, audio.duration || 0));
+    },
+
+    setAudioPlaybackRate: function (rate) {
+      const audio = document.getElementById('wiki-active-audio');
+      if (audio) audio.playbackRate = rate;
+
+      document.querySelectorAll('.wiki-audio-speed-btn').forEach(btn => {
+        if (parseFloat(btn.getAttribute('data-rate')) === rate) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+    },
+
+    toggleAudioMute: function () {
+      const audio = document.getElementById('wiki-active-audio');
+      const btn = document.getElementById('wiki-audio-mute-btn');
+      if (!audio) return;
+      audio.muted = !audio.muted;
+      if (btn) btn.textContent = audio.muted ? '🔇' : '🔊';
+    },
+
+    // --- CONTROLES DE VÍDEO ---
+    setVideoPlaybackRate: function (rate) {
+      const video = document.getElementById('wiki-active-video');
+      if (video) video.playbackRate = rate;
+
+      document.querySelectorAll('.wiki-video-speed-btn').forEach(btn => {
+        if (parseFloat(btn.getAttribute('data-rate')) === rate) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+    },
+
+    toggleVideoFullscreen: function () {
+      const video = document.getElementById('wiki-active-video');
+      if (!video) return;
+      if (video.requestFullscreen) {
+        video.requestFullscreen();
+      } else if (video.webkitRequestFullscreen) {
+        video.webkitRequestFullscreen();
+      }
+    },
+
+    // --- CONTROLES DE PPTX (DUAL-VIEWER & FULLSCREEN) ---
+    currentPptProvider: 'office',
+    togglePptProvider: function (fileUrl) {
+      const iframe = document.getElementById('wiki-ppt-iframe');
+      const label = document.getElementById('wiki-ppt-provider-label');
+      if (!iframe) return;
+
+      const encoded = encodeURIComponent(fileUrl);
+      if (this.currentPptProvider === 'office') {
+        this.currentPptProvider = 'google';
+        iframe.src = `https://docs.google.com/viewer?url=${encoded}&embedded=true`;
+        if (label) label.textContent = 'Google Docs Viewer';
+      } else {
+        this.currentPptProvider = 'office';
+        iframe.src = `https://view.officeapps.live.com/op/embed.aspx?src=${encoded}`;
+        if (label) label.textContent = 'Microsoft Office Online';
+      }
+    },
+
+    toggleIframeFullscreen: function (iframeId) {
+      const el = document.getElementById(iframeId);
+      if (!el) return;
+      if (el.requestFullscreen) el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    },
+
+    // --- MODAL LIGHTBOX DE IMAGENS ---
+    openImageLightbox: function (src, caption) {
+      let lightbox = document.getElementById('wiki-image-lightbox');
+      if (!lightbox) {
+        lightbox = document.createElement('div');
+        lightbox.id = 'wiki-image-lightbox';
+        lightbox.className = 'fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-4 transition-opacity duration-200';
+        lightbox.innerHTML = `
+          <button
+            onclick="window.WikiKB.closeImageLightbox()"
+            class="absolute top-5 right-5 w-11 h-11 rounded-2xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-lg transition border border-white/20 shadow-lg cursor-pointer"
+            title="Fechar (Esc)"
+          >
+            ✕
+          </button>
+          <img id="wiki-lightbox-img-el" src="" alt="Ampliação" class="wiki-lightbox-img" />
+          <p id="wiki-lightbox-caption" class="text-xs text-slate-300 mt-3 text-center max-w-2xl px-4"></p>
+        `;
+        lightbox.addEventListener('click', e => {
+          if (e.target === lightbox || e.target.id === 'wiki-lightbox-img-el') {
+            window.WikiKB.closeImageLightbox();
+          }
+        });
+        document.body.appendChild(lightbox);
+      }
+
+      const imgEl = document.getElementById('wiki-lightbox-img-el');
+      const capEl = document.getElementById('wiki-lightbox-caption');
+      if (imgEl) imgEl.src = src;
+      if (capEl) capEl.textContent = caption || '';
+
+      lightbox.classList.remove('hidden');
+    },
+
+    closeImageLightbox: function () {
+      const lightbox = document.getElementById('wiki-image-lightbox');
+      if (lightbox) lightbox.classList.add('hidden');
     },
 
     // ========================================================================
@@ -1367,6 +1748,13 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
           this.activeNodeId = id;
         }
       }
+
+      // Fecha o lightbox de imagem com a tecla Esc
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+          this.closeImageLightbox();
+        }
+      });
     }
   };
 

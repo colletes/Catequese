@@ -44,29 +44,31 @@ Estamos criando uma **Base de Conhecimento (estilo Confluence)** para os catequi
 
 ## 📊 4. Estado Atual do Projeto
 
-- **Fase**: Incremento 2 Concluído com sucesso.
+- **Fase**: Incremento 3 Concluído com sucesso.
 - **Roadmap**: Roteiro com 6 incrementos testáveis (ver [roadmap.md](file:///Users/thiagocarvalho/Public/Catequese/roadmap.md)).
-- **Último Incremento Concluído**: **Incremento 2** (01/10/2026) — Persistência no Cloud Firestore (`knowledge_nodes`), serviço `knowledge-service.js`, cache offline local, atualização em tempo real (`onSnapshot`), regra de segurança no `firestore.rules` (leitura para catequistas autenticados, escrita para coordenação/admin) e botão de inicialização com merge construtivo.
-- **Próximo Incremento a Executar**: **Incremento 3** (Visualizador Multimídia e Player Integrado: player nativo de áudio com scrubber e velocidade, player de vídeo responsivo, preview completo de apresentações PPTX e modal lightbox para imagens dos markdowns).
+- **Último Incremento Concluído**: **Incremento 3** (01/10/2026) — Visualizador Multimídia e Player Integrado: player customizado de áudio (play/pause, seek -10s/+10s, scrubber interativo, tempo decorrido, controle de velocidade 1x/1.25x/1.5x/2x, mute e download), player de vídeo responsivo com tela cheia e velocidades, visualizador de PPTX dual-provider (Microsoft Office Online & Google Docs Viewer com alternador e fullscreen) e modal lightbox para ampliação de imagens nos markdowns.
+- **Próximo Incremento a Executar**: **Incremento 4** (Seção de Referências & Motor Gemini: componente de rodapé enriquecido nos documentos com links automáticos para Vatican.va, Bíblia Online, CIC e Google Livros, além de função client-side integrada com a API Gemini para extração automática com conferência visual antes de salvar).
 
 ---
 
-## 🧪 5. Como Testar o Incremento 2
+## 🧪 5. Como Testar o Incremento 3
 
-1. Abra o site e faça login com seu e-mail pastoral ou Google.
-2. Acesse a aba **Base de Conhecimento**.
-3. Observe o badge no cabeçalho da Wiki:
-   - Se conectado ao Firestore, exibe `☁️ Nuvem Firestore (X itens)` ou `☁️ Firestore Vazio`.
-   - Se offline ou sem conexão, exibe `💾 Cache Local (X itens)`.
-4. Se o Firestore estiver vazio e você for Master Admin (`colletes@gmail.com`) ou Coordenação (`lorenammoraes@gmail.com`), um banner dourado ou o botão `☁️ Sincronizar Firestore` permite enviar o acervo inicial com merge construtivo.
-5. Ao sincronizar, verifique que os dados são salvos na coleção `knowledge_nodes` do Firestore e refletidos em tempo real em todas as sessões abertas.
+1. Abra a **Base de Conhecimento** no site.
+2. Na árvore lateral ou nos cards de pasta, teste os diferentes tipos de mídia:
+   - **Áudio**: abra `Cântico das Criaturas (São Francisco de Assis)` na pasta *Eucaristia I > Módulo 1*. Teste os botões Play/Pause, avançar/retroceder 10s, mudar a velocidade para 1.25x ou 1.5x, arrastar o scrubber e o botão de download.
+   - **Vídeo**: abra `Vídeo: A História dos Sacramentos da Iniciação Cristã` na pasta *Crisma Adultos*. Teste o player de vídeo, botão de tela cheia, controle de velocidade e download.
+   - **Apresentação PPTX**: abra `Apresentação: O Fogo de Pentecostes` na pasta *Crisma Jovem*. Teste a renderização no Office Viewer, o botão "Alternar Visualizador" (Google Docs Viewer) e o botão "Tela Cheia".
+   - **Imagens e Lightbox**: abra qualquer documento Markdown que possua imagem; clique na imagem para abrir o Lightbox ampliado com fundo escuro; feche clicando fora, no botão ✕ ou pressionando `Esc`.
 
 ---
 
-## 🎯 6. Instruções para o Incremento 3 (Visualizador Multimídia)
+## 🎯 6. Instruções para o Incremento 4 (Referências & Motor Gemini)
 
-1. Aprimorar a experiência de execução de arquivos multimídia no visualizador:
-   - **Áudio**: reprodutor customizado com controle de velocidade (1x, 1.25x, 1.5x), barra de progresso interativa e download.
-   - **Vídeo**: reprodutor responsivo com suporte a fullscreen e miniatura de capa.
-   - **PPTX**: visualizador incorporado via iframe do Microsoft Office Online Viewer com link alternativo para download.
-   - **Imagens**: lightbox modal ao clicar em qualquer imagem dentro de um documento Markdown para ampliação em alta resolução.
+1. Implementar o motor de extração inteligente via **Google Gemini**:
+   - Criar modal ou campo de configuração da API Key do Gemini no painel administrativo do site (armazenado com segurança no localStorage/Firestore).
+   - Criar rotina client-side que envia o texto do documento para a API do Gemini com prompt estruturado para reconhecer:
+     - Livro e versículos bíblicos (gerando link para `bibliaonline.com.br` ou Vaticano).
+     - Parágrafos do Catecismo da Igreja Católica (CIC § ... com link direto).
+     - Documentos, encíclicas e concílios do Vaticano (links para `vatican.va`).
+     - Títulos de livros e autores recomendados (links para `google.com/search?tbm=bks&q=...`).
+2. Permitir revisão visual das referências detectadas antes da publicação no documento.
