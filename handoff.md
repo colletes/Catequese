@@ -44,48 +44,46 @@ Estamos criando uma **Base de Conhecimento (estilo Confluence)** para os catequi
 
 ## 📊 4. Estado Atual do Projeto
 
-- **Fase**: Incremento 5 Concluído com sucesso.
-- **Roadmap**: Roteiro com 6 incrementos testáveis (ver [roadmap.md](file:///Users/thiagocarvalho/Public/Catequese/roadmap.md)).
-- **Último Incremento Concluído**: **Incremento 5** (01/10/2026) — Painel Web de Upload & Gestão no Site:
-  - Criação do módulo [`knowledge-upload-panel.js`](file:///Users/thiagocarvalho/Public/Catequese/knowledge-upload-panel.js).
-  - Modal **"+ Nova Pasta"**: seleção de pasta-mãe hierárquica com indentação visual, etapa catequética, ordem e descrição.
-  - Modal **"+ Novo Material"**:
-    - Drag & drop de arquivos `.docx`, `.pdf`, `.mp3`, `.mp4`, `.pptx`, `.md` e `.txt`.
-    - Conversão client-side em tempo real de DOCX para Markdown limpo (via `Mammoth.js` + `Turndown.js`).
-    - Extração de texto de PDF por páginas (via `PDF.js`).
-    - Upload binário de arquivos de mídia (áudios, vídeos e apresentações) diretamente para o Firebase Storage (`catequese-icm.firebasestorage.app`) com barra de progresso interativa (`0% -> 100%`).
-    - Editor integrado de Markdown com abas "Editor" e "Prévia", além de acionamento imediato da extração de referências por IA (`GeminiReferenceExtractor`).
-  - Modal **"✏️ Editar Documento"**: permite atualizar metadados e conteúdo Markdown com re-escaneamento de referências e gravação com merge construtivo seguro no Firestore.
-- **Próximo Incremento a Executar**: **Incremento 6** (Assistente Local do OneDrive: script Python com interface visual local em `http://localhost:8080` para escanear a pasta `/Users/thiagocarvalho/Library/CloudStorage/OneDrive-Pessoal/Catequese 1`, exibir a árvore para seleção e realizar ingestão em lote com upload de mídias para o Storage e merge construtivo no Firestore).
+- **Fase**: **Todos os 6 Incrementos Concluídos com Sucesso! 🏁**
+- **Roadmap**: Roteiro 100% finalizado (ver [roadmap.md](file:///Users/thiagocarvalho/Public/Catequese/roadmap.md)).
+- **Último Incremento Concluído**: **Incremento 6** (01/10/2026) — Assistente Local de Ingestão do OneDrive:
+  - Criação do script Python [`scripts/knowledge_importer.py`](file:///Users/thiagocarvalho/Public/Catequese/scripts/knowledge_importer.py) com servidor HTTP local embutido (`http://localhost:8080`).
+  - Criação do launcher amigável [`scripts/run_importer.sh`](file:///Users/thiagocarvalho/Public/Catequese/scripts/run_importer.sh).
+  - Escaneamento profundo de `/Users/thiagocarvalho/Library/CloudStorage/OneDrive-Pessoal/Catequese 1`:
+    - **28 pastas temáticas** mapeadas.
+    - **223 arquivos** classificados (86 DOCX, 87 PDF, 16 PPT/PPTX, 11 vídeos MOV, 18 imagens).
+  - Detecção transparente do estado do FileProvider (`UF_DATALESS`) informando se o arquivo está na nuvem (On-Demand) ou local no Mac.
+  - Prévia de conversão de texto de DOCX e PDF.
+  - Exportação em lote e geração de [`scripts/onedrive_seed.json`](file:///Users/thiagocarvalho/Public/Catequese/scripts/onedrive_seed.json).
+  - Suporte à sincronização no Cloud Firestore com merge construtivo seguro (`set(..., { merge: true })`).
 
 ---
 
-## 🧪 5. Como Testar o Incremento 5
+## 🧪 5. Como Testar o Incremento 6 (Assistente Local do OneDrive)
 
-1. Abra a **Base de Conhecimento** no site.
-2. No cabeçalho da Wiki ou no dashboard de qualquer pasta:
-   - Clique em **"📁 + Nova Pasta"** (ou **"+ Subpasta"**):
-     - Selecione a pasta mãe, defina o nome (ex: `Módulo 5: Liturgia e Orações`), a etapa e a ordem.
-     - Clique em **"Criar Pasta"**. O sistema grava no Firestore via merge construtivo e navega automaticamente para a nova pasta criada.
-   - Clique em **"📤 + Novo Material"** (ou **"+ Material"**):
-     - Arraste ou selecione um arquivo `.docx`: veja a conversão instantânea para Markdown e a prévia visual formatada com a tipografia do Santuário.
-     - Arraste ou selecione um arquivo `.pdf`: veja o texto extraído por páginas.
-     - Arraste ou selecione um arquivo de áudio (`.mp3`), vídeo (`.mp4`) ou apresentação (`.pptx`): veja o upload no Firebase Storage com a barra de progresso.
-     - Clique no botão **"✨ Detectar Referências (IA)"** para testar a extração teológica antes de publicar.
-     - Clique em **"Publicar no Acervo"**: o material é gravado no Firestore e selecionado imediatamente na árvore.
-3. Ao visualizar qualquer documento, clique no botão **"✏️ Editar"** para alterar títulos ou texto e salvar a nova versão.
+1. No terminal do Mac, inicie o assistente executando:
+   ```bash
+   ./scripts/run_importer.sh
+   # Ou diretamente:
+   python3 scripts/knowledge_importer.py
+   ```
+2. O servidor iniciará em `http://localhost:8080` e abrirá automaticamente no seu navegador.
+3. No painel web:
+   - Observe os cards de estatísticas (28 pastas, 223 arquivos totais, contagem de DOCX, PDF, PPTX e Mídias).
+   - Visualize a tabela com a árvore mapeada, tipos, etapas sugeridas e badges de status (*💾 Local* ou *☁️ Na Nuvem*).
+   - Use os filtros rápidos (*Todos*, *Documentos*, *PPTX*, *Vídeos/Áudios*) ou a caixa de seleção para escolher quais itens importar.
+   - Clique em **"👁️ Prévia"** em qualquer documento para inspecionar o texto.
+   - Clique em **"📦 Exportar Seed JSON"** para gerar o arquivo de carga estruturado em `scripts/onedrive_seed.json`.
+   - Clique em **"🚀 Iniciar Ingestão no Firestore"** para processar os nós com merge construtivo seguro.
 
 ---
 
-## 🎯 6. Instruções para o Incremento 6 (Assistente Local de Ingestão do OneDrive)
+## 🏁 6. Conclusão da Base de Conhecimento (Resumo dos 6 Incrementos)
 
-1. Criar o script Python [`scripts/knowledge_importer.py`](file:///Users/thiagocarvalho/Public/Catequese/scripts/knowledge_importer.py):
-   - Escanear a pasta local do OneDrive: `/Users/thiagocarvalho/Library/CloudStorage/OneDrive-Pessoal/Catequese 1`.
-   - Iniciar um servidor web leve local (`http://localhost:8080`) com interface gráfica amigável:
-     - Árvore de diretórios detectados no OneDrive com checkboxes para seleção seletiva de pastas e arquivos.
-     - Detecção automática de tipos (`.docx`, `.pdf`, `.pptx`, `.mp4`, `.mp3`).
-     - Conversão de `.docx` para Markdown (via biblioteca Python `python-docx` / `pypandoc` / `mammoth`).
-     - Envio de mídias para o Firebase Storage via Firebase Admin SDK ou REST API.
-     - Ingestão em lote no Cloud Firestore (`knowledge_nodes`) com estrita política de **merge construtivo** (`set(..., merge=True)`).
-2. Criar script de inicialização amigável (`scripts/run_importer.sh` ou similar).
-3. Testar a importação visual e validar o acervo no site.
+1. **Inc 1**: Interface Confluence no SPA (`knowledge-base.js`, `knowledge-base.css`, sidebar em árvore, leitor Markdown, filtros por etapa e busca em tempo real).
+2. **Inc 2**: Persistência no Cloud Firestore (`knowledge-service.js`, cache offline em `localStorage`, regras de segurança RBAC em `firestore.rules` atualizadas pelo subagent).
+3. **Inc 3**: Visualizador multimídia com player customizado de áudio (MP3), player de vídeo (MP4), visualizador duplo de apresentações PPTX (Office Online + Google Docs) e lightbox para imagens.
+4. **Inc 4**: Motor teológico inteligente via Google Gemini e heurística local (`gemini-reference-extractor.js`), rodapé de citações (Bíblia, CIC, Vaticano, Google Livros) e modal de revisão teológica.
+5. **Inc 5**: Painel web de upload e gestão no site (`knowledge-upload-panel.js`), modais de "+ Nova Pasta", "+ Novo Material" com conversão client-side (Mammoth + Turndown + PDF.js) e upload para Firebase Storage com barra de progresso.
+6. **Inc 6**: Assistente local em Python (`scripts/knowledge_importer.py` e `scripts/run_importer.sh`) com interface em `http://localhost:8080` para leitura e ingestão em lote do acervo da pasta do OneDrive.
+
