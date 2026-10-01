@@ -465,13 +465,127 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
     searchQuery: '',
     expandedFolders: new Set(['dir-geral', 'dir-eucaristia-1', 'dir-euc1-mod1', 'dir-crisma-jovem', 'dir-crisma-adultos']),
     sidebarCollapsedMobile: false,
+    cloudConnected: false,
+    isFirestoreEmpty: false,
+    isSyncing: false,
+    hasInitializedListener: false,
 
     // Inicialização do módulo
     init: function () {
       console.log('📚 WikiKB: Inicializando Base de Conhecimento...');
+      
+      // Carrega cache local se disponível
+      if (window.KnowledgeService && typeof window.KnowledgeService.getLocalCache === 'function') {
+        const cached = window.KnowledgeService.getLocalCache();
+        if (cached && cached.length > 0) {
+          this.nodes = cached;
+        }
+      }
+
       this.renderTree();
       this.selectNode(this.activeNodeId);
       this.setupEventListeners();
+      this.setupCloudSync();
+      this.updateAdminActionsVisibility();
+    },
+
+    updateAdminActionsVisibility: function () {
+      const canEdit = window.KnowledgeService && typeof window.KnowledgeService.canEdit === 'function' ? window.KnowledgeService.canEdit() : false;
+      const btnSync = document.getElementById('btn-wiki-sync-seed');
+      if (btnSync) {
+        if (canEdit) btnSync.classList.remove('hidden');
+        else btnSync.classList.add('hidden');
+      }
+    },
+
+    setupCloudSync: function () {
+      if (this.hasInitializedListener) return;
+      if (!window.KnowledgeService || typeof window.KnowledgeService.listenNodes !== 'function') return;
+
+      this.hasInitializedListener = true;
+      this.updateCloudStatusBadge('connecting');
+
+      window.KnowledgeService.listenNodes(
+        (remoteNodes, isOnline, isFirestoreEmpty) => {
+          this.cloudConnected = isOnline;
+          this.isFirestoreEmpty = !!isFirestoreEmpty;
+
+          if (isOnline && remoteNodes && remoteNodes.length > 0) {
+            this.nodes = remoteNodes;
+            this.updateCloudStatusBadge('cloud', remoteNodes.length);
+          } else if (isOnline && isFirestoreEmpty) {
+            this.updateCloudStatusBadge('empty', 0);
+          } else {
+            this.updateCloudStatusBadge('offline', this.nodes.length);
+          }
+
+          this.updateAdminActionsVisibility();
+          this.renderTree();
+
+          // Garante re-renderização suave da tela ativa
+          const current = this.getNode(this.activeNodeId);
+          if (current) {
+            this.selectNode(this.activeNodeId);
+          } else {
+            this.selectNode('dir-geral');
+          }
+        },
+        err => {
+          this.cloudConnected = false;
+          this.updateCloudStatusBadge('offline', this.nodes.length);
+        }
+      );
+    },
+
+    updateCloudStatusBadge: function (status, count) {
+      const badge = document.getElementById('wiki-cloud-status-badge');
+      if (!badge) return;
+
+      if (status === 'cloud') {
+        badge.className = 'inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/40 shadow-2xs';
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>Nuvem Firestore (${count} itens)</span>`;
+      } else if (status === 'empty') {
+        badge.className = 'inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-500/40 shadow-2xs';
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span><span>Firestore Vazio</span>`;
+      } else if (status === 'syncing') {
+        badge.className = 'inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-950 text-blue-300 border border-blue-500/40 shadow-2xs';
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping"></span><span>Sincronizando Nuvem...</span>`;
+      } else if (status === 'connecting') {
+        badge.className = 'inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shadow-2xs';
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span><span>Conectando Firestore...</span>`;
+      } else {
+        badge.className = 'inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shadow-2xs';
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span><span>Cache Local (${count || this.nodes.length} itens)</span>`;
+      }
+    },
+
+    syncSeedToFirestore: async function () {
+      if (!window.KnowledgeService || !window.KnowledgeService.canEdit()) {
+        alert('Acesso restrito à Coordenação Geral e Master Admin para sincronizar a base no banco de dados.');
+        return;
+      }
+
+      const proceed = confirm(
+        '🌱 Sincronização do Acervo Oficial da Catequese\n\n' +
+        'Deseja enviar a estrutura completa de pastas, diretrizes e encontros para o Cloud Firestore?\n\n' +
+        '• Estratégia de Merge Construtivo: grava os registros preservando dados já existentes sem perda de informação.\n' +
+        '• Total de nós semente: ' + INITIAL_WIKI_NODES.length + ' pastas e materiais.'
+      );
+      if (!proceed) return;
+
+      try {
+        this.isSyncing = true;
+        this.updateCloudStatusBadge('syncing');
+        await window.KnowledgeService.seedToFirestore(INITIAL_WIKI_NODES);
+        alert('✅ Acervo da Catequese sincronizado com sucesso no Cloud Firestore!');
+        this.isFirestoreEmpty = false;
+      } catch (err) {
+        console.error('Erro na sincronização:', err);
+        alert('❌ Não foi possível sincronizar no momento:\n' + err.message);
+        this.updateCloudStatusBadge('cloud', this.nodes.length);
+      } finally {
+        this.isSyncing = false;
+      }
     },
 
     // Retorna nó por ID
@@ -896,8 +1010,29 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
         }).join('');
       }
 
+      const emptyFirestoreBanner = (this.isFirestoreEmpty && window.KnowledgeService && typeof window.KnowledgeService.canEdit === 'function' && window.KnowledgeService.canEdit()) ? `
+        <div class="p-4 sm:p-5 rounded-2xl bg-amber-50 border-2 border-amber-300 text-amber-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+          <div class="flex items-start gap-3">
+            <span class="text-3xl flex-shrink-0">☁️</span>
+            <div>
+              <h4 class="text-xs sm:text-sm font-bold font-heading text-amber-950">Banco de Dados Conectado (Coleção Nova no Firestore)</h4>
+              <p class="text-[11.5px] text-amber-900 mt-0.5 leading-relaxed">
+                A coleção <code>knowledge_nodes</code> no Cloud Firestore está ativa e aguardando a sincronização inicial. Como membro da Coordenação, você pode publicar o acervo com um clique usando merge construtivo seguro.
+              </p>
+            </div>
+          </div>
+          <button
+            onclick="window.WikiKB.syncSeedToFirestore()"
+            class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2 flex-shrink-0 cursor-pointer"
+          >
+            <span>🌱</span> <span>Inicializar Acervo em Nuvem</span>
+          </button>
+        </div>
+      ` : '';
+
       viewer.innerHTML = `
         <div class="space-y-6 animate-in fade-in duration-200">
+          ${emptyFirestoreBanner}
           <!-- Header do Folder -->
           <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white rounded-3xl p-6 sm:p-7 shadow-md relative overflow-hidden border border-emerald-500/20">
             <div class="absolute right-0 top-0 bottom-0 w-1/3 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-emerald-500/10 via-transparent to-transparent pointer-events-none"></div>

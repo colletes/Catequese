@@ -34,8 +34,9 @@
 
   <!-- Marked.js (Renderização de Markdown na Base de Conhecimento) -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <!-- Estilos e Módulo da Base de Conhecimento (Wiki Confluence) -->
+  <!-- Estilos e Módulos da Base de Conhecimento (Wiki Confluence) -->
   <link rel="stylesheet" href="knowledge-base.css">
+  <script src="knowledge-service.js"></script>
   <script src="knowledge-base.js"></script>
   
   <!-- Tipografia Oficial do Santuário (Questrial, Nunito, Marcellus, Outfit, Roboto) -->
@@ -3972,8 +3973,9 @@
               <span class="inline-flex items-center gap-1.5 bg-emerald-900/80 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full font-heading">
                 <span>📚</span> <span>Base de Conhecimento da Catequese</span>
               </span>
-              <span class="text-xs text-amber-400 font-semibold hidden sm:inline-flex items-center gap-1">
-                • Estilo Confluence
+              <span id="wiki-cloud-status-badge" class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shadow-2xs">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                <span>Conectando Firestore...</span>
               </span>
             </div>
             <h2 class="text-2xl sm:text-3xl font-black font-heading text-white tracking-tight">
@@ -3986,6 +3988,15 @@
 
           <!-- Ações Rápidas do Cabeçalho da Wiki -->
           <div class="flex items-center gap-2 flex-wrap flex-shrink-0 self-start md:self-auto">
+            <button
+              id="btn-wiki-sync-seed"
+              type="button"
+              onclick="window.WikiKB.syncSeedToFirestore()"
+              class="hidden px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer"
+              title="Sincronizar acervo padrão com Firestore em nuvem"
+            >
+              <span>☁️</span> <span>Sincronizar Firestore</span>
+            </button>
             <button
               type="button"
               onclick="window.WikiKB.expandAll()"

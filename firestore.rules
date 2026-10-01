@@ -94,5 +94,11 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow write: if isCoordOrAdmin();
     }
+
+    // Base de Conhecimento (Wiki da Catequese — Árvore de Pastas, Documentos e Materiais)
+    match /knowledge_nodes/{nodeId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isCoordOrAdmin();
+    }
   }
 }
