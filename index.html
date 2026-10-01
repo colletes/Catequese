@@ -26,18 +26,29 @@
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-storage-compat.js"></script>
 
   <!-- Configuração do Firebase & Governança LGPD -->
   <script src="firebase-config.js"></script>
   <!-- Base Oficial de Catequistas com Fotos 3x4 Protegidas por LGPD -->
   <script src="catequistas-data.js"></script>
 
-  <!-- Marked.js (Renderização de Markdown na Base de Conhecimento) -->
+  <!-- Marked.js, Turndown.js, Mammoth.js & PDF.js (Processamento de Conteúdo e Conversão) -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/turndown/7.1.2/turndown.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    if (typeof pdfjsLib !== 'undefined') {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  </script>
+
   <!-- Estilos e Módulos da Base de Conhecimento (Wiki Confluence) -->
   <link rel="stylesheet" href="knowledge-base.css">
   <script src="knowledge-service.js"></script>
   <script src="gemini-reference-extractor.js"></script>
+  <script src="knowledge-upload-panel.js"></script>
   <script src="knowledge-base.js"></script>
   
   <!-- Tipografia Oficial do Santuário (Questrial, Nunito, Marcellus, Outfit, Roboto) -->
@@ -4006,6 +4017,24 @@
               title="Configurar chave da API Google Gemini para extração inteligente de referências teológicas"
             >
               <span>✨</span> <span>Chave Gemini (IA)</span>
+            </button>
+            <button
+              id="btn-wiki-new-folder"
+              type="button"
+              onclick="window.KnowledgeUploadPanel && window.KnowledgeUploadPanel.openCreateFolderModal()"
+              class="px-3 py-1.5 rounded-xl bg-emerald-700/80 hover:bg-emerald-600 text-white border border-emerald-500/40 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+              title="Criar uma nova pasta temática no acervo"
+            >
+              <span>📁</span> <span>+ Nova Pasta</span>
+            </button>
+            <button
+              id="btn-wiki-upload-material"
+              type="button"
+              onclick="window.KnowledgeUploadPanel && window.KnowledgeUploadPanel.openUploadMaterialModal()"
+              class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs transition flex items-center gap-1.5 shadow-md cursor-pointer"
+              title="Adicionar novo material (DOCX, PDF, Apresentação ou Mídia)"
+            >
+              <span>📤</span> <span>+ Novo Material</span>
             </button>
             <button
               type="button"

@@ -12,8 +12,8 @@ Este documento registra a quebra do projeto em **incrementos testáveis e de alt
 | **Inc 2** | **Persistência Firestore & Regras de Acesso**: Serviço `knowledge-service.js`, schema de nós, cache e regras RBAC | 🟢 Concluído | 01/10/2026 |
 | **Inc 3** | **Visualizador Multimídia**: Players embutidos de Áudio e Vídeo, visualizador de PPTX e lightbox de imagens | 🟢 Concluído | 01/10/2026 |
 | **Inc 4** | **Seção de Referências & Motor Gemini**: Identificação de citações bíblicas, CIC, Vaticano.va e Google Livros com revisão | 🟢 Concluído | 01/10/2026 |
-| **Inc 5** | **Painel Web de Upload & Gestão**: Modal de upload (PDF/DOCX/mídias), conversão cliente e criação de pastas para Coordenação | 🟡 Próximo (Em foco) | — |
-| **Inc 6** | **Assistente Local do OneDrive**: Script Python com interface visual local para importação em lote da pasta `Catequese 1` | ⚪ Aguardando Inc 5 | — |
+| **Inc 5** | **Painel Web de Upload & Gestão**: Modal de upload (PDF/DOCX/mídias), conversão cliente e criação de pastas para Coordenação | 🟢 Concluído | 01/10/2026 |
+| **Inc 6** | **Assistente Local do OneDrive**: Script Python com interface visual local para importação em lote da pasta `Catequese 1` | 🟡 Próximo (Em foco) | — |
 
 ---
 

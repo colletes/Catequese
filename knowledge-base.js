@@ -1050,19 +1050,40 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
                 ${desc}
               </p>
 
-              <!-- Mini Stats -->
-              <div class="mt-4 pt-3 border-t border-slate-700/60 flex flex-wrap items-center gap-4 text-xs text-slate-300">
-                <span class="flex items-center gap-1.5">
-                  <span class="text-amber-400 font-bold">${folderCount}</span> pastas
-                </span>
-                <span>•</span>
-                <span class="flex items-center gap-1.5">
-                  <span class="text-emerald-400 font-bold">${docCount}</span> documentos
-                </span>
-                <span>•</span>
-                <span class="flex items-center gap-1.5">
-                  <span class="text-blue-400 font-bold">${mediaCount}</span> arquivos de mídia
-                </span>
+              <!-- Mini Stats & Ações Rápidas da Pasta -->
+              <div class="mt-4 pt-3 border-t border-slate-700/60 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-300">
+                <div class="flex flex-wrap items-center gap-3">
+                  <span class="flex items-center gap-1.5">
+                    <span class="text-amber-400 font-bold">${folderCount}</span> pastas
+                  </span>
+                  <span>•</span>
+                  <span class="flex items-center gap-1.5">
+                    <span class="text-emerald-400 font-bold">${docCount}</span> documentos
+                  </span>
+                  <span>•</span>
+                  <span class="flex items-center gap-1.5">
+                    <span class="text-blue-400 font-bold">${mediaCount}</span> arquivos de mídia
+                  </span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onclick="window.KnowledgeUploadPanel && window.KnowledgeUploadPanel.openUploadMaterialModal('${folderId || ''}')"
+                    class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                    title="Adicionar material dentro desta pasta"
+                  >
+                    <span>📤</span> <span>+ Material</span>
+                  </button>
+                  <button
+                    type="button"
+                    onclick="window.KnowledgeUploadPanel && window.KnowledgeUploadPanel.openCreateFolderModal('${folderId || ''}')"
+                    class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                    title="Criar uma subpasta dentro desta pasta"
+                  >
+                    <span>📁</span> <span>+ Subpasta</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -1133,6 +1154,14 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
                   title="Extrair referências teológicas (Bíblia, CIC, Vaticano) com Inteligência Artificial Gemini"
                 >
                   <span>✨</span> <span>Extrair Referências (IA)</span>
+                </button>
+                <button
+                  type="button"
+                  onclick="window.KnowledgeUploadPanel && window.KnowledgeUploadPanel.openEditDocumentModal(window.WikiKB.getNode('${docNode.id}'))"
+                  class="px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  title="Editar informações ou conteúdo deste documento"
+                >
+                  <span>✏️</span> <span>Editar</span>
                 </button>
                 <button
                   type="button"

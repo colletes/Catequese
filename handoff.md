@@ -44,45 +44,48 @@ Estamos criando uma **Base de Conhecimento (estilo Confluence)** para os catequi
 
 ## 📊 4. Estado Atual do Projeto
 
-- **Fase**: Incremento 4 Concluído com sucesso.
+- **Fase**: Incremento 5 Concluído com sucesso.
 - **Roadmap**: Roteiro com 6 incrementos testáveis (ver [roadmap.md](file:///Users/thiagocarvalho/Public/Catequese/roadmap.md)).
-- **Último Incremento Concluído**: **Incremento 4** (01/10/2026) — Seção de Referências & Motor Gemini:
-  - Módulo `gemini-reference-extractor.js` com mapeamento teológico completo (encíclicas, concílios, exortações apostólicas e livros bíblicos).
-  - Suporte à API Google Gemini (`gemini-1.5-flash`) com chave configurável via modal e fallback de heurística de alta fidelidade sem necessidade de chave externa.
-  - Seção de rodapé enriquecida com cards categorizados (Bíblia, CIC, Vaticano, Google Livros).
-  - Modal de revisão das referências antes de salvar no Cloud Firestore (merge construtivo seguro).
-  - Botão de extração por IA no cabeçalho do documento e no rodapé, além de atalho de chave API no topo da Wiki.
-- **Próximo Incremento a Executar**: **Incremento 5** (Painel Web de Upload & Gestão no Site: modais de "+ Nova Pasta" e "+ Novo Material" para a Coordenação, upload de PDF/DOCX com conversão cliente para Markdown, e upload de mídias/imagens para o Firebase Storage).
+- **Último Incremento Concluído**: **Incremento 5** (01/10/2026) — Painel Web de Upload & Gestão no Site:
+  - Criação do módulo [`knowledge-upload-panel.js`](file:///Users/thiagocarvalho/Public/Catequese/knowledge-upload-panel.js).
+  - Modal **"+ Nova Pasta"**: seleção de pasta-mãe hierárquica com indentação visual, etapa catequética, ordem e descrição.
+  - Modal **"+ Novo Material"**:
+    - Drag & drop de arquivos `.docx`, `.pdf`, `.mp3`, `.mp4`, `.pptx`, `.md` e `.txt`.
+    - Conversão client-side em tempo real de DOCX para Markdown limpo (via `Mammoth.js` + `Turndown.js`).
+    - Extração de texto de PDF por páginas (via `PDF.js`).
+    - Upload binário de arquivos de mídia (áudios, vídeos e apresentações) diretamente para o Firebase Storage (`catequese-icm.firebasestorage.app`) com barra de progresso interativa (`0% -> 100%`).
+    - Editor integrado de Markdown com abas "Editor" e "Prévia", além de acionamento imediato da extração de referências por IA (`GeminiReferenceExtractor`).
+  - Modal **"✏️ Editar Documento"**: permite atualizar metadados e conteúdo Markdown com re-escaneamento de referências e gravação com merge construtivo seguro no Firestore.
+- **Próximo Incremento a Executar**: **Incremento 6** (Assistente Local do OneDrive: script Python com interface visual local em `http://localhost:8080` para escanear a pasta `/Users/thiagocarvalho/Library/CloudStorage/OneDrive-Pessoal/Catequese 1`, exibir a árvore para seleção e realizar ingestão em lote com upload de mídias para o Storage e merge construtivo no Firestore).
 
 ---
 
-## 🧪 5. Como Testar o Incremento 4
+## 🧪 5. Como Testar o Incremento 5
 
 1. Abra a **Base de Conhecimento** no site.
-2. Navegue até qualquer documento de texto (ex: `Apresentação e Roteiro Geral da 1ª Etapa` ou `Roteiro 01: O Encontro com a Palavra Viva`).
-3. Observe no rodapé do documento a seção **"Fontes & Referências Citadas"**:
-   - Cada referência possui badge colorido (Bíblia, CIC, Vaticano, Google Livros), título da fonte e resumo teológico.
-   - Clicar em qualquer card abre a fonte oficial em nova aba (ex: Bíblia Online, site do Vaticano ou Google Livros).
-4. No cabeçalho do documento, clique no botão roxo **"✨ Extrair Referências (IA)"** (ou no rodapé em **"✨ Revisar Fontes com IA"**):
-   - Abre-se o modal de revisão teológica.
-   - O extrator processa o documento usando a API Gemini (se chave configurada) ou a heurística local de expressões bíblicas/eclesiais.
-   - Os resultados são listados de forma clara e visual.
-   - Caso o usuário seja Coordenador/Admin, clicar em **"💾 Salvar Referências no Documento"** persiste as alterações no Firestore via merge seguro.
-5. No cabeçalho da Wiki, clique no botão **"✨ Chave Gemini (IA)"** para abrir o modal de configuração de chave da API do Google Gemini.
+2. No cabeçalho da Wiki ou no dashboard de qualquer pasta:
+   - Clique em **"📁 + Nova Pasta"** (ou **"+ Subpasta"**):
+     - Selecione a pasta mãe, defina o nome (ex: `Módulo 5: Liturgia e Orações`), a etapa e a ordem.
+     - Clique em **"Criar Pasta"**. O sistema grava no Firestore via merge construtivo e navega automaticamente para a nova pasta criada.
+   - Clique em **"📤 + Novo Material"** (ou **"+ Material"**):
+     - Arraste ou selecione um arquivo `.docx`: veja a conversão instantânea para Markdown e a prévia visual formatada com a tipografia do Santuário.
+     - Arraste ou selecione um arquivo `.pdf`: veja o texto extraído por páginas.
+     - Arraste ou selecione um arquivo de áudio (`.mp3`), vídeo (`.mp4`) ou apresentação (`.pptx`): veja o upload no Firebase Storage com a barra de progresso.
+     - Clique no botão **"✨ Detectar Referências (IA)"** para testar a extração teológica antes de publicar.
+     - Clique em **"Publicar no Acervo"**: o material é gravado no Firestore e selecionado imediatamente na árvore.
+3. Ao visualizar qualquer documento, clique no botão **"✏️ Editar"** para alterar títulos ou texto e salvar a nova versão.
 
 ---
 
-## 🎯 6. Instruções para o Incremento 5 (Painel Web de Upload & Gestão no Site)
+## 🎯 6. Instruções para o Incremento 6 (Assistente Local de Ingestão do OneDrive)
 
-1. **Ações para Coordenadores/Admin**:
-   - Adicionar botões "+ Nova Pasta" e "+ Novo Material" (visíveis condicionalmente para coordenadores autenticados).
-2. **Modal "+ Nova Pasta"**:
-   - Campos: Título, Descrição, Pasta Mãe (select com a árvore atual) e Etapa (Geral, Pré, Eucaristia I/II, Crisma Jovem/Adultos).
-   - Salvar no Firestore via `KnowledgeService.saveNode(...)`.
-3. **Modal "+ Novo Material"**:
-   - Drag & drop / seleção de arquivos:
-     - DOCX: conversão em Markdown no cliente (utilizando biblioteca leve como `mammoth.js` via CDN) e extração de imagens.
-     - PDF: extração de texto estruturado.
-     - Áudio/Vídeo/PPTX: upload binário para o Firebase Storage (`catequese-icm.firebasestorage.app`) com obtenção da URL de download e criação do nó no Firestore.
-   - Campo para edição prévia do Markdown e título antes da publicação.
-   - Botão para acionar extração de referências automática já integrado ao fluxo de upload.
+1. Criar o script Python [`scripts/knowledge_importer.py`](file:///Users/thiagocarvalho/Public/Catequese/scripts/knowledge_importer.py):
+   - Escanear a pasta local do OneDrive: `/Users/thiagocarvalho/Library/CloudStorage/OneDrive-Pessoal/Catequese 1`.
+   - Iniciar um servidor web leve local (`http://localhost:8080`) com interface gráfica amigável:
+     - Árvore de diretórios detectados no OneDrive com checkboxes para seleção seletiva de pastas e arquivos.
+     - Detecção automática de tipos (`.docx`, `.pdf`, `.pptx`, `.mp4`, `.mp3`).
+     - Conversão de `.docx` para Markdown (via biblioteca Python `python-docx` / `pypandoc` / `mammoth`).
+     - Envio de mídias para o Firebase Storage via Firebase Admin SDK ou REST API.
+     - Ingestão em lote no Cloud Firestore (`knowledge_nodes`) com estrita política de **merge construtivo** (`set(..., merge=True)`).
+2. Criar script de inicialização amigável (`scripts/run_importer.sh` ou similar).
+3. Testar a importação visual e validar o acervo no site.
