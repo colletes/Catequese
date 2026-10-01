@@ -1125,8 +1125,17 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
               </div>
 
               <!-- Ações do Documento -->
-              <div class="flex items-center gap-2 no-print">
+              <div class="flex items-center gap-2 no-print flex-wrap">
                 <button
+                  type="button"
+                  onclick="window.GeminiReferenceExtractor && window.GeminiReferenceExtractor.openReviewModalForCurrentDoc(window.WikiKB.getNode('${docNode.id}'))"
+                  class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  title="Extrair referências teológicas (Bíblia, CIC, Vaticano) com Inteligência Artificial Gemini"
+                >
+                  <span>✨</span> <span>Extrair Referências (IA)</span>
+                </button>
+                <button
+                  type="button"
                   onclick="window.WikiKB.copyLink('${docNode.id}')"
                   class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
                   title="Copiar link direto para este documento"
@@ -1134,6 +1143,7 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
                   <span>🔗</span> <span>Copiar Link</span>
                 </button>
                 <button
+                  type="button"
                   onclick="window.print()"
                   class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
                   title="Imprimir documento formatado"
@@ -1160,7 +1170,7 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
           </div>
 
           <!-- Seção Inferior: Fontes Oficiais e Referências -->
-          ${this.buildReferencesSectionHtml(docNode.references)}
+          ${this.buildReferencesSectionHtml(docNode.references, docNode)}
         </article>
       `;
 
@@ -1646,67 +1656,87 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
     // ========================================================================
     // 9. SEÇÃO INFERIOR: REFERÊNCIAS CITADAS, VATICANO E GOOGLE LIVROS
     // ========================================================================
-    buildReferencesSectionHtml: function (references) {
-      if (!references || references.length === 0) return '';
+    buildReferencesSectionHtml: function (references, docNode) {
+      const hasRefs = references && references.length > 0;
+      const docId = docNode ? docNode.id : '';
 
-      const itemsHtml = references.map(ref => {
-        let badge = '📖 Bíblia';
-        let badgeClass = 'bg-blue-100 text-blue-900 border-blue-200';
-        let icon = '📖';
+      let itemsHtml = '';
+      if (hasRefs) {
+        itemsHtml = references.map(ref => {
+          let badge = '📖 Bíblia';
+          let badgeClass = 'bg-blue-100 text-blue-900 border-blue-200';
 
-        if (ref.type === 'cic') {
-          badge = '🏛️ Catecismo (CIC)';
-          badgeClass = 'bg-amber-100 text-amber-900 border-amber-200';
-          icon = '🏛️';
-        } else if (ref.type === 'vaticano') {
-          badge = '📜 Santa Sé / Vaticano';
-          badgeClass = 'bg-emerald-100 text-emerald-900 border-emerald-200';
-          icon = '📜';
-        } else if (ref.type === 'livro') {
-          badge = '📚 Google Livros';
-          badgeClass = 'bg-purple-100 text-purple-900 border-purple-200';
-          icon = '📚';
-        }
+          if (ref.type === 'cic') {
+            badge = '🏛️ Catecismo (CIC)';
+            badgeClass = 'bg-amber-100 text-amber-900 border-amber-200';
+          } else if (ref.type === 'vaticano') {
+            badge = '📜 Santa Sé / Vaticano';
+            badgeClass = 'bg-emerald-100 text-emerald-900 border-emerald-200';
+          } else if (ref.type === 'livro') {
+            badge = '📚 Google Livros';
+            badgeClass = 'bg-purple-100 text-purple-900 border-purple-200';
+          }
 
-        return `
-          <a
-            href="${ref.url}"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="wiki-ref-card block p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs hover:shadow-md transition text-left group"
-          >
-            <div class="flex items-center justify-between gap-2 mb-2">
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${badgeClass}">
-                ${badge}
-              </span>
-              <span class="text-slate-400 group-hover:text-emerald-600 transition-colors text-xs font-bold">
-                ↗
-              </span>
-            </div>
-            <h5 class="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-emerald-800 transition-colors mb-1 font-heading">
-              ${ref.citation}
-            </h5>
-            ${ref.description ? `
-              <p class="text-[11px] text-slate-500 leading-normal line-clamp-2">
-                ${ref.description}
-              </p>
-            ` : ''}
-          </a>
+          return `
+            <a
+              href="${ref.url}"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="wiki-ref-card block p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs hover:shadow-md transition text-left group"
+            >
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${badgeClass}">
+                  ${badge}
+                </span>
+                <span class="text-slate-400 group-hover:text-emerald-600 transition-colors text-xs font-bold">
+                  ↗
+                </span>
+              </div>
+              <h5 class="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-emerald-800 transition-colors mb-1 font-heading">
+                ${ref.citation}
+              </h5>
+              ${ref.description ? `
+                <p class="text-[11px] text-slate-500 leading-normal line-clamp-2">
+                  ${ref.description}
+                </p>
+              ` : ''}
+            </a>
+          `;
+        }).join('');
+      } else {
+        itemsHtml = `
+          <div class="col-span-full py-6 text-center text-slate-400 bg-amber-50/50 rounded-2xl border border-dashed border-amber-200/80">
+            <span class="text-2xl block mb-1">📜</span>
+            <p class="text-xs font-semibold text-slate-600">Nenhuma citação externa cadastrada para este documento.</p>
+            <p class="text-[11px] text-slate-400 mt-0.5">Use o botão ao lado para escanear passagens da Bíblia e do Magistério com Inteligência Artificial.</p>
+          </div>
         `;
-      }).join('');
+      }
 
       return `
         <div class="p-6 sm:p-8 bg-[#fdfbf7] border-t border-amber-200/60 rounded-b-3xl mt-6">
-          <div class="flex items-center gap-2 mb-3">
-            <span class="text-lg">🏛️</span>
-            <div>
-              <h4 class="text-sm font-bold font-heading text-slate-900 uppercase tracking-wider">
-                Fontes & Referências Citadas
-              </h4>
-              <p class="text-[11px] text-slate-500">
-                Documentação oficial do Vaticano, citações bíblicas e bibliografia recomendada.
-              </p>
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+            <div class="flex items-center gap-2">
+              <span class="text-lg">🏛️</span>
+              <div>
+                <h4 class="text-sm font-bold font-heading text-slate-900 uppercase tracking-wider">
+                  Fontes &amp; Referências Citadas
+                </h4>
+                <p class="text-[11px] text-slate-500">
+                  Documentação oficial do Vaticano, citações bíblicas e bibliografia recomendada.
+                </p>
+              </div>
             </div>
+            ${docId ? `
+              <button
+                type="button"
+                onclick="window.GeminiReferenceExtractor && window.GeminiReferenceExtractor.openReviewModalForCurrentDoc(window.WikiKB.getNode('${docId}'))"
+                class="px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-xs transition border border-amber-300 shadow-2xs flex items-center gap-1.5 cursor-pointer"
+                title="Escanear e revisar referências com IA Gemini"
+              >
+                <span>✨</span> <span>Revisar Fontes com IA</span>
+              </button>
+            ` : ''}
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 mt-4">

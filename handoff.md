@@ -44,31 +44,45 @@ Estamos criando uma **Base de Conhecimento (estilo Confluence)** para os catequi
 
 ## 📊 4. Estado Atual do Projeto
 
-- **Fase**: Incremento 3 Concluído com sucesso.
+- **Fase**: Incremento 4 Concluído com sucesso.
 - **Roadmap**: Roteiro com 6 incrementos testáveis (ver [roadmap.md](file:///Users/thiagocarvalho/Public/Catequese/roadmap.md)).
-- **Último Incremento Concluído**: **Incremento 3** (01/10/2026) — Visualizador Multimídia e Player Integrado: player customizado de áudio (play/pause, seek -10s/+10s, scrubber interativo, tempo decorrido, controle de velocidade 1x/1.25x/1.5x/2x, mute e download), player de vídeo responsivo com tela cheia e velocidades, visualizador de PPTX dual-provider (Microsoft Office Online & Google Docs Viewer com alternador e fullscreen) e modal lightbox para ampliação de imagens nos markdowns.
-- **Próximo Incremento a Executar**: **Incremento 4** (Seção de Referências & Motor Gemini: componente de rodapé enriquecido nos documentos com links automáticos para Vatican.va, Bíblia Online, CIC e Google Livros, além de função client-side integrada com a API Gemini para extração automática com conferência visual antes de salvar).
+- **Último Incremento Concluído**: **Incremento 4** (01/10/2026) — Seção de Referências & Motor Gemini:
+  - Módulo `gemini-reference-extractor.js` com mapeamento teológico completo (encíclicas, concílios, exortações apostólicas e livros bíblicos).
+  - Suporte à API Google Gemini (`gemini-1.5-flash`) com chave configurável via modal e fallback de heurística de alta fidelidade sem necessidade de chave externa.
+  - Seção de rodapé enriquecida com cards categorizados (Bíblia, CIC, Vaticano, Google Livros).
+  - Modal de revisão das referências antes de salvar no Cloud Firestore (merge construtivo seguro).
+  - Botão de extração por IA no cabeçalho do documento e no rodapé, além de atalho de chave API no topo da Wiki.
+- **Próximo Incremento a Executar**: **Incremento 5** (Painel Web de Upload & Gestão no Site: modais de "+ Nova Pasta" e "+ Novo Material" para a Coordenação, upload de PDF/DOCX com conversão cliente para Markdown, e upload de mídias/imagens para o Firebase Storage).
 
 ---
 
-## 🧪 5. Como Testar o Incremento 3
+## 🧪 5. Como Testar o Incremento 4
 
 1. Abra a **Base de Conhecimento** no site.
-2. Na árvore lateral ou nos cards de pasta, teste os diferentes tipos de mídia:
-   - **Áudio**: abra `Cântico das Criaturas (São Francisco de Assis)` na pasta *Eucaristia I > Módulo 1*. Teste os botões Play/Pause, avançar/retroceder 10s, mudar a velocidade para 1.25x ou 1.5x, arrastar o scrubber e o botão de download.
-   - **Vídeo**: abra `Vídeo: A História dos Sacramentos da Iniciação Cristã` na pasta *Crisma Adultos*. Teste o player de vídeo, botão de tela cheia, controle de velocidade e download.
-   - **Apresentação PPTX**: abra `Apresentação: O Fogo de Pentecostes` na pasta *Crisma Jovem*. Teste a renderização no Office Viewer, o botão "Alternar Visualizador" (Google Docs Viewer) e o botão "Tela Cheia".
-   - **Imagens e Lightbox**: abra qualquer documento Markdown que possua imagem; clique na imagem para abrir o Lightbox ampliado com fundo escuro; feche clicando fora, no botão ✕ ou pressionando `Esc`.
+2. Navegue até qualquer documento de texto (ex: `Apresentação e Roteiro Geral da 1ª Etapa` ou `Roteiro 01: O Encontro com a Palavra Viva`).
+3. Observe no rodapé do documento a seção **"Fontes & Referências Citadas"**:
+   - Cada referência possui badge colorido (Bíblia, CIC, Vaticano, Google Livros), título da fonte e resumo teológico.
+   - Clicar em qualquer card abre a fonte oficial em nova aba (ex: Bíblia Online, site do Vaticano ou Google Livros).
+4. No cabeçalho do documento, clique no botão roxo **"✨ Extrair Referências (IA)"** (ou no rodapé em **"✨ Revisar Fontes com IA"**):
+   - Abre-se o modal de revisão teológica.
+   - O extrator processa o documento usando a API Gemini (se chave configurada) ou a heurística local de expressões bíblicas/eclesiais.
+   - Os resultados são listados de forma clara e visual.
+   - Caso o usuário seja Coordenador/Admin, clicar em **"💾 Salvar Referências no Documento"** persiste as alterações no Firestore via merge seguro.
+5. No cabeçalho da Wiki, clique no botão **"✨ Chave Gemini (IA)"** para abrir o modal de configuração de chave da API do Google Gemini.
 
 ---
 
-## 🎯 6. Instruções para o Incremento 4 (Referências & Motor Gemini)
+## 🎯 6. Instruções para o Incremento 5 (Painel Web de Upload & Gestão no Site)
 
-1. Implementar o motor de extração inteligente via **Google Gemini**:
-   - Criar modal ou campo de configuração da API Key do Gemini no painel administrativo do site (armazenado com segurança no localStorage/Firestore).
-   - Criar rotina client-side que envia o texto do documento para a API do Gemini com prompt estruturado para reconhecer:
-     - Livro e versículos bíblicos (gerando link para `bibliaonline.com.br` ou Vaticano).
-     - Parágrafos do Catecismo da Igreja Católica (CIC § ... com link direto).
-     - Documentos, encíclicas e concílios do Vaticano (links para `vatican.va`).
-     - Títulos de livros e autores recomendados (links para `google.com/search?tbm=bks&q=...`).
-2. Permitir revisão visual das referências detectadas antes da publicação no documento.
+1. **Ações para Coordenadores/Admin**:
+   - Adicionar botões "+ Nova Pasta" e "+ Novo Material" (visíveis condicionalmente para coordenadores autenticados).
+2. **Modal "+ Nova Pasta"**:
+   - Campos: Título, Descrição, Pasta Mãe (select com a árvore atual) e Etapa (Geral, Pré, Eucaristia I/II, Crisma Jovem/Adultos).
+   - Salvar no Firestore via `KnowledgeService.saveNode(...)`.
+3. **Modal "+ Novo Material"**:
+   - Drag & drop / seleção de arquivos:
+     - DOCX: conversão em Markdown no cliente (utilizando biblioteca leve como `mammoth.js` via CDN) e extração de imagens.
+     - PDF: extração de texto estruturado.
+     - Áudio/Vídeo/PPTX: upload binário para o Firebase Storage (`catequese-icm.firebasestorage.app`) com obtenção da URL de download e criação do nó no Firestore.
+   - Campo para edição prévia do Markdown e título antes da publicação.
+   - Botão para acionar extração de referências automática já integrado ao fluxo de upload.

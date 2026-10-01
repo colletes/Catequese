@@ -37,6 +37,7 @@
   <!-- Estilos e Módulos da Base de Conhecimento (Wiki Confluence) -->
   <link rel="stylesheet" href="knowledge-base.css">
   <script src="knowledge-service.js"></script>
+  <script src="gemini-reference-extractor.js"></script>
   <script src="knowledge-base.js"></script>
   
   <!-- Tipografia Oficial do Santuário (Questrial, Nunito, Marcellus, Outfit, Roboto) -->
@@ -3996,6 +3997,15 @@
               title="Sincronizar acervo padrão com Firestore em nuvem"
             >
               <span>☁️</span> <span>Sincronizar Firestore</span>
+            </button>
+            <button
+              id="btn-wiki-gemini-key"
+              type="button"
+              onclick="window.GeminiReferenceExtractor && window.GeminiReferenceExtractor.openApiKeyModal()"
+              class="px-3 py-1.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-200 border border-purple-500/40 text-xs font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer"
+              title="Configurar chave da API Google Gemini para extração inteligente de referências teológicas"
+            >
+              <span>✨</span> <span>Chave Gemini (IA)</span>
             </button>
             <button
               type="button"
