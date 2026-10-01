@@ -1,0 +1,290 @@
+/* ==========================================================================
+   PASTORAL DA CATEQUESE — SANTUÁRIO IMACULADO CORAÇÃO DE MARIA
+   Estilos da Base de Conhecimento (Wiki Confluence)
+   ========================================================================== */
+
+/* Layout do Confluence */
+.wiki-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 700px;
+}
+
+.wiki-sidebar-tree {
+  transition: all 0.25s ease-in-out;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.wiki-sidebar-tree::-webkit-scrollbar {
+  width: 5px;
+}
+
+.wiki-sidebar-tree::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+.wiki-sidebar-tree::-webkit-scrollbar-thumb:hover {
+  background: #d4a94f;
+}
+
+/* Árvore de navegação e guias visuais */
+.tree-node-item {
+  position: relative;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.tree-node-item:hover {
+  background-color: #f1f5f9;
+}
+
+.tree-node-item.active-node {
+  background-color: #ecfdf5 !important;
+  border-color: #059669 !important;
+  color: #065f46 !important;
+  box-shadow: 0 1px 3px rgba(5, 150, 105, 0.1);
+}
+
+.tree-node-item.active-node .tree-node-title {
+  font-weight: 700;
+  color: #065f46;
+}
+
+/* Guia vertical da árvore hierárquica */
+.tree-children-container {
+  position: relative;
+  border-left: 1.5px dashed #cbd5e1;
+  margin-left: 0.9rem;
+  padding-left: 0.5rem;
+}
+
+/* Rotação suave do chevron */
+.tree-chevron {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tree-chevron.expanded {
+  transform: rotate(90deg);
+}
+
+/* Tipografia e Leitor de Documentos (Estilo Confluence / Markdown) */
+.wiki-prose {
+  font-family: 'Nunito', sans-serif;
+  color: #1e293b;
+  line-height: 1.75;
+}
+
+.wiki-prose h1,
+.wiki-prose h2,
+.wiki-prose h3,
+.wiki-prose h4,
+.wiki-prose h5,
+.wiki-prose h6 {
+  font-family: 'Questrial', sans-serif;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+  margin-top: 1.8rem;
+  margin-bottom: 0.75rem;
+  font-weight: 700;
+}
+
+.wiki-prose h1 {
+  font-size: 1.85rem;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 0.5rem;
+  color: #064e3b; /* Tom esmeralda profundo */
+}
+
+.wiki-prose h2 {
+  font-size: 1.45rem;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 0.35rem;
+  color: #0f172a;
+}
+
+.wiki-prose h3 {
+  font-size: 1.25rem;
+  color: #1e293b;
+}
+
+.wiki-prose p {
+  margin-top: 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 0.975rem;
+  color: #334155;
+}
+
+.wiki-prose strong {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.wiki-prose a {
+  color: #059669;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s ease;
+}
+
+.wiki-prose a:hover {
+  color: #047857;
+  text-decoration-color: #d4a94f;
+}
+
+.wiki-prose ul {
+  list-style-type: disc;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.wiki-prose ol {
+  list-style-type: decimal;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.wiki-prose li {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.95rem;
+}
+
+.wiki-prose blockquote {
+  border-left: 4px solid #d4a94f;
+  background: #fdfbf7;
+  padding: 0.75rem 1.25rem;
+  margin: 1.25rem 0;
+  border-radius: 0 0.75rem 0.75rem 0;
+  font-style: italic;
+  color: #475569;
+}
+
+.wiki-prose blockquote p {
+  margin: 0;
+}
+
+.wiki-prose hr {
+  border: 0;
+  border-top: 1px solid #e2e8f0;
+  margin: 2rem 0;
+}
+
+/* Tabelas responsivas */
+.wiki-prose table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 1.5rem 0;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.wiki-prose th {
+  background-color: #0f172a;
+  color: #ffffff;
+  font-family: 'Questrial', sans-serif;
+  font-weight: 600;
+  padding: 0.65rem 0.85rem;
+  text-align: left;
+  font-size: 0.825rem;
+  letter-spacing: 0.02em;
+}
+
+.wiki-prose td {
+  padding: 0.65rem 0.85rem;
+  border-top: 1px solid #e2e8f0;
+  font-size: 0.875rem;
+  color: #334155;
+}
+
+.wiki-prose tr:nth-child(even) td {
+  background-color: #f8fafc;
+}
+
+.wiki-prose tr:hover td {
+  background-color: #f1f5f9;
+}
+
+/* Caixas de Destaque / Callouts */
+.wiki-callout {
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+  border-width: 1px;
+}
+
+.wiki-callout-note {
+  background-color: #f0fdf4;
+  border-color: #86efac;
+  color: #14532d;
+}
+
+.wiki-callout-tip {
+  background-color: #fefce8;
+  border-color: #fef08a;
+  color: #713f12;
+}
+
+.wiki-callout-important {
+  background-color: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1e3a8a;
+}
+
+/* Imagens embutidas */
+.wiki-prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 1rem;
+  margin: 1.5rem auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+  transition: transform 0.2s ease;
+}
+
+.wiki-prose img:hover {
+  transform: scale(1.01);
+}
+
+/* Código em linha e bloco */
+.wiki-prose code {
+  background: #f1f5f9;
+  color: #0f172a;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.375rem;
+  font-size: 0.85rem;
+  font-family: monospace;
+}
+
+.wiki-prose pre {
+  background: #0f172a;
+  color: #f8fafc;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.wiki-prose pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+/* Cards das referências bíblicas e vaticanas */
+.wiki-ref-card {
+  transition: all 0.2s ease;
+}
+
+.wiki-ref-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px -4px rgba(212, 169, 79, 0.25);
+  border-color: #d4a94f;
+}
