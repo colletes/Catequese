@@ -1090,6 +1090,255 @@
           console.warn(e);
         }
       }
+    },
+
+    // ========================================================================
+    // 8. MODAL: IMPORTAÇÃO DE CARGA DE ACERVO (SEED JSON) — EXCLUSIVO MASTER ADMIN
+    // ========================================================================
+    openImportSeedModal: function () {
+      if (!window.KnowledgeService || !window.KnowledgeService.isMasterAdmin()) {
+        alert('Acesso restrito: apenas o Master Admin pode importar arquivos de carga do acervo.');
+        return;
+      }
+
+      let modal = document.getElementById('modal-wiki-import-seed');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'modal-wiki-import-seed';
+        modal.className = 'fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto transition-all duration-200';
+        document.body.appendChild(modal);
+      }
+
+      modal.innerHTML = `
+        <div class="bg-white rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-150 flex flex-col">
+          <!-- Topo do Modal -->
+          <div class="p-5 sm:p-6 bg-gradient-to-r from-slate-950 via-amber-950 to-slate-950 text-white flex items-center justify-between border-b border-amber-500/20 flex-shrink-0">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-xl">
+                📥
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="text-base sm:text-lg font-bold font-heading text-white">Importar Carga do Acervo</h3>
+                  <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-amber-500 text-slate-950 tracking-wider">
+                    Master Admin
+                  </span>
+                </div>
+                <p class="text-[11px] text-amber-300">Carregamento em lote de nós estruturados (onedrive_seed.json)</p>
+              </div>
+            </div>
+            <button
+              onclick="document.getElementById('modal-wiki-import-seed').classList.add('hidden')"
+              class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-sm transition cursor-pointer"
+            >✕</button>
+          </div>
+
+          <!-- Corpo do Modal -->
+          <div class="p-5 sm:p-6 space-y-4 text-xs sm:text-sm">
+            <!-- Dropzone para Arquivo JSON -->
+            <div>
+              <label class="block font-bold text-slate-700 mb-1 text-xs">Arquivo de Carga (JSON)</label>
+              <div
+                id="wiki-seed-dropzone"
+                onclick="document.getElementById('wiki-seed-file-input').click()"
+                class="border-2 border-dashed border-amber-300 hover:border-amber-500 bg-amber-50/40 hover:bg-amber-50/80 rounded-2xl p-6 text-center transition cursor-pointer group"
+              >
+                <input
+                  type="file"
+                  id="wiki-seed-file-input"
+                  class="hidden"
+                  accept=".json,application/json"
+                />
+                <span class="text-3xl block mb-1 group-hover:scale-110 transition-transform">📦</span>
+                <p class="text-xs sm:text-sm font-bold text-slate-800">
+                  Clique para selecionar o arquivo <code>onedrive_seed.json</code>
+                </p>
+                <p class="text-[11px] text-slate-500 mt-1">
+                  Gerado pelo Assistente Local do OneDrive ou backup estruturado da Catequese.
+                </p>
+              </div>
+            </div>
+
+            <!-- Resumo do Arquivo Carregado -->
+            <div id="wiki-seed-summary-box" class="hidden p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+              <div class="flex items-center justify-between border-b border-slate-200/80 pb-2">
+                <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+                  <span>📊</span> <span>Resumo do Arquivo Selecionado</span>
+                </span>
+                <span id="wiki-seed-filename" class="font-mono text-[10px] text-slate-500 truncate max-w-[200px]"></span>
+              </div>
+              <div class="grid grid-cols-3 gap-2 text-center">
+                <div class="bg-white p-2.5 rounded-xl border border-slate-200">
+                  <span class="block text-[10px] font-bold text-slate-400 uppercase">Pastas</span>
+                  <span id="wiki-seed-count-folders" class="text-base font-black text-amber-700 font-heading">0</span>
+                </div>
+                <div class="bg-white p-2.5 rounded-xl border border-slate-200">
+                  <span class="block text-[10px] font-bold text-slate-400 uppercase">Documentos</span>
+                  <span id="wiki-seed-count-docs" class="text-base font-black text-emerald-700 font-heading">0</span>
+                </div>
+                <div class="bg-white p-2.5 rounded-xl border border-slate-200">
+                  <span class="block text-[10px] font-bold text-slate-400 uppercase">Mídias/PPTX</span>
+                  <span id="wiki-seed-count-media" class="text-base font-black text-blue-700 font-heading">0</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Alerta de Segurança e Merge Construtivo -->
+            <div class="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-950 text-xs flex items-start gap-2.5 leading-relaxed">
+              <span class="text-base text-amber-600 mt-0.5">⚠️</span>
+              <div>
+                <strong class="font-bold block">Política de Merge Construtivo (Regra de Ouro):</strong>
+                <span>Os novos materiais serão adicionados e mesclados no Firestore preservando integralmente todos os dados pré-existentes. Nenhum registro anterior será descartado.</span>
+              </div>
+            </div>
+
+            <!-- Progresso de Importação em Lote -->
+            <div id="wiki-seed-progress-container" class="hidden space-y-2 p-3.5 rounded-2xl bg-slate-900 text-white">
+              <div class="flex items-center justify-between text-xs font-bold">
+                <span id="wiki-seed-progress-title">Importando lotes no Firestore...</span>
+                <span id="wiki-seed-progress-percent">0%</span>
+              </div>
+              <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                <div id="wiki-seed-progress-bar" class="bg-gradient-to-r from-amber-400 to-emerald-400 h-2 rounded-full transition-all duration-150" style="width: 0%"></div>
+              </div>
+              <p id="wiki-seed-progress-detail" class="text-[10px] text-slate-400 font-mono"></p>
+            </div>
+          </div>
+
+          <!-- Rodapé do Modal -->
+          <div class="p-4 sm:p-5 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3 flex-shrink-0">
+            <span class="text-[11px] text-slate-500">
+              Operação exclusiva: <strong>Master Admin</strong>
+            </span>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                onclick="document.getElementById('modal-wiki-import-seed').classList.add('hidden')"
+                class="px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                id="btn-confirm-import-seed"
+                disabled
+                class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 disabled:opacity-40 disabled:cursor-not-allowed text-white font-black text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <span>🚀</span> <span>Iniciar Ingestão no Firestore</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      modal.classList.remove('hidden');
+
+      // Bind de eventos de upload do arquivo JSON
+      let parsedNodes = null;
+      const fileInput = document.getElementById('wiki-seed-file-input');
+      const dropzone = document.getElementById('wiki-seed-dropzone');
+      const confirmBtn = document.getElementById('btn-confirm-import-seed');
+
+      const processJsonFile = file => {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+          try {
+            const raw = JSON.parse(ev.target.result);
+            const nodes = Array.isArray(raw) ? raw : (Array.isArray(raw.nodes) ? raw.nodes : []);
+            if (!nodes.length) {
+              alert('O arquivo JSON não contém uma lista válida de nós da Wiki.');
+              return;
+            }
+
+            parsedNodes = nodes;
+            const folders = nodes.filter(n => n.type === 'folder').length;
+            const docs = nodes.filter(n => n.type === 'document').length;
+            const media = nodes.filter(n => n.type === 'media' || n.type === 'presentation').length;
+
+            document.getElementById('wiki-seed-filename').textContent = file.name;
+            document.getElementById('wiki-seed-count-folders').textContent = folders;
+            document.getElementById('wiki-seed-count-docs').textContent = docs;
+            document.getElementById('wiki-seed-count-media').textContent = media;
+            document.getElementById('wiki-seed-summary-box').classList.remove('hidden');
+
+            confirmBtn.disabled = false;
+          } catch (err) {
+            alert('Erro ao processar arquivo JSON: ' + err.message);
+          }
+        };
+        reader.readAsText(file);
+      };
+
+      if (fileInput) {
+        fileInput.onchange = e => {
+          if (e.target.files && e.target.files.length) {
+            processJsonFile(e.target.files[0]);
+          }
+        };
+      }
+
+      if (dropzone) {
+        ['dragenter', 'dragover'].forEach(name => {
+          dropzone.addEventListener(name, e => {
+            e.preventDefault();
+            dropzone.classList.add('border-amber-500', 'bg-amber-100/60');
+          });
+        });
+        ['dragleave', 'drop'].forEach(name => {
+          dropzone.addEventListener(name, e => {
+            e.preventDefault();
+            dropzone.classList.remove('border-amber-500', 'bg-amber-100/60');
+          });
+        });
+        dropzone.addEventListener('drop', e => {
+          const files = e.dataTransfer.files;
+          if (files && files.length) {
+            processJsonFile(files[0]);
+          }
+        });
+      }
+
+      // Execução da Ingestão em Lote
+      confirmBtn.onclick = async () => {
+        if (!parsedNodes || !parsedNodes.length) return;
+
+        const proceed = confirm(
+          `Deseja realmente iniciar a ingestão de ${parsedNodes.length} nós no Cloud Firestore?\n\n` +
+          `• Merge Construtivo seguro: nenhuma exclusão ou sobrescrita destrutiva.\n` +
+          `• Atualiza a coleção knowledge_nodes.`
+        );
+        if (!proceed) return;
+
+        confirmBtn.disabled = true;
+        const progressContainer = document.getElementById('wiki-seed-progress-container');
+        const progressBar = document.getElementById('wiki-seed-progress-bar');
+        const progressPercent = document.getElementById('wiki-seed-progress-percent');
+        const progressDetail = document.getElementById('wiki-seed-progress-detail');
+        if (progressContainer) progressContainer.classList.remove('hidden');
+
+        try {
+          await window.KnowledgeService.importNodesBatch(parsedNodes, (processed, total) => {
+            const pct = Math.round((processed / total) * 100);
+            if (progressBar) progressBar.style.width = `${pct}%`;
+            if (progressPercent) progressPercent.textContent = `${pct}%`;
+            if (progressDetail) progressDetail.textContent = `Processados ${processed} de ${total} registros...`;
+          });
+
+          alert(`🎉 Ingestão de ${parsedNodes.length} materiais concluída com sucesso no Cloud Firestore!`);
+          modal.classList.add('hidden');
+
+          // Atualiza a árvore do acervo na tela
+          if (window.WikiKB) {
+            window.WikiKB.selectNode(parsedNodes[0].id);
+          }
+        } catch (err) {
+          console.error('Erro na ingestão em lote:', err);
+          alert('❌ Falha na importação: ' + err.message);
+        } finally {
+          confirmBtn.disabled = false;
+        }
+      };
     }
   };
 })();

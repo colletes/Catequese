@@ -488,6 +488,28 @@ HTML_DASHBOARD = r"""<!DOCTYPE html>
   </div>
 
   <script>
+    // Configuração oficial do Firebase
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyAWrOAoRIfWQTerWqP4TO-XlQ8xuk192vU",
+      authDomain: "catequese-icm.firebaseapp.com",
+      projectId: "catequese-icm",
+      storageBucket: "catequese-icm.firebasestorage.app",
+      messagingSenderId: "30745657329",
+      appId: "1:30745657329:web:0ff21f4671238f64fa0e50"
+    };
+
+    let firebaseDb = null;
+    if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+      try {
+        firebase.initializeApp(FIREBASE_CONFIG);
+        firebaseDb = firebase.firestore();
+      } catch (e) {
+        console.warn('Firebase init warning:', e);
+      }
+    } else if (typeof firebase !== 'undefined' && firebase.apps.length) {
+      firebaseDb = firebase.firestore();
+    }
+
     // Estado do Dashboard Local
     let currentData = null;
     let selectedIds = new Set();
@@ -726,11 +748,45 @@ HTML_DASHBOARD = r"""<!DOCTYPE html>
         await new Promise(r => setTimeout(r, 20));
       }
 
-      // Grava no arquivo oficial de carga
+      // 1. Grava no arquivo oficial de carga local (backup permanente)
       await exportSeedJson();
+
+      // 2. Se Firebase Firestore estiver disponível, tenta sincronizar os nós selecionados
+      if (firebaseDb) {
+        log('Gravando lotes no Cloud Firestore (knowledge_nodes)...');
+        try {
+          const BATCH_SIZE = 400;
+          for (let i = 0; i < items.length; i += BATCH_SIZE) {
+            const chunk = items.slice(i, i + BATCH_SIZE);
+            const batch = firebaseDb.batch();
+            for (const item of chunk) {
+              const ref = firebaseDb.collection('knowledge_nodes').doc(item.id);
+              batch.set(ref, {
+                ...item,
+                updatedAt: new Date().toISOString()
+              }, { merge: true });
+            }
+            await batch.commit();
+            log(`✓ Lote gravado no Firestore (${Math.min(i + BATCH_SIZE, items.length)}/${items.length})`);
+          }
+          statusTitle.textContent = '✅ Ingestão finalizada e salva no Cloud Firestore!';
+          log('✅ Todos os nós foram mesclados no Firestore com merge construtivo!');
+          alert('🎉 Ingestão de materiais concluída com sucesso no Cloud Firestore!');
+          return;
+        } catch (dbErr) {
+          console.warn('Firestore direto:', dbErr);
+          log(`⚠️ Aviso do Firestore: ${dbErr.message}`);
+          log('💡 O arquivo onedrive_seed.json foi salvo com sucesso!');
+          log('👉 Acesse o site oficial como Master Admin e use o botão "📥 Importar Acervo (JSON)" para publicar.');
+          statusTitle.textContent = '📦 Seed JSON gerado (Pronto para importar no site)';
+          alert('✅ Arquivo onedrive_seed.json gerado com sucesso!\n\nVocê também pode importar este arquivo no site oficial com 1 clique usando o botão "📥 Importar Acervo (JSON)" exclusivo do Master Admin.');
+          return;
+        }
+      }
+
       statusTitle.textContent = '✅ Ingestão finalizada com sucesso!';
-      log('✅ Carga completa sincronizada e disponível para a Wiki oficial!');
-      alert('🎉 Ingestão de materiais concluída com sucesso!');
+      log('✅ Carga completa exportada em scripts/onedrive_seed.json!');
+      alert('🎉 Arquivo de carga exportado com sucesso!');
     }
   </script>
 </body>

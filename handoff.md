@@ -87,3 +87,16 @@ Estamos criando uma **Base de Conhecimento (estilo Confluence)** para os catequi
 5. **Inc 5**: Painel web de upload e gestão no site (`knowledge-upload-panel.js`), modais de "+ Nova Pasta", "+ Novo Material" com conversão client-side (Mammoth + Turndown + PDF.js) e upload para Firebase Storage com barra de progresso.
 6. **Inc 6**: Assistente local em Python (`scripts/knowledge_importer.py` e `scripts/run_importer.sh`) com interface em `http://localhost:8080` para leitura e ingestão em lote do acervo da pasta do OneDrive.
 
+---
+
+## 👑 7. Recurso Exclusivo: Importação de Acervo no Site (Master Admin)
+
+- **Localização**: Cabeçalho da Base de Conhecimento (`#view-conhecimento`).
+- **Visibilidade**: O botão **"📥 Importar Acervo (JSON)"** é renderizado **exclusivamente para o Master Admin** (`colletes@gmail.com`).
+- **Como utilizar**:
+  1. No site oficial, faça login com a conta Master Admin.
+  2. Acesse a aba **Base de Conhecimento**. O botão dourado **"📥 Importar Acervo (JSON)"** estará visível no topo ao lado de "Sincronizar Firestore".
+  3. Clique no botão e selecione o arquivo gerado pelo assistente: [`scripts/onedrive_seed.json`](file:///Users/thiagocarvalho/Public/Catequese/scripts/onedrive_seed.json).
+  4. O painel exibirá o resumo dos nós (pastas, documentos, mídias) e a política de **merge construtivo**.
+  5. Clique em **"🚀 Iniciar Ingestão no Firestore"**: os materiais serão gravados em lotes de 400 nós com barra de progresso em tempo real, sem necessidade de rodar nada pelo terminal!
+

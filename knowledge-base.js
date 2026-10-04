@@ -491,10 +491,19 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
 
     updateAdminActionsVisibility: function () {
       const canEdit = window.KnowledgeService && typeof window.KnowledgeService.canEdit === 'function' ? window.KnowledgeService.canEdit() : false;
+      const isMaster = window.KnowledgeService && typeof window.KnowledgeService.isMasterAdmin === 'function' ? window.KnowledgeService.isMasterAdmin() : false;
+
       const btnSync = document.getElementById('btn-wiki-sync-seed');
       if (btnSync) {
         if (canEdit) btnSync.classList.remove('hidden');
         else btnSync.classList.add('hidden');
+      }
+
+      // Importação de arquivo de carga em lote: EXCLUSIVO MASTER ADMIN
+      const btnImportSeed = document.getElementById('btn-wiki-import-seed');
+      if (btnImportSeed) {
+        if (isMaster) btnImportSeed.classList.remove('hidden');
+        else btnImportSeed.classList.add('hidden');
       }
     },
 

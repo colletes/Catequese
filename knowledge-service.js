@@ -60,6 +60,18 @@
       );
     },
 
+    // Checa se o usuário atual é Master Admin (Thiago Carvalho)
+    isMasterAdmin: function () {
+      const authState = window.appAuthState;
+      if (!authState) return false;
+      const user = authState.user;
+      const email = ((user && user.email) || authState.email || '').toLowerCase().trim();
+      const role = authState.role;
+      const R = window.ICM_CONFIG ? window.ICM_CONFIG.ROLES : {};
+      const masterEmail = (window.ICM_CONFIG && window.ICM_CONFIG.MASTER_ADMIN_EMAIL ? window.ICM_CONFIG.MASTER_ADMIN_EMAIL : 'colletes@gmail.com').toLowerCase().trim();
+      return role === (R.MASTER_ADMIN || 'master_admin') || email === masterEmail;
+    },
+
     // Escuta alterações em tempo real (onSnapshot)
     listenNodes: function (onDataCallback, onErrorCallback) {
       const db = this.getDb();
@@ -188,6 +200,54 @@
 
       if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
         window.ICM_CONFIG.logAuditEvent('WIKI_SEED_SYNC', 'knowledge_nodes', { count: initialNodes.length });
+      }
+
+      return true;
+    },
+
+    // Ingestão em lote de arquivos de carga (Seed / OneDrive) com MERGE CONSTRUTIVO
+    // Restrito exclusivamente ao Master Admin
+    importNodesBatch: async function (nodesList, onProgress) {
+      const db = this.getDb();
+      if (!db) throw new Error('Firestore não está conectado.');
+      if (!this.isMasterAdmin()) {
+        throw new Error('Acesso restrito: apenas o Master Admin pode importar arquivos de carga do acervo.');
+      }
+
+      if (!Array.isArray(nodesList) || nodesList.length === 0) {
+        throw new Error('Lista de nós vazia ou inválida.');
+      }
+
+      const BATCH_SIZE = 400; // Limite seguro abaixo de 500 operações por lote no Firestore
+      const total = nodesList.length;
+      let processed = 0;
+
+      for (let i = 0; i < total; i += BATCH_SIZE) {
+        const chunk = nodesList.slice(i, i + BATCH_SIZE);
+        const batch = db.batch();
+
+        for (const node of chunk) {
+          if (!node || !node.id) continue;
+          const ref = db.collection(COLLECTION_NAME).doc(node.id);
+          const dataToSave = {
+            ...node,
+            updatedAt: node.updatedAt || new Date().toISOString()
+          };
+          if (!dataToSave.createdAt) {
+            dataToSave.createdAt = new Date().toISOString();
+          }
+          batch.set(ref, dataToSave, { merge: true });
+        }
+
+        await batch.commit();
+        processed += chunk.length;
+        if (typeof onProgress === 'function') {
+          onProgress(processed, total);
+        }
+      }
+
+      if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
+        window.ICM_CONFIG.logAuditEvent('WIKI_BATCH_IMPORT', 'knowledge_nodes', { count: total });
       }
 
       return true;
