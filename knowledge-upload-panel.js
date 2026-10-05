@@ -1109,6 +1109,18 @@
         document.body.appendChild(modal);
       }
 
+      const allNodes = (window.WikiKB && window.WikiKB.nodes) || [];
+      const folders = allNodes.filter(n => n.type === 'folder');
+
+      const getFolderPath = (folderId) => {
+        const ancestors = window.WikiKB ? window.WikiKB.getAncestors(folderId) : [];
+        return ancestors.map(a => a.title).join(' / ');
+      };
+      folders.sort((a, b) => getFolderPath(a.id).localeCompare(getFolderPath(b.id)));
+
+      const activeNode = window.WikiKB ? window.WikiKB.getNode(window.WikiKB.activeNodeId) : null;
+      const preselectedFolderId = (activeNode && activeNode.type === 'folder') ? activeNode.id : '';
+
       modal.innerHTML = `
         <div class="bg-white rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-150 flex flex-col">
           <!-- Topo do Modal -->
@@ -1137,7 +1149,7 @@
           <div class="p-5 sm:p-6 space-y-4 text-xs sm:text-sm">
             <!-- Dropzone para Arquivo JSON -->
             <div>
-              <label class="block font-bold text-slate-700 mb-1 text-xs">Arquivo de Carga (JSON)</label>
+              <label class="block font-bold text-slate-700 mb-1 text-xs">Arquivo de Carga (JSON) *</label>
               <div
                 id="wiki-seed-dropzone"
                 onclick="document.getElementById('wiki-seed-file-input').click()"
@@ -1180,6 +1192,39 @@
                   <span class="block text-[10px] font-bold text-slate-400 uppercase">Mídias/PPTX</span>
                   <span id="wiki-seed-count-media" class="text-base font-black text-blue-700 font-heading">0</span>
                 </div>
+              </div>
+            </div>
+
+            <!-- Seleção da Pasta de Destino da Carga (Evita descarte acidental na raiz) -->
+            <div class="space-y-2 p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+              <label for="wiki-seed-dest-folder" class="block font-bold text-slate-800 text-xs">
+                📁 Pasta de Destino para os Materiais da Carga *
+              </label>
+              <select
+                id="wiki-seed-dest-folder"
+                class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-amber-600 focus:ring-2 focus:ring-amber-500/20 outline-none text-slate-800 text-xs bg-white font-medium shadow-2xs"
+              >
+                <option value="__NEW_FOLDER__" ${!preselectedFolderId ? 'selected' : ''}>✨ Criar uma Nova Pasta para esta Carga...</option>
+                ${folders.map(f => `
+                  <option value="${f.id}" ${f.id === preselectedFolderId ? 'selected' : ''}>📁 ${getFolderPath(f.id)}</option>
+                `).join('')}
+                <option value="__ROOT__">🏛️ Raiz da Base de Conhecimento (Nível Principal)</option>
+              </select>
+
+              <!-- Caixa para Criar Nova Pasta sob demanda -->
+              <div id="wiki-seed-new-folder-box" class="${preselectedFolderId ? 'hidden' : ''} pt-1 space-y-1">
+                <label for="wiki-seed-new-folder-title" class="block text-[11px] font-bold text-slate-600">
+                  Nome da Nova Pasta:
+                </label>
+                <input
+                  type="text"
+                  id="wiki-seed-new-folder-title"
+                  placeholder="Ex: Acervo OneDrive - Catequese 1"
+                  class="w-full px-3 py-2 rounded-xl border border-amber-300 focus:border-amber-600 outline-none text-slate-800 text-xs bg-white font-semibold"
+                />
+                <p class="text-[10px] text-amber-800">
+                  Uma pasta mãe será criada e todos os materiais de primeiro nível da carga ficarão organizados dentro dela.
+                </p>
               </div>
             </div>
 
@@ -1238,6 +1283,20 @@
       const fileInput = document.getElementById('wiki-seed-file-input');
       const dropzone = document.getElementById('wiki-seed-dropzone');
       const confirmBtn = document.getElementById('btn-confirm-import-seed');
+      const destSelect = document.getElementById('wiki-seed-dest-folder');
+      const newFolderBox = document.getElementById('wiki-seed-new-folder-box');
+      const newFolderTitleInput = document.getElementById('wiki-seed-new-folder-title');
+
+      if (destSelect && newFolderBox) {
+        destSelect.onchange = () => {
+          if (destSelect.value === '__NEW_FOLDER__') {
+            newFolderBox.classList.remove('hidden');
+            if (newFolderTitleInput) newFolderTitleInput.focus();
+          } else {
+            newFolderBox.classList.add('hidden');
+          }
+        };
+      }
 
       const processJsonFile = file => {
         if (!file) return;
@@ -1252,15 +1311,21 @@
             }
 
             parsedNodes = nodes;
-            const folders = nodes.filter(n => n.type === 'folder').length;
-            const docs = nodes.filter(n => n.type === 'document').length;
-            const media = nodes.filter(n => n.type === 'media' || n.type === 'presentation').length;
+            const foldersCount = nodes.filter(n => n.type === 'folder').length;
+            const docsCount = nodes.filter(n => n.type === 'document').length;
+            const mediaCount = nodes.filter(n => n.type === 'media' || n.type === 'presentation').length;
 
             document.getElementById('wiki-seed-filename').textContent = file.name;
-            document.getElementById('wiki-seed-count-folders').textContent = folders;
-            document.getElementById('wiki-seed-count-docs').textContent = docs;
-            document.getElementById('wiki-seed-count-media').textContent = media;
+            document.getElementById('wiki-seed-count-folders').textContent = foldersCount;
+            document.getElementById('wiki-seed-count-docs').textContent = docsCount;
+            document.getElementById('wiki-seed-count-media').textContent = mediaCount;
             document.getElementById('wiki-seed-summary-box').classList.remove('hidden');
+
+            // Sugere nome para a nova pasta se o campo estiver vazio
+            if (newFolderTitleInput && !newFolderTitleInput.value) {
+              const cleanName = file.name.replace(/\.json$/i, '').replace(/[-_]/g, ' ');
+              newFolderTitleInput.value = 'Acervo ' + cleanName;
+            }
 
             confirmBtn.disabled = false;
           } catch (err) {
@@ -1303,8 +1368,59 @@
       confirmBtn.onclick = async () => {
         if (!parsedNodes || !parsedNodes.length) return;
 
+        const destMode = destSelect ? destSelect.value : '';
+        let targetParentId = null;
+        let containerFolderNode = null;
+
+        if (destMode === '__NEW_FOLDER__') {
+          const folderTitle = (newFolderTitleInput ? newFolderTitleInput.value.trim() : '') || 'Acervo Importado';
+          const containerFolderId = 'fld-import-' + Date.now();
+          containerFolderNode = {
+            id: containerFolderId,
+            title: folderTitle,
+            type: 'folder',
+            parentId: null,
+            etapa: 'Geral',
+            description: `Pasta de carga criada automaticamente em ${new Date().toLocaleDateString('pt-BR')}.`,
+            order: 10,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+          targetParentId = containerFolderId;
+        } else if (destMode === '__ROOT__') {
+          const confirmRoot = confirm(
+            '⚠️ ATENÇÃO: Você selecionou a Raiz da Base de Conhecimento.\n\n' +
+            'Todos os itens de primeiro nível da carga serão adicionados diretamente na Raiz da Wiki.\n\n' +
+            'Deseja realmente continuar?'
+          );
+          if (!confirmRoot) return;
+          targetParentId = null;
+        } else if (destMode) {
+          targetParentId = destMode;
+        }
+
+        // Aplica o targetParentId apenas aos nós de primeiro nível (que não tinham parentId)
+        const finalNodes = parsedNodes.map(node => {
+          if (!node.parentId) {
+            return {
+              ...node,
+              parentId: targetParentId
+            };
+          }
+          return node;
+        });
+
+        if (containerFolderNode) {
+          finalNodes.unshift(containerFolderNode);
+        }
+
+        const destLabel = destMode === '__NEW_FOLDER__'
+          ? `Nova Pasta "${containerFolderNode.title}"`
+          : (targetParentId ? `Pasta selecionada` : 'Raiz da Base');
+
         const proceed = confirm(
-          `Deseja realmente iniciar a ingestão de ${parsedNodes.length} nós no Cloud Firestore?\n\n` +
+          `Deseja realmente iniciar a ingestão de ${finalNodes.length} nós no Cloud Firestore?\n\n` +
+          `• Destino: ${destLabel}\n` +
           `• Merge Construtivo seguro: nenhuma exclusão ou sobrescrita destrutiva.\n` +
           `• Atualiza a coleção knowledge_nodes.`
         );
@@ -1318,19 +1434,28 @@
         if (progressContainer) progressContainer.classList.remove('hidden');
 
         try {
-          await window.KnowledgeService.importNodesBatch(parsedNodes, (processed, total) => {
+          await window.KnowledgeService.importNodesBatch(finalNodes, (processed, total) => {
             const pct = Math.round((processed / total) * 100);
             if (progressBar) progressBar.style.width = `${pct}%`;
             if (progressPercent) progressPercent.textContent = `${pct}%`;
             if (progressDetail) progressDetail.textContent = `Processados ${processed} de ${total} registros...`;
           });
 
-          alert(`🎉 Ingestão de ${parsedNodes.length} materiais concluída com sucesso no Cloud Firestore!`);
+          alert(`🎉 Ingestão de ${finalNodes.length} materiais concluída com sucesso no Cloud Firestore!\n\nDestino: ${destLabel}`);
           modal.classList.add('hidden');
 
-          // Atualiza a árvore do acervo na tela
+          // Atualiza a visualização da Wiki localmente
           if (window.WikiKB) {
-            window.WikiKB.selectNode(parsedNodes[0].id);
+            finalNodes.forEach(fn => {
+              const idx = window.WikiKB.nodes.findIndex(n => n.id === fn.id);
+              if (idx >= 0) window.WikiKB.nodes[idx] = fn;
+              else window.WikiKB.nodes.push(fn);
+            });
+            if (window.KnowledgeService && window.KnowledgeService.saveLocalCache) {
+              window.KnowledgeService.saveLocalCache(window.WikiKB.nodes);
+            }
+            window.WikiKB.renderTree();
+            window.WikiKB.selectNode(targetParentId || finalNodes[0].id);
           }
         } catch (err) {
           console.error('Erro na ingestão em lote:', err);
