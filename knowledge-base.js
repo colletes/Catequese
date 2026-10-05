@@ -239,7 +239,6 @@
         console.log(`✅ Lote excluído no Firestore com sucesso (${totalDeleted} registros).`);
       } catch (err) {
         console.warn('Aviso ao sincronizar exclusão em lote no Firestore:', err);
-        alert(`⚠️ Itens removidos da tela local.\nAviso do Firestore: ${err.message}`);
       }
     },
 
@@ -407,7 +406,6 @@
         console.log(`✅ ${selectedIds.length} itens movidos com sucesso no Firestore!`);
       } catch (err) {
         console.warn('Aviso ao sincronizar movimentação em lote:', err);
-        alert(`⚠️ Itens movidos localmente na tela.\nAviso do Firestore: ${err.message}`);
       }
     },
 
@@ -476,7 +474,6 @@
         console.log(`✅ Item excluído do Firestore com sucesso (${deletedCount} registros).`);
       } catch (err) {
         console.warn('Aviso: Falha ao sincronizar exclusão com o Firestore:', err);
-        alert('⚠️ Item removido da tela local.\nAviso do Firestore: ' + err.message);
       }
     },
 
