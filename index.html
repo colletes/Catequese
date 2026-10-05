@@ -4002,13 +4002,13 @@
           <!-- Ações Rápidas do Cabeçalho da Wiki -->
           <div class="flex items-center gap-2 flex-wrap flex-shrink-0 self-start md:self-auto">
             <button
-              id="btn-wiki-sync-seed"
+              id="btn-wiki-clear-sample"
               type="button"
-              onclick="window.WikiKB.syncSeedToFirestore()"
-              class="hidden px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer"
-              title="Sincronizar acervo padrão com Firestore em nuvem"
+              onclick="window.WikiKB && window.WikiKB.promptClearAcervo()"
+              class="hidden px-3 py-1.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40 text-xs font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer"
+              title="Limpar todos os arquivos da Base de Conhecimento do banco (Exclusivo Master Admin e Coordenação Geral)"
             >
-              <span>☁️</span> <span>Sincronizar Firestore</span>
+              <span>🗑️</span> <span>Limpar Base da Wiki</span>
             </button>
             <button
               id="btn-wiki-import-seed"

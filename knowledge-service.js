@@ -72,6 +72,25 @@
       return role === (R.MASTER_ADMIN || 'master_admin') || email === masterEmail;
     },
 
+    // Checa se o usuário atual é Master Admin ou Coordenação Geral
+    isCoordOrAdmin: function () {
+      const authState = window.appAuthState;
+      if (!authState) return false;
+      const user = authState.user;
+      const email = ((user && user.email) || authState.email || '').toLowerCase().trim();
+      const role = authState.role;
+      const R = window.ICM_CONFIG ? window.ICM_CONFIG.ROLES : {};
+      const masterEmail = (window.ICM_CONFIG && window.ICM_CONFIG.MASTER_ADMIN_EMAIL ? window.ICM_CONFIG.MASTER_ADMIN_EMAIL : 'colletes@gmail.com').toLowerCase().trim();
+      const coordEmail = (window.ICM_CONFIG && window.ICM_CONFIG.COORD_GERAL_EMAIL ? window.ICM_CONFIG.COORD_GERAL_EMAIL : 'lorenammoraes@gmail.com').toLowerCase().trim();
+
+      return (
+        role === (R.MASTER_ADMIN || 'master_admin') ||
+        role === (R.COORD_GERAL || 'coord_geral') ||
+        email === masterEmail ||
+        email === coordEmail
+      );
+    },
+
     // Escuta alterações em tempo real (onSnapshot)
     listenNodes: function (onDataCallback, onErrorCallback) {
       const db = this.getDb();
@@ -157,16 +176,12 @@
       return dataToSave;
     },
 
-    // Exclusão segura de nó (somente se não tiver filhos)
-    deleteNode: async function (nodeId, allNodes) {
+    // Exclusão de arquivo ou nó individual (Master Admin e Coordenação Geral)
+    deleteNode: async function (nodeId) {
       const db = this.getDb();
       if (!db) throw new Error('Firestore não está conectado.');
-      if (!this.canEdit()) throw new Error('Permissão negada. Apenas a coordenação pode remover materiais.');
-
-      // Verifica se tem filhos
-      const hasChildren = (allNodes || []).some(n => n.parentId === nodeId);
-      if (hasChildren) {
-        throw new Error('Não é possível excluir uma pasta que contém subpastas ou documentos. Esvazie a pasta primeiro.');
+      if (!this.isCoordOrAdmin()) {
+        throw new Error('Acesso restrito: apenas o Master Admin e a Coordenação Geral podem excluir itens da Wiki.');
       }
 
       await db.collection(COLLECTION_NAME).doc(nodeId).delete();
@@ -176,6 +191,43 @@
       }
 
       return true;
+    },
+
+    // Exclusão em cascata de pasta e todos os seus filhos (Master Admin e Coordenação Geral)
+    deleteNodeCascade: async function (nodeId, allNodes = []) {
+      const db = this.getDb();
+      if (!db) throw new Error('Firestore não está conectado.');
+      if (!this.isCoordOrAdmin()) {
+        throw new Error('Acesso restrito: apenas o Master Admin e a Coordenação Geral podem excluir pastas da Wiki.');
+      }
+
+      // Encontra todos os descendentes recursivamente
+      const toDelete = new Set([nodeId]);
+      let added = true;
+      while (added) {
+        added = false;
+        for (const n of allNodes) {
+          if (!toDelete.has(n.id) && n.parentId && toDelete.has(n.parentId)) {
+            toDelete.add(n.id);
+            added = true;
+          }
+        }
+      }
+
+      const BATCH_SIZE = 400;
+      const idsArray = Array.from(toDelete);
+      for (let i = 0; i < idsArray.length; i += BATCH_SIZE) {
+        const chunk = idsArray.slice(i, i + BATCH_SIZE);
+        const batch = db.batch();
+        chunk.forEach(id => batch.delete(db.collection(COLLECTION_NAME).doc(id)));
+        await batch.commit();
+      }
+
+      if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
+        window.ICM_CONFIG.logAuditEvent('WIKI_NODE_DELETE_CASCADE', `node:${nodeId}`, { count: idsArray.length });
+      }
+
+      return idsArray.length;
     },
 
     // Carga inicial/seed para o Firestore com MERGE CONSTRUTIVO (nunca destrutivo)
@@ -251,6 +303,54 @@
       }
 
       return true;
+    },
+
+    // Limpeza da Base de Conhecimento (Exclusivo Master Admin)
+    clearKnowledgeNodes: async function (onlySamples = false) {
+      const db = this.getDb();
+      if (!db) throw new Error('Firestore não está conectado.');
+      if (!this.isMasterAdmin()) {
+        throw new Error('Acesso restrito: apenas o Master Admin pode limpar o acervo.');
+      }
+
+      const sampleIds = new Set([
+        'dir-geral', 'doc-guia-catequista', 'doc-oracao-liturgia',
+        'dir-eucaristia-1', 'dir-euc1-mod1', 'doc-euc1-enc1', 'doc-euc1-enc2',
+        'media-euc1-cantico', 'dir-crisma-jovem', 'dir-crisma-dons',
+        'doc-crisma-sete-dons', 'pres-crisma-pentecostes', 'dir-crisma-adultos',
+        'doc-adul-confirmacao', 'media-adul-video-historia'
+      ]);
+
+      const snapshot = await db.collection(COLLECTION_NAME).get();
+      if (snapshot.empty) {
+        this.saveLocalCache([]);
+        return 0;
+      }
+
+      const BATCH_SIZE = 400;
+      let count = 0;
+      const docsToDelete = [];
+
+      snapshot.forEach(doc => {
+        if (!onlySamples || sampleIds.has(doc.id)) {
+          docsToDelete.push(doc.ref);
+          count++;
+        }
+      });
+
+      for (let i = 0; i < docsToDelete.length; i += BATCH_SIZE) {
+        const chunk = docsToDelete.slice(i, i + BATCH_SIZE);
+        const batch = db.batch();
+        chunk.forEach(ref => batch.delete(ref));
+        await batch.commit();
+      }
+
+      this.saveLocalCache([]);
+      if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
+        window.ICM_CONFIG.logAuditEvent('WIKI_PURGE_NODES', 'knowledge_nodes', { count, onlySamples });
+      }
+
+      return count;
     }
   };
 })();
