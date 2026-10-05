@@ -230,6 +230,47 @@
       return idsArray.length;
     },
 
+    // Mover pasta ou arquivo para outro destino (Master Admin e Coordenação Geral)
+    moveNode: async function (nodeId, newParentId, allNodes = []) {
+      const db = this.getDb();
+      if (!db) throw new Error('Firestore não está conectado.');
+      if (!this.isCoordOrAdmin()) {
+        throw new Error('Acesso restrito: apenas o Master Admin e a Coordenação Geral podem mover itens da Base de Conhecimento.');
+      }
+
+      const targetParentId = newParentId || null;
+
+      if (targetParentId === nodeId) {
+        throw new Error('Não é possível mover um item para dentro de si mesmo.');
+      }
+
+      // Prevenção rigorosa de ciclo hierárquico caso o item seja uma pasta
+      if (targetParentId) {
+        let curr = targetParentId;
+        const visited = new Set();
+        while (curr) {
+          if (curr === nodeId) {
+            throw new Error('Não é possível mover uma pasta para dentro dela mesma ou para uma de suas subpastas.');
+          }
+          visited.add(curr);
+          const pNode = allNodes.find(n => n.id === curr);
+          curr = (pNode && pNode.parentId && !visited.has(pNode.parentId)) ? pNode.parentId : null;
+        }
+      }
+
+      const ref = db.collection(COLLECTION_NAME).doc(nodeId);
+      await ref.set({
+        parentId: targetParentId,
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+
+      if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
+        window.ICM_CONFIG.logAuditEvent('WIKI_NODE_MOVE', `node:${nodeId}`, { newParentId: targetParentId });
+      }
+
+      return true;
+    },
+
     // Carga inicial/seed para o Firestore com MERGE CONSTRUTIVO (nunca destrutivo)
     seedToFirestore: async function (initialNodes) {
       const db = this.getDb();

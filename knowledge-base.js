@@ -138,6 +138,202 @@
       }
     },
 
+    // Modal interativo de movimentação de pastas e arquivos (Master Admin e Coordenação Geral)
+    openMoveModal: function (nodeId) {
+      if (!window.KnowledgeService || !window.KnowledgeService.isCoordOrAdmin()) {
+        alert('Acesso restrito: apenas o Master Admin e a Coordenação Geral podem mover pastas e arquivos.');
+        return;
+      }
+
+      const node = this.getNode(nodeId);
+      if (!node) return;
+
+      const isFolder = node.type === 'folder';
+      const itemTypeLabel = isFolder ? 'Pasta' : (node.type === 'presentation' ? 'Apresentação' : (node.type === 'media' ? 'Mídia' : 'Documento'));
+
+      // Nós proibidos como destino:
+      // Se for pasta, ela não pode ser movida para dentro dela mesma nem para nenhum de seus descendentes
+      const forbiddenIds = new Set();
+      if (isFolder) {
+        const collectDescendants = (pId) => {
+          forbiddenIds.add(pId);
+          this.nodes.filter(n => n.parentId === pId).forEach(child => collectDescendants(child.id));
+        };
+        collectDescendants(nodeId);
+      } else {
+        forbiddenIds.add(nodeId);
+      }
+
+      // Localização atual do item
+      let currentParentTitle = '🏛️ Raiz da Base de Conhecimento';
+      if (node.parentId) {
+        const pNode = this.getNode(node.parentId);
+        if (pNode) currentParentTitle = `📁 ${pNode.title}`;
+      }
+
+      // Pastas disponíveis
+      const availableFolders = this.nodes.filter(n => n.type === 'folder' && !forbiddenIds.has(n.id));
+
+      // Ordena alfabeticamente pelo caminho completo
+      const getFolderPath = (folderId) => {
+        const ancestors = this.getAncestors(folderId);
+        return ancestors.map(a => a.title).join(' / ');
+      };
+
+      availableFolders.sort((a, b) => getFolderPath(a.id).localeCompare(getFolderPath(b.id)));
+
+      let folderOptions = `<option value="" ${!node.parentId ? 'selected' : ''}>🏛️ Raiz da Base de Conhecimento (Nível Principal)</option>`;
+      availableFolders.forEach(f => {
+        const isCurrent = (node.parentId === f.id);
+        const path = getFolderPath(f.id);
+        folderOptions += `<option value="${f.id}" ${isCurrent ? 'selected' : ''}>📁 ${path}${isCurrent ? ' (Local atual)' : ''}</option>`;
+      });
+
+      let modal = document.getElementById('modal-wiki-move-node');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'modal-wiki-move-node';
+        modal.className = 'fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 transition-all duration-200';
+        document.body.appendChild(modal);
+      }
+
+      const icon = this.getNodeIcon(node, false);
+
+      modal.innerHTML = `
+        <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+          <div class="p-5 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex items-center justify-between border-b border-amber-500/20">
+            <div class="flex items-center gap-2.5">
+              <span class="text-2xl">📦</span>
+              <div>
+                <h3 class="text-base font-bold font-heading text-white">Mover ${itemTypeLabel}</h3>
+                <p class="text-[11px] text-amber-300">Altere a pasta onde este item está localizado</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onclick="window.WikiKB.closeMoveModal()"
+              class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-sm transition cursor-pointer"
+            >✕</button>
+          </div>
+
+          <form id="form-wiki-move-node" onsubmit="window.WikiKB.executeMoveNode(event, '${node.id}')" class="p-6 space-y-4 text-xs sm:text-sm">
+            <!-- Card de Identificação do Item -->
+            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-start gap-3">
+              <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-xl flex-shrink-0 shadow-2xs">
+                ${icon}
+              </div>
+              <div class="min-w-0 flex-1">
+                <span class="text-[10px] uppercase font-bold tracking-wider text-slate-500 block mb-0.5">${itemTypeLabel}</span>
+                <h4 class="font-bold text-slate-900 truncate text-sm">${node.title}</h4>
+                <p class="text-xs text-slate-500 mt-0.5 truncate">
+                  <span class="font-semibold text-slate-600">Local atual:</span> ${currentParentTitle}
+                </p>
+              </div>
+            </div>
+
+            <!-- Seleção da Pasta Destino -->
+            <div>
+              <label for="select-wiki-move-dest" class="block font-bold text-slate-700 mb-1 text-xs">
+                Nova Pasta de Destino *
+              </label>
+              <select
+                id="select-wiki-move-dest"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-amber-600 focus:ring-2 focus:ring-amber-500/20 outline-none text-slate-800 text-xs bg-white font-medium shadow-2xs"
+              >
+                ${folderOptions}
+              </select>
+              <p class="text-[11px] text-slate-400 mt-1">
+                ${isFolder ? '⚠️ Subpastas desta pasta foram ocultadas para evitar dependências circulares.' : 'Selecione a pasta de destino ou a Raiz principal.'}
+              </p>
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onclick="window.WikiKB.closeMoveModal()"
+                class="px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs transition cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                id="btn-wiki-move-confirm"
+                class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition flex items-center gap-1.5 shadow-sm cursor-pointer"
+              >
+                <span>📦</span> <span>Mover Agora</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      `;
+
+      modal.classList.remove('hidden');
+    },
+
+    closeMoveModal: function () {
+      const modal = document.getElementById('modal-wiki-move-node');
+      if (modal) modal.classList.add('hidden');
+    },
+
+    executeMoveNode: async function (e, nodeId) {
+      if (e && e.preventDefault) e.preventDefault();
+
+      const select = document.getElementById('select-wiki-move-dest');
+      const submitBtn = document.getElementById('btn-wiki-move-confirm');
+      if (!select) return;
+
+      const newParentId = select.value.trim() || null;
+      const node = this.getNode(nodeId);
+      if (!node) return;
+
+      if ((node.parentId || null) === newParentId) {
+        alert('O item já está localizado na pasta selecionada.');
+        return;
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span>⏳</span> <span>Movendo...</span>';
+      }
+
+      try {
+        await window.KnowledgeService.moveNode(nodeId, newParentId, this.nodes);
+
+        // Atualiza na memória local
+        node.parentId = newParentId;
+        node.updatedAt = new Date().toISOString();
+
+        if (window.KnowledgeService.saveLocalCache) {
+          window.KnowledgeService.saveLocalCache(this.nodes);
+        }
+
+        // Se moveu para uma pasta, expande a pasta de destino na árvore lateral
+        if (newParentId) {
+          this.expandedFolders.add(newParentId);
+          let p = newParentId;
+          while (p) {
+            this.expandedFolders.add(p);
+            const pNode = this.getNode(p);
+            p = pNode ? pNode.parentId : null;
+          }
+        }
+
+        this.closeMoveModal();
+        this.renderTree();
+        this.selectNode(nodeId);
+
+        alert(`✅ "${node.title}" foi movido com sucesso!`);
+      } catch (err) {
+        console.error('Erro ao mover item:', err);
+        alert('❌ Falha ao mover: ' + err.message);
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<span>📦</span> <span>Mover Agora</span>';
+        }
+      }
+    },
+
     // Limpeza completa do acervo sample (Master Admin e Coordenação Geral)
     promptClearAcervo: async function () {
       if (!window.KnowledgeService || !window.KnowledgeService.isCoordOrAdmin()) {
@@ -683,6 +879,14 @@
                     ${isCoordOrAdmin ? `
                       <button
                         type="button"
+                        onclick="event.stopPropagation(); window.WikiKB.openMoveModal('${c.id}')"
+                        class="p-1 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition cursor-pointer"
+                        title="Mover ${isFld ? 'pasta' : 'arquivo'}"
+                      >
+                        📦
+                      </button>
+                      <button
+                        type="button"
                         onclick="event.stopPropagation(); window.WikiKB.promptDeleteNode('${c.id}', '${c.type}')"
                         class="p-1 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
                         title="Excluir ${isFld ? 'pasta' : 'arquivo'}"
@@ -762,6 +966,14 @@
                     <span>📁</span> <span>+ Subpasta</span>
                   </button>
                   ${folderNode && isCoordOrAdmin ? `
+                    <button
+                      type="button"
+                      onclick="window.WikiKB.openMoveModal('${folderNode.id}')"
+                      class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                      title="Mover esta pasta para outro local"
+                    >
+                      <span>📦</span> <span>Mover Pasta</span>
+                    </button>
                     <button
                       type="button"
                       onclick="window.WikiKB.promptDeleteNode('${folderNode.id}', 'folder')"
@@ -869,6 +1081,14 @@
                   <span>🖨️</span> <span>Imprimir</span>
                 </button>
                 ${isCoordOrAdmin ? `
+                  <button
+                    type="button"
+                    onclick="window.WikiKB.openMoveModal('${docNode.id}')"
+                    class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                    title="Mover este documento para outra pasta"
+                  >
+                    <span>📦</span> <span>Mover</span>
+                  </button>
                   <button
                     type="button"
                     onclick="window.WikiKB.promptDeleteNode('${docNode.id}', 'document')"
@@ -1186,6 +1406,14 @@
                 <span>📥</span> <span>Baixar Arquivo</span>
               </a>
               ${isCoordOrAdmin ? `
+                <button
+                  type="button"
+                  onclick="window.WikiKB.openMoveModal('${mediaNode.id}')"
+                  class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  title="Mover este arquivo para outra pasta"
+                >
+                  <span>📦</span> <span>Mover</span>
+                </button>
                 <button
                   type="button"
                   onclick="window.WikiKB.promptDeleteNode('${mediaNode.id}', '${mediaNode.type}')"
