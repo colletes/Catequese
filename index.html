@@ -4020,6 +4020,15 @@
               <span>📥</span> <span>Importar Acervo (JSON)</span>
             </button>
             <button
+              id="btn-wiki-sync-cache-to-cloud"
+              type="button"
+              onclick="window.WikiKB && window.WikiKB.uploadLocalCacheToFirestore()"
+              class="hidden px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-md cursor-pointer animate-pulse"
+              title="Sincronizar todos os materiais do cache local diretamente no Cloud Firestore"
+            >
+              <span>☁️</span> <span>Sincronizar na Nuvem</span>
+            </button>
+            <button
               id="btn-wiki-gemini-key"
               type="button"
               onclick="window.GeminiReferenceExtractor && window.GeminiReferenceExtractor.openApiKeyModal()"
@@ -20245,14 +20254,19 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       if (!data || typeof data !== 'object') return;
       Object.entries(data).forEach(([key, val]) => {
         const [etapa, turma] = key.split('__');
+        if (!etapa || !turma) return;
+        const hasRecords = !!(val && val.records && Object.keys(val.records).length > 0);
+        // Turma sem registros e sem datas personalizadas não tem nada a proteger nem a enviar.
+        if (!hasRecords && !(val && val.customizedDates)) return;
+        // merge:true evita que um navegador com dados vazios apague registros já salvos na nuvem.
         window.firebaseDb.collection('turma_chamadas').doc(key).set({
-          etapa: etapa || currentAlunosEtapa,
-          turma: turma || currentAlunosTurma,
+          etapa: etapa,
+          turma: turma,
           dates: (val && val.dates) || [],
           records: (val && val.records) || {},
           customizedDates: !!(val && val.customizedDates),
           updatedAt: new Date().toISOString()
-        }).catch(e => console.warn('Sync Firestore chamadas error:', key, e));
+        }, { merge: true }).catch(e => console.warn('Sync Firestore chamadas error:', key, e));
       });
     }
 
@@ -20281,12 +20295,24 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             if (key === 'Crisma Adultos__Turma 03' && cloudDates.length !== TURMA_LORENA_DATES_2026_2.length) {
               cloudDates = [...TURMA_LORENA_DATES_2026_2];
             }
+            // União por data/aluno: o que existe só no navegador não é perdido; a nuvem vence em conflito.
+            const cloudRecords = cloudData.records || {};
+            const localRecords = (db[key] && db[key].records) || {};
+            const mergedRecords = {};
+            let localHasExtra = false;
+            new Set([...Object.keys(localRecords), ...Object.keys(cloudRecords)]).forEach(date => {
+              mergedRecords[date] = Object.assign({}, localRecords[date], cloudRecords[date]);
+              Object.keys(localRecords[date] || {}).forEach(id => {
+                if (!(cloudRecords[date] && id in cloudRecords[date])) localHasExtra = true;
+              });
+            });
             db[key] = {
               dates: cloudDates,
-              records: cloudData.records || {},
+              records: mergedRecords,
               customizedDates: true
             };
             localStorage.setItem(STORAGE_KEY_CHAMADAS, JSON.stringify(db));
+            if (localHasExtra) syncAllChamadasToFirestore(db);
             if (currentAlunosSubTab === 'chamada') {
               renderChamadaSection();
             }
