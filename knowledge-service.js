@@ -176,6 +176,14 @@
       return dataToSave;
     },
 
+    // Utilitário para evitar que promessas do Firestore fiquem pendentes infinitamente
+    withTimeout: function (promise, timeoutMs = 8000, errorMsg = 'Operação com o Firestore demorou mais que o esperado.') {
+      return Promise.race([
+        promise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error(errorMsg)), timeoutMs))
+      ]);
+    },
+
     // Exclusão de arquivo ou nó individual (Master Admin e Coordenação Geral)
     deleteNode: async function (nodeId) {
       const db = this.getDb();
@@ -184,7 +192,11 @@
         throw new Error('Acesso restrito: apenas o Master Admin e a Coordenação Geral podem excluir itens da Wiki.');
       }
 
-      await db.collection(COLLECTION_NAME).doc(nodeId).delete();
+      await this.withTimeout(
+        db.collection(COLLECTION_NAME).doc(nodeId).delete(),
+        8000,
+        'Tempo limite ao excluir do Firestore.'
+      );
 
       if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
         window.ICM_CONFIG.logAuditEvent('WIKI_NODE_DELETE', `node:${nodeId}`);
@@ -220,7 +232,7 @@
         const chunk = idsArray.slice(i, i + BATCH_SIZE);
         const batch = db.batch();
         chunk.forEach(id => batch.delete(db.collection(COLLECTION_NAME).doc(id)));
-        await batch.commit();
+        await this.withTimeout(batch.commit(), 10000, 'Tempo limite ao excluir lote de pastas no Firestore.');
       }
 
       if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
@@ -228,6 +240,93 @@
       }
 
       return idsArray.length;
+    },
+
+    // Exclusão em lote de múltiplos nós selecionados (pastas e arquivos)
+    deleteNodesBatch: async function (nodeIds = [], allNodes = []) {
+      const db = this.getDb();
+      if (!db) throw new Error('Firestore não está conectado.');
+      if (!this.isCoordOrAdmin()) {
+        throw new Error('Acesso restrito: apenas o Master Admin e a Coordenação Geral podem excluir múltiplos itens.');
+      }
+
+      // Encontra todos os nós e seus descendentes recursivamente
+      const toDelete = new Set(nodeIds);
+      let added = true;
+      while (added) {
+        added = false;
+        for (const n of allNodes) {
+          if (!toDelete.has(n.id) && n.parentId && toDelete.has(n.parentId)) {
+            toDelete.add(n.id);
+            added = true;
+          }
+        }
+      }
+
+      const BATCH_SIZE = 400;
+      const idsArray = Array.from(toDelete);
+      for (let i = 0; i < idsArray.length; i += BATCH_SIZE) {
+        const chunk = idsArray.slice(i, i + BATCH_SIZE);
+        const batch = db.batch();
+        chunk.forEach(id => batch.delete(db.collection(COLLECTION_NAME).doc(id)));
+        await this.withTimeout(batch.commit(), 10000, 'Tempo limite ao excluir lote no Firestore.');
+      }
+
+      if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
+        window.ICM_CONFIG.logAuditEvent('WIKI_NODES_BATCH_DELETE', 'knowledge_nodes', { count: idsArray.length });
+      }
+
+      return idsArray.length;
+    },
+
+    // Mover lote de múltiplos nós selecionados para uma pasta destino
+    moveNodesBatch: async function (nodeIds = [], newParentId, allNodes = []) {
+      const db = this.getDb();
+      if (!db) throw new Error('Firestore não está conectado.');
+      if (!this.isCoordOrAdmin()) {
+        throw new Error('Acesso restrito: apenas o Master Admin e a Coordenação Geral podem mover múltiplos itens.');
+      }
+
+      const targetParentId = newParentId || null;
+
+      // Validação de ciclo: se targetParentId for um dos selecionados ou descendente de um dos selecionados
+      if (targetParentId) {
+        const forbiddenIds = new Set(nodeIds);
+        let added = true;
+        while (added) {
+          added = false;
+          for (const n of allNodes) {
+            if (!forbiddenIds.has(n.id) && n.parentId && forbiddenIds.has(n.parentId)) {
+              forbiddenIds.add(n.id);
+              added = true;
+            }
+          }
+        }
+        if (forbiddenIds.has(targetParentId)) {
+          throw new Error('Não é possível mover os itens para uma pasta que está entre os selecionados ou suas subpastas.');
+        }
+      }
+
+      const BATCH_SIZE = 400;
+      const totalMoved = nodeIds.length;
+      for (let i = 0; i < totalMoved; i += BATCH_SIZE) {
+        const chunk = nodeIds.slice(i, i + BATCH_SIZE);
+        const batch = db.batch();
+        chunk.forEach(id => {
+          const ref = db.collection(COLLECTION_NAME).doc(id);
+          batch.set(ref, {
+            parentId: targetParentId,
+            updatedAt: new Date().toISOString()
+          }, { merge: true });
+        });
+        await this.withTimeout(batch.commit(), 10000, 'Tempo limite ao mover lote no Firestore.');
+      }
+
+      if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
+        window.ICM_CONFIG.logAuditEvent('WIKI_NODES_BATCH_MOVE', 'knowledge_nodes', { count: totalMoved, newParentId: targetParentId });
+      }
+
+      return totalMoved;
     },
 
     // Mover pasta ou arquivo para outro destino (Master Admin e Coordenação Geral)
@@ -259,10 +358,14 @@
       }
 
       const ref = db.collection(COLLECTION_NAME).doc(nodeId);
-      await ref.set({
-        parentId: targetParentId,
-        updatedAt: new Date().toISOString()
-      }, { merge: true });
+      await this.withTimeout(
+        ref.set({
+          parentId: targetParentId,
+          updatedAt: new Date().toISOString()
+        }, { merge: true }),
+        8000,
+        'Tempo limite ao mover item no Firestore.'
+      );
 
       if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
         window.ICM_CONFIG.logAuditEvent('WIKI_NODE_MOVE', `node:${nodeId}`, { newParentId: targetParentId });

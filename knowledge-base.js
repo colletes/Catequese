@@ -23,6 +23,7 @@
     activeEtapaFilter: 'all',
     searchQuery: '',
     expandedFolders: new Set(),
+    selectedNodeIds: new Set(),
     sidebarCollapsedMobile: false,
     cloudConnected: false,
     isFirestoreEmpty: true,
@@ -78,7 +79,339 @@
       }
     },
 
-    // Ação de exclusão individual ou em cascata (Master Admin e Coordenação Geral)
+    // ========================================================================
+    // SELEÇÃO MÚLTIPLA E AÇÕES EM LOTE (MOVER E EXCLUIR VÁRIOS ITENS)
+    // ========================================================================
+    toggleSelectNode: function (nodeId, isChecked, event) {
+      if (event) event.stopPropagation();
+      if (isChecked) {
+        this.selectedNodeIds.add(nodeId);
+      } else {
+        this.selectedNodeIds.delete(nodeId);
+      }
+      this.updateSelectionToolbar();
+      this.updateCardSelectionVisuals();
+    },
+
+    toggleSelectAllInFolder: function (isChecked) {
+      const folderId = this.activeNodeId;
+      const children = this.getChildren(folderId);
+      children.forEach(c => {
+        if (isChecked) this.selectedNodeIds.add(c.id);
+        else this.selectedNodeIds.delete(c.id);
+      });
+      this.updateSelectionToolbar();
+      this.updateCardSelectionVisuals();
+    },
+
+    clearSelection: function () {
+      this.selectedNodeIds.clear();
+      this.updateSelectionToolbar();
+      this.updateCardSelectionVisuals();
+    },
+
+    updateCardSelectionVisuals: function () {
+      document.querySelectorAll('.wiki-card-checkbox').forEach(cb => {
+        const id = cb.getAttribute('data-node-id');
+        const isSel = this.selectedNodeIds.has(id);
+        cb.checked = isSel;
+        const card = document.getElementById('wiki-card-' + id);
+        if (card) {
+          if (isSel) {
+            card.classList.add('ring-2', 'ring-emerald-500', 'bg-emerald-50/50');
+          } else {
+            card.classList.remove('ring-2', 'ring-emerald-500', 'bg-emerald-50/50');
+          }
+        }
+      });
+      const masterCb = document.getElementById('wiki-select-all-checkbox');
+      if (masterCb) {
+        const children = this.getChildren(this.activeNodeId);
+        const allChecked = children.length > 0 && children.every(c => this.selectedNodeIds.has(c.id));
+        masterCb.checked = allChecked;
+      }
+    },
+
+    updateSelectionToolbar: function () {
+      let toolbar = document.getElementById('wiki-selection-toolbar');
+      const count = this.selectedNodeIds.size;
+
+      if (count === 0) {
+        if (toolbar) toolbar.classList.add('hidden');
+        return;
+      }
+
+      if (!toolbar) {
+        toolbar = document.createElement('div');
+        toolbar.id = 'wiki-selection-toolbar';
+        toolbar.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-4 duration-200';
+        document.body.appendChild(toolbar);
+      }
+
+      toolbar.innerHTML = `
+        <div class="flex items-center gap-2 pr-2 border-r border-slate-700 text-xs">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="font-bold text-emerald-300">${count}</span>
+          <span class="text-slate-300">${count === 1 ? 'item selecionado' : 'itens selecionados'}</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            onclick="window.WikiKB.openBatchMoveModal()"
+            class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition shadow-2xs cursor-pointer"
+            title="Mover os itens selecionados para outra pasta"
+          >
+            <span>📦</span> <span>Mover (${count})</span>
+          </button>
+          <button
+            type="button"
+            onclick="window.WikiKB.promptDeleteSelectedNodes()"
+            class="px-3.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs flex items-center gap-1.5 transition shadow-2xs cursor-pointer"
+            title="Excluir os itens selecionados da Base de Conhecimento"
+          >
+            <span>🗑️</span> <span>Excluir (${count})</span>
+          </button>
+          <button
+            type="button"
+            onclick="window.WikiKB.clearSelection()"
+            class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold transition cursor-pointer"
+            title="Desmarcar seleção"
+          >
+            ✕ Desmarcar
+          </button>
+        </div>
+      `;
+
+      toolbar.classList.remove('hidden');
+    },
+
+    // Exclusão em lote dos nós selecionados
+    promptDeleteSelectedNodes: async function () {
+      if (!window.KnowledgeService || !window.KnowledgeService.isCoordOrAdmin()) {
+        alert('Acesso restrito: apenas o Master Admin e a Coordenação Geral podem excluir itens da Base de Conhecimento.');
+        return;
+      }
+
+      const count = this.selectedNodeIds.size;
+      if (count === 0) return;
+
+      const proceed = confirm(
+        `⚠️ EXCLUIR MÚLTIPLOS ITENS\n\n` +
+        `Deseja realmente excluir os ${count} itens selecionados?\n\n` +
+        `• Todas as subpastas e materiais contidos nas pastas selecionadas também serão excluídos.\n` +
+        `• Esta ação não pode ser desfeita.`
+      );
+      if (!proceed) return;
+
+      const selectedIds = Array.from(this.selectedNodeIds);
+      const previousNodes = [...this.nodes];
+
+      // 1. Atualização Otimista Imediata na UI
+      const removedIds = new Set();
+      const collect = (pId) => {
+        removedIds.add(pId);
+        this.nodes.filter(n => n.parentId === pId).forEach(c => collect(c.id));
+      };
+      selectedIds.forEach(id => {
+        const n = this.getNode(id);
+        if (n && n.type === 'folder') collect(id);
+        else removedIds.add(id);
+      });
+
+      this.nodes = this.nodes.filter(n => !removedIds.has(n.id));
+      this.selectedNodeIds.clear();
+
+      if (this.activeNodeId && removedIds.has(this.activeNodeId)) {
+        this.activeNodeId = null;
+      }
+
+      if (window.KnowledgeService.saveLocalCache) {
+        window.KnowledgeService.saveLocalCache(this.nodes);
+      }
+
+      this.renderTree();
+      this.selectNode(this.activeNodeId);
+      this.updateSelectionToolbar();
+
+      // 2. Sincronização em segundo plano no Firestore
+      try {
+        const totalDeleted = await window.KnowledgeService.deleteNodesBatch(selectedIds, previousNodes);
+        console.log(`✅ Lote excluído no Firestore com sucesso (${totalDeleted} registros).`);
+      } catch (err) {
+        console.warn('Aviso ao sincronizar exclusão em lote no Firestore:', err);
+        alert(`⚠️ Itens removidos da tela local.\nAviso do Firestore: ${err.message}`);
+      }
+    },
+
+    // Modal de movimentação em lote
+    openBatchMoveModal: function () {
+      if (!window.KnowledgeService || !window.KnowledgeService.isCoordOrAdmin()) {
+        alert('Acesso restrito ao Master Admin e à Coordenação Geral.');
+        return;
+      }
+      const count = this.selectedNodeIds.size;
+      if (count === 0) return;
+
+      const selectedIds = Array.from(this.selectedNodeIds);
+      const selectedNodes = selectedIds.map(id => this.getNode(id)).filter(Boolean);
+
+      // Pastas proibidas como destino: os próprios itens selecionados e seus descendentes
+      const forbiddenIds = new Set(selectedIds);
+      selectedNodes.filter(n => n.type === 'folder').forEach(f => {
+        const collect = (pId) => {
+          forbiddenIds.add(pId);
+          this.nodes.filter(n => n.parentId === pId).forEach(c => collect(c.id));
+        };
+        collect(f.id);
+      });
+
+      // Pastas disponíveis
+      const availableFolders = this.nodes.filter(n => n.type === 'folder' && !forbiddenIds.has(n.id));
+      const getFolderPath = (folderId) => {
+        const ancestors = this.getAncestors(folderId);
+        return ancestors.map(a => a.title).join(' / ');
+      };
+      availableFolders.sort((a, b) => getFolderPath(a.id).localeCompare(getFolderPath(b.id)));
+
+      let folderOptions = `<option value="">🏛️ Raiz da Base de Conhecimento (Nível Principal)</option>`;
+      availableFolders.forEach(f => {
+        const path = getFolderPath(f.id);
+        folderOptions += `<option value="${f.id}">📁 ${path}</option>`;
+      });
+
+      let modal = document.getElementById('modal-wiki-batch-move');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'modal-wiki-batch-move';
+        modal.className = 'fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 transition-all duration-200';
+        document.body.appendChild(modal);
+      }
+
+      const foldersCount = selectedNodes.filter(n => n.type === 'folder').length;
+      const filesCount = selectedNodes.length - foldersCount;
+
+      modal.innerHTML = `
+        <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+          <div class="p-5 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex items-center justify-between border-b border-amber-500/20">
+            <div class="flex items-center gap-2.5">
+              <span class="text-2xl">📦</span>
+              <div>
+                <h3 class="text-base font-bold font-heading text-white">Mover ${count} Itens em Lote</h3>
+                <p class="text-[11px] text-amber-300">Escolha a pasta de destino para todos os itens selecionados</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onclick="window.WikiKB.closeBatchMoveModal()"
+              class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-sm transition cursor-pointer"
+            >✕</button>
+          </div>
+
+          <form id="form-wiki-batch-move" onsubmit="window.WikiKB.executeBatchMove(event)" class="p-6 space-y-4 text-xs sm:text-sm">
+            <div class="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-between text-xs font-semibold text-amber-900">
+              <span>Itens selecionados:</span>
+              <span class="font-bold">${foldersCount > 0 ? `📁 ${foldersCount} pasta(s) • ` : ''}📄 ${filesCount} arquivo(s) (Total: ${count})</span>
+            </div>
+
+            <div>
+              <label for="select-wiki-batch-move-dest" class="block font-bold text-slate-700 mb-1 text-xs">
+                Nova Pasta de Destino *
+              </label>
+              <select
+                id="select-wiki-batch-move-dest"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-amber-600 focus:ring-2 focus:ring-amber-500/20 outline-none text-slate-800 text-xs bg-white font-medium shadow-2xs"
+              >
+                ${folderOptions}
+              </select>
+              <p class="text-[11px] text-slate-400 mt-1">
+                Pastas selecionadas e suas subpastas foram ocultadas para evitar dependências circulares.
+              </p>
+            </div>
+
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onclick="window.WikiKB.closeBatchMoveModal()"
+                class="px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs transition cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                id="btn-wiki-batch-move-confirm"
+                class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition flex items-center gap-1.5 shadow-sm cursor-pointer"
+              >
+                <span>📦</span> <span>Mover ${count} Itens</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      `;
+
+      modal.classList.remove('hidden');
+    },
+
+    closeBatchMoveModal: function () {
+      const modal = document.getElementById('modal-wiki-batch-move');
+      if (modal) modal.classList.add('hidden');
+    },
+
+    executeBatchMove: async function (e) {
+      if (e && e.preventDefault) e.preventDefault();
+      const select = document.getElementById('select-wiki-batch-move-dest');
+      const submitBtn = document.getElementById('btn-wiki-batch-move-confirm');
+      if (!select) return;
+
+      const newParentId = select.value.trim() || null;
+      const selectedIds = Array.from(this.selectedNodeIds);
+      if (selectedIds.length === 0) return;
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span>⏳</span> <span>Movendo em lote...</span>';
+      }
+
+      // 1. Atualização Otimista Imediata na UI
+      selectedIds.forEach(id => {
+        const node = this.getNode(id);
+        if (node) {
+          node.parentId = newParentId;
+          node.updatedAt = new Date().toISOString();
+        }
+      });
+
+      this.selectedNodeIds.clear();
+
+      if (window.KnowledgeService.saveLocalCache) {
+        window.KnowledgeService.saveLocalCache(this.nodes);
+      }
+
+      if (newParentId) {
+        this.expandedFolders.add(newParentId);
+        let p = newParentId;
+        while (p) {
+          this.expandedFolders.add(p);
+          const pNode = this.getNode(p);
+          p = pNode ? pNode.parentId : null;
+        }
+      }
+
+      this.closeBatchMoveModal();
+      this.renderTree();
+      this.selectNode(newParentId || this.activeNodeId);
+      this.updateSelectionToolbar();
+
+      // 2. Sincronização em segundo plano no Firestore
+      try {
+        await window.KnowledgeService.moveNodesBatch(selectedIds, newParentId, this.nodes);
+        console.log(`✅ ${selectedIds.length} itens movidos com sucesso no Firestore!`);
+      } catch (err) {
+        console.warn('Aviso ao sincronizar movimentação em lote:', err);
+        alert(`⚠️ Itens movidos localmente na tela.\nAviso do Firestore: ${err.message}`);
+      }
+    },
+
+    // Ação de exclusão individual otimista (Master Admin e Coordenação Geral)
     promptDeleteNode: async function (nodeId, nodeType) {
       if (!window.KnowledgeService || !window.KnowledgeService.isCoordOrAdmin()) {
         alert('Acesso restrito: apenas o Master Admin e a Coordenação Geral podem excluir itens da Base de Conhecimento.');
@@ -86,7 +419,10 @@
       }
 
       const node = this.getNode(nodeId);
-      if (!node) return;
+      if (!node) {
+        alert('Item não encontrado na memória.');
+        return;
+      }
 
       const isFolder = node.type === 'folder' || nodeType === 'folder';
       const typeLabel = isFolder ? 'a pasta' : 'o arquivo';
@@ -98,43 +434,49 @@
       const proceed = confirm(msg);
       if (!proceed) return;
 
+      // 1. Atualização Otimista Imediata na UI (remove na hora para o usuário ver)
+      const previousNodes = [...this.nodes];
+      const removedIds = new Set();
+      if (isFolder) {
+        const collectDescendants = (pId) => {
+          removedIds.add(pId);
+          this.nodes.filter(n => n.parentId === pId).forEach(child => collectDescendants(child.id));
+        };
+        collectDescendants(nodeId);
+        this.nodes = this.nodes.filter(n => !removedIds.has(n.id));
+      } else {
+        removedIds.add(nodeId);
+        this.nodes = this.nodes.filter(n => n.id !== nodeId);
+      }
+
+      // Se o nó excluído era o ativo, volta para a pasta pai ou raiz
+      if (this.activeNodeId === nodeId || removedIds.has(this.activeNodeId)) {
+        this.activeNodeId = node.parentId || null;
+      }
+
+      this.selectedNodeIds.delete(nodeId);
+      removedIds.forEach(id => this.selectedNodeIds.delete(id));
+
+      if (window.KnowledgeService.saveLocalCache) {
+        window.KnowledgeService.saveLocalCache(this.nodes);
+      }
+
+      this.renderTree();
+      this.selectNode(this.activeNodeId);
+      this.updateSelectionToolbar();
+
+      // 2. Sincronização em segundo plano com o Firestore
       try {
         let deletedCount = 1;
         if (isFolder) {
-          deletedCount = await window.KnowledgeService.deleteNodeCascade(nodeId, this.nodes);
+          deletedCount = await window.KnowledgeService.deleteNodeCascade(nodeId, previousNodes);
         } else {
           await window.KnowledgeService.deleteNode(nodeId);
         }
-
-        // Se o nó excluído era o ativo, volta para a pasta pai ou raiz
-        if (this.activeNodeId === nodeId) {
-          this.activeNodeId = node.parentId || null;
-        }
-
-        // Remove da lista local em memória
-        if (isFolder) {
-          const removedIds = new Set();
-          const collectDescendants = (pId) => {
-            removedIds.add(pId);
-            this.nodes.filter(n => n.parentId === pId).forEach(child => collectDescendants(child.id));
-          };
-          collectDescendants(nodeId);
-          this.nodes = this.nodes.filter(n => !removedIds.has(n.id));
-        } else {
-          this.nodes = this.nodes.filter(n => n.id !== nodeId);
-        }
-
-        if (window.KnowledgeService.saveLocalCache) {
-          window.KnowledgeService.saveLocalCache(this.nodes);
-        }
-
-        this.renderTree();
-        this.selectNode(this.activeNodeId);
-
-        alert(`✅ ${isFolder ? 'Pasta' : 'Arquivo'} excluído com sucesso${isFolder && deletedCount > 1 ? ` (${deletedCount} itens removidos)` : ''}!`);
+        console.log(`✅ Item excluído do Firestore com sucesso (${deletedCount} registros).`);
       } catch (err) {
-        console.error('Erro ao excluir item:', err);
-        alert('❌ Falha ao excluir: ' + err.message);
+        console.warn('Aviso: Falha ao sincronizar exclusão com o Firestore:', err);
+        alert('⚠️ Item removido da tela local.\nAviso do Firestore: ' + err.message);
       }
     },
 
@@ -862,15 +1204,34 @@
 
           const descSnippet = c.description || (c.contentMarkdown ? c.contentMarkdown.replace(/[#*`>]/g, '').substring(0, 110) + '...' : 'Sem descrição complementar.');
 
+          const isSelected = this.selectedNodeIds.has(c.id);
+          const cardBorder = isSelected
+            ? 'border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/40'
+            : 'border-slate-200/90 ' + borderHoverColor;
+
           return `
             <div
+              id="wiki-card-${c.id}"
               onclick="window.WikiKB.selectNode('${c.id}')"
-              class="group bg-white hover:bg-slate-50/80 p-5 rounded-2xl border border-slate-200/90 ${borderHoverColor} shadow-2xs hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col justify-between"
+              class="group bg-white hover:bg-slate-50/80 p-5 rounded-2xl border ${cardBorder} shadow-2xs hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col justify-between"
             >
               <div>
                 <div class="flex items-center justify-between gap-2 mb-3">
-                  <div class="w-10 h-10 rounded-xl bg-slate-100 group-hover:scale-105 transition-transform flex items-center justify-center text-xl shadow-2xs">
-                    ${icon}
+                  <div class="flex items-center gap-2.5">
+                    ${isCoordOrAdmin ? `
+                      <input
+                        type="checkbox"
+                        data-node-id="${c.id}"
+                        class="wiki-card-checkbox w-4 h-4 rounded text-emerald-600 accent-emerald-600 cursor-pointer"
+                        onclick="event.stopPropagation()"
+                        onchange="window.WikiKB.toggleSelectNode('${c.id}', this.checked, event)"
+                        ${isSelected ? 'checked' : ''}
+                        title="Selecionar para mover ou excluir em lote"
+                      />
+                    ` : ''}
+                    <div class="w-10 h-10 rounded-xl bg-slate-100 group-hover:scale-105 transition-transform flex items-center justify-center text-xl shadow-2xs">
+                      ${icon}
+                    </div>
                   </div>
                   <div class="flex items-center gap-1.5">
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${badgeBg}">
@@ -990,10 +1351,24 @@
 
           <!-- Conteúdo da Pasta (Grid de Cards) -->
           <div>
-            <div class="flex items-center justify-between mb-3 px-1">
+            <div class="flex items-center justify-between mb-3 px-1 flex-wrap gap-2">
               <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 font-heading">
                 Itens nesta pasta (${children.length})
               </h3>
+              ${isCoordOrAdmin && children.length > 0 ? `
+                <div class="flex items-center gap-2">
+                  <label class="inline-flex items-center gap-2 text-xs text-slate-600 font-bold cursor-pointer select-none hover:text-emerald-700 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs transition">
+                    <input
+                      type="checkbox"
+                      id="wiki-select-all-checkbox"
+                      onchange="window.WikiKB.toggleSelectAllInFolder(this.checked)"
+                      class="w-4 h-4 rounded text-emerald-600 accent-emerald-600 cursor-pointer"
+                      ${children.length > 0 && children.every(c => this.selectedNodeIds.has(c.id)) ? 'checked' : ''}
+                    />
+                    <span>Selecionar todos (${children.length})</span>
+                  </label>
+                </div>
+              ` : ''}
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               ${childCardsHtml}
@@ -1001,6 +1376,8 @@
           </div>
         </div>
       `;
+
+      setTimeout(() => this.updateSelectionToolbar(), 10);
     },
 
     // ========================================================================
