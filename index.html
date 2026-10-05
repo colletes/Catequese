@@ -20423,6 +20423,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         if (viewChamada) viewChamada.classList.remove('hidden');
         if (quickActions) quickActions.classList.remove('hidden');
         renderChamadaSection();
+        // Puxa da nuvem ao abrir a aba: o sync inicial pode rodar antes do login concluir e falhar sem retry.
+        syncTurmaChamadasFromFirestore(currentAlunosEtapa, currentAlunosTurma);
       } else {
         if (btnCadastro) {
           btnCadastro.className = 'flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition shadow-xs bg-indigo-600 text-white border border-indigo-700';
