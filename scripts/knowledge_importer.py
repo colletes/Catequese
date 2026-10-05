@@ -21,6 +21,7 @@ import unicodedata
 import http.server
 import socketserver
 import urllib.parse
+import subprocess
 from datetime import datetime
 
 # Constantes e Caminhos
@@ -28,7 +29,33 @@ DEFAULT_PORT = 8080
 DEFAULT_ONEDRIVE_PATH = os.path.expanduser(
     "~/Library/CloudStorage/OneDrive-Pessoal/Catequese 1"
 )
+CURRENT_SCAN_PATH = DEFAULT_ONEDRIVE_PATH
 UF_DATALESS = 0x40000000  # Flag do macOS para arquivos na nuvem do FileProvider (OneDrive/iCloud)
+
+
+def choose_folder_dialog(default_dir=None):
+    """Abre o diálogo nativo do Finder no macOS para escolher uma pasta"""
+    if sys.platform != 'darwin':
+        return None
+    try:
+        script = 'tell application "System Events"\n'
+        script += '  activate\n'
+        if default_dir and os.path.exists(os.path.expanduser(default_dir)):
+            clean_dir = os.path.abspath(os.path.expanduser(default_dir)).replace('"', '\\"')
+            script += f'  set chosen to choose folder with prompt "Selecione a pasta de materiais da Catequese:" default location (POSIX file "{clean_dir}")\n'
+        else:
+            script += '  set chosen to choose folder with prompt "Selecione a pasta de materiais da Catequese:"\n'
+        script += '  return POSIX path of chosen\n'
+        script += 'end tell'
+
+        res = subprocess.run(["osascript", "-e", script], capture_output=True, text=True, timeout=120)
+        if res.returncode == 0 and res.stdout.strip():
+            return res.stdout.strip()
+        return None
+    except Exception as e:
+        print(f"Aviso ao abrir diálogo de pastas: {e}")
+        return None
+
 
 # Tenta carregar python-docx e fitz (PyMuPDF)
 try:
@@ -145,14 +172,28 @@ def extract_pdf_text(file_path, max_pages=25):
 
 def scan_onedrive_directory(base_path):
     """
-    Escaneia recursivamente o diretório do OneDrive e constrói
+    Escaneia recursivamente o diretório informado e constrói
     a árvore completa de pastas e arquivos compatíveis com o schema da Wiki.
     """
+    if not base_path:
+        base_path = DEFAULT_ONEDRIVE_PATH
+
+    base_path = os.path.abspath(os.path.expanduser(base_path))
+
     if not os.path.exists(base_path):
         return {
             'error': f'Diretório não encontrado: {base_path}',
             'nodes': [],
-            'stats': {}
+            'stats': {},
+            'basePath': base_path
+        }
+
+    if not os.path.isdir(base_path):
+        return {
+            'error': f'O caminho informado não é uma pasta: {base_path}',
+            'nodes': [],
+            'stats': {},
+            'basePath': base_path
         }
 
     nodes = []
@@ -345,6 +386,100 @@ HTML_DASHBOARD = r"""<!DOCTYPE html>
   <!-- Container Principal -->
   <main class="max-w-6xl mx-auto p-4 sm:p-6 space-y-6">
 
+    <!-- Card de Seleção e Configuração da Pasta do Acervo -->
+    <div class="bg-white p-5 rounded-3xl border-2 border-emerald-500/30 shadow-md space-y-3">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <label for="input-folder-path" class="text-xs font-bold text-slate-800 flex items-center gap-2">
+          <span class="text-xl">📁</span>
+          <span class="font-heading text-sm font-black text-slate-900">Pasta do Acervo para Escaneamento:</span>
+        </label>
+        <span class="text-[11px] text-slate-400">Escolha pelo Finder do Mac ou digite qualquer caminho</span>
+      </div>
+
+      <div class="flex flex-col md:flex-row items-stretch gap-2.5">
+        <div class="relative flex-1">
+          <input
+            type="text"
+            id="input-folder-path"
+            placeholder="/Users/.../OneDrive-Pessoal/Catequese 1"
+            onkeydown="if(event.key==='Enter') triggerScanFromInput()"
+            class="w-full pl-3 pr-8 py-2.5 text-xs font-mono bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-slate-800 transition shadow-inner"
+          />
+          <button
+            type="button"
+            onclick="clearFolderPath()"
+            class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer font-bold"
+            title="Limpar campo"
+          >
+            ✕
+          </button>
+        </div>
+
+        <!-- Botão Procurar Pasta (Nativo macOS Finder) -->
+        <button
+          type="button"
+          id="btn-pick-folder"
+          onclick="pickFolderNative()"
+          class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs shadow-xs transition flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
+          title="Abre a janela do Finder para escolher qualquer pasta no seu computador"
+        >
+          <span>📂</span> <span id="btn-pick-folder-text">Escolher Pasta no Mac...</span>
+        </button>
+
+        <!-- Botão Escanear Pasta -->
+        <button
+          type="button"
+          id="btn-scan-folder"
+          onclick="triggerScanFromInput()"
+          class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
+        >
+          <span>🔍</span> <span id="btn-scan-folder-text">Escanear Pasta</span>
+        </button>
+      </div>
+
+      <!-- Atalhos rápidos para pastas conhecidas -->
+      <div class="flex items-center gap-2 flex-wrap pt-1 text-xs">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Atalhos rápidos:</span>
+        <button
+          type="button"
+          onclick="setFolderPathShortcut('~/Library/CloudStorage/OneDrive-Pessoal/Catequese 1')"
+          class="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] font-semibold transition cursor-pointer"
+        >
+          ☁️ OneDrive / Catequese 1
+        </button>
+        <button
+          type="button"
+          onclick="setFolderPathShortcut('~/Library/CloudStorage/OneDrive-Pessoal/Catequese')"
+          class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-[11px] font-semibold transition cursor-pointer"
+        >
+          ☁️ OneDrive / Catequese
+        </button>
+        <button
+          type="button"
+          onclick="setFolderPathShortcut('~/Library/CloudStorage/OneDrive-Pessoal')"
+          class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-[11px] font-semibold transition cursor-pointer"
+        >
+          ☁️ OneDrive Raiz
+        </button>
+        <button
+          type="button"
+          onclick="setFolderPathShortcut('~/Documents')"
+          class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-[11px] font-semibold transition cursor-pointer"
+        >
+          📄 Documentos
+        </button>
+      </div>
+
+      <!-- Alerta de Erro de Diretório -->
+      <div id="folder-error-alert" class="hidden p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <span>⚠️</span>
+          <span id="folder-error-msg">Diretório não encontrado.</span>
+        </div>
+        <button type="button" onclick="document.getElementById('folder-error-alert').classList.add('hidden')" class="text-red-600 font-bold px-2 py-0.5">✕</button>
+      </div>
+    </div>
+
     <!-- Card de Alerta sobre Arquivos na Nuvem (OneDrive Dataless) -->
     <div id="cloud-info-banner" class="hidden p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
       <div class="flex items-center gap-3">
@@ -517,19 +652,104 @@ HTML_DASHBOARD = r"""<!DOCTYPE html>
 
     // Inicialização
     window.addEventListener('DOMContentLoaded', () => {
-      runScan();
+      const savedPath = localStorage.getItem('catequese_import_path');
+      const inputEl = document.getElementById('input-folder-path');
+      if (savedPath && inputEl) {
+        inputEl.value = savedPath;
+      }
+      runScan(savedPath || '');
     });
 
-    async function runScan() {
-      const tbody = document.getElementById('tree-table-body');
-      tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-slate-400">⏳ Escaneando pastas e materiais no OneDrive...</td></tr>';
+    function clearFolderPath() {
+      const inputEl = document.getElementById('input-folder-path');
+      if (inputEl) {
+        inputEl.value = '';
+        inputEl.focus();
+      }
+    }
+
+    function triggerScanFromInput() {
+      const inputEl = document.getElementById('input-folder-path');
+      const val = (inputEl && inputEl.value) ? inputEl.value.trim() : '';
+      runScan(val);
+    }
+
+    function setFolderPathShortcut(path) {
+      const inputEl = document.getElementById('input-folder-path');
+      if (inputEl) inputEl.value = path;
+      runScan(path);
+    }
+
+    async function pickFolderNative() {
+      const btn = document.getElementById('btn-pick-folder');
+      const btnText = document.getElementById('btn-pick-folder-text');
+      const oldText = btnText ? btnText.textContent : 'Escolher Pasta no Mac...';
+      const inputEl = document.getElementById('input-folder-path');
+      const currentVal = inputEl ? inputEl.value.trim() : '';
+
       try {
-        const res = await fetch('/api/scan');
+        if (btnText) btnText.textContent = '⏳ Selecionando no Mac...';
+        btn.classList.add('opacity-75');
+
+        const res = await fetch('/api/choose-folder?current=' + encodeURIComponent(currentVal));
+        const data = await res.json();
+
+        if (data && data.path) {
+          if (inputEl) inputEl.value = data.path;
+          localStorage.setItem('catequese_import_path', data.path);
+          await runScan(data.path);
+        }
+      } catch (err) {
+        console.error('Erro ao escolher pasta:', err);
+      } finally {
+        if (btnText) btnText.textContent = oldText;
+        btn.classList.remove('opacity-75');
+      }
+    }
+
+    async function runScan(targetPath) {
+      const tbody = document.getElementById('tree-table-body');
+      const scanBtnText = document.getElementById('btn-scan-folder-text');
+      if (scanBtnText) scanBtnText.textContent = 'Escaneando...';
+
+      tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-slate-400">⏳ Escaneando pastas e materiais...</td></tr>';
+
+      const errAlert = document.getElementById('folder-error-alert');
+      if (errAlert) errAlert.classList.add('hidden');
+
+      try {
+        const queryParam = targetPath ? `?path=${encodeURIComponent(targetPath)}` : '';
+        const res = await fetch(`/api/scan${queryParam}`);
         const data = await res.json();
         currentData = data;
+
+        if (data.error) {
+          if (errAlert) {
+            errAlert.classList.remove('hidden');
+            document.getElementById('folder-error-msg').textContent = data.error;
+          }
+          tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-red-500 font-bold">⚠️ ${data.error}</td></tr>`;
+          document.getElementById('stat-folders').textContent = '0';
+          document.getElementById('stat-files').textContent = '0';
+          document.getElementById('stat-docx').textContent = '0';
+          document.getElementById('stat-pdf').textContent = '0';
+          document.getElementById('stat-pptx').textContent = '0';
+          document.getElementById('stat-media').textContent = '0';
+          document.getElementById('path-label').textContent = data.basePath || targetPath || '';
+          return;
+        }
+
+        if (data.basePath) {
+          const inputEl = document.getElementById('input-folder-path');
+          if (inputEl) inputEl.value = data.basePath;
+          localStorage.setItem('catequese_import_path', data.basePath);
+        }
+
         renderDashboard(data);
       } catch (err) {
         tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-red-500 font-bold">❌ Erro ao conectar com o serviço local: ${err.message}</td></tr>`;
+      } finally {
+        if (scanBtnText) scanBtnText.textContent = 'Escanear Pasta';
       }
     }
 
@@ -544,11 +764,15 @@ HTML_DASHBOARD = r"""<!DOCTYPE html>
       document.getElementById('stat-media').textContent = stats.media_count || 0;
       document.getElementById('path-label').textContent = data.basePath || '';
 
+      const banner = document.getElementById('cloud-info-banner');
       if (stats.dataless_count > 0) {
-        const banner = document.getElementById('cloud-info-banner');
-        banner.classList.remove('hidden');
-        document.getElementById('cloud-count-text').textContent = 
-          `${stats.dataless_count} de ${stats.total_files} arquivos estão no OneDrive em nuvem (Files On-Demand).`;
+        if (banner) {
+          banner.classList.remove('hidden');
+          document.getElementById('cloud-count-text').textContent = 
+            `${stats.dataless_count} de ${stats.total_files} arquivos estão no OneDrive em nuvem (Files On-Demand).`;
+        }
+      } else {
+        if (banner) banner.classList.add('hidden');
       }
 
       // Inicializa todos os itens selecionados por padrão
@@ -809,11 +1033,28 @@ class KnowledgeImporterHTTPHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         elif path == '/api/scan':
-            data = scan_onedrive_directory(DEFAULT_ONEDRIVE_PATH)
+            global CURRENT_SCAN_PATH
+            query = urllib.parse.parse_qs(parsed.query)
+            target = query.get('path', [''])[0].strip()
+            if not target:
+                target = CURRENT_SCAN_PATH or DEFAULT_ONEDRIVE_PATH
+            data = scan_onedrive_directory(target)
+            if not data.get('error'):
+                CURRENT_SCAN_PATH = data.get('basePath')
             self.send_response(200)
             self.send_header('Content-Type', 'application/json; charset=utf-8')
             self.end_headers()
             self.wfile.write(json.dumps(data, ensure_ascii=False).encode('utf-8'))
+            return
+
+        elif path == '/api/choose-folder':
+            query = urllib.parse.parse_qs(parsed.query)
+            current = query.get('current', [''])[0].strip() or CURRENT_SCAN_PATH or DEFAULT_ONEDRIVE_PATH
+            chosen = choose_folder_dialog(current)
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(json.dumps({'path': chosen}, ensure_ascii=False).encode('utf-8'))
             return
 
         elif path == '/api/file-content':
@@ -873,8 +1114,11 @@ class KnowledgeImporterHTTPHandler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
 
 
-def start_server(port=DEFAULT_PORT):
+def start_server(port=DEFAULT_PORT, initial_path=None):
     """Inicia o servidor HTTP local do assistente"""
+    global CURRENT_SCAN_PATH
+    if initial_path:
+        CURRENT_SCAN_PATH = os.path.abspath(os.path.expanduser(initial_path))
     handler = KnowledgeImporterHTTPHandler
     socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("", port), handler) as httpd:
@@ -882,8 +1126,9 @@ def start_server(port=DEFAULT_PORT):
         print("⛪ PASTORAL DA CATEQUESE — SANTUÁRIO IMACULADO CORAÇÃO DE MARIA")
         print("🚀 Assistente Local de Ingestão em Lote do OneDrive")
         print("=" * 70)
-        print(f"📂 Diretório Base: {DEFAULT_ONEDRIVE_PATH}")
+        print(f"📂 Diretório Inicial: {CURRENT_SCAN_PATH}")
         print(f"🌐 Servidor ativo em: http://localhost:{port}")
+        print("💡 Você pode escolher qualquer pasta diretamente na interface web!")
         print("📌 Pressione Ctrl+C para encerrar o servidor.")
         print("=" * 70)
         try:
@@ -894,6 +1139,16 @@ def start_server(port=DEFAULT_PORT):
 
 if __name__ == '__main__':
     port = DEFAULT_PORT
-    if len(sys.argv) > 1 and sys.argv[1].isdigit():
-        port = int(sys.argv[1])
-    start_server(port)
+    custom_path = None
+    args = sys.argv[1:]
+    for i, arg in enumerate(args):
+        if arg in ('--path', '-p') and i + 1 < len(args):
+            custom_path = args[i + 1]
+        elif arg.startswith('--path='):
+            custom_path = arg.split('=', 1)[1]
+        elif arg.isdigit():
+            port = int(arg)
+        elif not arg.startswith('-') and (os.path.exists(os.path.expanduser(arg)) or '/' in arg or '~' in arg):
+            custom_path = arg
+
+    start_server(port, custom_path)

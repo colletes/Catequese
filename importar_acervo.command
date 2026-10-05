@@ -13,8 +13,13 @@ echo "⛪ SANTUÁRIO IMACULADO CORAÇÃO DE MARIA — CATEQUESE ICM"
 echo "📚 Assistente Local de Ingestão do Acervo (OneDrive)"
 echo "======================================================================"
 echo ""
-echo "📂 Pasta padrão do OneDrive:"
+echo "📂 Pasta padrão inicial:"
 echo "   $HOME/Library/CloudStorage/OneDrive-Pessoal/Catequese 1"
+echo ""
+echo "💡 DICA: Na página que abrirá, você pode escolher qualquer pasta:"
+echo "   • Clicando no botão 'Escolher Pasta no Mac...' (abre a janela do Finder);"
+echo "   • Digitando ou colando qualquer caminho local;"
+echo "   • Ou clicando nos atalhos rápidos do OneDrive."
 echo ""
 echo "🚀 Iniciando servidor local na porta 8080..."
 echo "🌐 A interface web abrirá automaticamente no seu navegador."
@@ -34,8 +39,8 @@ if command -v open >/dev/null 2>&1; then
   (sleep 1.5 && open "http://localhost:8080") &
 fi
 
-# Executa o servidor Python
-python3 "scripts/knowledge_importer.py" 8080
+# Executa o servidor Python (repassa argumentos se houver)
+python3 "scripts/knowledge_importer.py" 8080 "$@"
 
 # Se o servidor for interrompido
 echo ""
