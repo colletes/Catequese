@@ -556,7 +556,7 @@ HTML_DASHBOARD = r"""<!DOCTYPE html>
         onclick="startBatchImport()"
         class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-bold text-xs shadow-md transition flex items-center gap-2 cursor-pointer"
       >
-        <span>🚀</span> <span>Iniciar Ingestão no Firestore</span>
+        <span>📦</span> <span>Preparar &amp; Gerar Carga do Acervo</span>
       </button>
     </div>
 
@@ -913,32 +913,57 @@ HTML_DASHBOARD = r"""<!DOCTYPE html>
       }
     }
 
-    async function exportSeedJson() {
+    function triggerDownloadJson(filename, jsonString) {
+      try {
+        const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        console.warn('Download fallback:', e);
+      }
+    }
+
+    async function exportSeedJson(silent = false) {
       if (!currentData) return;
       try {
+        const jsonStr = JSON.stringify(currentData, null, 2);
         const res = await fetch('/api/export-seed', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(currentData)
+          body: jsonStr
         });
         const r = await res.json();
-        alert('✅ Acervo exportado com sucesso em:\n' + r.file);
+        
+        // Também dispara download no navegador para conveniência
+        triggerDownloadJson('onedrive_seed.json', jsonStr);
+
+        if (!silent) {
+          alert('✅ Acervo exportado e baixado com sucesso!\n\nArquivo salvo no disco em:\n' + r.file + '\n\nE na sua pasta de Downloads.');
+        }
+        return r.file;
       } catch (err) {
-        alert('Erro ao exportar JSON: ' + err.message);
+        if (!silent) alert('Erro ao exportar JSON: ' + err.message);
+        throw err;
       }
     }
 
     // Ingestão em Lote
     async function startBatchImport() {
       if (selectedIds.size === 0) {
-        alert('Selecione pelo menos uma pasta ou material para importar.');
+        alert('Selecione pelo menos uma pasta ou material para preparar a carga.');
         return;
       }
 
       const proceed = confirm(
-        `Deseja iniciar a importação de ${selectedIds.size} itens selecionados?\n\n` +
-        `• Estratégia de Merge Construtivo: preserva todos os registros já existentes.\n` +
-        `• Arquivos são processados e organizados por etapas.`
+        `Deseja preparar a carga de ${selectedIds.size} itens selecionados do acervo?\n\n` +
+        `• O assistente irá consolidar todas as pastas e documentos no formato oficial da Wiki.\n` +
+        `• Gerará o arquivo onedrive_seed.json para publicação no site via Master Admin.`
       );
       if (!proceed) return;
 
@@ -959,25 +984,26 @@ HTML_DASHBOARD = r"""<!DOCTYPE html>
         logEl.scrollTop = logEl.scrollHeight;
       }
 
-      log(`Iniciando ingestão de ${items.length} nós com merge construtivo...`);
+      log(`Iniciando consolidação de ${items.length} nós do acervo...`);
 
-      // Salva lote via endpoint local com backup
       for (const item of items) {
         processed++;
         const pct = Math.round((processed / items.length) * 100);
         progressBar.style.width = pct + '%';
         percentLabel.textContent = pct + '%';
-        statusTitle.textContent = `Processando (${processed}/${items.length}): ${item.title}`;
+        statusTitle.textContent = `Preparando (${processed}/${items.length}): ${item.title}`;
         log(`✓ Nó preparado: [${item.type.toUpperCase()}] ${item.title}`);
-        await new Promise(r => setTimeout(r, 20));
+        await new Promise(r => setTimeout(r, 15));
       }
 
-      // 1. Grava no arquivo oficial de carga local (backup permanente)
-      await exportSeedJson();
+      // 1. Grava no arquivo oficial de carga local e inicia download
+      log('Salvando scripts/onedrive_seed.json e iniciando download...');
+      await exportSeedJson(true);
 
-      // 2. Se Firebase Firestore estiver disponível, tenta sincronizar os nós selecionados
-      if (firebaseDb) {
-        log('Gravando lotes no Cloud Firestore (knowledge_nodes)...');
+      // 2. Se houver usuário autenticado no Firebase local, tenta gravar
+      const currentUser = firebase.auth && firebase.auth().currentUser;
+      if (firebaseDb && currentUser) {
+        log('Usuário autenticado detectado. Gravando lotes no Cloud Firestore (knowledge_nodes)...');
         try {
           const BATCH_SIZE = 400;
           for (let i = 0; i < items.length; i += BATCH_SIZE) {
@@ -994,24 +1020,32 @@ HTML_DASHBOARD = r"""<!DOCTYPE html>
             log(`✓ Lote gravado no Firestore (${Math.min(i + BATCH_SIZE, items.length)}/${items.length})`);
           }
           statusTitle.textContent = '✅ Ingestão finalizada e salva no Cloud Firestore!';
-          log('✅ Todos os nós foram mesclados no Firestore com merge construtivo!');
+          log('✅ Todos os nós foram gravados no Firestore com merge construtivo!');
           alert('🎉 Ingestão de materiais concluída com sucesso no Cloud Firestore!');
           return;
         } catch (dbErr) {
           console.warn('Firestore direto:', dbErr);
-          log(`⚠️ Aviso do Firestore: ${dbErr.message}`);
-          log('💡 O arquivo onedrive_seed.json foi salvo com sucesso!');
-          log('👉 Acesse o site oficial como Master Admin e use o botão "📥 Importar Acervo (JSON)" para publicar.');
-          statusTitle.textContent = '📦 Seed JSON gerado (Pronto para importar no site)';
-          alert('✅ Arquivo onedrive_seed.json gerado com sucesso!\n\nVocê também pode importar este arquivo no site oficial com 1 clique usando o botão "📥 Importar Acervo (JSON)" exclusivo do Master Admin.');
-          return;
         }
       }
 
-      statusTitle.textContent = '✅ Ingestão finalizada com sucesso!';
-      log('✅ Carga completa exportada em scripts/onedrive_seed.json!');
-      alert('🎉 Arquivo de carga exportado com sucesso!');
-    }
+      // 3. Instruções oficiais para importação no site (Master Admin)
+      statusTitle.textContent = '📦 Carga pronta! Importe no site oficial.';
+      log('✅ Carga completa exportada em: scripts/onedrive_seed.json');
+      log('📥 Arquivo baixado para sua pasta de Downloads.');
+      log('👉 Acesse o site oficial como Master Admin e clique em "📥 Importar Acervo (JSON)" para publicar.');
+
+      alert(
+        `🎉 Carga do Acervo Preparada com Sucesso!\n\n` +
+        `• ${items.length} itens (pastas e materiais) foram consolidados.\n` +
+        `• O arquivo "onedrive_seed.json" foi gerado na pasta "scripts/" e baixado para o seu computador.\n\n` +
+        `👉 COMO PUBLICAR NO SITE DA CATEQUESE:\n` +
+        `1. Acesse o site oficial (https://colletes.github.io/Catequese);\n` +
+        `2. Certifique-se de estar logado como Master Admin (colletes@gmail.com);\n` +
+        `3. Vá na aba "Base de Conhecimento";\n` +
+        `4. Clique no botão "📥 Importar Acervo (JSON)";\n` +
+        `5. Selecione o arquivo "onedrive_seed.json" e clique em "Iniciar Ingestão no Firestore".\n\n` +
+        `Seus materiais aparecerão imediatamente na Wiki!`
+      );
   </script>
 </body>
 </html>
