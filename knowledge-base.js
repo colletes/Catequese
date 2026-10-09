@@ -730,9 +730,17 @@
             this.nodes = remoteNodes;
             this.updateCloudStatusBadge('cloud', remoteNodes.length);
           } else if (isOnline && isFirestoreEmpty) {
-            this.nodes = [];
-            this.updateCloudStatusBadge('empty', 0);
+            if (this.nodes && this.nodes.length > 0) {
+              console.log(`ℹ️ WikiKB: Firestore vazio. Mantendo ${this.nodes.length} nós locais prontos para sincronização.`);
+              this.updateCloudStatusBadge('empty-with-local', this.nodes.length);
+            } else {
+              this.nodes = [];
+              this.updateCloudStatusBadge('empty', 0);
+            }
           } else {
+            if (remoteNodes && remoteNodes.length > 0) {
+              this.nodes = remoteNodes;
+            }
             this.updateCloudStatusBadge('offline', this.nodes.length);
           }
 
@@ -758,9 +766,14 @@
       const badge = document.getElementById('wiki-cloud-status-badge');
       if (!badge) return;
 
+      const totalItems = count !== undefined ? count : this.nodes.length;
+
       if (status === 'cloud') {
         badge.className = 'inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/40 shadow-2xs';
-        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>Nuvem Firestore (${count} itens)</span>`;
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>Nuvem Firestore (${totalItems} itens)</span>`;
+      } else if (status === 'empty-with-local') {
+        badge.className = 'inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-500/40 shadow-2xs';
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span><span>Local pronto para Nuvem (${totalItems} itens)</span>`;
       } else if (status === 'empty') {
         badge.className = 'inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-500/40 shadow-2xs';
         badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span><span>Firestore Vazio</span>`;
@@ -772,7 +785,54 @@
         badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span><span>Conectando Firestore...</span>`;
       } else {
         badge.className = 'inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shadow-2xs';
-        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span><span>Cache Local (${count || this.nodes.length} itens)</span>`;
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span><span>Cache Local (${totalItems} itens)</span>`;
+      }
+    },
+
+    // Enviar acervo local diretamente para o Cloud Firestore
+    uploadLocalCacheToFirestore: async function () {
+      if (!window.KnowledgeService || !window.KnowledgeService.isCoordOrAdmin()) {
+        alert('Acesso restrito ao Master Admin e à Coordenação Geral.');
+        return;
+      }
+      if (!this.nodes || !this.nodes.length) {
+        alert('Nenhum material encontrado no cache local para sincronizar.');
+        return;
+      }
+
+      const proceed = confirm(
+        `☁️ SINCRONIZAR ACERVO COM O CLOUD FIRESTORE\n\n` +
+        `Deseja enviar os ${this.nodes.length} itens do seu cache local para o banco de dados na nuvem?\n\n` +
+        `• Sincroniza todas as pastas e documentos com merge construtivo seguro no Firestore.\n` +
+        `• Todos os catequistas terão acesso imediato aos materiais.\n\n` +
+        `Deseja iniciar agora?`
+      );
+      if (!proceed) return;
+
+      const btn = document.getElementById('btn-wiki-sync-cache-to-cloud');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>⏳</span> <span>Sincronizando Nuvem...</span>';
+      }
+
+      this.updateCloudStatusBadge('syncing', this.nodes.length);
+
+      try {
+        await window.KnowledgeService.importNodesBatch(this.nodes);
+        this.updateCloudStatusBadge('cloud', this.nodes.length);
+        this.isFirestoreEmpty = false;
+        alert(`🎉 Sucesso! ${this.nodes.length} materiais foram sincronizados com o Cloud Firestore na nuvem!`);
+        this.updateAdminActionsVisibility();
+        this.renderTree();
+      } catch (err) {
+        console.error('Erro na sincronização:', err);
+        alert('❌ Não foi possível sincronizar com o Firestore:\n' + err.message);
+        this.updateCloudStatusBadge('empty-with-local', this.nodes.length);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>☁️</span> <span>Sincronizar na Nuvem</span>';
+        }
       }
     },
 
@@ -807,14 +867,25 @@
 
     // Retorna nó por ID
     getNode: function (id) {
-      return this.nodes.find(n => n.id === id);
+      if (!id) return null;
+      return this.nodes.find(n => n && n.id === id);
     },
 
-    // Retorna filhos imediatos de um nó
+    // Retorna filhos imediatos de um nó (trata nulos, vazios e órfãos como nós de raiz)
     getChildren: function (parentId) {
+      const isLookingForRoot = (parentId === null || parentId === undefined || parentId === '');
       return this.nodes
-        .filter(n => n.parentId === parentId)
-        .sort((a, b) => (a.order || 99) - (b.order || 99) || a.title.localeCompare(b.title));
+        .filter(n => {
+          if (!n || !n.id) return false;
+          if (isLookingForRoot) {
+            // É raiz se não tem parentId (null, undefined, vazio '')
+            if (n.parentId === null || n.parentId === undefined || n.parentId === '') return true;
+            // OU se o parentId aponta para um nó que não existe mais na lista (nó órfão)
+            return !this.nodes.some(p => p && p.id === n.parentId);
+          }
+          return n.parentId === parentId;
+        })
+        .sort((a, b) => (a.order || 99) - (b.order || 99) || (a.title || '').localeCompare(b.title || ''));
     },
 
     // Retorna a trilha ancestral completa para breadcrumbs

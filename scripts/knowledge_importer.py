@@ -70,6 +70,12 @@ try:
 except ImportError:
     HAS_FITZ = False
 
+try:
+    import pptx
+    HAS_PPTX = True
+except ImportError:
+    HAS_PPTX = False
+
 
 def slugify(text):
     """Gera slugs amigáveis para identificadores de nós"""
@@ -168,6 +174,59 @@ def extract_pdf_text(file_path, max_pages=25):
         return "\n\n".join(pages_text)
     except Exception as e:
         return f"# Erro na extração do PDF\n\n{str(e)}"
+
+
+def extract_pptx_markdown(file_path):
+    """Extrai slides de apresentação PPTX em seções Markdown"""
+    if not HAS_PPTX:
+        return None
+    try:
+        from pptx import Presentation
+        prs = Presentation(file_path)
+        slides_md = []
+        for idx, slide in enumerate(prs.slides, 1):
+            slide_texts = []
+            for shape in slide.shapes:
+                if shape.has_text_frame:
+                    for paragraph in shape.text_frame.paragraphs:
+                        t = paragraph.text.strip()
+                        if t:
+                            slide_texts.append(t)
+            if slide_texts:
+                slides_md.append(f"### Slide {idx}\n\n" + "\n\n".join(slide_texts))
+        return "\n\n---\n\n".join(slides_md) if slides_md else "*(Apresentação sem texto legível)*"
+    except Exception as e:
+        return f"# Erro na conversão do PPTX\n\nNão foi possível ler a apresentação: {str(e)}"
+
+
+def extract_file_content(file_path):
+    """Extrai o conteúdo legível de um arquivo local para Markdown"""
+    if not file_path or not os.path.exists(file_path):
+        return None
+
+    # Checa se o arquivo é online-only no OneDrive (UF_DATALESS)
+    try:
+        st = os.stat(file_path)
+        if bool(st.st_flags & UF_DATALESS):
+            return "*(Arquivo pendente de download no OneDrive. Clique com o botão direito na pasta no Finder e selecione 'Sempre Manter Neste Dispositivo' para baixar os conteúdos.)*"
+    except Exception:
+        pass
+
+    ext = os.path.splitext(file_path)[1].lower()
+    if ext in ('.docx', '.doc'):
+        return extract_docx_markdown(file_path)
+    elif ext == '.pdf':
+        return extract_pdf_text(file_path)
+    elif ext in ('.pptx', '.ppt'):
+        return extract_pptx_markdown(file_path)
+    elif ext in ('.txt', '.md'):
+        try:
+            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                return f.read()
+        except Exception as e:
+            return f"# Erro ao ler arquivo texto\n\n{str(e)}"
+    return None
+
 
 
 def scan_onedrive_directory(base_path):
@@ -1128,16 +1187,43 @@ class KnowledgeImporterHTTPHandler(http.server.SimpleHTTPRequestHandler):
             body = self.rfile.read(length)
             try:
                 data = json.loads(body.decode('utf-8'))
+                nodes = data.get('nodes', []) if isinstance(data, dict) else data
+
+                # ENRIQUECIMENTO: Extrai o conteúdo real de cada arquivo antes de salvar
+                extracted_count = 0
+                dataless_count = 0
+                for n in nodes:
+                    if n.get('type') in ('document', 'presentation'):
+                        local_path = n.get('fullLocalPath')
+                        if local_path and os.path.exists(local_path):
+                            content = extract_file_content(local_path)
+                            if content and not content.startswith("*("):
+                                n['contentMarkdown'] = content
+                                n['isDataless'] = False
+                                extracted_count += 1
+                            else:
+                                n['contentMarkdown'] = content or "*(Documento sem conteúdo legível)*"
+                                dataless_count += 1
+                        else:
+                            n['contentMarkdown'] = "*(Arquivo não localizado no disco local)*"
+
                 target_file = os.path.join(
                     os.path.dirname(__file__), 'onedrive_seed.json'
                 )
                 with open(target_file, 'w', encoding='utf-8') as f:
                     json.dump(data, f, ensure_ascii=False, indent=2)
 
+                print(f"✅ Exportação concluída: {extracted_count} documentos extraídos, {dataless_count} arquivos pendentes de download no OneDrive.")
+
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
-                self.wfile.write(json.dumps({'status': 'ok', 'file': target_file}).encode('utf-8'))
+                self.wfile.write(json.dumps({
+                    'status': 'ok',
+                    'file': target_file,
+                    'extractedCount': extracted_count,
+                    'datalessCount': dataless_count
+                }).encode('utf-8'))
             except Exception as e:
                 self.send_response(500)
                 self.end_headers()
@@ -1146,6 +1232,55 @@ class KnowledgeImporterHTTPHandler(http.server.SimpleHTTPRequestHandler):
 
         self.send_response(404)
         self.end_headers()
+
+
+def export_seed_cli(scan_path=None):
+    """Executa a exportação do acervo diretamente pela linha de comando com extração de conteúdo"""
+    path = scan_path or CURRENT_SCAN_PATH
+    print("=" * 70)
+    print("⛪ PASTORAL DA CATEQUESE — SANTUÁRIO IMACULADO CORAÇÃO DE MARIA")
+    print("📦 Exportação Consolidada do Acervo com Extração de Conteúdo")
+    print("=" * 70)
+    print(f"📂 Diretório: {path}")
+
+    res = scan_onedrive_directory(path)
+    if 'error' in res:
+        print(f"❌ Erro ao escanear: {res['error']}")
+        return
+
+    nodes = res.get('nodes', [])
+    print(f"📦 Total de nós mapeados: {len(nodes)}")
+
+    extracted_count = 0
+    dataless_count = 0
+
+    print("📄 Extraindo texto e formatação dos documentos (DOCX, PDF, PPTX)...")
+    for n in nodes:
+        if n.get('type') in ('document', 'presentation'):
+            local_path = n.get('fullLocalPath')
+            if local_path and os.path.exists(local_path):
+                content = extract_file_content(local_path)
+                if content and not content.startswith("*("):
+                    n['contentMarkdown'] = content
+                    n['isDataless'] = False
+                    extracted_count += 1
+                else:
+                    n['contentMarkdown'] = content or "*(Documento sem conteúdo legível)*"
+                    dataless_count += 1
+            else:
+                n['contentMarkdown'] = "*(Arquivo não localizado no disco)*"
+
+    target_file = os.path.join(os.path.dirname(__file__), 'onedrive_seed.json')
+    with open(target_file, 'w', encoding='utf-8') as f:
+        json.dump(res, f, ensure_ascii=False, indent=2)
+
+    print("=" * 70)
+    print(f"🎉 Arquivo gerado com sucesso em: {target_file}")
+    print(f"   • {extracted_count} documentos com texto e formatação completa!")
+    if dataless_count > 0:
+        print(f"   • ⚠️ {dataless_count} arquivos estão como 'Somente Online' no OneDrive.")
+        print("     👉 Como resolver: No Finder, clique com botão direito na pasta do OneDrive e selecione 'Sempre Manter Neste Dispositivo'.")
+    print("=" * 70)
 
 
 def start_server(port=DEFAULT_PORT, initial_path=None):
@@ -1174,9 +1309,12 @@ def start_server(port=DEFAULT_PORT, initial_path=None):
 if __name__ == '__main__':
     port = DEFAULT_PORT
     custom_path = None
+    cli_export = False
     args = sys.argv[1:]
     for i, arg in enumerate(args):
-        if arg in ('--path', '-p') and i + 1 < len(args):
+        if arg in ('--export', '-e'):
+            cli_export = True
+        elif arg in ('--path', '-p') and i + 1 < len(args):
             custom_path = args[i + 1]
         elif arg.startswith('--path='):
             custom_path = arg.split('=', 1)[1]
@@ -1185,4 +1323,8 @@ if __name__ == '__main__':
         elif not arg.startswith('-') and (os.path.exists(os.path.expanduser(arg)) or '/' in arg or '~' in arg):
             custom_path = arg
 
-    start_server(port, custom_path)
+    if cli_export:
+        export_seed_cli(custom_path)
+    else:
+        start_server(port, custom_path)
+

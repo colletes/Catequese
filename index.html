@@ -866,6 +866,16 @@
               <span id="user-mgmt-pending-badge" class="hidden bg-amber-500 text-slate-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow-xs">0</span>
             </button>
 
+            <!-- Cadastrar Catequista (Exclusivo Master Admin, Coord. Geral e Vice Geral) -->
+            <button
+              id="btn-menu-cadastrar-catequista"
+              onclick="closeProfileDropdown(); openCadastrarCatequistaModal();"
+              class="hidden w-full flex items-center gap-2.5 px-3.5 py-2.5 hover:bg-slate-800/80 transition text-left text-amber-300 group cursor-pointer"
+            >
+              <span class="text-base group-hover:scale-110 transition-transform">➕</span>
+              <span class="font-semibold text-white group-hover:text-amber-200">Cadastrar Catequista</span>
+            </button>
+
             <!-- Permissões RBAC -->
             <button
               onclick="closeProfileDropdown(); openRbacMatrixModal();"
@@ -2181,6 +2191,10 @@
               </p>
             </div>
             <div class="flex items-center gap-2 flex-wrap">
+              <button id="btn-cadastrar-catequista" onclick="openCadastrarCatequistaModal()" class="hidden inline-flex items-center gap-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-md transition transform active:scale-95 font-heading" title="Cadastrar novo catequista (Exclusivo Coordenação Geral, Vice e Master Admin)">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                <span>➕ Cadastrar Catequista</span>
+              </button>
               <button onclick="exportarCatequistasCSV()" class="inline-flex items-center gap-1.5 bg-[#d4a94f] hover:bg-[#e6c27a] text-slate-950 font-bold px-4 py-2 rounded-xl text-xs shadow-md transition transform active:scale-95 font-heading">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 <span>Exportar Planilha (CSV)</span>
@@ -3646,6 +3660,197 @@
 
     <!-- Input oculto para upload de foto de catequistas -->
     <input type="file" id="input-catequista-foto" accept="image/png,image/jpeg,image/webp,image/jpg" class="hidden" onchange="handleCatequistaPhotoSelected(event)">
+
+    <!-- ========================================== -->
+    <!-- MODAL: CADASTRAR NOVO CATEQUISTA (2026)    -->
+    <!-- Exclusivo Master Admin, Coord. Geral e Vice -->
+    <!-- ========================================== -->
+    <div id="modal-cadastrar-catequista" class="hidden fixed inset-0 z-[60] bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+      <div class="bg-white rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl border border-slate-200 my-auto transform transition-all flex flex-col max-h-[92vh]">
+        
+        <!-- Header com gradiente escuro e borda dourada -->
+        <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 text-white p-5 sm:p-6 relative border-b-2 border-[#d4a94f] flex-shrink-0">
+          <button onclick="closeCadastrarCatequistaModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white p-2 rounded-xl hover:bg-white/10 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#d4a94f] to-[#b88d36] text-slate-950 flex items-center justify-center text-2xl font-bold shadow-lg shrink-0">
+              ➕
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-black uppercase tracking-wider text-[#d4a94f] font-heading">Pastoral da Catequese 2026</span>
+                <span class="text-[9.5px] font-bold text-amber-300 bg-amber-950/90 border border-amber-500/40 px-2 py-0.5 rounded-full">Coordenação Geral &amp; Admin</span>
+              </div>
+              <h3 class="text-lg sm:text-xl font-black font-heading text-white">Cadastrar Catequista</h3>
+              <p class="text-xs text-slate-300">Inclusão oficial no banco de dados e vinculação pastoral</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Body -->
+        <form id="form-cadastrar-catequista" onsubmit="handleCadastrarCatequistaSubmit(event)" class="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1 text-xs">
+          
+          <!-- Bloco Foto de Perfil & Identificação Rápida -->
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 flex flex-col sm:flex-row items-center gap-4">
+            <div class="relative shrink-0 flex flex-col items-center">
+              <div id="cad-cat-foto-preview" onclick="triggerNewCatFotoUpload()" class="w-20 h-24 rounded-2xl bg-slate-100 border-2 border-dashed border-amber-400/80 hover:border-amber-400 text-slate-500 flex flex-col items-center justify-center gap-1 shadow-xs cursor-pointer overflow-hidden transition group" title="Clique para anexar foto 3x4">
+                <span class="text-2xl group-hover:scale-110 transition-transform">📷</span>
+                <span class="text-[9px] uppercase font-bold text-slate-400 group-hover:text-amber-600">Subir 3x4</span>
+              </div>
+              <button type="button" id="cad-cat-btn-remove-foto" onclick="removeNewCatFoto()" class="hidden text-rose-500 hover:text-rose-700 text-[10px] font-bold mt-1.5 underline">
+                Remover foto
+              </button>
+            </div>
+            <div class="flex-1 space-y-1 text-center sm:text-left">
+              <span class="text-xs font-bold text-slate-800 block">Foto de Perfil Oficial (3x4)</span>
+              <p class="text-[11px] text-slate-500 leading-relaxed">
+                Opcional. Clique no quadro ao lado para carregar uma imagem (JPG, PNG ou WebP). Você também poderá ajustar ou enquadrar o corte 3x4 na ficha após salvar.
+              </p>
+              <button type="button" onclick="triggerNewCatFotoUpload()" class="mt-1 inline-flex items-center gap-1 px-3 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-xl text-[11px] font-bold transition shadow-2xs">
+                <span>📁 Escolher Arquivo</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Bloco 1: Dados Pessoais & Contato -->
+          <div class="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200/80 space-y-3">
+            <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 font-heading flex items-center gap-2">
+              <span>👤</span> <span>Dados Pessoais &amp; Contato</span>
+            </h4>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="sm:col-span-2">
+                <label class="block text-slate-700 font-bold mb-1">Nome Completo *</label>
+                <input type="text" id="cad-cat-nome" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 bg-white outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition" placeholder="Nome completo do catequista" />
+              </div>
+
+              <div>
+                <label class="block text-slate-700 font-bold mb-1">Apelido / Como prefere ser chamado(a)</label>
+                <input type="text" id="cad-cat-apelido" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 bg-white outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition" placeholder="Ex: Carlinhos, Bia..." />
+              </div>
+
+              <div>
+                <label class="block text-slate-700 font-bold mb-1">Data de Nascimento</label>
+                <input type="text" id="cad-cat-data-nascimento" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 bg-white outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition" placeholder="DD/MM/AAAA" />
+              </div>
+
+              <div>
+                <label class="block text-slate-700 font-bold mb-1">WhatsApp / Telefone *</label>
+                <input type="text" id="cad-cat-telefone" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono font-medium text-slate-800 bg-white outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition" placeholder="(61) 9XXXX-XXXX" />
+              </div>
+
+              <div>
+                <label class="block text-slate-700 font-bold mb-1">E-mail (Preferência Google)</label>
+                <input type="email" id="cad-cat-email" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono font-medium text-slate-800 bg-white outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition" placeholder="catequista@gmail.com" />
+              </div>
+
+              <div>
+                <label class="block text-slate-700 font-bold mb-1">Profissão / Ocupação</label>
+                <input type="text" id="cad-cat-profissao" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 bg-white outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition" placeholder="Ex: Professor, Engenheiro..." />
+              </div>
+
+              <div>
+                <label class="block text-slate-700 font-bold mb-1">Estado Civil</label>
+                <select id="cad-cat-estado-civil" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 bg-white outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition">
+                  <option value="Solteiro(a)">Solteiro(a)</option>
+                  <option value="Casado(a)">Casado(a)</option>
+                  <option value="União Estável">União Estável</option>
+                  <option value="Divorciado(a)">Divorciado(a)</option>
+                  <option value="Viúvo(a)">Viúvo(a)</option>
+                  <option value="Outro">Outro</option>
+                </select>
+              </div>
+
+              <div class="sm:col-span-2">
+                <label class="block text-slate-700 font-bold mb-1">Endereço Residencial</label>
+                <input type="text" id="cad-cat-endereco" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 bg-white outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition" placeholder="Quadra, Bairro, Cidade..." />
+              </div>
+            </div>
+          </div>
+
+          <!-- Bloco 2: Atribuições Pastorais & Paróquia -->
+          <div class="bg-amber-50/70 p-4 sm:p-5 rounded-2xl border border-amber-200/80 space-y-3">
+            <h4 class="text-xs font-black uppercase tracking-wider text-amber-950 font-heading flex items-center gap-2">
+              <span>⛪</span> <span>Vínculo Pastoral &amp; Turma</span>
+            </h4>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="sm:col-span-2">
+                <label class="block text-slate-700 font-bold mb-1">Paróquia Habitual de Missa</label>
+                <input type="text" id="cad-cat-paroquia" value="Santuário do Imaculado Coração de Maria" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-900 bg-white outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition" />
+              </div>
+
+              <div>
+                <label class="block text-slate-700 font-bold mb-1">Etapa Principal *</label>
+                <select id="cad-cat-etapa-principal" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 bg-white outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition">
+                  <option value="Pré-Eucaristia">Pré-Eucaristia</option>
+                  <option value="Eucaristia I">Eucaristia I</option>
+                  <option value="Eucaristia II">Eucaristia II</option>
+                  <option value="Perseverança">Perseverança</option>
+                  <option value="Crisma Jovem">Crisma Jovem</option>
+                  <option value="Crisma Adultos">Crisma Adultos</option>
+                  <option value="Coordenação Geral">Coordenação Geral</option>
+                  <option value="Apoio Pastoral">Apoio Pastoral / Sem turma</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-slate-700 font-bold mb-1">Função / Título Pastoral *</label>
+                <select id="cad-cat-funcao-principal" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 bg-white outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition">
+                  <option value="Catequista Titular">Catequista Titular</option>
+                  <option value="Catequista Auxiliar">Catequista Auxiliar</option>
+                  <option value="Coordenador(a) de Etapa">Coordenador(a) de Etapa</option>
+                  <option value="Vice-Coordenador(a) de Etapa">Vice-Coordenador(a) de Etapa</option>
+                  <option value="Coordenador(a) Geral">Coordenador(a) Geral</option>
+                  <option value="Vice-Coordenador(a) Geral">Vice-Coordenador(a) Geral</option>
+                  <option value="Apoio Pastoral">Apoio Pastoral</option>
+                </select>
+              </div>
+
+              <div class="sm:col-span-2">
+                <label class="block text-slate-700 font-bold mb-1">Turma Vinculada (Organograma 2026)</label>
+                <select id="cad-cat-turma-vinculada" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 bg-white outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition">
+                  <option value="sem_turma">Sem Turma Regular (Apoio / Coordenação)</option>
+                  <!-- Populado dinamicamente -->
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bloco 3: Governança de Acesso ao Sistema -->
+          <div class="bg-indigo-50/70 p-4 rounded-2xl border border-indigo-200/80 space-y-2">
+            <div class="flex items-start gap-2.5">
+              <input type="checkbox" id="cad-cat-liberar-acesso" checked class="mt-1 w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-indigo-300 cursor-pointer" />
+              <div>
+                <label for="cad-cat-liberar-acesso" class="font-bold text-slate-900 cursor-pointer block text-xs">
+                  Pré-autorizar login imediato com Conta Google
+                </label>
+                <p class="text-[11px] text-slate-600 leading-snug">
+                  Se marcado e o e-mail for informado, o catequista poderá entrar no sistema via Conta Google sem ficar retido na fila de aprovações.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Input oculto para carregar foto do novo catequista -->
+          <input type="file" id="input-cad-cat-foto" accept="image/png,image/jpeg,image/webp,image/jpg" class="hidden" onchange="handleNewCatFotoSelected(event)">
+
+          <!-- Footer Actions -->
+          <div class="pt-2 flex items-center justify-between border-t border-slate-200">
+            <button type="button" onclick="closeCadastrarCatequistaModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl text-xs transition">
+              Cancelar
+            </button>
+            <button type="submit" class="inline-flex items-center gap-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-md transition transform active:scale-95 font-heading">
+              <span>💾</span> <span>Salvar &amp; Cadastrar Catequista</span>
+            </button>
+          </div>
+
+        </form>
+
+      </div>
+    </div>
 
     <!-- ========================================== -->
     <!-- MODAL: CROPPER / ENQUADRAMENTO DE FOTO 3X4 -->
@@ -6487,6 +6692,11 @@
         }
       }
 
+      // Cadastrar Catequista (Master Admin, Coordenação Geral e Vice-Coordenação)
+      if (typeof updateCadastrarCatequistaVisibility === 'function') {
+        updateCadastrarCatequistaVisibility();
+      }
+
       // Registra login na trilha de auditoria
       window.ICM_CONFIG.logAuditEvent('AUTH_LOGIN', 'sessão_ativa', {
         role: role,
@@ -6539,6 +6749,10 @@
         window.appAuthState.user = null;
         window.appAuthState.role = null;
         window.appAuthState.turnstileVerified = false;
+
+        if (typeof updateCadastrarCatequistaVisibility === 'function') {
+          updateCadastrarCatequistaVisibility();
+        }
 
         const gate = document.getElementById('auth-gate');
         if (gate) gate.classList.remove('hidden');
@@ -9546,12 +9760,20 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       if (badgeTotal) {
         badgeTotal.textContent = `${all.length} Cadastrados`;
       }
+      const statTotalCats = document.getElementById('stat-total-cats');
+      if (statTotalCats) {
+        statTotalCats.textContent = all.length;
+      }
+      if (typeof updateCadastrarCatequistaVisibility === 'function') {
+        updateCadastrarCatequistaVisibility();
+      }
 
       if (filtered.length === 0) {
         tbody.innerHTML = `
           <tr>
             <td colspan="7" class="py-8 text-center text-slate-400">
               Nenhum catequista encontrado com os filtros selecionados.
+              ${canCadastrarCatequista() ? '<div class="mt-2"><button onclick="openCadastrarCatequistaModal()" class="text-xs font-bold text-amber-600 hover:underline">➕ Deseja cadastrar um novo catequista?</button></div>' : ''}
             </td>
           </tr>
         `;
@@ -9680,6 +9902,295 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+    }
+
+    // =========================================================================
+    // CADASTRO DE CATEQUISTAS (RBAC: MASTER ADMIN, COORD. GERAL E VICE GERAL)
+    // =========================================================================
+    let newCatTempFoto = null;
+
+    function canCadastrarCatequista() {
+      if (!window.appAuthState || !window.appAuthState.user) {
+        return false;
+      }
+      const role = window.appAuthState.role;
+      const email = ((window.appAuthState.user && window.appAuthState.user.email) || '').toLowerCase();
+      const roles = (window.ICM_CONFIG && window.ICM_CONFIG.ROLES) ? window.ICM_CONFIG.ROLES : {};
+
+      const isMaster = role === roles.MASTER_ADMIN || role === 'master_admin' || email === (window.ICM_CONFIG && (window.ICM_CONFIG.MASTER_ADMIN_EMAIL || '').toLowerCase());
+      const isCoordGeral = role === roles.COORD_GERAL || role === 'coord_geral' || email === (window.ICM_CONFIG && (window.ICM_CONFIG.COORD_GERAL_EMAIL || '').toLowerCase());
+      const isViceCoord = role === roles.VICE_COORD_GERAL || role === 'vice_coord_geral' || role === 'vice_coordenador' || (window.appAuthState.turmaNome && window.appAuthState.turmaNome.toLowerCase().includes('vice')) || email === (window.ICM_CONFIG && (window.ICM_CONFIG.VICE_COORD_GERAL_EMAIL || '').toLowerCase());
+
+      return isMaster || isCoordGeral || isViceCoord;
+    }
+
+    function updateCadastrarCatequistaVisibility() {
+      const allowed = canCadastrarCatequista();
+      const btnHeader = document.getElementById('btn-cadastrar-catequista');
+      const btnMenu = document.getElementById('btn-menu-cadastrar-catequista');
+      if (btnHeader) btnHeader.classList.toggle('hidden', !allowed);
+      if (btnMenu) btnMenu.classList.toggle('hidden', !allowed);
+    }
+
+    function openCadastrarCatequistaModal() {
+      if (!canCadastrarCatequista()) {
+        alert('⚠️ Operação não permitida: Apenas o Master Admin, a Coordenação Geral e o Vice-Coordenador Geral têm permissão para cadastrar novos catequistas.');
+        return;
+      }
+
+      const modal = document.getElementById('modal-cadastrar-catequista');
+      if (!modal) return;
+
+      const form = document.getElementById('form-cadastrar-catequista');
+      if (form) form.reset();
+
+      newCatTempFoto = null;
+      const preview = document.getElementById('cad-cat-foto-preview');
+      if (preview) {
+        preview.innerHTML = `<span class="text-2xl group-hover:scale-110 transition-transform">📷</span><span class="text-[9px] uppercase font-bold text-slate-400 group-hover:text-amber-600">Subir 3x4</span>`;
+        preview.classList.remove('bg-slate-900');
+        preview.classList.add('bg-slate-100');
+      }
+      const removeBtn = document.getElementById('cad-cat-btn-remove-foto');
+      if (removeBtn) removeBtn.classList.add('hidden');
+
+      // Popula turmas
+      const selTurma = document.getElementById('cad-cat-turma-vinculada');
+      if (selTurma) {
+        selTurma.innerHTML = `<option value="sem_turma">Sem Turma Regular (Apoio / Coordenação)</option>` + (typeof getTurmaOptionsHtml === 'function' ? getTurmaOptionsHtml() : '');
+      }
+
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeCadastrarCatequistaModal() {
+      const modal = document.getElementById('modal-cadastrar-catequista');
+      if (modal) modal.classList.add('hidden');
+      const cropModal = document.getElementById('modal-crop-foto-catequista');
+      const detModal = document.getElementById('modal-catequista-detalhes');
+      if ((!cropModal || cropModal.classList.contains('hidden')) && (!detModal || detModal.classList.contains('hidden'))) {
+        document.body.style.overflow = '';
+      }
+    }
+
+    function triggerNewCatFotoUpload() {
+      const input = document.getElementById('input-cad-cat-foto');
+      if (input) {
+        input.value = '';
+        input.click();
+      }
+    }
+
+    function handleNewCatFotoSelected(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        alert('Por favor, selecione um arquivo de imagem válido (JPG, PNG ou WebP).');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const maxW = 300;
+          const maxH = 400;
+          canvas.width = maxW;
+          canvas.height = maxH;
+          const ctx = canvas.getContext('2d');
+
+          // Desenho proporcional centralizado
+          const ratio = Math.max(maxW / img.width, maxH / img.height);
+          const cx = (maxW - img.width * ratio) / 2;
+          const cy = (maxH - img.height * ratio) / 2;
+          ctx.drawImage(img, 0, 0, img.width, img.height, cx, cy, img.width * ratio, img.height * ratio);
+
+          newCatTempFoto = canvas.toDataURL('image/jpeg', 0.85);
+          const preview = document.getElementById('cad-cat-foto-preview');
+          if (preview) {
+            preview.innerHTML = `<img src="${newCatTempFoto}" alt="Foto 3x4" class="w-full h-full object-cover" style="aspect-ratio: 3/4;" />`;
+            preview.classList.add('bg-slate-900');
+            preview.classList.remove('bg-slate-100');
+          }
+          const removeBtn = document.getElementById('cad-cat-btn-remove-foto');
+          if (removeBtn) removeBtn.classList.remove('hidden');
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeNewCatFoto() {
+      newCatTempFoto = null;
+      const preview = document.getElementById('cad-cat-foto-preview');
+      if (preview) {
+        preview.innerHTML = `<span class="text-2xl group-hover:scale-110 transition-transform">📷</span><span class="text-[9px] uppercase font-bold text-slate-400 group-hover:text-amber-600">Subir 3x4</span>`;
+        preview.classList.remove('bg-slate-900');
+        preview.classList.add('bg-slate-100');
+      }
+      const removeBtn = document.getElementById('cad-cat-btn-remove-foto');
+      if (removeBtn) removeBtn.classList.add('hidden');
+      const input = document.getElementById('input-cad-cat-foto');
+      if (input) input.value = '';
+    }
+
+    async function handleCadastrarCatequistaSubmit(event) {
+      if (event) event.preventDefault();
+
+      if (!canCadastrarCatequista()) {
+        alert('⚠️ Operação não permitida: Apenas a Coordenação Geral, a Vice-Coordenação Geral e o Master Admin podem cadastrar novos catequistas.');
+        return;
+      }
+
+      const elNome = document.getElementById('cad-cat-nome');
+      const nomeCompleto = elNome ? elNome.value.trim() : '';
+      if (!nomeCompleto) {
+        alert('Por favor, informe o Nome Completo do catequista.');
+        return;
+      }
+
+      const apelido = (document.getElementById('cad-cat-apelido')?.value || '').trim();
+      const dataNascimento = (document.getElementById('cad-cat-data-nascimento')?.value || '').trim();
+      const telefone = (document.getElementById('cad-cat-telefone')?.value || '').trim();
+      const email = (document.getElementById('cad-cat-email')?.value || '').trim().toLowerCase();
+      const paroquia = (document.getElementById('cad-cat-paroquia')?.value || 'Santuário do Imaculado Coração de Maria').trim();
+      const etapaPrincipal = (document.getElementById('cad-cat-etapa-principal')?.value || 'Pré-Eucaristia').trim();
+      const turmaVal = (document.getElementById('cad-cat-turma-vinculada')?.value || 'sem_turma').trim();
+      const funcaoPrincipal = (document.getElementById('cad-cat-funcao-principal')?.value || 'Catequista Titular').trim();
+      const profissao = (document.getElementById('cad-cat-profissao')?.value || '').trim();
+      const estadoCivil = (document.getElementById('cad-cat-estado-civil')?.value || 'Solteiro(a)').trim();
+      const endereco = (document.getElementById('cad-cat-endereco')?.value || '').trim();
+      const liberarAcessoGoogle = document.getElementById('cad-cat-liberar-acesso')?.checked;
+
+      // Telefone raw limpo com DDI 55
+      let telefoneRaw = telefone.replace(/\D/g, '');
+      if (telefoneRaw && (telefoneRaw.length === 10 || telefoneRaw.length === 11) && !telefoneRaw.startsWith('55')) {
+        telefoneRaw = '55' + telefoneRaw;
+      }
+
+      const user = window.appAuthState && window.appAuthState.user;
+      const currentUserName = user ? (user.displayName || user.email) : 'Coordenação Geral';
+      const currentUserEmail = user ? (user.email || '') : '';
+      const nowIso = new Date().toISOString();
+      const newId = 'cat-2026-' + Date.now();
+
+      // Monta turmas atribuídas
+      const turmasList = [];
+      if (turmaVal && turmaVal !== 'sem_turma' && turmaVal !== 'todas') {
+        let stageName = etapaPrincipal;
+        let turmaName = turmaVal;
+        if (turmaVal.includes('•')) {
+          const parts = turmaVal.split('•').map(s => s.trim());
+          stageName = parts[0] || etapaPrincipal;
+          turmaName = parts[1] || turmaVal;
+        }
+        turmasList.push({
+          stage: stageName,
+          turma: turmaName,
+          funcao: funcaoPrincipal,
+          dayTime: 'Ano Pastoral 2026',
+          room: 'Centro Catequético'
+        });
+      } else if (turmaVal === 'todas') {
+        turmasList.push({
+          stage: etapaPrincipal,
+          turma: 'Todas as Turmas',
+          funcao: funcaoPrincipal,
+          dayTime: 'Ano Pastoral 2026',
+          room: 'Coordenação'
+        });
+      }
+
+      const newCatequista = {
+        id: newId,
+        nomeCompleto: nomeCompleto,
+        apelido: apelido,
+        nomeConhecido: apelido || nomeCompleto.split(' ')[0],
+        dataNascimento: dataNascimento || 'Não informada',
+        telefone: telefone || 'Não informado',
+        telefoneRaw: telefoneRaw || '',
+        email: email || '',
+        profissao: profissao || '',
+        estadoCivil: estadoCivil || '',
+        endereco: endereco || '',
+        paroquia: paroquia || 'Santuário do Imaculado Coração de Maria',
+        etapaDeclarada: etapaPrincipal,
+        etapaPrincipal: etapaPrincipal,
+        funcaoPrincipal: funcaoPrincipal,
+        funcoes: [funcaoPrincipal],
+        turmas: turmasList,
+        foto: newCatTempFoto || null,
+        fotoFaceDetected: !!newCatTempFoto,
+        fotoRemoved: false,
+        createdAt: nowIso,
+        createdBy: currentUserName,
+        createdByEmail: currentUserEmail,
+        updatedAt: nowIso,
+        updatedBy: currentUserName,
+        updatedByEmail: currentUserEmail
+      };
+
+      // 1. Salva no LocalStorage
+      const list = getCatequistasRegistrationData();
+      list.unshift(newCatequista);
+      saveCatequistasRegistrationData(list);
+
+      // 2. Sincroniza com Firestore sob proteção RBAC e merge construtivo
+      if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
+        window.firebaseDb.collection('catequistas').doc(newId).set(newCatequista, { merge: true }).then(() => {
+          console.log('✅ Novo catequista persistido no Firestore:', newId);
+        }).catch(err => {
+          console.warn('Erro ao salvar catequista no Firestore:', err);
+        });
+      }
+
+      // 3. Pré-autoriza login se solicitado e com e-mail informado
+      if (liberarAcessoGoogle && email && email.includes('@')) {
+        let userRole = 'catequista';
+        if (funcaoPrincipal.toLowerCase().includes('coordenador geral') || etapaPrincipal.toLowerCase().includes('coordenação geral')) {
+          userRole = 'coord_geral';
+        } else if (funcaoPrincipal.toLowerCase().includes('vice') || etapaPrincipal.toLowerCase().includes('vice')) {
+          userRole = 'vice_coord_geral';
+        } else if (funcaoPrincipal.toLowerCase().includes('etapa')) {
+          userRole = 'coord_etapa';
+        }
+
+        if (window.ICM_CONFIG && typeof window.ICM_CONFIG.preAuthorizeUser === 'function') {
+          window.ICM_CONFIG.preAuthorizeUser({
+            email: email,
+            displayName: nomeCompleto,
+            role: userRole,
+            turmaId: turmaVal,
+            turmaNome: turmaVal,
+            etapa: etapaPrincipal,
+            createdBy: currentUserName
+          }).catch(err => console.warn('Erro ao pré-autorizar usuário no sistema:', err));
+        }
+      }
+
+      // 4. Registro de Auditoria Perene LGPD (Art. 37)
+      if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
+        window.ICM_CONFIG.logAuditEvent('CATEQUISTA_REGISTER', `catequista:${nomeCompleto}`, {
+          catId: newId,
+          email: email,
+          etapa: etapaPrincipal,
+          funcao: funcaoPrincipal,
+          acessoLiberado: !!(liberarAcessoGoogle && email),
+          cadastradoPor: currentUserName,
+          cadastradoPorEmail: currentUserEmail,
+          timestamp: nowIso
+        });
+      }
+
+      // 5. Atualiza a tabela na tela e fecha o modal
+      newCatTempFoto = null;
+      closeCadastrarCatequistaModal();
+      filterCatequistasList();
+
+      alert(`✅ Catequista ${nomeCompleto} cadastrado(a) com sucesso na Pastoral da Catequese 2026!`);
     }
 
 
@@ -10817,6 +11328,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         if (viewCatequistas) viewCatequistas.classList.remove('hidden');
         if (toolbar) toolbar.classList.add('hidden');
         if (btnCatequistas) btnCatequistas.className = activeBtn;
+        if (typeof updateCadastrarCatequistaVisibility === 'function') updateCadastrarCatequistaVisibility();
         if (typeof syncCatequistasFromFirestore === 'function') syncCatequistasFromFirestore();
         if (typeof renderCatequistasList === 'function') renderCatequistasList();
       }
