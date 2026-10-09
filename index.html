@@ -2250,7 +2250,7 @@
                   <th class="py-3 px-4 font-heading">E-mail</th>
                   <th class="py-3 px-4 font-heading">Paróquia Habitual</th>
                   <th class="py-3 px-4 font-heading">Etapa &amp; Turma(s) 2026</th>
-                  <th class="py-3 px-4 text-center font-heading" style="width: 100px;">Ficha</th>
+                  <th class="py-3 px-4 text-center font-heading" style="width: 130px;">Ações</th>
                 </tr>
               </thead>
               <tbody id="tbody-catequistas-list" class="divide-y divide-slate-100">
@@ -3436,6 +3436,9 @@
                 <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-300 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-full">
                   <span>🔒</span> <span>Protegido LGPD</span>
                 </span>
+                <span id="badge-cat-editing-mode" class="hidden inline-flex items-center gap-1 text-[10px] font-bold text-amber-300 bg-amber-950/90 border border-amber-400/80 px-2.5 py-0.5 rounded-full font-heading">
+                  <span>✏️</span> <span>Modo de Edição</span>
+                </span>
               </div>
               <h3 id="modal-cat-nome" class="text-xl sm:text-2xl font-black font-heading text-white truncate">
                 Nome do Catequista
@@ -3443,6 +3446,11 @@
               <p id="modal-cat-etapa-sub" class="text-xs text-slate-300">
                 Crisma Jovem • Santuário Imaculado Coração de Maria
               </p>
+              <div class="pt-1">
+                <button type="button" id="btn-cat-start-edit" onclick="toggleCatequistaEditMode(true)" class="hidden inline-flex items-center gap-1.5 bg-[#d4a94f] hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs transition shadow-xs">
+                  <span>✏️</span> <span>Editar Dados</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -3450,80 +3458,188 @@
         <!-- Conteúdo do Modal -->
         <div class="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
           
-          <!-- Botões Rápidos de Contato -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <a id="modal-cat-btn-wa" href="#" target="_blank" class="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-2xl text-xs sm:text-sm shadow-sm transition">
-              <span>💬 Conversar no WhatsApp</span>
-            </a>
-            <a id="modal-cat-btn-email" href="#" class="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-100 font-bold py-3 px-4 rounded-2xl text-xs sm:text-sm border border-slate-700 transition">
-              <span>✉️ Enviar E-mail</span>
-            </a>
-          </div>
+          <!-- MODO VISUALIZAÇÃO -->
+          <div id="modal-cat-view-container" class="space-y-6">
+            <!-- Botões Rápidos de Contato -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <a id="modal-cat-btn-wa" href="#" target="_blank" class="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-2xl text-xs sm:text-sm shadow-sm transition">
+                <span>💬 Conversar no WhatsApp</span>
+              </a>
+              <a id="modal-cat-btn-email" href="#" class="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-100 font-bold py-3 px-4 rounded-2xl text-xs sm:text-sm border border-slate-700 transition">
+                <span>✉️ Enviar E-mail</span>
+              </a>
+            </div>
 
-          <!-- Bloco 1: Informações Pessoais -->
-          <div class="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200/80 space-y-3">
-            <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 font-heading flex items-center gap-2">
-              <span>👤</span> <span>Dados Pessoais &amp; Cadastro</span>
-            </h4>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
-              <div>
-                <span class="text-slate-400 font-bold block">Nome Completo:</span>
-                <span id="modal-cat-nome-completo" class="font-bold text-slate-900 text-sm"></span>
+            <!-- Bloco 1: Informações Pessoais -->
+            <div class="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200/80 space-y-3">
+              <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 font-heading flex items-center gap-2">
+                <span>👤</span> <span>Dados Pessoais &amp; Cadastro</span>
+              </h4>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
+                <div>
+                  <span class="text-slate-400 font-bold block">Nome Completo:</span>
+                  <span id="modal-cat-nome-completo" class="font-bold text-slate-900 text-sm"></span>
+                </div>
+                <div>
+                  <span class="text-slate-400 font-bold block">Data de Nascimento / Idade:</span>
+                  <span id="modal-cat-dob" class="font-semibold text-slate-800 text-sm"></span>
+                </div>
+                <div>
+                  <span class="text-slate-400 font-bold block">Telefone / WhatsApp:</span>
+                  <span id="modal-cat-telefone" class="font-bold text-slate-900 font-mono"></span>
+                </div>
+                <div>
+                  <span class="text-slate-400 font-bold block">E-mail:</span>
+                  <span id="modal-cat-email" class="font-medium text-slate-800 font-mono"></span>
+                </div>
+                <div>
+                  <span class="text-slate-400 font-bold block">Profissão:</span>
+                  <span id="modal-cat-profissao" class="font-medium text-slate-800"></span>
+                </div>
+                <div>
+                  <span class="text-slate-400 font-bold block">Estado Civil:</span>
+                  <span id="modal-cat-estado-civil" class="font-medium text-slate-800"></span>
+                </div>
+                <div class="sm:col-span-2">
+                  <span class="text-slate-400 font-bold block">Endereço Residencial:</span>
+                  <span id="modal-cat-endereco" class="font-medium text-slate-800"></span>
+                </div>
               </div>
-              <div>
-                <span class="text-slate-400 font-bold block">Data de Nascimento / Idade:</span>
-                <span id="modal-cat-dob" class="font-semibold text-slate-800 text-sm"></span>
+            </div>
+
+            <!-- Bloco 2: Paróquia & Vida Comunitária -->
+            <div class="bg-amber-50/60 p-4 sm:p-5 rounded-2xl border border-amber-200/80 space-y-2">
+              <h4 class="text-xs font-black uppercase tracking-wider text-amber-900 font-heading flex items-center gap-2">
+                <span>⛪</span> <span>Paróquia Habitual de Frequência da Missa</span>
+              </h4>
+              <div id="modal-cat-paroquia" class="font-bold text-slate-900 text-sm">
+                Santuário do Imaculado Coração de Maria
               </div>
-              <div>
-                <span class="text-slate-400 font-bold block">Telefone / WhatsApp:</span>
-                <span id="modal-cat-telefone" class="font-bold text-slate-900 font-mono"></span>
-              </div>
-              <div>
-                <span class="text-slate-400 font-bold block">E-mail:</span>
-                <span id="modal-cat-email" class="font-medium text-slate-800 font-mono"></span>
-              </div>
-              <div>
-                <span class="text-slate-400 font-bold block">Profissão:</span>
-                <span id="modal-cat-profissao" class="font-medium text-slate-800"></span>
-              </div>
-              <div>
-                <span class="text-slate-400 font-bold block">Estado Civil:</span>
-                <span id="modal-cat-estado-civil" class="font-medium text-slate-800"></span>
-              </div>
-              <div class="sm:col-span-2">
-                <span class="text-slate-400 font-bold block">Endereço Residencial:</span>
-                <span id="modal-cat-endereco" class="font-medium text-slate-800"></span>
+            </div>
+
+            <!-- Bloco 3: Turmas Atribuídas no Organograma 2026 -->
+            <div class="space-y-3">
+              <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 font-heading flex items-center gap-2">
+                <span>📖</span> <span>Turma(s) e Atribuições na Catequese 2026</span>
+              </h4>
+              <div id="modal-cat-turmas-list" class="space-y-2">
+                <!-- Lista de Turmas -->
               </div>
             </div>
           </div>
 
-          <!-- Bloco 2: Paróquia & Vida Comunitária -->
-          <div class="bg-amber-50/60 p-4 sm:p-5 rounded-2xl border border-amber-200/80 space-y-2">
-            <h4 class="text-xs font-black uppercase tracking-wider text-amber-900 font-heading flex items-center gap-2">
-              <span>⛪</span> <span>Paróquia Habitual de Frequência da Missa</span>
-            </h4>
-            <div id="modal-cat-paroquia" class="font-bold text-slate-900 text-sm">
-              Santuário do Imaculado Coração de Maria
-            </div>
-          </div>
+          <!-- MODO EDIÇÃO DE DADOS -->
+          <div id="modal-cat-edit-container" class="hidden space-y-5">
+            <form id="form-edit-catequista" onsubmit="handleSaveCatequistaDetails(event)" class="space-y-5">
+              <!-- Bloco 1: Identificação & Dados Pessoais -->
+              <div class="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200/80 space-y-3.5">
+                <div class="flex items-center justify-between">
+                  <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 font-heading flex items-center gap-2">
+                    <span>👤</span> <span>Editar Dados Pessoais &amp; Contato</span>
+                  </h4>
+                  <span class="text-[10px] text-amber-700 font-bold bg-amber-100 px-2 py-0.5 rounded-full border border-amber-300">Coordenação &amp; Admin</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
+                  <div class="sm:col-span-2">
+                    <label class="block text-slate-600 font-bold mb-1">Nome Completo *</label>
+                    <input type="text" id="edit-cat-nome-completo" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 bg-white outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition" placeholder="Nome completo do catequista" />
+                  </div>
+                  <div>
+                    <label class="block text-slate-600 font-bold mb-1">Apelido / Nome Conhecido</label>
+                    <input type="text" id="edit-cat-apelido" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 bg-white outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition" placeholder="Como prefere ser chamado(a)" />
+                  </div>
+                  <div>
+                    <label class="block text-slate-600 font-bold mb-1">Data de Nascimento</label>
+                    <input type="text" id="edit-cat-data-nascimento" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 bg-white outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition" placeholder="DD/MM/AAAA" />
+                  </div>
+                  <div>
+                    <label class="block text-slate-600 font-bold mb-1">Telefone / WhatsApp</label>
+                    <input type="text" id="edit-cat-telefone" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono font-medium text-slate-800 bg-white outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition" placeholder="(61) 9XXXX-XXXX" />
+                  </div>
+                  <div>
+                    <label class="block text-slate-600 font-bold mb-1">E-mail</label>
+                    <input type="email" id="edit-cat-email" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono font-medium text-slate-800 bg-white outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition" placeholder="email@exemplo.com" />
+                  </div>
+                  <div>
+                    <label class="block text-slate-600 font-bold mb-1">Profissão / Ocupação</label>
+                    <input type="text" id="edit-cat-profissao" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 bg-white outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition" placeholder="Profissão ou ocupação" />
+                  </div>
+                  <div>
+                    <label class="block text-slate-600 font-bold mb-1">Estado Civil</label>
+                    <select id="edit-cat-estado-civil" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 bg-white outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition">
+                      <option value="Solteiro(a)">Solteiro(a)</option>
+                      <option value="Casado(a)">Casado(a)</option>
+                      <option value="União Estável">União Estável</option>
+                      <option value="Divorciado(a)">Divorciado(a)</option>
+                      <option value="Viúvo(a)">Viúvo(a)</option>
+                      <option value="Outro">Outro</option>
+                    </select>
+                  </div>
+                  <div class="sm:col-span-2">
+                    <label class="block text-slate-600 font-bold mb-1">Endereço Residencial</label>
+                    <input type="text" id="edit-cat-endereco" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 bg-white outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition" placeholder="Endereço, Bairro, Cidade" />
+                  </div>
+                </div>
+              </div>
 
-          <!-- Bloco 3: Turmas Atribuídas no Organograma 2026 -->
-          <div class="space-y-3">
-            <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 font-heading flex items-center gap-2">
-              <span>📖</span> <span>Turma(s) e Atribuições na Catequese 2026</span>
-            </h4>
-            <div id="modal-cat-turmas-list" class="space-y-2">
-              <!-- Lista de Turmas -->
-            </div>
+              <!-- Bloco 2: Atribuições Pastorais & Paróquia -->
+              <div class="bg-amber-50/70 p-4 sm:p-5 rounded-2xl border border-amber-200/80 space-y-3.5">
+                <h4 class="text-xs font-black uppercase tracking-wider text-amber-950 font-heading flex items-center gap-2">
+                  <span>⛪</span> <span>Vínculo Pastoral &amp; Paróquia</span>
+                </h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
+                  <div class="sm:col-span-2">
+                    <label class="block text-slate-700 font-bold mb-1">Paróquia Habitual de Missa</label>
+                    <input type="text" id="edit-cat-paroquia" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-900 bg-white outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition" placeholder="Santuário do Imaculado Coração de Maria" />
+                  </div>
+                  <div>
+                    <label class="block text-slate-700 font-bold mb-1">Etapa Principal</label>
+                    <select id="edit-cat-etapa-principal" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 bg-white outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition">
+                      <option value="Pré-Eucaristia">Pré-Eucaristia</option>
+                      <option value="Eucaristia I">Eucaristia I</option>
+                      <option value="Eucaristia II">Eucaristia II</option>
+                      <option value="Perseverança">Perseverança</option>
+                      <option value="Crisma Jovem">Crisma Jovem</option>
+                      <option value="Crisma Adultos">Crisma Adultos</option>
+                      <option value="Coordenação Geral">Coordenação Geral</option>
+                      <option value="Apoio Pastoral">Apoio Pastoral / Sem turma</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-slate-700 font-bold mb-1">Função / Título Principal</label>
+                    <input type="text" id="edit-cat-funcao-principal" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-900 bg-white outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition" placeholder="Ex: Catequista Titular, Auxiliar, Coordenador(a)..." />
+                  </div>
+                </div>
+              </div>
+            </form>
           </div>
 
         </div>
 
         <!-- Footer -->
-        <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
-          <button onclick="closeCatequistaModal()" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs transition">
-            Fechar Ficha
-          </button>
+        <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-2">
+          <div class="text-[11px] text-slate-400">
+            <span>Pastoral da Catequese 2026</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <!-- Ações em Modo Visualização -->
+            <button id="modal-cat-footer-close" type="button" onclick="closeCatequistaModal()" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs transition">
+              Fechar Ficha
+            </button>
+            <button id="btn-cat-footer-edit" type="button" onclick="toggleCatequistaEditMode(true)" class="hidden px-4 py-2 bg-gradient-to-r from-amber-500 to-[#d4a94f] hover:from-amber-600 hover:to-[#c39943] text-slate-950 font-bold rounded-xl text-xs shadow-xs transition inline-flex items-center gap-1.5" title="Editar dados cadastrais">
+              <span>✏️</span> <span>Editar Cadastro</span>
+            </button>
+
+            <!-- Ações em Modo Edição -->
+            <div id="modal-cat-footer-edit-actions" class="hidden flex items-center gap-2">
+              <button type="button" onclick="toggleCatequistaEditMode(false)" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl text-xs transition">
+                Cancelar
+              </button>
+              <button type="button" onclick="handleSaveCatequistaDetails(event)" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-xs transition inline-flex items-center gap-1.5">
+                <span>💾</span> <span>Salvar Alterações</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -5986,6 +6102,16 @@
         if (typeof window.ICM_CONFIG.listenUsersFromFirestore === 'function') {
           window.ICM_CONFIG.listenUsersFromFirestore();
         }
+
+        // Observa sessão do Firebase Auth para sincronizar dados em tempo real
+        firebaseAuth.onAuthStateChanged((user) => {
+          if (user) {
+            console.log('🔥 Sessão Firebase Auth ativa:', user.email);
+            if (typeof syncCatequistasFromFirestore === 'function') {
+              syncCatequistasFromFirestore();
+            }
+          }
+        });
       }
     } catch (err) {
       console.warn('Firebase SDK não pôde conectar em modo live. Operando com autenticação institucional protegida:', err);
@@ -6367,11 +6493,19 @@
         email: userData.email
       });
 
-      // Sincroniza catequistas e fotos 3x4 no Firestore sob proteção LGPD (Master Admin e Coordenação Geral)
-      if (role === window.ICM_CONFIG.ROLES.MASTER_ADMIN || role === window.ICM_CONFIG.ROLES.COORD_GERAL) {
-        if (typeof syncCatequistasToFirestore === 'function') {
-          syncCatequistasToFirestore();
-        }
+      // Sincroniza catequistas e fotos 3x4 no Firestore sob proteção LGPD (Master Admin, Coordenação Geral e Vice Geral)
+      if (typeof syncCatequistasFromFirestore === 'function') {
+        syncCatequistasFromFirestore().then(() => {
+          if (canEditCatequistas() && typeof syncCatequistasToFirestore === 'function') {
+            syncCatequistasToFirestore();
+          }
+        });
+      } else if (canEditCatequistas() && typeof syncCatequistasToFirestore === 'function') {
+        syncCatequistasToFirestore();
+      }
+
+      if (typeof filterCatequistasList === 'function') {
+        filterCatequistasList();
       }
 
       // Atualiza contadores da Central de Notificações
@@ -8388,7 +8522,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       try {
         const stored = localStorage.getItem(STORAGE_KEY_CATEQUISTAS_2026);
         if (stored) {
-          const parsed = JSON.parse(stored);
+          let parsed = JSON.parse(stored);
           if (Array.isArray(parsed) && parsed.length > 0) {
             let changed = false;
             // Remove duplicidade conhecida (Ronaldo Buril: cat-2026-72 unificado em cat-2026-71)
@@ -8396,21 +8530,32 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             parsed = parsed.filter(p => p.id !== 'cat-2026-72');
             if (parsed.length !== preLen) changed = true;
 
-            // Sincroniza e mescla fotos 3x4 e funções acumuladas do dataset oficial
+            // Sincroniza e mescla fotos 3x4 e funções acumuladas do dataset oficial SEM sobrescrever edições do usuário
             if (Array.isArray(seedSource)) {
               seedSource.forEach(seedCat => {
                 const found = parsed.find(p => p.id === seedCat.id || (p.row && p.row === seedCat.row) || (p.nomeCompleto && normCatString(p.nomeCompleto) === normCatString(seedCat.nomeCompleto)));
                 if (found) {
-                  if (seedCat.foto && (!found.foto || found.foto !== seedCat.foto)) {
+                  // Apenas preenche a foto padrão se o registro local NÃO tiver foto, NÃO tiver removido intencionalmente e NUNCA tiver sido editado
+                  if (!found.foto && !found.fotoRemoved && !found.updatedAt && seedCat.foto) {
                     found.foto = seedCat.foto;
                     found.fotoFaceDetected = seedCat.fotoFaceDetected;
                     changed = true;
                   }
-                  if (seedCat.funcoes && (!found.funcoes || JSON.stringify(found.funcoes) !== JSON.stringify(seedCat.funcoes))) {
+                  // Apenas preenche funções se o registro local não possui e não foi editado
+                  if (!found.funcoes && !found.updatedAt && seedCat.funcoes) {
                     found.funcoes = seedCat.funcoes;
                     found.funcaoPrincipal = seedCat.funcaoPrincipal;
                     found.turmas = seedCat.turmas;
                     changed = true;
+                  }
+                  // Preenche campos complementares vazios sem sobrescrever dados já preenchidos
+                  for (const key of Object.keys(seedCat)) {
+                    if (found[key] === undefined || found[key] === null || found[key] === '') {
+                      if (seedCat[key] !== undefined && seedCat[key] !== null && seedCat[key] !== '') {
+                        found[key] = seedCat[key];
+                        changed = true;
+                      }
+                    }
                   }
                 } else {
                   parsed.push(seedCat);
@@ -8434,33 +8579,128 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       if (!window.firebaseDb || typeof window.firebaseDb.collection !== 'function') return;
       try {
         const list = getCatequistasRegistrationData();
+        // Proteção do Firestore: Carrega dados existentes para merge construtivo
+        const snap = await window.firebaseDb.collection('catequistas').get();
+        const existingCloudMap = new Map();
+        if (snap && !snap.empty) {
+          snap.forEach(d => existingCloudMap.set(d.id, d.data()));
+        }
+
         const batch = window.firebaseDb.batch();
-        list.forEach(cat => {
-          const docRef = window.firebaseDb.collection('catequistas').doc(cat.id);
-          batch.set(docRef, {
-            id: cat.id,
-            nomeCompleto: cat.nomeCompleto,
-            dataNascimento: cat.dataNascimento,
-            telefone: cat.telefone,
-            telefoneRaw: cat.telefoneRaw,
-            email: cat.email,
-            profissao: cat.profissao,
-            endereco: cat.endereco,
-            estadoCivil: cat.estadoCivil,
-            paroquia: cat.paroquia,
-            etapaDeclarada: cat.etapaDeclarada,
-            turmas: cat.turmas || [],
-            etapaPrincipal: cat.etapaPrincipal,
-            funcaoPrincipal: cat.funcaoPrincipal,
-            foto: cat.foto || null,
-            fotoFaceDetected: cat.fotoFaceDetected || false,
-            updatedAt: new Date().toISOString()
-          }, { merge: true });
-        });
-        await batch.commit();
-        console.log('✅ Base oficial de catequistas sincronizada no Firestore (LGPD).');
+        let ops = 0;
+
+        for (const cat of list) {
+          const cloudCat = existingCloudMap.get(cat.id);
+          let shouldWrite = false;
+
+          if (!cloudCat) {
+            shouldWrite = true;
+          } else {
+            const localTime = cat.updatedAt ? new Date(cat.updatedAt).getTime() : 0;
+            const cloudTime = cloudCat.updatedAt ? new Date(cloudCat.updatedAt).getTime() : 0;
+            if (localTime > cloudTime) {
+              shouldWrite = true;
+            }
+          }
+
+          if (shouldWrite) {
+            const docRef = window.firebaseDb.collection('catequistas').doc(cat.id);
+            const docData = {
+              id: cat.id,
+              nomeCompleto: cat.nomeCompleto || '',
+              apelido: cat.apelido || cat.nomeConhecido || '',
+              dataNascimento: cat.dataNascimento || '',
+              telefone: cat.telefone || '',
+              telefoneRaw: cat.telefoneRaw || '',
+              email: cat.email || '',
+              profissao: cat.profissao || '',
+              endereco: cat.endereco || '',
+              estadoCivil: cat.estadoCivil || '',
+              paroquia: cat.paroquia || '',
+              etapaDeclarada: cat.etapaDeclarada || '',
+              turmas: cat.turmas || [],
+              etapaPrincipal: cat.etapaPrincipal || '',
+              funcaoPrincipal: cat.funcaoPrincipal || '',
+              foto: cat.foto !== undefined ? cat.foto : null,
+              fotoFaceDetected: cat.fotoFaceDetected || false,
+              fotoRemoved: cat.fotoRemoved || false,
+              updatedAt: cat.updatedAt || new Date().toISOString()
+            };
+            batch.set(docRef, docData, { merge: true });
+            ops++;
+          }
+        }
+
+        if (ops > 0) {
+          await batch.commit();
+          console.log(`✅ ${ops} catequistas sincronizados no Firestore com proteção contra sobrescrita.`);
+        } else {
+          console.log('✅ Base de catequistas já sincronizada com o Firestore.');
+        }
       } catch (err) {
         console.warn('Sync Firestore catequistas mantido localmente:', err);
+      }
+    }
+
+    async function syncCatequistasFromFirestore() {
+      if (!window.firebaseDb || typeof window.firebaseDb.collection !== 'function') return;
+      try {
+        const snapshot = await window.firebaseDb.collection('catequistas').get();
+        if (!snapshot || snapshot.empty) return;
+
+        const list = getCatequistasRegistrationData();
+        let changed = false;
+
+        snapshot.forEach(docSnap => {
+          const cloudData = docSnap.data();
+          if (!cloudData || !cloudData.id) return;
+
+          const idx = list.findIndex(c => c.id === cloudData.id);
+          if (idx !== -1) {
+            const localCat = list[idx];
+            const cloudTime = cloudData.updatedAt ? new Date(cloudData.updatedAt).getTime() : 0;
+            const localTime = localCat.updatedAt ? new Date(localCat.updatedAt).getTime() : 0;
+
+            // Merge construtivo: Se cloud é mais recente ou local nunca foi editado
+            if (cloudTime >= localTime || !localTime) {
+              const fields = [
+                'nomeCompleto', 'apelido', 'nomeConhecido', 'dataNascimento',
+                'telefone', 'telefoneRaw', 'email', 'profissao', 'endereco',
+                'estadoCivil', 'paroquia', 'etapaPrincipal', 'funcaoPrincipal',
+                'foto', 'fotoFaceDetected', 'fotoRemoved', 'updatedAt'
+              ];
+              fields.forEach(f => {
+                if (cloudData[f] !== undefined && cloudData[f] !== localCat[f]) {
+                  localCat[f] = cloudData[f];
+                  changed = true;
+                }
+              });
+              if (Array.isArray(cloudData.turmas) && cloudData.turmas.length > 0) {
+                localCat.turmas = cloudData.turmas;
+                changed = true;
+              }
+            } else if (localTime > cloudTime) {
+              // Local é mais recente: envia ao Firestore
+              window.firebaseDb.collection('catequistas').doc(localCat.id).set({
+                ...localCat,
+                updatedAt: localCat.updatedAt
+              }, { merge: true }).catch(err => console.warn('Erro ao atualizar catequista no Firestore:', localCat.id, err));
+            }
+          } else {
+            list.push(cloudData);
+            changed = true;
+          }
+        });
+
+        if (changed) {
+          saveCatequistasRegistrationData(list);
+          if (typeof filterCatequistasList === 'function') {
+            filterCatequistasList();
+          }
+          console.log(`✅ Base de catequistas atualizada da nuvem (${snapshot.size} registros).`);
+        }
+      } catch (e) {
+        console.warn('Sync Firestore catequistas mantido localmente:', e);
       }
     }
 
@@ -8560,8 +8800,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     let currentCatequistaForPhoto = null;
     let currentCropper = null;
 
-    function canManageCatequistasPhotos() {
-      // Se não há autenticação ativa (ou modo offline / dev), permite gerenciar fotos
+    function canEditCatequistas() {
+      // Se não há autenticação ativa (ou modo offline / dev), permite gerenciar dados
       if (!window.appAuthState || !window.appAuthState.user) {
         return true;
       }
@@ -8574,6 +8814,10 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       const isViceCoord = role === roles.VICE_COORD_GERAL || role === 'vice_coord_geral' || role === 'vice_coordenador' || (window.appAuthState.turmaNome && window.appAuthState.turmaNome.toLowerCase().includes('vice')) || email === (window.ICM_CONFIG && (window.ICM_CONFIG.VICE_COORD_GERAL_EMAIL || '').toLowerCase());
 
       return isMaster || isCoordGeral || isViceCoord;
+    }
+
+    function canManageCatequistasPhotos() {
+      return canEditCatequistas();
     }
 
     function triggerCatequistaPhotoUpload() {
@@ -8708,6 +8952,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         if (catIdx !== -1) {
           list[catIdx].foto = croppedDataUrl;
           list[catIdx].fotoFaceDetected = true;
+          list[catIdx].fotoRemoved = false;
           list[catIdx].updatedAt = new Date().toISOString();
           saveCatequistasRegistrationData(list);
           currentCatequistaForPhoto = list[catIdx];
@@ -8716,10 +8961,14 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         // Sincroniza com Firestore se disponível
         if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
           window.firebaseDb.collection('catequistas').doc(currentCatequistaForPhoto.id).set({
+            ...currentCatequistaForPhoto,
             foto: croppedDataUrl,
             fotoFaceDetected: true,
-            updatedAt: new Date().toISOString()
-          }, { merge: true }).catch(err => {
+            fotoRemoved: false,
+            updatedAt: currentCatequistaForPhoto.updatedAt
+          }, { merge: true }).then(() => {
+            console.log('✅ Foto 3x4 do catequista sincronizada no Firestore:', currentCatequistaForPhoto.id);
+          }).catch(err => {
             console.warn('Sync foto Firestore mantido localmente:', err);
           });
         }
@@ -8776,19 +9025,24 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
       const list = getCatequistasRegistrationData();
       const catIdx = list.findIndex(c => c.id === currentCatequistaForPhoto.id);
+      const nowIso = new Date().toISOString();
       if (catIdx !== -1) {
         list[catIdx].foto = null;
         list[catIdx].fotoFaceDetected = false;
-        list[catIdx].updatedAt = new Date().toISOString();
+        list[catIdx].fotoRemoved = true;
+        list[catIdx].updatedAt = nowIso;
         saveCatequistasRegistrationData(list);
         currentCatequistaForPhoto = list[catIdx];
       }
 
       if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
-        window.firebaseDb.collection('catequistas').doc(currentCatequistaForPhoto.id).update({
+        window.firebaseDb.collection('catequistas').doc(currentCatequistaForPhoto.id).set({
           foto: null,
           fotoFaceDetected: false,
-          updatedAt: new Date().toISOString()
+          fotoRemoved: true,
+          updatedAt: nowIso
+        }, { merge: true }).then(() => {
+          console.log('✅ Remoção de foto persistida no Firestore:', currentCatequistaForPhoto.id);
         }).catch(err => console.warn('Remoção de foto Firestore local:', err));
       }
 
@@ -8824,7 +9078,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       alert(`Foto removida com sucesso. O perfil agora exibe as iniciais.`);
     }
 
-    function openCatequistaModal(identifier) {
+    function openCatequistaModal(identifier, startInEditMode = false) {
       const modal = document.getElementById('modal-catequista-detalhes');
       if (!modal) return;
 
@@ -9014,17 +9268,227 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         }
       }
 
+      // Atualiza visibilidade dos botões de edição baseado em permissão (Master Admin, Coord Geral e Vice Geral)
+      const canEdit = canEditCatequistas();
+      const btnStartEdit = document.getElementById('btn-cat-start-edit');
+      const btnFooterEdit = document.getElementById('btn-cat-footer-edit');
+      if (btnStartEdit) btnStartEdit.classList.toggle('hidden', !canEdit);
+      if (btnFooterEdit) btnFooterEdit.classList.toggle('hidden', !canEdit);
+
+      // Reseta para visualização ou entra em edição se solicitado
+      if (startInEditMode && canEdit) {
+        toggleCatequistaEditMode(true);
+      } else {
+        toggleCatequistaEditMode(false);
+      }
+
       modal.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
     }
 
     function closeCatequistaModal() {
+      toggleCatequistaEditMode(false);
       const modal = document.getElementById('modal-catequista-detalhes');
       if (modal) modal.classList.add('hidden');
       const cropModal = document.getElementById('modal-crop-foto-catequista');
       if (!cropModal || cropModal.classList.contains('hidden')) {
         document.body.style.overflow = '';
       }
+    }
+
+    function toggleCatequistaEditMode(enable) {
+      if (enable && !canEditCatequistas()) {
+        alert('⚠️ Operação não permitida: Apenas o Master Admin, Coordenação Geral e Vice-Coordenação têm permissão para editar os dados dos catequistas.');
+        return;
+      }
+
+      const viewContainer = document.getElementById('modal-cat-view-container');
+      const editContainer = document.getElementById('modal-cat-edit-container');
+      const btnStartEdit = document.getElementById('btn-cat-start-edit');
+      const btnFooterEdit = document.getElementById('btn-cat-footer-edit');
+      const footerCloseBtn = document.getElementById('modal-cat-footer-close');
+      const editFooterBtns = document.getElementById('modal-cat-footer-edit-actions');
+      const editBadge = document.getElementById('badge-cat-editing-mode');
+
+      if (enable) {
+        if (!currentCatequistaForPhoto) return;
+        const cat = currentCatequistaForPhoto;
+
+        // Popula campos com dados atuais
+        const elNome = document.getElementById('edit-cat-nome-completo');
+        if (elNome) elNome.value = cat.nomeCompleto || '';
+
+        const elApelido = document.getElementById('edit-cat-apelido');
+        if (elApelido) elApelido.value = cat.apelido || cat.nomeConhecido || '';
+
+        const elDob = document.getElementById('edit-cat-data-nascimento');
+        if (elDob) elDob.value = (cat.dataNascimento && !cat.dataNascimento.includes('Não informada')) ? cat.dataNascimento : '';
+
+        const elTel = document.getElementById('edit-cat-telefone');
+        if (elTel) elTel.value = (cat.telefone && !cat.telefone.includes('Não informado')) ? cat.telefone : '';
+
+        const elEmail = document.getElementById('edit-cat-email');
+        if (elEmail) elEmail.value = (cat.email && !cat.email.includes('Não informado')) ? cat.email : '';
+
+        const elProf = document.getElementById('edit-cat-profissao');
+        if (elProf) elProf.value = (cat.profissao && !cat.profissao.includes('Não informada')) ? cat.profissao : '';
+
+        const elEstCivil = document.getElementById('edit-cat-estado-civil');
+        if (elEstCivil) elEstCivil.value = cat.estadoCivil || 'Casado(a)';
+
+        const elEnd = document.getElementById('edit-cat-endereco');
+        if (elEnd) elEnd.value = (cat.endereco && !cat.endereco.includes('Não informado')) ? cat.endereco : '';
+
+        const elParoquia = document.getElementById('edit-cat-paroquia');
+        if (elParoquia) elParoquia.value = cat.paroquia || 'Santuário do Imaculado Coração de Maria';
+
+        const elEtapa = document.getElementById('edit-cat-etapa-principal');
+        if (elEtapa && cat.etapaPrincipal) {
+          elEtapa.value = cat.etapaPrincipal;
+        }
+
+        const elFuncao = document.getElementById('edit-cat-funcao-principal');
+        if (elFuncao) elFuncao.value = cat.funcaoPrincipal || 'Catequista Titular';
+
+        if (viewContainer) viewContainer.classList.add('hidden');
+        if (editContainer) editContainer.classList.remove('hidden');
+        if (btnStartEdit) btnStartEdit.classList.add('hidden');
+        if (btnFooterEdit) btnFooterEdit.classList.add('hidden');
+        if (footerCloseBtn) footerCloseBtn.classList.add('hidden');
+        if (editFooterBtns) editFooterBtns.classList.remove('hidden');
+        if (editBadge) editBadge.classList.remove('hidden');
+      } else {
+        if (viewContainer) viewContainer.classList.remove('hidden');
+        if (editContainer) editContainer.classList.add('hidden');
+        if (footerCloseBtn) footerCloseBtn.classList.remove('hidden');
+        if (editFooterBtns) editFooterBtns.classList.add('hidden');
+        if (editBadge) editBadge.classList.add('hidden');
+
+        const canEdit = canEditCatequistas();
+        if (btnStartEdit) btnStartEdit.classList.toggle('hidden', !canEdit);
+        if (btnFooterEdit) btnFooterEdit.classList.toggle('hidden', !canEdit);
+      }
+    }
+
+    async function handleSaveCatequistaDetails(event) {
+      if (event) event.preventDefault();
+
+      if (!canEditCatequistas()) {
+        alert('⚠️ Operação não permitida: Apenas o Master Admin, Coordenação Geral e Vice-Coordenação têm permissão para editar os dados dos catequistas.');
+        return;
+      }
+
+      if (!currentCatequistaForPhoto || !currentCatequistaForPhoto.id) {
+        alert('Nenhum catequista selecionado.');
+        return;
+      }
+
+      const catId = currentCatequistaForPhoto.id;
+      const list = getCatequistasRegistrationData();
+      const idx = list.findIndex(c => c.id === catId);
+      if (idx === -1) {
+        alert('Catequista não encontrado no cadastro.');
+        return;
+      }
+
+      const elNome = document.getElementById('edit-cat-nome-completo');
+      const nomeCompleto = elNome ? elNome.value.trim() : '';
+      if (!nomeCompleto) {
+        alert('Por favor, informe o Nome Completo.');
+        return;
+      }
+
+      const apelido = (document.getElementById('edit-cat-apelido')?.value || '').trim();
+      const dataNascimento = (document.getElementById('edit-cat-data-nascimento')?.value || '').trim();
+      const telefone = (document.getElementById('edit-cat-telefone')?.value || '').trim();
+      const email = (document.getElementById('edit-cat-email')?.value || '').trim();
+      const profissao = (document.getElementById('edit-cat-profissao')?.value || '').trim();
+      const estadoCivil = (document.getElementById('edit-cat-estado-civil')?.value || '').trim();
+      const endereco = (document.getElementById('edit-cat-endereco')?.value || '').trim();
+      const paroquia = (document.getElementById('edit-cat-paroquia')?.value || '').trim();
+      const etapaPrincipal = (document.getElementById('edit-cat-etapa-principal')?.value || '').trim();
+      const funcaoPrincipal = (document.getElementById('edit-cat-funcao-principal')?.value || '').trim();
+
+      // Calcula telefoneRaw limpo
+      let telefoneRaw = telefone.replace(/\D/g, '');
+      if (telefoneRaw && (telefoneRaw.length === 10 || telefoneRaw.length === 11) && !telefoneRaw.startsWith('55')) {
+        telefoneRaw = '55' + telefoneRaw;
+      }
+
+      // Atualiza no registro local
+      list[idx].nomeCompleto = nomeCompleto;
+      list[idx].apelido = apelido;
+      list[idx].nomeConhecido = apelido || list[idx].nomeConhecido;
+      list[idx].dataNascimento = dataNascimento || 'Não informada';
+      list[idx].telefone = telefone || 'Não informado';
+      list[idx].telefoneRaw = telefoneRaw || '';
+      list[idx].email = email || '';
+      list[idx].profissao = profissao || '';
+      list[idx].estadoCivil = estadoCivil || '';
+      list[idx].endereco = endereco || '';
+      list[idx].paroquia = paroquia || 'Santuário do Imaculado Coração de Maria';
+      if (etapaPrincipal) list[idx].etapaPrincipal = etapaPrincipal;
+      if (funcaoPrincipal) list[idx].funcaoPrincipal = funcaoPrincipal;
+      list[idx].updatedAt = new Date().toISOString();
+
+      currentCatequistaForPhoto = list[idx];
+
+      // 1. Salva em localStorage
+      saveCatequistasRegistrationData(list);
+
+      // 2. Sincroniza com Firestore sob proteção RBAC
+      if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
+        const userEmail = (window.appAuthState && window.appAuthState.user && window.appAuthState.user.email) || '';
+        const userName = (window.appAuthState && window.appAuthState.user && (window.appAuthState.user.displayName || window.appAuthState.user.email)) || 'Coordenação';
+        
+        window.firebaseDb.collection('catequistas').doc(catId).set({
+          id: catId,
+          nomeCompleto: list[idx].nomeCompleto,
+          apelido: list[idx].apelido || '',
+          dataNascimento: list[idx].dataNascimento,
+          telefone: list[idx].telefone,
+          telefoneRaw: list[idx].telefoneRaw,
+          email: list[idx].email,
+          profissao: list[idx].profissao,
+          estadoCivil: list[idx].estadoCivil,
+          endereco: list[idx].endereco,
+          paroquia: list[idx].paroquia,
+          etapaPrincipal: list[idx].etapaPrincipal,
+          funcaoPrincipal: list[idx].funcaoPrincipal,
+          turmas: list[idx].turmas || [],
+          foto: list[idx].foto !== undefined ? list[idx].foto : null,
+          fotoFaceDetected: list[idx].fotoFaceDetected || false,
+          fotoRemoved: list[idx].fotoRemoved || false,
+          updatedAt: list[idx].updatedAt,
+          updatedBy: userName,
+          updatedByEmail: userEmail
+        }, { merge: true }).then(() => {
+          console.log('✅ Dados cadastrais do catequista persistidos no Firestore:', catId);
+        }).catch(err => {
+          console.warn('Erro ao salvar catequista no Firestore:', err);
+        });
+      }
+
+      // 3. Auditoria LGPD (Art. 37)
+      if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
+        const userEmail = (window.appAuthState && window.appAuthState.user && window.appAuthState.user.email) || '';
+        const userName = (window.appAuthState && window.appAuthState.user && (window.appAuthState.user.displayName || window.appAuthState.user.email)) || 'Coordenação';
+        window.ICM_CONFIG.logAuditEvent('CATEQUISTA_UPDATE_DATA', `catequista:${nomeCompleto}`, {
+          catId: catId,
+          updatedBy: userName,
+          updatedByEmail: userEmail,
+          timestamp: new Date().toISOString()
+        });
+      }
+
+      // 4. Atualiza a tabela na tela
+      filterCatequistasList();
+
+      // 5. Retorna ao modo de visualização com dados atualizados
+      toggleCatequistaEditMode(false);
+      openCatequistaModal(catId);
+
+      alert(`✅ Dados de ${nomeCompleto} atualizados e salvos com sucesso!`);
     }
 
     function renderCatequistasList() {
@@ -9093,6 +9557,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         `;
         return;
       }
+
+      const canEdit = canEditCatequistas();
 
       tbody.innerHTML = filtered.map(c => {
         const turmasHtml = c.turmas && c.turmas.length > 0
@@ -9165,10 +9631,16 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             <td class="py-3 px-4">
               <div>${turmasHtml}</div>
             </td>
-            <td class="py-3 px-4 text-center">
-              <button onclick="openCatequistaModal('${c.id}')" class="p-1.5 bg-slate-100 hover:bg-[#d4a94f] hover:text-slate-950 text-slate-600 rounded-lg transition text-xs font-bold" title="Ver ficha completa">
-                👁️ Ficha
-              </button>
+            <td class="py-3 px-4 text-center whitespace-nowrap">
+              <div class="inline-flex items-center gap-1.5 justify-center">
+                <button onclick="openCatequistaModal('${c.id}')" class="p-1.5 bg-slate-100 hover:bg-[#d4a94f] hover:text-slate-950 text-slate-700 rounded-lg transition text-xs font-bold" title="Ver ficha completa">
+                  👁️ Ficha
+                </button>
+                ${canEdit ? `
+                <button onclick="openCatequistaModal('${c.id}', true)" class="p-1.5 bg-amber-500/20 hover:bg-[#d4a94f] hover:text-slate-950 text-amber-900 rounded-lg transition text-xs font-bold border border-amber-500/40" title="Editar dados cadastrais de ${c.nomeCompleto}">
+                  ✏️ Editar
+                </button>` : ''}
+              </div>
             </td>
           </tr>
         `;
@@ -10345,6 +10817,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         if (viewCatequistas) viewCatequistas.classList.remove('hidden');
         if (toolbar) toolbar.classList.add('hidden');
         if (btnCatequistas) btnCatequistas.className = activeBtn;
+        if (typeof syncCatequistasFromFirestore === 'function') syncCatequistasFromFirestore();
         if (typeof renderCatequistasList === 'function') renderCatequistasList();
       }
     }

@@ -77,6 +77,16 @@
         if (isMaster) btnImportSeed.classList.remove('hidden');
         else btnImportSeed.classList.add('hidden');
       }
+
+      // Sincronizar Cache Local na Nuvem: visível para Coord/Admin se houver itens locais e Firestore vazio/desconectado
+      const btnSyncCloud = document.getElementById('btn-wiki-sync-cache-to-cloud');
+      if (btnSyncCloud) {
+        if (isCoordOrAdmin && this.nodes && this.nodes.length > 0 && (!this.cloudConnected || this.isFirestoreEmpty)) {
+          btnSyncCloud.classList.remove('hidden');
+        } else {
+          btnSyncCloud.classList.add('hidden');
+        }
+      }
     },
 
     // ========================================================================

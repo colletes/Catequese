@@ -15,8 +15,12 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.token.email.lower() == 'lorenammoraes@gmail.com';
     }
 
+    function isViceCoordGeral() {
+      return isAuthenticated() && request.auth.token.email.lower() == 'andresprojetos@gmail.com';
+    }
+
     function isCoordOrAdmin() {
-      return isMasterAdmin() || isCoordGeral();
+      return isMasterAdmin() || isCoordGeral() || isViceCoordGeral();
     }
 
     // Perfis de Usuários (Governança e Consentimento LGPD)

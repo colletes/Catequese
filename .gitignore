@@ -4,3 +4,5 @@ firebase-debug.log
 firebase-debug.*.log
 __pycache__/
 *.pyc
+.DS_Store
+scripts/catequizandos_database_consolidado.json
