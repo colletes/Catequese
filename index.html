@@ -2150,12 +2150,22 @@
           <div class="overflow-x-auto rounded-2xl border border-slate-200">
             <table class="w-full text-left text-xs sm:text-sm border-collapse">
               <thead>
-                <tr class="bg-slate-900 text-white border-b-2 border-[#d4a94f]">
-                  <th class="py-3 px-4 font-heading">Etapa &amp; Turma</th>
-                  <th class="py-3 px-4 font-heading">Dia e Horário</th>
-                  <th class="py-3 px-4 font-heading">Catequistas &amp; Auxiliares</th>
-                  <th class="py-3 px-4 font-heading">Sala Oficial</th>
-                  <th class="py-3 px-4 font-heading">Prédio / Local</th>
+                <tr class="bg-slate-900 text-white border-b-2 border-[#d4a94f] select-none text-xs sm:text-sm">
+                  <th id="th-turma-nome" onclick="setTurmasSort('etapaTurma')" class="py-3 px-4 font-heading cursor-pointer hover:bg-slate-800 transition text-[#d4a94f]" title="Ordenar por Etapa &amp; Turma">
+                    <span>Etapa &amp; Turma</span><span class="sort-icon text-[10px] text-amber-300 font-bold"> ▲</span>
+                  </th>
+                  <th id="th-turma-horario" onclick="setTurmasSort('dayTime')" class="py-3 px-4 font-heading cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Dia e Horário">
+                    <span>Dia e Horário</span><span class="sort-icon text-[10px] text-slate-400 font-normal"> ↕</span>
+                  </th>
+                  <th id="th-turma-catequistas" onclick="setTurmasSort('catechists')" class="py-3 px-4 font-heading cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Catequistas &amp; Auxiliares">
+                    <span>Catequistas &amp; Auxiliares</span><span class="sort-icon text-[10px] text-slate-400 font-normal"> ↕</span>
+                  </th>
+                  <th id="th-turma-sala" onclick="setTurmasSort('room')" class="py-3 px-4 font-heading cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Sala Oficial">
+                    <span>Sala Oficial</span><span class="sort-icon text-[10px] text-slate-400 font-normal"> ↕</span>
+                  </th>
+                  <th id="th-turma-predio" onclick="setTurmasSort('hall')" class="py-3 px-4 font-heading cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Prédio / Local">
+                    <span>Prédio / Local</span><span class="sort-icon text-[10px] text-slate-400 font-normal"> ↕</span>
+                  </th>
                   <th class="py-3 px-4 text-center font-heading no-print" style="width: 110px;">Ações</th>
                 </tr>
               </thead>
@@ -2257,13 +2267,25 @@
           <div class="overflow-x-auto">
             <table class="w-full text-left text-xs sm:text-sm border-collapse">
               <thead>
-                <tr class="bg-slate-900 text-white border-b-2 border-[#d4a94f]">
-                  <th class="py-3 px-4 font-heading">Catequista (Nome Completo)</th>
-                  <th class="py-3 px-4 font-heading">Data Nasc.</th>
-                  <th class="py-3 px-4 font-heading">WhatsApp / Telefone</th>
-                  <th class="py-3 px-4 font-heading">E-mail</th>
-                  <th class="py-3 px-4 font-heading">Paróquia Habitual</th>
-                  <th class="py-3 px-4 font-heading">Etapa &amp; Turma(s) 2026</th>
+                <tr class="bg-slate-900 text-white border-b-2 border-[#d4a94f] select-none text-xs sm:text-sm">
+                  <th id="th-cat-nome" onclick="setCatequistasSort('nome')" class="py-3 px-4 font-heading cursor-pointer hover:bg-slate-800 transition text-[#d4a94f]" title="Ordenar por Nome Completo">
+                    <span>Catequista (Nome Completo)</span><span class="sort-icon text-[10px] text-amber-300 font-bold"> ▲</span>
+                  </th>
+                  <th id="th-cat-nasc" onclick="setCatequistasSort('dataNascimento')" class="py-3 px-4 font-heading cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Data de Nascimento">
+                    <span>Data Nasc.</span><span class="sort-icon text-[10px] text-slate-400 font-normal"> ↕</span>
+                  </th>
+                  <th id="th-cat-telefone" onclick="setCatequistasSort('telefone')" class="py-3 px-4 font-heading cursor-pointer hover:bg-slate-800 transition" title="Ordenar por WhatsApp / Telefone">
+                    <span>WhatsApp / Telefone</span><span class="sort-icon text-[10px] text-slate-400 font-normal"> ↕</span>
+                  </th>
+                  <th id="th-cat-email" onclick="setCatequistasSort('email')" class="py-3 px-4 font-heading cursor-pointer hover:bg-slate-800 transition" title="Ordenar por E-mail">
+                    <span>E-mail</span><span class="sort-icon text-[10px] text-slate-400 font-normal"> ↕</span>
+                  </th>
+                  <th id="th-cat-paroquia" onclick="setCatequistasSort('paroquia')" class="py-3 px-4 font-heading cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Paróquia Habitual">
+                    <span>Paróquia Habitual</span><span class="sort-icon text-[10px] text-slate-400 font-normal"> ↕</span>
+                  </th>
+                  <th id="th-cat-turma" onclick="setCatequistasSort('turmas')" class="py-3 px-4 font-heading cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Etapa &amp; Turma(s)">
+                    <span>Etapa &amp; Turma(s) 2026</span><span class="sort-icon text-[10px] text-slate-400 font-normal"> ↕</span>
+                  </th>
                   <th class="py-3 px-4 text-center font-heading" style="width: 130px;">Ações</th>
                 </tr>
               </thead>
@@ -4787,11 +4809,17 @@
 
           <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
             <table class="w-full text-left text-xs">
-              <thead class="bg-slate-900 text-white font-heading text-[11px] uppercase">
+              <thead class="bg-slate-900 text-white font-heading text-[11px] uppercase select-none">
                 <tr>
-                  <th class="py-2.5 px-3">Catequizando</th>
-                  <th class="py-2.5 px-3">Etapa &amp; Turma</th>
-                  <th class="py-2.5 px-3">Documento Pendente</th>
+                  <th id="th-pend-nome" onclick="setPendenciasSort('nome')" class="py-2.5 px-3 cursor-pointer hover:bg-slate-800 transition text-[#d4a94f]" title="Ordenar por Nome do Catequizando">
+                    <span>Catequizando</span><span class="sort-icon text-[10px] text-amber-300 font-bold"> ▲</span>
+                  </th>
+                  <th id="th-pend-turma" onclick="setPendenciasSort('turma')" class="py-2.5 px-3 cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Etapa &amp; Turma">
+                    <span>Etapa &amp; Turma</span><span class="sort-icon text-[10px] text-slate-400 font-normal"> ↕</span>
+                  </th>
+                  <th id="th-pend-docs" onclick="setPendenciasSort('pendencias')" class="py-2.5 px-3 cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Documento Pendente">
+                    <span>Documento Pendente</span><span class="sort-icon text-[10px] text-slate-400 font-normal"> ↕</span>
+                  </th>
                   <th class="py-2.5 px-3 text-center">Ações Rápidas</th>
                 </tr>
               </thead>
@@ -4987,15 +5015,23 @@
 
           <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
             <table class="w-full text-left text-xs">
-              <thead class="bg-slate-900 text-white font-heading text-[10.5px] uppercase">
+              <thead class="bg-slate-900 text-white font-heading text-[10.5px] uppercase select-none">
                 <tr>
                   <th class="py-2.5 px-3 w-8 text-center">
                     <input type="checkbox" id="check-select-all-lgpd" onchange="toggleSelectAllLgpdTitulares(this.checked)" class="rounded text-[#d4a94f] focus:ring-0 cursor-pointer" />
                   </th>
-                  <th class="py-2.5 px-3">Titular / Nome</th>
-                  <th class="py-2.5 px-3">CPF</th>
-                  <th class="py-2.5 px-3">Categoria</th>
-                  <th class="py-2.5 px-3">Turma / Etapa</th>
+                  <th id="th-lgpd-nome" onclick="setLgpdTitularesSort('nome')" class="py-2.5 px-3 cursor-pointer hover:bg-slate-800 transition text-[#d4a94f]" title="Ordenar por Nome do Titular">
+                    <span>Titular / Nome</span><span class="sort-icon text-[10px] text-amber-300 font-bold"> ▲</span>
+                  </th>
+                  <th id="th-lgpd-cpf" onclick="setLgpdTitularesSort('cpf')" class="py-2.5 px-3 cursor-pointer hover:bg-slate-800 transition" title="Ordenar por CPF">
+                    <span>CPF</span><span class="sort-icon text-[10px] text-slate-400 font-normal"> ↕</span>
+                  </th>
+                  <th id="th-lgpd-tipo" onclick="setLgpdTitularesSort('tipo')" class="py-2.5 px-3 cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Categoria">
+                    <span>Categoria</span><span class="sort-icon text-[10px] text-slate-400 font-normal"> ↕</span>
+                  </th>
+                  <th id="th-lgpd-turma" onclick="setLgpdTitularesSort('turma')" class="py-2.5 px-3 cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Turma / Etapa">
+                    <span>Turma / Etapa</span><span class="sort-icon text-[10px] text-slate-400 font-normal"> ↕</span>
+                  </th>
                   <th class="py-2.5 px-3 text-right">Ações de Privacidade</th>
                 </tr>
               </thead>
@@ -7041,6 +7077,48 @@
       return list;
     }
 
+    let lgpdTitularesSortColumn = 'nome';
+    let lgpdTitularesSortDirection = 'asc';
+
+    function setLgpdTitularesSort(col) {
+      if (lgpdTitularesSortColumn === col) {
+        lgpdTitularesSortDirection = lgpdTitularesSortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        lgpdTitularesSortColumn = col;
+        lgpdTitularesSortDirection = 'asc';
+      }
+      updateLgpdTitularesSortHeadersUI();
+      renderLgpdTitularesTable();
+    }
+
+    function updateLgpdTitularesSortHeadersUI() {
+      const colMap = {
+        'nome': 'th-lgpd-nome',
+        'cpf': 'th-lgpd-cpf',
+        'tipo': 'th-lgpd-tipo',
+        'turma': 'th-lgpd-turma'
+      };
+
+      Object.entries(colMap).forEach(([c, thId]) => {
+        const th = document.getElementById(thId);
+        if (!th) return;
+        const iconSpan = th.querySelector('.sort-icon');
+        if (c === lgpdTitularesSortColumn) {
+          th.classList.add('text-[#d4a94f]');
+          if (iconSpan) {
+            iconSpan.textContent = lgpdTitularesSortDirection === 'asc' ? ' ▲' : ' ▼';
+            iconSpan.className = 'sort-icon text-[10px] text-amber-300 font-bold';
+          }
+        } else {
+          th.classList.remove('text-[#d4a94f]');
+          if (iconSpan) {
+            iconSpan.textContent = ' ↕';
+            iconSpan.className = 'sort-icon text-[10px] text-slate-400 font-normal';
+          }
+        }
+      });
+    }
+
     function renderLgpdTitularesTable() {
       const tbody = document.getElementById('tbody-lgpd-titulares');
       const badgeCount = document.getElementById('badge-lgpd-titulares-count');
@@ -7064,6 +7142,40 @@
       });
 
       if (badgeCount) badgeCount.textContent = filtered.length;
+
+      // Aplica ordenação
+      filtered.sort((a, b) => {
+        let cmp = 0;
+        if (lgpdTitularesSortColumn === 'cpf') {
+          const cA = (a.cpf || '').replace(/\D/g, '');
+          const cB = (b.cpf || '').replace(/\D/g, '');
+          if (!cA && !cB) cmp = 0;
+          else if (!cA) cmp = 1;
+          else if (!cB) cmp = -1;
+          else cmp = cA.localeCompare(cB);
+        } else if (lgpdTitularesSortColumn === 'tipo') {
+          const tA = (a.categoria || a.tipo || '').trim();
+          const tB = (b.categoria || b.tipo || '').trim();
+          cmp = tA.localeCompare(tB, 'pt-BR', { sensitivity: 'base' });
+        } else if (lgpdTitularesSortColumn === 'turma') {
+          const trmA = (`${a.etapa || ''} ${a.turma || ''}`).trim();
+          const trmB = (`${b.etapa || ''} ${b.turma || ''}`).trim();
+          cmp = trmA.localeCompare(trmB, 'pt-BR', { numeric: true, sensitivity: 'base' });
+        } else {
+          // Padrão: nome
+          cmp = (a.nome || '').trim().localeCompare((b.nome || '').trim(), 'pt-BR', { sensitivity: 'base' });
+        }
+
+        if (cmp === 0) {
+          cmp = (a.nome || '').trim().localeCompare((b.nome || '').trim(), 'pt-BR', { sensitivity: 'base' });
+        }
+
+        return lgpdTitularesSortDirection === 'asc' ? cmp : -cmp;
+      });
+
+      if (typeof updateLgpdTitularesSortHeadersUI === 'function') {
+        updateLgpdTitularesSortHeadersUI();
+      }
 
       if (filtered.length === 0) {
         tbody.innerHTML = `
@@ -8139,6 +8251,47 @@
       if (selEmail) selEmail.innerHTML = optionsHtml;
     }
 
+    let pendenciasSortColumn = 'nome';
+    let pendenciasSortDirection = 'asc';
+
+    function setPendenciasSort(col) {
+      if (pendenciasSortColumn === col) {
+        pendenciasSortDirection = pendenciasSortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        pendenciasSortColumn = col;
+        pendenciasSortDirection = 'asc';
+      }
+      updatePendenciasSortHeadersUI();
+      renderPainelPendencias();
+    }
+
+    function updatePendenciasSortHeadersUI() {
+      const colMap = {
+        'nome': 'th-pend-nome',
+        'turma': 'th-pend-turma',
+        'pendencias': 'th-pend-docs'
+      };
+
+      Object.entries(colMap).forEach(([c, thId]) => {
+        const th = document.getElementById(thId);
+        if (!th) return;
+        const iconSpan = th.querySelector('.sort-icon');
+        if (c === pendenciasSortColumn) {
+          th.classList.add('text-[#d4a94f]');
+          if (iconSpan) {
+            iconSpan.textContent = pendenciasSortDirection === 'asc' ? ' ▲' : ' ▼';
+            iconSpan.className = 'sort-icon text-[10px] text-amber-300 font-bold';
+          }
+        } else {
+          th.classList.remove('text-[#d4a94f]');
+          if (iconSpan) {
+            iconSpan.textContent = ' ↕';
+            iconSpan.className = 'sort-icon text-[10px] text-slate-400 font-normal';
+          }
+        }
+      });
+    }
+
     function renderPainelPendencias() {
       const tbody = document.getElementById('tbody-pendencias-docs');
       const badgeCount = document.getElementById('badge-pendencias-count');
@@ -8210,6 +8363,29 @@
         }
       }
       if (typeof updateUserMgmtBadges === 'function') updateUserMgmtBadges();
+
+      // Aplica ordenação
+      pendencias.sort((a, b) => {
+        let cmp = 0;
+        if (pendenciasSortColumn === 'turma') {
+          cmp = (`${a.etapa} ${a.turma}`).localeCompare(`${b.etapa} ${b.turma}`, 'pt-BR', { numeric: true, sensitivity: 'base' });
+        } else if (pendenciasSortColumn === 'pendencias') {
+          cmp = (a.pendencias.join(', ')).localeCompare(b.pendencias.join(', '), 'pt-BR', { sensitivity: 'base' });
+        } else {
+          // Padrão: nome
+          cmp = (a.aluno.nome || '').trim().localeCompare((b.aluno.nome || '').trim(), 'pt-BR', { sensitivity: 'base' });
+        }
+
+        if (cmp === 0) {
+          cmp = (a.aluno.nome || '').trim().localeCompare((b.aluno.nome || '').trim(), 'pt-BR', { sensitivity: 'base' });
+        }
+
+        return pendenciasSortDirection === 'asc' ? cmp : -cmp;
+      });
+
+      if (typeof updatePendenciasSortHeadersUI === 'function') {
+        updatePendenciasSortHeadersUI();
+      }
 
       if (pendencias.length === 0) {
         tbody.innerHTML = `
@@ -8771,8 +8947,9 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
                     found.turmas = seedCat.turmas;
                     changed = true;
                   }
-                  // Preenche campos complementares vazios sem sobrescrever dados já preenchidos
+                  // Preenche campos complementares vazios sem sobrescrever dados já preenchidos (exclui fotos para não restaurar foto removida)
                   for (const key of Object.keys(seedCat)) {
+                    if (key === 'foto' || key === 'fotoFaceDetected' || key === 'fotoRemoved') continue;
                     if (found[key] === undefined || found[key] === null || found[key] === '') {
                       if (seedCat[key] !== undefined && seedCat[key] !== null && seedCat[key] !== '') {
                         found[key] = seedCat[key];
@@ -8844,8 +9021,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
               turmas: cat.turmas || [],
               etapaPrincipal: cat.etapaPrincipal || '',
               funcaoPrincipal: cat.funcaoPrincipal || '',
-              foto: cat.foto !== undefined ? cat.foto : null,
-              fotoFaceDetected: cat.fotoFaceDetected || false,
+              foto: cat.fotoRemoved ? null : (cat.foto !== undefined ? cat.foto : null),
+              fotoFaceDetected: cat.fotoRemoved ? false : (cat.fotoFaceDetected || false),
               fotoRemoved: cat.fotoRemoved || false,
               updatedAt: cat.updatedAt || new Date().toISOString()
             };
@@ -8876,9 +9053,11 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
         snapshot.forEach(docSnap => {
           const cloudData = docSnap.data();
-          if (!cloudData || !cloudData.id) return;
+          const cloudId = (cloudData && cloudData.id) || docSnap.id;
+          if (!cloudData || !cloudId) return;
+          if (!cloudData.id) cloudData.id = cloudId;
 
-          const idx = list.findIndex(c => c.id === cloudData.id);
+          const idx = list.findIndex(c => c.id === cloudId || (c.nomeCompleto && cloudData.nomeCompleto && normCatString(c.nomeCompleto) === normCatString(cloudData.nomeCompleto)));
           if (idx !== -1) {
             const localCat = list[idx];
             const cloudTime = cloudData.updatedAt ? new Date(cloudData.updatedAt).getTime() : 0;
@@ -8898,6 +9077,12 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
                   changed = true;
                 }
               });
+              if (cloudData.fotoRemoved) {
+                localCat.foto = null;
+                localCat.fotoFaceDetected = false;
+                localCat.fotoRemoved = true;
+                changed = true;
+              }
               if (Array.isArray(cloudData.turmas) && cloudData.turmas.length > 0) {
                 localCat.turmas = cloudData.turmas;
                 changed = true;
@@ -8906,6 +9091,10 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
               // Local é mais recente: envia ao Firestore
               window.firebaseDb.collection('catequistas').doc(localCat.id).set({
                 ...localCat,
+                id: localCat.id,
+                foto: localCat.fotoRemoved ? null : (localCat.foto !== undefined ? localCat.foto : null),
+                fotoFaceDetected: localCat.fotoRemoved ? false : (localCat.fotoFaceDetected || false),
+                fotoRemoved: !!localCat.fotoRemoved,
                 updatedAt: localCat.updatedAt
               }, { merge: true }).catch(err => console.warn('Erro ao atualizar catequista no Firestore:', localCat.id, err));
             }
@@ -9235,7 +9424,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       }
     }
 
-    function removeCatequistaPhoto() {
+    async function removeCatequistaPhoto() {
       if (!currentCatequistaForPhoto) return;
       if (!canManageCatequistasPhotos()) {
         alert('⚠️ Operação não permitida: Apenas o Master Admin, Coordenação Geral e Vice-Coordenação têm permissão para gerenciar fotos.');
@@ -9246,59 +9435,85 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         return;
       }
 
-      const list = getCatequistasRegistrationData();
-      const catIdx = list.findIndex(c => c.id === currentCatequistaForPhoto.id);
-      const nowIso = new Date().toISOString();
-      if (catIdx !== -1) {
-        list[catIdx].foto = null;
-        list[catIdx].fotoFaceDetected = false;
-        list[catIdx].fotoRemoved = true;
-        list[catIdx].updatedAt = nowIso;
-        saveCatequistasRegistrationData(list);
-        currentCatequistaForPhoto = list[catIdx];
-      }
-
-      if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
-        window.firebaseDb.collection('catequistas').doc(currentCatequistaForPhoto.id).set({
-          foto: null,
-          fotoFaceDetected: false,
-          fotoRemoved: true,
-          updatedAt: nowIso
-        }, { merge: true }).then(() => {
-          console.log('✅ Remoção de foto persistida no Firestore:', currentCatequistaForPhoto.id);
-        }).catch(err => console.warn('Remoção de foto Firestore local:', err));
-      }
-
-      if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
-        const currentUserName = (window.appAuthState && window.appAuthState.user && (window.appAuthState.user.displayName || window.appAuthState.user.email)) || 'Coordenação Geral';
-        window.ICM_CONFIG.logAuditEvent('CATEQUISTA_PHOTO_REMOVE', `catequista:${currentCatequistaForPhoto.nomeCompleto}`, {
-          catId: currentCatequistaForPhoto.id,
-          removedBy: currentUserName,
-          timestamp: new Date().toISOString()
-        });
-      }
-
-      const initials = (currentCatequistaForPhoto.nomeCompleto || 'C')
-        .split(' ')
-        .filter(w => w.length > 0)
-        .slice(0, 2)
-        .map(w => w[0].toUpperCase())
-        .join('');
-
-      const avatarEl = document.getElementById('modal-cat-avatar');
-      const fotoBadge = document.getElementById('modal-cat-foto-badge');
       const btnRemove = document.getElementById('modal-cat-btn-remove-foto');
-
-      if (avatarEl) {
-        avatarEl.innerHTML = initials;
-        avatarEl.classList.add('bg-gradient-to-br', 'from-[#d4a94f]', 'to-[#b88d36]', 'text-slate-950');
-        avatarEl.classList.remove('bg-slate-900');
+      const originalText = btnRemove ? btnRemove.textContent : '';
+      if (btnRemove) {
+        btnRemove.disabled = true;
+        btnRemove.textContent = 'Removendo...';
       }
-      if (fotoBadge) fotoBadge.classList.add('hidden');
-      if (btnRemove) btnRemove.classList.add('hidden');
 
-      filterCatequistasList();
-      alert(`Foto removida com sucesso. O perfil agora exibe as iniciais.`);
+      try {
+        const list = getCatequistasRegistrationData();
+        const catIdx = list.findIndex(c => c.id === currentCatequistaForPhoto.id || (c.nomeCompleto && normCatString(c.nomeCompleto) === normCatString(currentCatequistaForPhoto.nomeCompleto)));
+        const nowIso = new Date().toISOString();
+
+        if (catIdx !== -1) {
+          list[catIdx].foto = null;
+          list[catIdx].fotoFaceDetected = false;
+          list[catIdx].fotoRemoved = true;
+          list[catIdx].updatedAt = nowIso;
+          saveCatequistasRegistrationData(list);
+          currentCatequistaForPhoto = list[catIdx];
+        } else {
+          currentCatequistaForPhoto.foto = null;
+          currentCatequistaForPhoto.fotoFaceDetected = false;
+          currentCatequistaForPhoto.fotoRemoved = true;
+          currentCatequistaForPhoto.updatedAt = nowIso;
+        }
+
+        // Persistência robusta no Firestore
+        if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
+          const docRef = window.firebaseDb.collection('catequistas').doc(currentCatequistaForPhoto.id);
+          const updatePayload = {
+            ...currentCatequistaForPhoto,
+            id: currentCatequistaForPhoto.id,
+            foto: null,
+            fotoFaceDetected: false,
+            fotoRemoved: true,
+            updatedAt: nowIso
+          };
+          await docRef.set(updatePayload, { merge: true });
+          console.log('✅ Remoção de foto persistida no Firestore:', currentCatequistaForPhoto.id);
+        }
+
+        if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
+          const currentUserName = (window.appAuthState && window.appAuthState.user && (window.appAuthState.user.displayName || window.appAuthState.user.email)) || 'Coordenação Geral';
+          window.ICM_CONFIG.logAuditEvent('CATEQUISTA_PHOTO_REMOVE', `catequista:${currentCatequistaForPhoto.nomeCompleto}`, {
+            catId: currentCatequistaForPhoto.id,
+            removedBy: currentUserName,
+            timestamp: nowIso
+          });
+        }
+
+        const initials = (currentCatequistaForPhoto.nomeCompleto || 'C')
+          .split(' ')
+          .filter(w => w.length > 0)
+          .slice(0, 2)
+          .map(w => w[0].toUpperCase())
+          .join('');
+
+        const avatarEl = document.getElementById('modal-cat-avatar');
+        const fotoBadge = document.getElementById('modal-cat-foto-badge');
+
+        if (avatarEl) {
+          avatarEl.innerHTML = initials;
+          avatarEl.classList.add('bg-gradient-to-br', 'from-[#d4a94f]', 'to-[#b88d36]', 'text-slate-950');
+          avatarEl.classList.remove('bg-slate-900');
+        }
+        if (fotoBadge) fotoBadge.classList.add('hidden');
+        if (btnRemove) btnRemove.classList.add('hidden');
+
+        filterCatequistasList();
+        alert(`✅ Foto de ${currentCatequistaForPhoto.nomeCompleto} removida com sucesso. O perfil agora exibe as iniciais.`);
+      } catch (err) {
+        console.error('Erro ao remover foto do catequista:', err);
+        alert('⚠️ Erro ao persistir a remoção da foto no banco de dados: ' + (err.message || err));
+      } finally {
+        if (btnRemove) {
+          btnRemove.disabled = false;
+          btnRemove.textContent = originalText;
+        }
+      }
     }
 
     function openCatequistaModal(identifier, startInEditMode = false) {
@@ -9339,7 +9554,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       }
 
       if (avatarEl) {
-        if (cat.foto) {
+        if (cat.foto && !cat.fotoRemoved) {
           avatarEl.innerHTML = `<img src="${cat.foto}" alt="${cat.nomeCompleto}" class="w-full h-full object-cover" style="aspect-ratio: 3/4;" />`;
           avatarEl.classList.remove('bg-gradient-to-br', 'from-[#d4a94f]', 'to-[#b88d36]', 'text-slate-950');
           avatarEl.classList.add('bg-slate-900');
@@ -9714,6 +9929,50 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       alert(`✅ Dados de ${nomeCompleto} atualizados e salvos com sucesso!`);
     }
 
+    let catequistasSortColumn = 'nome';
+    let catequistasSortDirection = 'asc';
+
+    function setCatequistasSort(col) {
+      if (catequistasSortColumn === col) {
+        catequistasSortDirection = catequistasSortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        catequistasSortColumn = col;
+        catequistasSortDirection = 'asc';
+      }
+      updateCatequistasSortHeadersUI();
+      filterCatequistasList();
+    }
+
+    function updateCatequistasSortHeadersUI() {
+      const colMap = {
+        'nome': 'th-cat-nome',
+        'dataNascimento': 'th-cat-nasc',
+        'telefone': 'th-cat-telefone',
+        'email': 'th-cat-email',
+        'paroquia': 'th-cat-paroquia',
+        'turmas': 'th-cat-turma'
+      };
+
+      Object.entries(colMap).forEach(([c, thId]) => {
+        const th = document.getElementById(thId);
+        if (!th) return;
+        const iconSpan = th.querySelector('.sort-icon');
+        if (c === catequistasSortColumn) {
+          th.classList.add('text-[#d4a94f]');
+          if (iconSpan) {
+            iconSpan.textContent = catequistasSortDirection === 'asc' ? ' ▲' : ' ▼';
+            iconSpan.className = 'sort-icon text-[10px] text-amber-300 font-bold';
+          }
+        } else {
+          th.classList.remove('text-[#d4a94f]');
+          if (iconSpan) {
+            iconSpan.textContent = ' ↕';
+            iconSpan.className = 'sort-icon text-[10px] text-slate-400 font-normal';
+          }
+        }
+      });
+    }
+
     function renderCatequistasList() {
       filterCatequistasList();
     }
@@ -9777,6 +10036,70 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         updateCadastrarCatequistaVisibility();
       }
 
+      // Ordenação selecionada pelo usuário
+      filtered.sort((a, b) => {
+        let cmp = 0;
+        if (catequistasSortColumn === 'dataNascimento') {
+          const parseDate = (d) => {
+            if (!d || typeof d !== 'string' || d.toLowerCase().includes('não') || d.toLowerCase().includes('nao')) return 0;
+            const parts = d.trim().split(/[-/]/);
+            if (parts.length === 3) {
+              if (parts[0].length === 4) return new Date(parts[0], parts[1] - 1, parts[2]).getTime();
+              return new Date(parts[2], parts[1] - 1, parts[0]).getTime();
+            }
+            return 0;
+          };
+          const tA = parseDate(a.dataNascimento);
+          const tB = parseDate(b.dataNascimento);
+          if (!tA && !tB) cmp = 0;
+          else if (!tA) cmp = 1;
+          else if (!tB) cmp = -1;
+          else cmp = tA - tB;
+        } else if (catequistasSortColumn === 'telefone') {
+          const numA = (a.telefoneRaw || a.telefone || '').replace(/\D/g, '');
+          const numB = (b.telefoneRaw || b.telefone || '').replace(/\D/g, '');
+          if (!numA && !numB) cmp = 0;
+          else if (!numA) cmp = 1;
+          else if (!numB) cmp = -1;
+          else cmp = numA.localeCompare(numB);
+        } else if (catequistasSortColumn === 'email') {
+          const eA = (a.email || '').trim().toLowerCase();
+          const eB = (b.email || '').trim().toLowerCase();
+          if (!eA && !eB) cmp = 0;
+          else if (!eA) cmp = 1;
+          else if (!eB) cmp = -1;
+          else cmp = eA.localeCompare(eB, 'pt-BR');
+        } else if (catequistasSortColumn === 'paroquia') {
+          const pA = (a.paroquia || '').trim();
+          const pB = (b.paroquia || '').trim();
+          cmp = pA.localeCompare(pB, 'pt-BR', { sensitivity: 'base' });
+        } else if (catequistasSortColumn === 'turmas') {
+          const getTurmaStr = (c) => {
+            if (c.turmas && c.turmas.length > 0) {
+              return c.turmas.map(t => `${t.stage} ${t.turma}`).join(' ');
+            }
+            return c.etapaPrincipal || c.funcaoPrincipal || '';
+          };
+          const tA = getTurmaStr(a);
+          const tB = getTurmaStr(b);
+          cmp = tA.localeCompare(tB, 'pt-BR', { sensitivity: 'base' });
+        } else {
+          // Padrão: nome
+          cmp = (a.nomeCompleto || '').trim().localeCompare((b.nomeCompleto || '').trim(), 'pt-BR', { sensitivity: 'base' });
+        }
+
+        // Desempate alfabético por nome
+        if (cmp === 0) {
+          cmp = (a.nomeCompleto || '').trim().localeCompare((b.nomeCompleto || '').trim(), 'pt-BR', { sensitivity: 'base' });
+        }
+
+        return catequistasSortDirection === 'asc' ? cmp : -cmp;
+      });
+
+      if (typeof updateCatequistasSortHeadersUI === 'function') {
+        updateCatequistasSortHeadersUI();
+      }
+
       if (filtered.length === 0) {
         tbody.innerHTML = `
           <tr>
@@ -9822,7 +10145,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           .map(w => w[0].toUpperCase())
           .join('');
 
-        const photoHtml = c.foto
+        const photoHtml = (c.foto && !c.fotoRemoved)
           ? `<div class="w-10 h-[52px] rounded-xl overflow-hidden border border-slate-200 shrink-0 bg-slate-100 shadow-xs cursor-pointer group-hover:border-[#d4a94f] transition flex items-center justify-center" onclick="openCatequistaModal('${c.id}')" title="Ver foto 3x4 de ${c.nomeCompleto}">
                <img src="${c.foto}" alt="${c.nomeCompleto}" class="w-full h-full object-cover" style="aspect-ratio: 3/4;" loading="lazy" />
              </div>`
@@ -9850,7 +10173,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
                   <div class="text-[11px] text-slate-500 mt-1 font-medium flex items-center gap-1.5 flex-wrap">
                     <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
                     ${funcoesBadges}
-                    ${c.foto ? `<span class="inline-flex items-center gap-0.5 text-[9px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-1.5 py-0.2 rounded-full" title="Foto 3x4 no banco protegido por LGPD">📸 3x4</span>` : ''}
+                    ${(c.foto && !c.fotoRemoved) ? `<span class="inline-flex items-center gap-0.5 text-[9px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-1.5 py-0.2 rounded-full" title="Foto 3x4 no banco protegido por LGPD">📸 3x4</span>` : ''}
                   </div>
                 </div>
               </div>
@@ -10750,6 +11073,50 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       `;
     }
 
+    // Ordenação da Tabela de Turmas
+    let turmasSortColumn = 'etapaTurma';
+    let turmasSortDirection = 'asc';
+
+    function setTurmasSort(col) {
+      if (turmasSortColumn === col) {
+        turmasSortDirection = turmasSortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        turmasSortColumn = col;
+        turmasSortDirection = 'asc';
+      }
+      updateTurmasSortHeadersUI();
+      renderScheduleTable();
+    }
+
+    function updateTurmasSortHeadersUI() {
+      const colMap = {
+        'etapaTurma': 'th-turma-nome',
+        'dayTime': 'th-turma-horario',
+        'catechists': 'th-turma-catequistas',
+        'room': 'th-turma-sala',
+        'hall': 'th-turma-predio'
+      };
+
+      Object.entries(colMap).forEach(([c, thId]) => {
+        const th = document.getElementById(thId);
+        if (!th) return;
+        const iconSpan = th.querySelector('.sort-icon');
+        if (c === turmasSortColumn) {
+          th.classList.add('text-[#d4a94f]');
+          if (iconSpan) {
+            iconSpan.textContent = turmasSortDirection === 'asc' ? ' ▲' : ' ▼';
+            iconSpan.className = 'sort-icon text-[10px] text-amber-300 font-bold';
+          }
+        } else {
+          th.classList.remove('text-[#d4a94f]');
+          if (iconSpan) {
+            iconSpan.textContent = ' ↕';
+            iconSpan.className = 'sort-icon text-[10px] text-slate-400 font-normal';
+          }
+        }
+      });
+    }
+
     // Renderizar Planilha & Tabela de Turmas
     function renderScheduleTable() {
       const tbody = document.getElementById('turmas-table-body');
@@ -10767,12 +11134,15 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
       let totalFiltered = 0;
       let totalAll = 0;
+      const items = [];
 
       org.stages.forEach(st => {
-        if (selectedEtapa !== 'all' && st.name !== selectedEtapa) return;
+        const stageMatch = (selectedEtapa === 'all' || st.name === selectedEtapa);
 
         (st.turmas || []).forEach(r => {
           totalAll++;
+          if (!stageMatch) return;
+
           const matchQuery = !query || 
             st.name.toLowerCase().includes(query) ||
             r.turma.toLowerCase().includes(query) ||
@@ -10784,51 +11154,100 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
           if (!matchQuery) return;
           totalFiltered++;
-
-          const tr = document.createElement('tr');
-          tr.className = 'hover:bg-amber-50/50 transition';
-
-          let badgeColor = 'bg-slate-100 text-slate-800';
-          if (st.name.includes('Pré')) badgeColor = 'bg-rose-100 text-rose-800';
-          else if (st.name.includes('Eucaristia I') && !st.name.includes('II')) badgeColor = 'bg-emerald-100 text-emerald-800';
-          else if (st.name.includes('Eucaristia II')) badgeColor = 'bg-sky-100 text-sky-800';
-          else if (st.name.includes('Perseverança')) badgeColor = 'bg-amber-100 text-amber-900';
-          else if (st.name.includes('Crisma Jovem')) badgeColor = 'bg-purple-100 text-purple-900';
-          else if (st.name.includes('Crisma Adultos')) badgeColor = 'bg-indigo-100 text-indigo-900';
-
-          let catechistsHtml = '';
-          if (r.semCatequista) {
-            catechistsHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-yellow-100 text-yellow-800 border border-yellow-300">⚠️ Auxiliares em formação</span><div class="text-xs font-semibold text-slate-800 mt-1">${formatCatechistChips(r.catechists, st.name)}</div>`;
-          } else {
-            catechistsHtml = `<div>${formatCatechistChips(r.catechists, st.name)}</div>`;
-            if (r.auxiliares && r.auxiliares.length > 0) {
-              catechistsHtml += `<div class="text-[11px] text-slate-400 italic mt-1 flex items-center gap-1 flex-wrap"><span>Aux.:</span> ${formatCatechistChips(r.auxiliares.join(', '), st.name)}</div>`;
-            }
-          }
-
-          tr.innerHTML = `
-            <td class="py-3 px-4">
-              <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold ${badgeColor}">${st.name}</span>
-              <div class="text-xs font-bold text-slate-900 mt-1">${r.turma}</div>
-            </td>
-            <td class="py-3 px-4 font-semibold text-slate-700 whitespace-nowrap">${r.dayTime}</td>
-            <td class="py-3 px-4">${catechistsHtml}</td>
-            <td class="py-3 px-4 font-bold text-slate-800">${r.room}</td>
-            <td class="py-3 px-4 text-slate-500 text-xs">${r.hall}</td>
-            <td class="py-3 px-4 text-center no-print whitespace-nowrap">
-              ${(window.appAuthState && window.ICM_CONFIG && (window.appAuthState.role === window.ICM_CONFIG.ROLES.MASTER_ADMIN || window.appAuthState.role === window.ICM_CONFIG.ROLES.COORD_GERAL)) ? `
-              <div class="flex items-center justify-center gap-1">
-                <button onclick="openEditTurmaModal('${r.id}')" class="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition" title="Editar Turma">
-                  ✏️
-                </button>
-                <button onclick="deleteTurma('${r.id}')" class="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg transition" title="Excluir Turma">
-                  🗑️
-                </button>
-              </div>` : '<span class="text-slate-300 text-xs">—</span>'}
-            </td>
-          `;
-          tbody.appendChild(tr);
+          items.push({ stage: st, turma: r });
         });
+      });
+
+      // Ordena turmas
+      const stageOrder = {
+        'Pré Eucaristia': 1,
+        'Eucaristia I': 2,
+        'Eucaristia II': 3,
+        'Perseverança': 4,
+        'Crisma Jovem': 5,
+        'Crisma Adultos': 6
+      };
+
+      items.sort((a, b) => {
+        let cmp = 0;
+        if (turmasSortColumn === 'etapaTurma') {
+          const ordA = stageOrder[a.stage.name] || 99;
+          const ordB = stageOrder[b.stage.name] || 99;
+          if (ordA !== ordB) {
+            cmp = ordA - ordB;
+          } else {
+            cmp = (a.turma.turma || '').localeCompare(b.turma.turma || '', 'pt-BR', { numeric: true, sensitivity: 'base' });
+          }
+        } else if (turmasSortColumn === 'dayTime') {
+          cmp = (a.turma.dayTime || '').localeCompare(b.turma.dayTime || '', 'pt-BR', { sensitivity: 'base' });
+        } else if (turmasSortColumn === 'catechists') {
+          const catA = ((a.turma.catechists || '') + ' ' + (a.turma.auxiliares || []).join(' ')).trim();
+          const catB = ((b.turma.catechists || '') + ' ' + (b.turma.auxiliares || []).join(' ')).trim();
+          cmp = catA.localeCompare(catB, 'pt-BR', { sensitivity: 'base' });
+        } else if (turmasSortColumn === 'room') {
+          cmp = (a.turma.room || '').localeCompare(b.turma.room || '', 'pt-BR', { numeric: true, sensitivity: 'base' });
+        } else if (turmasSortColumn === 'hall') {
+          cmp = (a.turma.hall || '').localeCompare(b.turma.hall || '', 'pt-BR', { sensitivity: 'base' });
+        }
+
+        if (cmp === 0) {
+          const ordA = stageOrder[a.stage.name] || 99;
+          const ordB = stageOrder[b.stage.name] || 99;
+          if (ordA !== ordB) cmp = ordA - ordB;
+          else cmp = (a.turma.turma || '').localeCompare(b.turma.turma || '', 'pt-BR', { numeric: true });
+        }
+
+        return turmasSortDirection === 'asc' ? cmp : -cmp;
+      });
+
+      if (typeof updateTurmasSortHeadersUI === 'function') {
+        updateTurmasSortHeadersUI();
+      }
+
+      items.forEach(({ stage: st, turma: r }) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-amber-50/50 transition';
+
+        let badgeColor = 'bg-slate-100 text-slate-800';
+        if (st.name.includes('Pré')) badgeColor = 'bg-rose-100 text-rose-800';
+        else if (st.name.includes('Eucaristia I') && !st.name.includes('II')) badgeColor = 'bg-emerald-100 text-emerald-800';
+        else if (st.name.includes('Eucaristia II')) badgeColor = 'bg-sky-100 text-sky-800';
+        else if (st.name.includes('Perseverança')) badgeColor = 'bg-amber-100 text-amber-900';
+        else if (st.name.includes('Crisma Jovem')) badgeColor = 'bg-purple-100 text-purple-900';
+        else if (st.name.includes('Crisma Adultos')) badgeColor = 'bg-indigo-100 text-indigo-900';
+
+        let catechistsHtml = '';
+        if (r.semCatequista) {
+          catechistsHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-yellow-100 text-yellow-800 border border-yellow-300">⚠️ Auxiliares em formação</span><div class="text-xs font-semibold text-slate-800 mt-1">${formatCatechistChips(r.catechists, st.name)}</div>`;
+        } else {
+          catechistsHtml = `<div>${formatCatechistChips(r.catechists, st.name)}</div>`;
+          if (r.auxiliares && r.auxiliares.length > 0) {
+            catechistsHtml += `<div class="text-[11px] text-slate-400 italic mt-1 flex items-center gap-1 flex-wrap"><span>Aux.:</span> ${formatCatechistChips(r.auxiliares.join(', '), st.name)}</div>`;
+          }
+        }
+
+        tr.innerHTML = `
+          <td class="py-3 px-4">
+            <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold ${badgeColor}">${st.name}</span>
+            <div class="text-xs font-bold text-slate-900 mt-1">${r.turma}</div>
+          </td>
+          <td class="py-3 px-4 font-semibold text-slate-700 whitespace-nowrap">${r.dayTime}</td>
+          <td class="py-3 px-4">${catechistsHtml}</td>
+          <td class="py-3 px-4 font-bold text-slate-800">${r.room}</td>
+          <td class="py-3 px-4 text-slate-500 text-xs">${r.hall}</td>
+          <td class="py-3 px-4 text-center no-print whitespace-nowrap">
+            ${(window.appAuthState && window.ICM_CONFIG && (window.appAuthState.role === window.ICM_CONFIG.ROLES.MASTER_ADMIN || window.appAuthState.role === window.ICM_CONFIG.ROLES.COORD_GERAL)) ? `
+            <div class="flex items-center justify-center gap-1">
+              <button onclick="openEditTurmaModal('${r.id}')" class="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition" title="Editar Turma">
+                ✏️
+              </button>
+              <button onclick="deleteTurma('${r.id}')" class="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg transition" title="Excluir Turma">
+                🗑️
+              </button>
+            </div>` : '<span class="text-slate-300 text-xs">—</span>'}
+          </td>
+        `;
+        tbody.appendChild(tr);
       });
 
       const caption = document.getElementById('org-table-stats-caption');
@@ -20600,23 +21019,34 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           cmp = (a._originalIdx ?? 0) - (b._originalIdx ?? 0);
         } else if (alunosSortColumn === 'dataNascimento') {
           const parseDate = (d) => {
-            if (!d) return 0;
-            const parts = d.split(/[-/]/);
+            if (!d || typeof d !== 'string' || d.toLowerCase().includes('não') || d.toLowerCase().includes('nao')) return 0;
+            const parts = d.trim().split(/[-/]/);
             if (parts.length === 3) {
               if (parts[0].length === 4) return new Date(parts[0], parts[1] - 1, parts[2]).getTime();
               return new Date(parts[2], parts[1] - 1, parts[0]).getTime();
             }
             return 0;
           };
-          cmp = parseDate(a.dataNascimento) - parseDate(b.dataNascimento);
+          const tA = parseDate(a.dataNascimento);
+          const tB = parseDate(b.dataNascimento);
+          if (!tA && !tB) cmp = 0;
+          else if (!tA) cmp = 1;
+          else if (!tB) cmp = -1;
+          else cmp = tA - tB;
         } else if (alunosSortColumn === 'cpf') {
           const valA = (a.cpf || '').replace(/\D/g, '');
           const valB = (b.cpf || '').replace(/\D/g, '');
-          cmp = valA.localeCompare(valB);
+          if (!valA && !valB) cmp = 0;
+          else if (!valA) cmp = 1;
+          else if (!valB) cmp = -1;
+          else cmp = valA.localeCompare(valB);
         } else {
           const valA = (a[alunosSortColumn] || '').toString().trim();
           const valB = (b[alunosSortColumn] || '').toString().trim();
-          cmp = valA.localeCompare(valB, 'pt-BR', { sensitivity: 'base' });
+          if (!valA && !valB) cmp = 0;
+          else if (!valA) cmp = 1;
+          else if (!valB) cmp = -1;
+          else cmp = valA.localeCompare(valB, 'pt-BR', { sensitivity: 'base' });
         }
 
         // Desempate alfabético por nome
