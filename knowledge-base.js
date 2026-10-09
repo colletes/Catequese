@@ -11,8 +11,453 @@
   // 1. CARGA SEMENTE INICIAL (MOCK DATA CATEQUÉTICO OFICIAL)
   // Estrutura hierárquica baseada nos temas reais do Santuário ICM
   // ==========================================================================
-  // Base inicial vazia para permitir carga limpa a partir do acervo do OneDrive
-  const INITIAL_WIKI_NODES = [];
+  const INITIAL_WIKI_NODES = [
+    // --- DIRETRIZES GERAIS ---
+    {
+      id: 'dir-geral',
+      parentId: null,
+      path: [],
+      title: 'Diretrizes e Orientações Gerais',
+      type: 'folder',
+      etapa: 'Geral',
+      description: 'Normas pastorais, metodologia de acolhida, orações litúrgicas e cronograma oficial.',
+      order: 1
+    },
+    {
+      id: 'doc-guia-catequista',
+      parentId: 'dir-geral',
+      path: ['dir-geral'],
+      title: 'Guia do Catequista 2026: Metodologia e Missão',
+      type: 'document',
+      extension: 'md',
+      etapa: 'Geral',
+      order: 1,
+      createdAt: '2026-02-01T10:00:00Z',
+      updatedAt: '2026-09-15T14:30:00Z',
+      createdBy: { name: 'Coordenação Geral', email: 'lorenammoraes@gmail.com' },
+      contentMarkdown: `# Guia Oficial do Catequista 2026
+## Santuário Imaculado Coração de Maria — Brasília/DF
+
+A missão do catequista não é apenas transmitir conteúdos doutrinais, mas **propiciar uma experiência viva e transformadora com a Pessoa de Jesus Cristo**.
+
+---
+
+### 1. Estrutura Padrão de um Encontro (1h30)
+
+Cada encontro catequético deve seguir uma pedagogia do acolhimento e da oração, dividindo-se harmoniosamente em quatro tempos:
+
+1. **Acolhida & Integração (15 min):** Recepção calorosa na porta da sala, oração inicial espontânea e dinâmica rápida de interação.
+2. **Iluminação Bíblica (25 min):** Leitura orante da Palavra de Deus (*Lectio Divina* simplificada para a idade).
+3. **Aprofundamento Catequético (30 min):** Diálogo construtivo sobre o tema da semana, exemplos práticos do cotidiano e síntese da fé.
+4. **Oração Final & Compromisso da Semana (20 min):** Momento de recolhimento diante do altar da sala, preces pelos familiares e partilha do gesto concreto.
+
+---
+
+### 2. Cuidados com a Linguagem e Metodologia
+
+> *"A catequese é um caminho de comunhão e amadurecimento na fé, onde o catequista é testemunha alegre do Evangelho."*  
+> — **Diretório para a Catequese, n. 113**
+
+* Utilize recursos visuais, mapas e dinâmicas condizentes com a faixa etária.
+* Promova a participação de todos os catequizandos, acolhendo suas dúvidas com carinho e paciência.
+* Mantenha a pontualidade rigorosa para respeitar o tempo das famílias.
+
+---
+
+### 3. Tabela de Etapas e Faixas Etárias da Paróquia
+
+| Etapa | Faixa Etária | Horários de Encontro | Coordenador(a) |
+| :--- | :---: | :--- | :--- |
+| **Pré-Eucaristia** | 7 a 8 anos | Sábado 8h30 e Sábado 15h00 | Patrícia Guimarães |
+| **Eucaristia I** | 9 a 10 anos | Sábado 8h30 | Marilian / Priscila |
+| **Eucaristia II** | 10 a 11 anos | Sábado 8h30 | Marilian / Priscila |
+| **Perseverança** | Até 13 anos | Sábado 8h30 e Sábado 15h00 | Andrés Unda |
+| **Crisma Jovem** | 13 a 17 anos | Sábado 15h00 | Tiago Artur / Ricardo |
+| **Crisma Adultos** | +18 anos | Segunda 20h00 e Quarta 16h00 | Daniel / Patrícia Gomes |
+`,
+      references: [
+        {
+          type: 'biblia',
+          citation: 'Mt 28, 19-20',
+          description: 'A Grande Comissão Missionária: "Ide e fazei discípulos de todas as nações..."',
+          url: 'https://www.bibliaonline.com.br/nvi/mt/28/19-20'
+        },
+        {
+          type: 'cic',
+          citation: 'CIC § 4-9',
+          description: 'A Catequese na Missão da Igreja e sua Tradição Viva',
+          url: 'https://www.vatican.va/archive/cathechism_po/index_new/prologo-cic_po.html'
+        },
+        {
+          type: 'vaticano',
+          citation: 'Exortação Apostólica Catechesi Tradendae',
+          description: 'São João Paulo II sobre a catequese em nosso tempo',
+          url: 'https://www.vatican.va/content/john-paul-ii/pt/apost_exhortations/documents/hf_jp-ii_exh_16101979_catechesi-tradendae.html'
+        },
+        {
+          type: 'livro',
+          citation: 'Diretório para a Catequese (Pontifício Conselho)',
+          description: 'Diretrizes oficiais da Santa Sé para a nova evangelização',
+          url: 'https://www.google.com/search?tbm=bks&q=Diretorio+para+a+Catequese+Pontificio+Conselho'
+        }
+      ]
+    },
+    {
+      id: 'doc-oracao-liturgia',
+      parentId: 'dir-geral',
+      path: ['dir-geral'],
+      title: 'Orações e Ritos Iniciais para os Encontros',
+      type: 'document',
+      extension: 'md',
+      etapa: 'Geral',
+      order: 2,
+      createdAt: '2026-02-10T11:00:00Z',
+      updatedAt: '2026-08-20T10:00:00Z',
+      createdBy: { name: 'Vice-Coordenação', email: 'andresprojetos@gmail.com' },
+      contentMarkdown: `# Orações e Ritos Iniciais para os Encontros de Catequese
+
+Iniciar cada encontro invocando o Espírito Santo cria o clima sagrado indispensável para a escuta da Palavra.
+
+### 🕊️ Oração ao Espírito Santo
+*Vinde, Espírito Santo, enchei os corações dos vossos fiéis e acendei neles o fogo do vosso amor.  
+Enviai o vosso Espírito e tudo será criado, e renovareis a face da terra.*
+
+**Oremos:** *Ó Deus, que instruístes os corações dos vossos fiéis com a luz do Espírito Santo, fazei que apreciemos retamente todas as coisas segundo o mesmo Espírito e gozemos sempre da sua consolação. Por Cristo, Senhor nosso. Amém.*
+
+---
+
+### 🌹 Oração ao Imaculado Coração de Maria (Padroeira do Santuário)
+*Ó Coração Imaculado de Maria, repleto de bondade e amor, sede vós a nossa guia e luz no caminho da fé. Ensinai-nos a ouvir a Palavra de vosso Filho Jesus, guardá-la no coração e colocá-la em prática em nosso lar, na escola e na paróquia. Amém.*
+`,
+      references: [
+        {
+          type: 'cic',
+          citation: 'CIC § 2673-2679',
+          description: 'A Oração a Maria e a Comunhão dos Santos',
+          url: 'https://www.vatican.va/archive/cathechism_po/index_new/p4s1c2_po.html'
+        }
+      ]
+    },
+
+    // --- EUCARISTIA I ---
+    {
+      id: 'dir-eucaristia-1',
+      parentId: null,
+      path: [],
+      title: 'Eucaristia I (9 a 10 anos)',
+      type: 'folder',
+      etapa: 'Eucaristia I',
+      description: 'Módulos didáticos, encontros sobre a Criação, a Bíblia, a vida de Jesus e os Mandamentos.',
+      order: 2
+    },
+    {
+      id: 'dir-euc1-mod1',
+      parentId: 'dir-eucaristia-1',
+      path: ['dir-eucaristia-1'],
+      title: 'Módulo 1: Deus Criador e a Aliança de Amor',
+      type: 'folder',
+      etapa: 'Eucaristia I',
+      description: 'A criação do mundo, a dignidade dos filhos de Deus e a história da Salvação.',
+      order: 1
+    },
+    {
+      id: 'doc-euc1-enc1',
+      parentId: 'dir-euc1-mod1',
+      path: ['dir-eucaristia-1', 'dir-euc1-mod1'],
+      title: 'Encontro 01: Quem é Deus e a Criação do Mundo',
+      type: 'document',
+      extension: 'md',
+      etapa: 'Eucaristia I',
+      order: 1,
+      createdAt: '2026-03-01T09:00:00Z',
+      updatedAt: '2026-09-10T16:00:00Z',
+      createdBy: { name: 'Marilian & Priscila Ayres', email: 'eucaristia@icm.org' },
+      contentMarkdown: `# Encontro 01: Quem é Deus e a Criação do Mundo
+**Etapa:** Eucaristia I • Crianças de 9 a 10 anos
+
+### 🎯 Objetivo do Encontro
+Descobrir que Deus é Pai, Criador de todo o Universo, e que Ele criou o ser humano por puro amor para viver em amizade com a natureza e os irmãos.
+
+---
+
+### 📖 Iluminação Bíblica
+> *"No princípio, Deus criou o céu e a terra... E Deus viu tudo o que havia feito, e era muito bom!"*  
+> — **Gênesis 1, 1.31**
+
+---
+
+### 💬 Roteiro de Conversa com as Crianças
+1. **Pergunta disparadora:** *"Quando você olha para o céu estrelado, para as árvores ou para o mar, o que você sente?"*
+2. **Explicação:** Toda a beleza da natureza é um presente de amor de Deus para nós. Ele é o Pai bom que cuida de tudo com carinho.
+3. **Cuidado com a Casa Comum:** O Papa Francisco na encíclica *Laudato Si'* nos ensina que a Terra é nossa casa e precisamos cuidar das plantas, dos animais e do desperdício de água.
+
+---
+
+### 🎨 Atividade Prática Proposta
+Distribuir folhas para desenho onde cada catequizando desenha um elemento da criação pelo qual é mais grato (família, animais, sol, rios). No final, colar os desenhos em um mural coletivo na Sala de Catequese.
+`,
+      references: [
+        {
+          type: 'biblia',
+          citation: 'Gn 1, 1-31',
+          description: 'A narrativa da Criação e a bondade divina',
+          url: 'https://www.bibliaonline.com.br/nvi/gn/1'
+        },
+        {
+          type: 'biblia',
+          citation: 'Sl 8, 4-10',
+          description: 'Salmo da Criação: "A majestade de Deus e a grandeza do homem"',
+          url: 'https://www.bibliaonline.com.br/nvi/sl/8'
+        },
+        {
+          type: 'vaticano',
+          citation: 'Encíclica Laudato Si’ (Papa Francisco)',
+          description: 'Sobre o cuidado da casa comum e o valor sagrado da Criação',
+          url: 'https://www.vatican.va/content/francesco/pt/encyclicals/documents/papa-francesco_20150524_enciclica-laudato-si.html'
+        },
+        {
+          type: 'cic',
+          citation: 'CIC § 279-301',
+          description: 'A Criação: Obra da Santíssima Trindade',
+          url: 'https://www.vatican.va/archive/cathechism_po/index_new/p1s2c1p4_po.html'
+        }
+      ]
+    },
+    {
+      id: 'doc-euc1-enc2',
+      parentId: 'dir-euc1-mod1',
+      path: ['dir-eucaristia-1', 'dir-euc1-mod1'],
+      title: 'Encontro 02: A Bíblia — Carta de Deus para Nós',
+      type: 'document',
+      extension: 'md',
+      etapa: 'Eucaristia I',
+      order: 2,
+      createdAt: '2026-03-08T09:00:00Z',
+      updatedAt: '2026-09-12T11:00:00Z',
+      createdBy: { name: 'Marilian', email: 'eucaristia@icm.org' },
+      contentMarkdown: `# Encontro 02: A Bíblia — A Carta de Deus para Nós
+
+### 🎯 Objetivo do Encontro
+Ensinar as crianças a manusear a Bíblia, entender a divisão entre Antigo e Novo Testamento e localizar capítulos e versículos com facilidade.
+
+### 📚 Curiosidades Bíblicas
+* A palavra **Bíblia** vem do grego e significa *"conjunto de livros"*.
+* São **73 livros** na Bíblia Católica (46 no Antigo Testamento e 27 no Novo Testamento).
+* O centro de toda a Bíblia é **Jesus Cristo**, revelado nos quatro Santos Evangelhos: Mateus, Marcos, Lucas e João.
+
+---
+
+### 🔍 Como Localizar um Trecho:
+Tomemos o exemplo: **Mt 5, 1-12**
+- **Mt:** Livro de Mateus (abreviação oficial).
+- **5:** Capítulo (número grande no texto).
+- **, (vírgula):** Separa o capítulo dos versículos.
+- **1-12:** Versículos do 1 até o 12.
+`,
+      references: [
+        {
+          type: 'biblia',
+          citation: '2Tm 3, 16-17',
+          description: '"Toda a Escritura é divinamente inspirada e proveitosa para ensinar..."',
+          url: 'https://www.bibliaonline.com.br/nvi/2tm/3/16-17'
+        },
+        {
+          type: 'vaticano',
+          citation: 'Constituição Dogmática Dei Verbum (Vaticano II)',
+          description: 'A Revelação Divina e a transmissão da Palavra de Deus',
+          url: 'https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651118_dei-verbum_po.html'
+        }
+      ]
+    },
+    {
+      id: 'media-euc1-cantico',
+      parentId: 'dir-euc1-mod1',
+      path: ['dir-eucaristia-1', 'dir-euc1-mod1'],
+      title: 'Cântico das Criaturas — São Francisco de Assis',
+      type: 'media',
+      extension: 'mp3',
+      etapa: 'Eucaristia I',
+      order: 3,
+      createdAt: '2026-03-01T10:00:00Z',
+      mediaUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+      fileSizeBytes: 4200000,
+      description: 'Áudio pastoral para cantar e orar com as crianças na Sala de Catequese ao falar sobre a Criação.'
+    },
+
+    // --- CRISMA JOVEM ---
+    {
+      id: 'dir-crisma-jovem',
+      parentId: null,
+      path: [],
+      title: 'Crisma Jovem (13 a 17 anos)',
+      type: 'folder',
+      etapa: 'Crisma Jovem',
+      description: 'Encontros de aprofundamento, os Dons do Espírito Santo, Doutrina Social e Projeto de Vida Cristã.',
+      order: 3
+    },
+    {
+      id: 'dir-crisma-dons',
+      parentId: 'dir-crisma-jovem',
+      path: ['dir-crisma-jovem'],
+      title: 'Módulo: Os Dons do Espírito Santo',
+      type: 'folder',
+      etapa: 'Crisma Jovem',
+      description: 'Os sete dons da Confirmação e sua aplicação nos desafios da juventude.',
+      order: 1
+    },
+    {
+      id: 'doc-crisma-sete-dons',
+      parentId: 'dir-crisma-dons',
+      path: ['dir-crisma-jovem', 'dir-crisma-dons'],
+      title: 'Os 7 Dons do Espírito Santo na Vida Cotidiana',
+      type: 'document',
+      extension: 'md',
+      etapa: 'Crisma Jovem',
+      order: 1,
+      createdAt: '2026-04-10T14:00:00Z',
+      updatedAt: '2026-09-18T18:00:00Z',
+      createdBy: { name: 'Tiago Artur & Ricardo', email: 'crisma.jovem@icm.org' },
+      contentMarkdown: `# Os 7 Dons do Espírito Santo na Vida Cotidiana
+**Pastoral da Crisma Jovem • Santuário ICM**
+
+O Sacramento da Crisma confirma e aperfeiçoa a graça batismal, concedendo-nos a força do **Espírito Santo** para sermos verdadeiras testemunhas de Cristo no mundo.
+
+---
+
+### 🔥 Os 7 Dons Infusos da Graça:
+
+1. **Sabedoria:** O dom de saborear as coisas de Deus e enxergar a vida com os olhos do Pai.
+2. **Entendimento (ou Inteligência):** Ajuda a compreender as verdades profundas da fé e a mensagem de Jesus.
+3. **Conselho:** Capacidade de discernir o caminho certo nos momentos de decisão moral e pressão social.
+4. **Fortaleza:** Coragem sobrenatural para superar medos, rejeições e perseverar no bem.
+5. **Ciência:** Compreensão do valor das criaturas em relação ao Criador.
+6. **Piedade:** Filial confiança em Deus e compaixão sincera pelos irmãos mais necessitados.
+7. **Temor de Deus:** Santo respeito pelo Criador, não por medo de castigo, mas por profundo amor de não ofender a quem tanto nos ama.
+
+---
+
+### 💡 Questões para Roda de Conversa:
+* Em quais situações na escola ou nas redes sociais você já precisou do dom da **Fortaleza**?
+* Como o dom do **Conselho** pode te ajudar na escolha da sua vocação e profissão?
+`,
+      references: [
+        {
+          type: 'biblia',
+          citation: 'Is 11, 1-3',
+          description: 'A profecia sobre os dons do Espírito de Javé sobre o Messias',
+          url: 'https://www.bibliaonline.com.br/nvi/is/11/1-3'
+        },
+        {
+          type: 'biblia',
+          citation: '1Cor 12, 4-11',
+          description: 'A diversidade de dons espirituais e o mesmo Espírito',
+          url: 'https://www.bibliaonline.com.br/nvi/1co/12/4-11'
+        },
+        {
+          type: 'cic',
+          citation: 'CIC § 1285-1321',
+          description: 'O Sacramento da Confirmação: Efeitos e Ministração',
+          url: 'https://www.vatican.va/archive/cathechism_po/index_new/p2s2c1a2_po.html'
+        },
+        {
+          type: 'vaticano',
+          citation: 'Exortação Christus Vivit (Papa Francisco)',
+          description: 'Exortação apostólica aos jovens e a todo o povo de Deus',
+          url: 'https://www.vatican.va/content/francesco/pt/apost_exhortations/documents/papa-francesco_esortazione-ap_20190325_christus-vivit.html'
+        }
+      ]
+    },
+    {
+      id: 'pres-crisma-pentecostes',
+      parentId: 'dir-crisma-dons',
+      path: ['dir-crisma-jovem', 'dir-crisma-dons'],
+      title: 'Apresentação: O Fogo de Pentecostes e a Missão Jovem',
+      type: 'presentation',
+      extension: 'pptx',
+      etapa: 'Crisma Jovem',
+      order: 2,
+      createdAt: '2026-04-12T15:00:00Z',
+      mediaUrl: 'https://imaculadocoracaodf.com.br/materiais/crisma_pentecostes_2026.pptx',
+      fileSizeBytes: 8500000,
+      description: 'Slides com ilustrações dinâmicas, passagens dos Atos dos Apóstolos e testemunhos juvenis.'
+    },
+
+    // --- CRISMA ADULTOS ---
+    {
+      id: 'dir-crisma-adultos',
+      parentId: null,
+      path: [],
+      title: 'Crisma Adultos (+18 anos)',
+      type: 'folder',
+      etapa: 'Crisma Adultos',
+      description: 'Formação madura sobre a fé católica, moral, sacramentos e a missão dos leigos na sociedade.',
+      order: 4
+    },
+    {
+      id: 'doc-adul-confirmacao',
+      parentId: 'dir-crisma-adultos',
+      path: ['dir-crisma-adultos'],
+      title: 'O Sacramento da Confirmação e a Fé Madura',
+      type: 'document',
+      extension: 'md',
+      etapa: 'Crisma Adultos',
+      order: 1,
+      createdAt: '2026-05-02T19:00:00Z',
+      updatedAt: '2026-09-01T20:00:00Z',
+      createdBy: { name: 'Daniel & Patrícia Gomes', email: 'crisma.adultos@icm.org' },
+      contentMarkdown: `# O Sacramento da Confirmação e a Fé Madura
+**Pastoral da Crisma de Adultos • Santuário ICM**
+
+O adulto que procura a Crisma expressa um desejo consciente de ratificar as promessas que, no Batismo, foram assumidas pelos pais e padrinhos.
+
+---
+
+### 🕊️ Os Três Sacramentos da Iniciação Cristã
+1. **Batismo:** Porta de entrada da vida na graça, perdão do pecado original e nascimento como filho de Deus.
+2. **Confirmação:** Consolidação e selamento do Espírito Santo com o óleo santo do Crisma consagrado na Quinta-feira Santa.
+3. **Eucaristia:** Banquete pascal, cume e fonte de toda a vida da Igreja.
+
+---
+
+### 🏛️ O Enraizamento no Concílio Vaticano II
+Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
+> *"Pelo sacramento da Confirmação, os fiéis são vinculados mais perfeitamente à Igreja, enriquecidos com especial força do Espírito Santo, e deste modo ficam mais estritamente obrigados a difundir e defender a fé por palavras e obras como verdadeiras testemunhas de Cristo."*  
+> — **Lumen Gentium, n. 11**
+`,
+      references: [
+        {
+          type: 'vaticano',
+          citation: 'Constituição Dogmática Lumen Gentium',
+          description: 'Concílio Vaticano II sobre a Igreja e a dignidade do Povo de Deus',
+          url: 'https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_po.html'
+        },
+        {
+          type: 'cic',
+          citation: 'CIC § 1285',
+          description: 'A necessidade da Confirmação para o cumprimento da graça batismal',
+          url: 'https://www.vatican.va/archive/cathechism_po/index_new/p2s2c1a2_po.html#1285'
+        }
+      ]
+    },
+    {
+      id: 'media-adul-video-historia',
+      parentId: 'dir-crisma-adultos',
+      path: ['dir-crisma-adultos'],
+      title: 'Vídeo: A História dos Sacramentos da Iniciação Cristã',
+      type: 'media',
+      extension: 'mp4',
+      etapa: 'Crisma Adultos',
+      order: 2,
+      createdAt: '2026-05-15T20:30:00Z',
+      mediaUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+      fileSizeBytes: 15800000,
+      description: 'Breve documentário sobre como os primeiros cristãos celebravam o Batismo, a Crisma e a Eucaristia.'
+    }
+  ];
+
+  // ==========================================================================
+  // 2. ESTADO DA BASE DE CONHECIMENTO
+  // ==========================================================================
 
   // ==========================================================================
   // 2. ESTADO DA BASE DE CONHECIMENTO
@@ -29,25 +474,28 @@
     isFirestoreEmpty: true,
     isSyncing: false,
     hasInitializedListener: false,
-
     // Inicialização do módulo
     init: function () {
       console.log('📚 WikiKB: Inicializando Base de Conhecimento...');
       
-      // Carrega cache local se disponível (e limpa caso contenha os samples antigos)
+      let hasValidCache = false;
       if (window.KnowledgeService && typeof window.KnowledgeService.getLocalCache === 'function') {
         const cached = window.KnowledgeService.getLocalCache();
         if (cached && Array.isArray(cached) && cached.length > 0) {
-          const hasOldSamples = cached.some(n => n && (n.id === 'dir-geral' || n.id === 'doc-guia-catequista'));
-          if (hasOldSamples) {
-            console.log('🧹 WikiKB: Purgando cache local antigo de arquivos sample...');
-            window.KnowledgeService.saveLocalCache([]);
-            this.nodes = [];
-          } else {
-            this.nodes = cached;
-          }
+          this.nodes = cached;
+          hasValidCache = true;
         }
       }
+
+      if (!hasValidCache) {
+        this.nodes = JSON.parse(JSON.stringify(INITIAL_WIKI_NODES));
+        if (window.KnowledgeService && window.KnowledgeService.saveLocalCache) {
+          window.KnowledgeService.saveLocalCache(this.nodes);
+        }
+      }
+
+      this.activeNodeId = 'dir-geral';
+      this.expandedFolders = new Set(['dir-geral', 'dir-eucaristia-1', 'dir-euc1-mod1', 'dir-crisma-jovem', 'dir-crisma-adultos']);
 
       this.renderTree();
       this.selectNode(this.activeNodeId);
@@ -63,6 +511,13 @@
       // Botão antigo de seed estático fica oculto para não reinjetar samples
       const btnSync = document.getElementById('btn-wiki-sync-seed');
       if (btnSync) btnSync.classList.add('hidden');
+
+      // Botão de Restaurar Acervo Padrão: MASTER ADMIN & COORDENAÇÃO GERAL
+      const btnRestoreDefault = document.getElementById('btn-wiki-restore-default');
+      if (btnRestoreDefault) {
+        if (isCoordOrAdmin) btnRestoreDefault.classList.remove('hidden');
+        else btnRestoreDefault.classList.add('hidden');
+      }
 
       // Botão de Limpeza do Acervo Sample: MASTER ADMIN & COORDENAÇÃO GERAL
       const btnClear = document.getElementById('btn-wiki-clear-sample');
@@ -714,6 +1169,45 @@
       }
     },
 
+    // Restaurar acervo padrão oficial (15 pastas e materiais essenciais)
+    promptRestoreDefaultNodes: async function () {
+      if (!window.KnowledgeService || !window.KnowledgeService.isCoordOrAdmin()) {
+        alert('Acesso restrito ao Master Admin e à Coordenação Geral.');
+        return;
+      }
+
+      const proceed = confirm(
+        '🌱 RESTAURAR PASTAS E MATERIAIS PADRÃO\n\n' +
+        'Deseja limpar a base atual e restabelecer as 15 pastas e documentos oficiais da Catequese?\n\n' +
+        '• Inclui: Diretrizes Gerais, Eucaristia I, Crisma Jovem e Crisma Adultos com textos formatados e citações do Vaticano;\n' +
+        '• Sincroniza diretamente com o Cloud Firestore na nuvem.'
+      );
+      if (!proceed) return;
+
+      try {
+        if (window.KnowledgeService.clearKnowledgeNodes) {
+          await window.KnowledgeService.clearKnowledgeNodes(false);
+        }
+        const defaultNodes = JSON.parse(JSON.stringify(INITIAL_WIKI_NODES));
+        if (window.KnowledgeService.seedToFirestore) {
+          await window.KnowledgeService.seedToFirestore(defaultNodes);
+        }
+        this.nodes = defaultNodes;
+        this.activeNodeId = 'dir-geral';
+        this.expandedFolders = new Set(['dir-geral', 'dir-eucaristia-1', 'dir-euc1-mod1', 'dir-crisma-jovem', 'dir-crisma-adultos']);
+        if (window.KnowledgeService.saveLocalCache) {
+          window.KnowledgeService.saveLocalCache(this.nodes);
+        }
+        this.updateCloudStatusBadge('cloud', this.nodes.length);
+        this.renderTree();
+        this.selectNode('dir-geral');
+        alert(`✅ Base de conhecimento restaurada com sucesso com as ${defaultNodes.length} pastas e materiais padrão!`);
+      } catch (err) {
+        console.error('Erro ao restaurar base padrão:', err);
+        alert('❌ Falha ao restaurar padrão: ' + err.message);
+      }
+    },
+
     setupCloudSync: function () {
       if (this.hasInitializedListener) return;
       if (!window.KnowledgeService || typeof window.KnowledgeService.listenNodes !== 'function') return;
@@ -730,13 +1224,18 @@
             this.nodes = remoteNodes;
             this.updateCloudStatusBadge('cloud', remoteNodes.length);
           } else if (isOnline && isFirestoreEmpty) {
-            if (this.nodes && this.nodes.length > 0) {
-              console.log(`ℹ️ WikiKB: Firestore vazio. Mantendo ${this.nodes.length} nós locais prontos para sincronização.`);
-              this.updateCloudStatusBadge('empty-with-local', this.nodes.length);
-            } else {
-              this.nodes = [];
-              this.updateCloudStatusBadge('empty', 0);
+            console.log('🌱 WikiKB: Firestore vazio detectado. Semeando acervo padrão oficial...');
+            const defaultNodes = JSON.parse(JSON.stringify(INITIAL_WIKI_NODES));
+            this.nodes = defaultNodes;
+            this.activeNodeId = 'dir-geral';
+            this.expandedFolders = new Set(['dir-geral', 'dir-eucaristia-1', 'dir-euc1-mod1', 'dir-crisma-jovem', 'dir-crisma-adultos']);
+            if (window.KnowledgeService && window.KnowledgeService.seedToFirestore && window.KnowledgeService.canEdit()) {
+              window.KnowledgeService.seedToFirestore(defaultNodes).catch(e => console.warn(e));
             }
+            if (window.KnowledgeService && window.KnowledgeService.saveLocalCache) {
+              window.KnowledgeService.saveLocalCache(defaultNodes);
+            }
+            this.updateCloudStatusBadge('cloud', defaultNodes.length);
           } else {
             if (remoteNodes && remoteNodes.length > 0) {
               this.nodes = remoteNodes;

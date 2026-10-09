@@ -4323,6 +4323,15 @@
           <!-- Ações Rápidas do Cabeçalho da Wiki -->
           <div class="flex items-center gap-2 flex-wrap flex-shrink-0 self-start md:self-auto">
             <button
+              id="btn-wiki-restore-default"
+              type="button"
+              onclick="window.WikiKB && window.WikiKB.promptRestoreDefaultNodes()"
+              class="hidden px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer"
+              title="Restaurar a estrutura e materiais padrão oficiais da Catequese (Exclusivo Master Admin e Coordenação Geral)"
+            >
+              <span>🌱</span> <span>Restaurar Pastas Padrão</span>
+            </button>
+            <button
               id="btn-wiki-clear-sample"
               type="button"
               onclick="window.WikiKB && window.WikiKB.promptClearAcervo()"
