@@ -80,7 +80,7 @@ Cada encontro catequético deve seguir uma pedagogia do acolhimento e da oraçã
           type: 'biblia',
           citation: 'Mt 28, 19-20',
           description: 'A Grande Comissão Missionária: "Ide e fazei discípulos de todas as nações..."',
-          url: 'https://www.bibliaonline.com.br/nvi/mt/28/19-20'
+          url: 'https://www.bibliacatolica.com.br/biblia-ave-maria/sao-mateus/28/'
         },
         {
           type: 'cic',
@@ -201,13 +201,13 @@ Distribuir folhas para desenho onde cada catequizando desenha um elemento da cri
           type: 'biblia',
           citation: 'Gn 1, 1-31',
           description: 'A narrativa da Criação e a bondade divina',
-          url: 'https://www.bibliaonline.com.br/nvi/gn/1'
+          url: 'https://www.bibliacatolica.com.br/biblia-ave-maria/genesis/1/'
         },
         {
           type: 'biblia',
           citation: 'Sl 8, 4-10',
           description: 'Salmo da Criação: "A majestade de Deus e a grandeza do homem"',
-          url: 'https://www.bibliaonline.com.br/nvi/sl/8'
+          url: 'https://www.bibliacatolica.com.br/biblia-ave-maria/salmos/8/'
         },
         {
           type: 'vaticano',
@@ -259,7 +259,7 @@ Tomemos o exemplo: **Mt 5, 1-12**
           type: 'biblia',
           citation: '2Tm 3, 16-17',
           description: '"Toda a Escritura é divinamente inspirada e proveitosa para ensinar..."',
-          url: 'https://www.bibliaonline.com.br/nvi/2tm/3/16-17'
+          url: 'https://www.bibliacatolica.com.br/biblia-ave-maria/ii-timoteo/3/'
         },
         {
           type: 'vaticano',
@@ -345,13 +345,13 @@ O Sacramento da Crisma confirma e aperfeiçoa a graça batismal, concedendo-nos 
           type: 'biblia',
           citation: 'Is 11, 1-3',
           description: 'A profecia sobre os dons do Espírito de Javé sobre o Messias',
-          url: 'https://www.bibliaonline.com.br/nvi/is/11/1-3'
+          url: 'https://www.bibliacatolica.com.br/biblia-ave-maria/isaias/11/'
         },
         {
           type: 'biblia',
           citation: '1Cor 12, 4-11',
           description: 'A diversidade de dons espirituais e o mesmo Espírito',
-          url: 'https://www.bibliaonline.com.br/nvi/1co/12/4-11'
+          url: 'https://www.bibliacatolica.com.br/biblia-ave-maria/i-corintios/12/'
         },
         {
           type: 'cic',
@@ -1208,15 +1208,15 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
       }
     },
 
-    setupCloudSync: function () {
-      if (this.hasInitializedListener) return;
+    setupCloudSync: function (force = false) {
+      if (this.hasInitializedListener && !force) return;
       if (!window.KnowledgeService || typeof window.KnowledgeService.listenNodes !== 'function') return;
 
-      this.hasInitializedListener = true;
       this.updateCloudStatusBadge('connecting');
 
       window.KnowledgeService.listenNodes(
         (remoteNodes, isOnline, isFirestoreEmpty) => {
+          this.hasInitializedListener = true;
           this.cloudConnected = isOnline;
           this.isFirestoreEmpty = !!isFirestoreEmpty;
 
@@ -2598,9 +2598,21 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
             badgeClass = 'bg-purple-100 text-purple-900 border-purple-200';
           }
 
+          let targetUrl = ref.url || '#';
+          if (ref.type === 'biblia' || (targetUrl && targetUrl.includes('bibliaonline.com.br'))) {
+            if (window.GeminiReferenceExtractor && typeof window.GeminiReferenceExtractor.enrichAndDeduplicate === 'function') {
+              const enriched = window.GeminiReferenceExtractor.enrichAndDeduplicate([ref]);
+              if (enriched && enriched[0] && enriched[0].url) {
+                targetUrl = enriched[0].url;
+              }
+            } else if (targetUrl.includes('bibliaonline.com.br')) {
+              targetUrl = 'https://www.bibliacatolica.com.br/biblia-ave-maria/';
+            }
+          }
+
           return `
             <a
-              href="${ref.url}"
+              href="${targetUrl}"
               target="_blank"
               rel="noopener noreferrer"
               class="wiki-ref-card block p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs hover:shadow-md transition text-left group"

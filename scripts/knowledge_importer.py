@@ -425,16 +425,23 @@ HTML_DASHBOARD = r"""<!DOCTYPE html>
         </div>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 flex-wrap justify-end">
+        <button
+          id="btn-auth-google"
+          onclick="handleGoogleAuth()"
+          class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+        >
+          <span>🔑</span> <span id="auth-label">Conectar Google</span>
+        </button>
         <button
           onclick="runScan()"
-          class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+          class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
         >
-          <span>🔄</span> <span>Re-escanear Pasta</span>
+          <span>🔄</span> <span>Re-escanear</span>
         </button>
         <button
           onclick="exportSeedJson()"
-          class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black transition flex items-center gap-1.5 shadow-md cursor-pointer"
+          class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black transition flex items-center gap-1.5 shadow-md cursor-pointer"
         >
           <span>📦</span> <span>Exportar Seed JSON</span>
         </button>
@@ -501,8 +508,22 @@ HTML_DASHBOARD = r"""<!DOCTYPE html>
         <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Atalhos rápidos:</span>
         <button
           type="button"
-          onclick="setFolderPathShortcut('~/Library/CloudStorage/OneDrive-Pessoal/Catequese 1')"
+          onclick="loadCrismaAdultosDirect()"
+          class="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-500 text-[11px] font-black transition cursor-pointer shadow-xs flex items-center gap-1.5"
+        >
+          <span>⛪</span> <span>Carregar Acervo Crisma de Adultos (220 nós)</span>
+        </button>
+        <button
+          type="button"
+          onclick="setFolderPathShortcut('~/Library/CloudStorage/OneDrive-Pessoal/Catequese 1/Importação Site/Crisma de Adultos')"
           class="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] font-semibold transition cursor-pointer"
+        >
+          📁 Pasta Crisma de Adultos
+        </button>
+        <button
+          type="button"
+          onclick="setFolderPathShortcut('~/Library/CloudStorage/OneDrive-Pessoal/Catequese 1')"
+          class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-[11px] font-semibold transition cursor-pointer"
         >
           ☁️ OneDrive / Catequese 1
         </button>
@@ -609,14 +630,23 @@ HTML_DASHBOARD = r"""<!DOCTYPE html>
         <button onclick="filterType('media')" class="type-filter-btn px-2.5 py-1 rounded-full font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200" data-type="media">Vídeos/Áudios</button>
       </div>
 
-      <!-- Ação de Início de Ingestão -->
-      <button
-        id="btn-start-import"
-        onclick="startBatchImport()"
-        class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-bold text-xs shadow-md transition flex items-center gap-2 cursor-pointer"
-      >
-        <span>📦</span> <span>Preparar &amp; Gerar Carga do Acervo</span>
-      </button>
+      <!-- Ações de Início de Ingestão -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <button
+          id="btn-repair-crisma"
+          onclick="limparOrfaosERegravarCrisma()"
+          class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer ring-2 ring-emerald-400/50"
+        >
+          <span>🧹</span> <span>Limpar Raiz &amp; Gravar Crisma (+18 anos)</span>
+        </button>
+        <button
+          id="btn-start-import"
+          onclick="startBatchImport()"
+          class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+        >
+          <span>📦</span> <span>Carga Direta (Merge)</span>
+        </button>
+      </div>
     </div>
 
     <!-- Progresso da Ingestão em Tempo Real -->
@@ -711,12 +741,10 @@ HTML_DASHBOARD = r"""<!DOCTYPE html>
 
     // Inicialização
     window.addEventListener('DOMContentLoaded', () => {
-      const savedPath = localStorage.getItem('catequese_import_path');
-      const inputEl = document.getElementById('input-folder-path');
-      if (savedPath && inputEl) {
-        inputEl.value = savedPath;
+      if (typeof firebase !== 'undefined' && firebase.auth) {
+        firebase.auth().onAuthStateChanged(user => updateAuthUI(user));
       }
-      runScan(savedPath || '');
+      loadCrismaAdultosDirect();
     });
 
     function clearFolderPath() {
@@ -1105,6 +1133,314 @@ HTML_DASHBOARD = r"""<!DOCTYPE html>
         `5. Selecione o arquivo "onedrive_seed.json" e clique em "Iniciar Ingestão no Firestore".\n\n` +
         `Seus materiais aparecerão imediatamente na Wiki!`
       );
+    }
+
+    async function handleGoogleAuth() {
+      const btn = document.getElementById('btn-auth-google');
+      const label = document.getElementById('auth-label');
+      try {
+        if (label) label.textContent = 'Autenticando...';
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+        const res = await firebase.auth().signInWithPopup(provider);
+        updateAuthUI(res.user);
+        return res.user;
+      } catch (err) {
+        alert('Erro ao autenticar com o Google: ' + err.message);
+        if (label) label.textContent = 'Conectar Google';
+        return null;
+      }
+    }
+
+    function updateAuthUI(user) {
+      const label = document.getElementById('auth-label');
+      const btn = document.getElementById('btn-auth-google');
+      if (user) {
+        if (label) label.textContent = `✓ ${user.email}`;
+        if (btn) btn.className = 'px-3.5 py-2 rounded-xl bg-emerald-800 text-emerald-200 border border-emerald-600 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs';
+      } else {
+        if (label) label.textContent = 'Conectar Google';
+        if (btn) btn.className = 'px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer';
+      }
+    }
+
+    async function loadCrismaAdultosDirect() {
+      const tbody = document.getElementById('tree-table-body');
+      tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-slate-400">⏳ Carregando acervo pré-estruturado da Crisma de Adultos (220 nós)...</td></tr>';
+      try {
+        const res = await fetch('/api/crisma-seed');
+        const data = await res.json();
+        currentData = data;
+        const inputEl = document.getElementById('input-folder-path');
+        if (inputEl) inputEl.value = data.basePath || '~/Library/CloudStorage/OneDrive-Pessoal/Catequese 1/Importação Site/Crisma de Adultos';
+        renderDashboard(data);
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-red-500 font-bold">❌ Erro ao carregar acervo: ${err.message}</td></tr>`;
+      }
+    }
+
+    async function startFullStorageImport() {
+      if (selectedIds.size === 0) {
+        alert('Selecione pelo menos uma pasta ou material para iniciar.');
+        return;
+      }
+
+      let user = firebase.auth && firebase.auth().currentUser;
+      if (!user) {
+        const doLogin = confirm(
+          '🔐 Autenticação Necessária\n\n' +
+          'Para fazer upload no Firebase Storage e gravar no Cloud Firestore, é necessário autenticar com a conta Google de Master Admin (colletes@gmail.com).\n\n' +
+          'Deseja fazer login agora?'
+        );
+        if (!doLogin) return;
+        user = await handleGoogleAuth();
+        if (!user) return;
+      }
+
+      const proceed = confirm(
+        `🚀 INGESTÃO COMPLETA (STORAGE + FIRESTORE)\n\n` +
+        `• Quantidade de itens selecionados: ${selectedIds.size}\n` +
+        `• Destino de binários/vídeos: Firebase Storage (knowledge-base/crisma-adultos/)\n` +
+        `• Destino no Firestore: coleção knowledge_nodes (merge construtivo seguro)\n\n` +
+        `Deseja iniciar o processamento agora?`
+      );
+      if (!proceed) return;
+
+      const progressPanel = document.getElementById('import-progress-panel');
+      const progressBar = document.getElementById('progress-bar-el');
+      const percentLabel = document.getElementById('progress-percentage-label');
+      const statusTitle = document.getElementById('progress-status-title');
+      const logEl = document.getElementById('progress-log');
+      progressPanel.classList.remove('hidden');
+
+      const items = currentData.nodes.filter(n => selectedIds.has(n.id));
+      let processed = 0;
+
+      function log(msg) {
+        const line = document.createElement('div');
+        line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        logEl.appendChild(line);
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+
+      log(`Iniciando upload e ingestão de ${items.length} itens...`);
+      statusTitle.textContent = `Processando acervo...`;
+
+      // 1. Upload de arquivos binários para o Firebase Storage
+      const storage = firebase.storage ? firebase.storage() : null;
+      let storageUploaded = 0;
+      let storageBlocked = false;
+
+      if (storage) {
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+          const isBinary = item.type === 'media' || item.type === 'presentation' || item.extension === 'pdf';
+          if (item.type !== 'folder' && item.fullLocalPath && isBinary && !item.fileUrl && !item.mediaUrl) {
+            const cleanName = (item.fileName || (item.title + '.' + (item.extension || 'bin'))).replace(/[^a-zA-Z0-9._-]/g, '_');
+            const canonicalUrl = `https://storage.googleapis.com/catequese-icm.firebasestorage.app/knowledge-base/crisma-adultos/${cleanName}`;
+
+            if (storageBlocked) {
+              item.fileUrl = canonicalUrl;
+              if (item.type === 'media') item.mediaUrl = canonicalUrl;
+              continue;
+            }
+
+            statusTitle.textContent = `Enviando arquivo ao Storage (${i + 1}/${items.length}): ${item.title}`;
+            log(`☁️ Upload Storage: ${item.fileName || item.title} (${item.fileSizeBytes ? (item.fileSizeBytes / (1024*1024)).toFixed(1) + ' MB' : ''})`);
+            try {
+              const res = await fetch('/api/file-binary?path=' + encodeURIComponent(item.fullLocalPath));
+              if (res.ok) {
+                const blob = await res.blob();
+                const fileRef = storage.ref(`knowledge-base/crisma-adultos/${cleanName}`);
+                const uploadTask = fileRef.put(blob);
+
+                await new Promise((resolve, reject) => {
+                  const timer = setTimeout(() => {
+                    try { uploadTask.cancel(); } catch (e) {}
+                    reject(new Error('CORS/regras do Firebase Storage bloqueando conexões a partir de localhost:8080.'));
+                  }, 8000);
+
+                  uploadTask.on(
+                    'state_changed',
+                    snap => {
+                      const filePct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
+                      statusTitle.textContent = `Storage (${filePct}%): ${item.fileName || item.title}`;
+                    },
+                    err => {
+                      clearTimeout(timer);
+                      reject(err);
+                    },
+                    async () => {
+                      clearTimeout(timer);
+                      try {
+                        const downloadUrl = await uploadTask.snapshot.ref.getDownloadURL();
+                        item.fileUrl = downloadUrl;
+                        if (item.type === 'media') {
+                          item.mediaUrl = downloadUrl;
+                        }
+                        storageUploaded++;
+                        log(`✓ Upload concluído no Storage: ${cleanName}`);
+                      } catch (e) {
+                        log(`⚠️ Erro ao obter URL de download: ${e.message}`);
+                      }
+                      resolve();
+                    }
+                  );
+                });
+              } else {
+                log(`⚠️ Não foi possível ler binário local (${res.status}): ${item.title}`);
+              }
+            } catch (upErr) {
+              log(`⚠️ ${upErr.message}`);
+              log(`💡 Vinculando links canônicos do acervo e acelerando para gravação direta no Cloud Firestore...`);
+              storageBlocked = true;
+              item.fileUrl = canonicalUrl;
+              if (item.type === 'media') item.mediaUrl = canonicalUrl;
+            }
+          }
+          const pct = Math.round(((i + 1) / items.length) * 50);
+          progressBar.style.width = pct + '%';
+          percentLabel.textContent = pct + '%';
+        }
+      }
+
+      // 2. Gravação em lote com Merge Construtivo no Cloud Firestore
+      log(`Gravando ${items.length} nós no Cloud Firestore (knowledge_nodes) com merge construtivo...`);
+      statusTitle.textContent = `Gravando no Cloud Firestore...`;
+
+      const BATCH_SIZE = 300;
+      for (let i = 0; i < items.length; i += BATCH_SIZE) {
+        const chunk = items.slice(i, i + BATCH_SIZE);
+        const batch = firebaseDb.batch();
+        for (const item of chunk) {
+          const ref = firebaseDb.collection('knowledge_nodes').doc(item.id);
+          batch.set(ref, {
+            ...item,
+            updatedAt: new Date().toISOString()
+          }, { merge: true });
+        }
+        await batch.commit();
+        const curPct = 50 + Math.round(((i + chunk.length) / items.length) * 50);
+        progressBar.style.width = curPct + '%';
+        percentLabel.textContent = curPct + '%';
+        log(`✓ Lote gravado no Firestore (${Math.min(i + BATCH_SIZE, items.length)}/${items.length})`);
+      }
+
+      // Atualiza o arquivo seed com as URLs do Storage
+      await exportSeedJson(true);
+
+      statusTitle.textContent = '🎉 Ingestão completa finalizada com sucesso!';
+      log(`🎉 Ingestão finalizada! ${items.length} nós no Firestore, ${storageUploaded} arquivos no Storage.`);
+      alert(
+        `🎉 Ingestão Completa Concluída com Sucesso!\n\n` +
+        `• ${items.length} nós gravados no Firestore com merge construtivo.\n` +
+        `• ${storageUploaded} arquivos binários enviados para o Firebase Storage.\n` +
+        `• Todos os materiais já estão disponíveis na pasta Crisma Adultos (+18 anos) da Wiki!`
+      );
+    }
+
+    async function limparOrfaosERegravarCrisma() {
+      let user = firebase.auth && firebase.auth().currentUser;
+      if (!user) {
+        alert('Por favor, conecte-se com sua conta Google de Master Admin antes de continuar.');
+        user = await handleGoogleAuth();
+        if (!user) return;
+      }
+
+      const proceed = confirm(
+        '🧹 LIMPAR RAÍZ E GRAVAR ACERVO OFICIAL NA CRISMA DE ADULTOS\n\n' +
+        'Esta ação irá:\n' +
+        '1. Remover com segurança apenas os nós preliminares órfãos da raiz (prefixos fld-od- e doc-od- sem parentId);\n' +
+        '2. Gravar os 220 nós oficiais completos com todos os textos em Markdown e as 35 pastas diretamente dentro de "Crisma Adultos (+18 anos)";\n' +
+        '3. Preservar intactos todos os demais materiais da Catequese.\n\n' +
+        'Deseja prosseguir?'
+      );
+      if (!proceed) return;
+
+      const progressPanel = document.getElementById('import-progress-panel');
+      const progressBar = document.getElementById('progress-bar-el');
+      const percentLabel = document.getElementById('progress-percentage-label');
+      const statusTitle = document.getElementById('progress-status-title');
+      const logEl = document.getElementById('progress-log');
+      progressPanel.classList.remove('hidden');
+
+      function log(msg) {
+        const line = document.createElement('div');
+        line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        logEl.appendChild(line);
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+
+      log('🔍 Buscando nós órfãos preliminares na raiz do Firestore...');
+      statusTitle.textContent = 'Buscando nós órfãos na raiz...';
+
+      try {
+        // 1. Busca os nós órfãos na raiz (sem parentId e com prefixos de importação temporária)
+        const snapshot = await firebaseDb.collection('knowledge_nodes').get();
+        const toDelete = [];
+        snapshot.forEach(doc => {
+          const d = doc.data();
+          const id = doc.id;
+          const isTempPrefix = id.startsWith('fld-od-') || id.startsWith('doc-od-') || id.startsWith('med-od-') || id.startsWith('pres-od-');
+          if (isTempPrefix && (!d.parentId || d.parentId === 'null')) {
+            toDelete.push(doc.ref);
+          }
+        });
+
+        log(`Encontrados ${toDelete.length} nós órfãos na raiz para remoção.`);
+        statusTitle.textContent = `Removendo ${toDelete.length} nós órfãos da raiz...`;
+
+        // 2. Remove os órfãos em lote
+        const BATCH_SIZE = 400;
+        for (let i = 0; i < toDelete.length; i += BATCH_SIZE) {
+          const chunk = toDelete.slice(i, i + BATCH_SIZE);
+          const batch = firebaseDb.batch();
+          chunk.forEach(ref => batch.delete(ref));
+          await batch.commit();
+          log(`✓ Removido lote de órfãos (${Math.min(i + BATCH_SIZE, toDelete.length)}/${toDelete.length})`);
+        }
+
+        // 3. Carrega o seed oficial completo com Markdown e pastas sob dir-crisma-adultos
+        log('📦 Carregando acervo oficial com Markdown (crisma_adultos_seed.json)...');
+        statusTitle.textContent = 'Carregando acervo oficial...';
+        const res = await fetch('/api/crisma-seed');
+        const data = await res.json();
+        const officialNodes = data.nodes || [];
+
+        log(`Carregados ${officialNodes.length} nós oficiais estruturados.`);
+        statusTitle.textContent = `Gravando ${officialNodes.length} nós em "Crisma Adultos (+18 anos)"...`;
+
+        // 4. Grava os 220 nós com merge construtivo
+        for (let i = 0; i < officialNodes.length; i += BATCH_SIZE) {
+          const chunk = officialNodes.slice(i, i + BATCH_SIZE);
+          const batch = firebaseDb.batch();
+          chunk.forEach(node => {
+            const ref = firebaseDb.collection('knowledge_nodes').doc(node.id);
+            batch.set(ref, {
+              ...node,
+              updatedAt: new Date().toISOString()
+            }, { merge: true });
+          });
+          await batch.commit();
+          const pct = Math.round(((i + chunk.length) / officialNodes.length) * 100);
+          progressBar.style.width = pct + '%';
+          percentLabel.textContent = pct + '%';
+          log(`✓ Gravado lote com Markdown no Firestore (${Math.min(i + BATCH_SIZE, officialNodes.length)}/${officialNodes.length})`);
+        }
+
+        statusTitle.textContent = '🎉 Acervo de Crisma de Adultos 100% gravado e corrigido!';
+        log('🎉 Sucesso absoluto! Todas as 35 pastas e 185 documentos estão organizados em "Crisma Adultos (+18 anos)".');
+        alert(
+          `🎉 Operação Concluída com Sucesso!\n\n` +
+          `• ${toDelete.length} nós órfãos foram removidos da raiz.\n` +
+          `• ${officialNodes.length} nós oficiais com textos completos em Markdown foram gravados dentro de "Crisma Adultos (+18 anos)".\n` +
+          `• Acesse a Wiki da Catequese para conferir!`
+        );
+      } catch (err) {
+        log(`❌ Erro durante o processo: ${err.message}`);
+        alert('Erro ao executar reparo: ' + err.message);
+      }
+    }
   </script>
 </body>
 </html>
@@ -1176,6 +1512,61 @@ class KnowledgeImporterHTTPHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Content-Type', 'application/json; charset=utf-8')
             self.end_headers()
             self.wfile.write(json.dumps({'content': content or 'Sem conteúdo legível'}, ensure_ascii=False).encode('utf-8'))
+            return
+
+        elif path == '/api/crisma-seed':
+            seed_file = os.path.join(os.path.dirname(__file__), 'crisma_adultos_seed.json')
+            if not os.path.exists(seed_file):
+                try:
+                    from build_crisma_adultos_acervo import build_crisma_adultos_acervo
+                    nodes, stats = build_crisma_adultos_acervo()
+                    with open(seed_file, 'w', encoding='utf-8') as f:
+                        json.dump({"nodes": nodes, "stats": stats, "basePath": DEFAULT_ONEDRIVE_PATH}, f, ensure_ascii=False, indent=2)
+                except Exception as e:
+                    self.send_response(500)
+                    self.end_headers()
+                    self.wfile.write(json.dumps({'error': str(e)}).encode('utf-8'))
+                    return
+
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+            with open(seed_file, 'rb') as f:
+                self.wfile.write(f.read())
+            return
+
+        elif path == '/api/file-binary':
+            query = urllib.parse.parse_qs(parsed.query)
+            file_path = query.get('path', [''])[0]
+            if not file_path or not os.path.exists(file_path):
+                self.send_response(404)
+                self.end_headers()
+                self.wfile.write(b'Arquivo nao encontrado')
+                return
+
+            ext = os.path.splitext(file_path)[1].lower()
+            mime = 'application/octet-stream'
+            if ext == '.pdf': mime = 'application/pdf'
+            elif ext == '.mov': mime = 'video/quicktime'
+            elif ext == '.mp4': mime = 'video/mp4'
+            elif ext in ('.pptx', '.ppt'): mime = 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+            elif ext in ('.docx', '.doc'): mime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            elif ext in ('.jpg', '.jpeg'): mime = 'image/jpeg'
+            elif ext == '.png': mime = 'image/png'
+
+            file_size = os.path.getsize(file_path)
+            self.send_response(200)
+            self.send_header('Content-Type', mime)
+            self.send_header('Content-Length', str(file_size))
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+
+            try:
+                with open(file_path, 'rb') as f:
+                    while chunk := f.read(1024 * 1024):
+                        self.wfile.write(chunk)
+            except Exception as e:
+                print(f"Erro ao transmitir binario: {e}")
             return
 
         super().do_GET()

@@ -77,38 +77,112 @@
   ];
 
   const BIBLE_BOOKS_MAP = {
-    'gn': 'gn', 'gênesis': 'gn', 'genesis': 'gn',
-    'ex': 'ex', 'êxodo': 'ex', 'exodo': 'ex',
-    'lv': 'lv', 'levítico': 'lv',
-    'nm': 'nm', 'números': 'nm',
-    'dt': 'dt', 'deuteronômio': 'dt',
-    'sl': 'sl', 'salmo': 'sl', 'salmos': 'sl',
-    'is': 'is', 'isaías': 'is', 'isaias': 'is',
-    'jr': 'jr', 'jeremias': 'jr',
-    'mt': 'mt', 'mateus': 'mt',
-    'mc': 'mc', 'marcos': 'mc',
-    'lc': 'lc', 'lucas': 'lc',
-    'jo': 'jo', 'joão': 'jo', 'joao': 'jo',
-    'at': 'at', 'atos': 'at',
-    'rm': 'rm', 'romanos': 'rm',
-    '1co': '1co', '1cor': '1co', '1 coríntios': '1co',
-    '2co': '2co', '2cor': '2co', '2 coríntios': '2co',
-    'gl': 'gl', 'gálatas': 'gl',
-    'ef': 'ef', 'efésios': 'ef',
-    'fp': 'fp', 'filipenses': 'fp',
-    'cl': 'cl', 'colossenses': 'cl',
-    '1ts': '1ts', '1 tessalonicenses': '1ts',
-    '2ts': '2ts', '2 tessalonicenses': '2ts',
-    '1tm': '1tm', '1 timóteo': '1tm',
-    '2tm': '2tm', '2 timóteo': '2tm',
-    'tt': 'tt', 'tito': 'tt',
-    'hb': 'hb', 'hebreus': 'hb',
-    'tg': 'tg', 'tiago': 'tg',
-    '1pe': '1pe', '1 pedro': '1pe',
-    '2pe': '2pe', '2 pedro': '2pe',
-    '1jo': '1jo', '1 joão': '1jo',
-    'ap': 'ap', 'apocalipse': 'ap'
+    // Antigo Testamento
+    'gn': 'genesis', 'gênesis': 'genesis', 'genesis': 'genesis',
+    'ex': 'exodo', 'êxodo': 'exodo', 'exodo': 'exodo',
+    'lv': 'levitico', 'levítico': 'levitico', 'levitico': 'levitico',
+    'nm': 'numeros', 'números': 'numeros', 'numeros': 'numeros',
+    'dt': 'deuteronomio', 'deuteronômio': 'deuteronomio', 'deuteronomio': 'deuteronomio',
+    'js': 'josue', 'josué': 'josue', 'josue': 'josue',
+    'jz': 'juizes', 'juízes': 'juizes', 'juizes': 'juizes',
+    'rt': 'rute', 'rute': 'rute',
+    '1sm': 'i-samuel', '1samuel': 'i-samuel', 'isamuel': 'i-samuel',
+    '2sm': 'ii-samuel', '2samuel': 'ii-samuel', 'iisamuel': 'ii-samuel',
+    '1rs': 'i-reis', '1reis': 'i-reis', 'ireis': 'i-reis',
+    '2rs': 'ii-reis', '2reis': 'ii-reis', 'iireis': 'ii-reis',
+    '1cr': 'i-cronicas', '1cronicas': 'i-cronicas', '1crônicas': 'i-cronicas',
+    '2cr': 'ii-cronicas', '2cronicas': 'ii-cronicas', '2crônicas': 'ii-cronicas',
+    'ed': 'esdras', 'esdras': 'esdras',
+    'ne': 'neemias', 'neemias': 'neemias',
+    'tb': 'tobias', 'tobias': 'tobias',
+    'jdt': 'judite', 'judite': 'judite',
+    'et': 'ester', 'ester': 'ester',
+    '1mc': 'i-macabeus', '1macabeus': 'i-macabeus',
+    '2mc': 'ii-macabeus', '2macabeus': 'ii-macabeus',
+    'jó': 'jo', 'job': 'jo',
+    'sl': 'salmos', 'salmo': 'salmos', 'salmos': 'salmos',
+    'pr': 'proverbios', 'pv': 'proverbios', 'provérbios': 'proverbios', 'proverbios': 'proverbios',
+    'ec': 'eclesiastes', 'qo': 'eclesiastes', 'eclesiastes': 'eclesiastes',
+    'ct': 'cantico-dos-canticos', 'cânticos': 'cantico-dos-canticos', 'canticos': 'cantico-dos-canticos',
+    'sb': 'sabedoria', 'sabedoria': 'sabedoria',
+    'eclo': 'eclesiastico', 'si': 'eclesiastico', 'sirácida': 'eclesiastico', 'eclesiástico': 'eclesiastico', 'eclesiastico': 'eclesiastico',
+    'is': 'isaias', 'isaías': 'isaias', 'isaias': 'isaias',
+    'jr': 'jeremias', 'jeremias': 'jeremias',
+    'lm': 'lamentacoes', 'lamentações': 'lamentacoes', 'lamentacoes': 'lamentacoes',
+    'br': 'baruc', 'baruc': 'baruc',
+    'ez': 'ezequiel', 'ezequiel': 'ezequiel',
+    'dn': 'daniel', 'daniel': 'daniel',
+    'os': 'oseias', 'oséias': 'oseias', 'oseias': 'oseias',
+    'jl': 'joel', 'joel': 'joel',
+    'am': 'amos', 'amós': 'amos', 'amos': 'amos',
+    'ab': 'abdias', 'abdias': 'abdias',
+    'jn': 'jonas', 'jonas': 'jonas',
+    'mq': 'miqueias', 'miquéias': 'miqueias', 'miqueias': 'miqueias',
+    'na': 'naum', 'naum': 'naum',
+    'hc': 'habacuc', 'habacuc': 'habacuc', 'habacuque': 'habacuc',
+    'sf': 'sofonias', 'sofonias': 'sofonias',
+    'ag': 'ageu', 'ageu': 'ageu',
+    'zc': 'zacarias', 'zacarias': 'zacarias',
+    'ml': 'malaquias', 'malaquias': 'malaquias',
+
+    // Novo Testamento
+    'mt': 'sao-mateus', 'mateus': 'sao-mateus', 'sãomateus': 'sao-mateus', 'saomateus': 'sao-mateus',
+    'mc': 'sao-marcos', 'marcos': 'sao-marcos', 'sãomarcos': 'sao-marcos', 'saomarcos': 'sao-marcos',
+    'lc': 'sao-lucas', 'lucas': 'sao-lucas', 'sãolucas': 'sao-lucas', 'saolucas': 'sao-lucas',
+    'jo': 'sao-joao', 'joão': 'sao-joao', 'joao': 'sao-joao', 'sãojoão': 'sao-joao', 'saojoao': 'sao-joao',
+    'at': 'atos-dos-apostolos', 'atos': 'atos-dos-apostolos', 'atosdosapóstolos': 'atos-dos-apostolos', 'atosdosapostolos': 'atos-dos-apostolos',
+    'rm': 'romanos', 'romanos': 'romanos',
+    '1co': 'i-corintios', '1cor': 'i-corintios', '1coríntios': 'i-corintios', '1corintios': 'i-corintios', 'icorintios': 'i-corintios',
+    '2co': 'ii-corintios', '2cor': 'ii-corintios', '2coríntios': 'ii-corintios', '2corintios': 'ii-corintios', 'iicorintios': 'ii-corintios',
+    'gl': 'galatas', 'gálatas': 'galatas', 'galatas': 'galatas',
+    'ef': 'efesios', 'efésios': 'efesios', 'efesios': 'efesios',
+    'fp': 'filipenses', 'fl': 'filipenses', 'filipenses': 'filipenses',
+    'cl': 'colossenses', 'colossenses': 'colossenses',
+    '1ts': 'i-tessalonicenses', '1tes': 'i-tessalonicenses', '1tessalonicenses': 'i-tessalonicenses', 'itessalonicenses': 'i-tessalonicenses',
+    '2ts': 'ii-tessalonicenses', '2tes': 'ii-tessalonicenses', '2tessalonicenses': 'ii-tessalonicenses', 'iitessalonicenses': 'ii-tessalonicenses',
+    '1tm': 'i-timoteo', '1tim': 'i-timoteo', '1timóteo': 'i-timoteo', '1timoteo': 'i-timoteo', 'itimoteo': 'i-timoteo',
+    '2tm': 'ii-timoteo', '2tim': 'ii-timoteo', '2timóteo': 'ii-timoteo', '2timoteo': 'ii-timoteo', 'iitimoteo': 'ii-timoteo',
+    'tt': 'tito', 'tito': 'tito',
+    'fm': 'filemon', 'flm': 'filemon', 'filemon': 'filemon', 'filemom': 'filemon',
+    'hb': 'hebreus', 'hebreus': 'hebreus',
+    'tg': 'sao-tiago', 'tiago': 'sao-tiago', 'sãotiago': 'sao-tiago', 'saotiago': 'sao-tiago',
+    '1pe': 'i-sao-pedro', '1pedro': 'i-sao-pedro', '1sãopedro': 'i-sao-pedro', '1saopedro': 'i-sao-pedro', 'isaopedro': 'i-sao-pedro',
+    '2pe': 'ii-sao-pedro', '2pedro': 'ii-sao-pedro', '2sãopedro': 'ii-sao-pedro', '2saopedro': 'ii-sao-pedro', 'iisaopedro': 'ii-sao-pedro',
+    '1jo': 'i-sao-joao', '1joao': 'i-sao-joao', '1joão': 'i-sao-joao', '1sãojoão': 'i-sao-joao', 'isaojoao': 'i-sao-joao',
+    '2jo': 'ii-sao-joao', '2joao': 'ii-sao-joao', '2joão': 'ii-sao-joao', '2sãojoão': 'ii-sao-joao', 'iisaojoao': 'ii-sao-joao',
+    '3jo': 'iii-sao-joao', '3joao': 'iii-sao-joao', '3joão': 'iii-sao-joao', '3sãojoão': 'iii-sao-joao', 'iiisaojoao': 'iii-sao-joao',
+    'jd': 'sao-judas', 'judas': 'sao-judas', 'sãojudas': 'sao-judas', 'saojudas': 'sao-judas',
+    'ap': 'apocalipse', 'apocalipse': 'apocalipse'
   };
+
+  // Helper para resolver URL na Bíblia Católica Ave Maria (bibliacatolica.com.br)
+  function resolveBibliaCatolicaUrl(citation, currentUrl) {
+    if (currentUrl && currentUrl.includes('bibliacatolica.com.br')) {
+      return currentUrl;
+    }
+    // Se a URL antiga do bibliaonline tinha slug e capítulo
+    if (currentUrl && currentUrl.includes('bibliaonline.com.br')) {
+      const parts = currentUrl.split('/');
+      const nviIdx = parts.indexOf('nvi');
+      if (nviIdx !== -1 && parts[nviIdx + 1]) {
+        const rawSlug = parts[nviIdx + 1].toLowerCase();
+        const cap = parts[nviIdx + 2] ? parts[nviIdx + 2].split(/[^0-9]/)[0] : '1';
+        const slug = BIBLE_BOOKS_MAP[rawSlug] || rawSlug;
+        return `https://www.bibliacatolica.com.br/biblia-ave-maria/${slug}/${cap}/`;
+      }
+    }
+    // Tenta extrair livro e capítulo diretamente da citação (Ex: "Mt 28, 19-20", "1Cor 12, 4-11")
+    if (citation) {
+      const match = citation.match(/([0-9]?\s*[a-zA-ZÀ-ÿ]+)\.?\s*([0-9]{1,3})/i);
+      if (match) {
+        const rawBook = match[1].toLowerCase().replace(/\s+/g, '').replace('.', '');
+        const cap = match[2];
+        const slug = BIBLE_BOOKS_MAP[rawBook] || rawBook;
+        return `https://www.bibliacatolica.com.br/biblia-ave-maria/${slug}/${cap}/`;
+      }
+    }
+    return 'https://www.bibliacatolica.com.br/biblia-ave-maria/';
+  }
 
   // ==========================================================================
   // 2. SERVIÇO PRINCIPAL DO EXTRATOR
@@ -174,7 +248,7 @@ Para cada referência, retorne um objeto com:
 - "type": "biblia" | "cic" | "vaticano" | "livro"
 - "citation": citação exata e padronizada em português.
 - "description": explicação concisa (1 linha) sobre o conteúdo daquela citação no contexto.
-- "url": URL direta confiável (para Bíblia use "https://www.bibliaonline.com.br/nvi/livro/cap/vers" se possível; para Vaticano use link do vatican.va; para livros use link de busca do Google Livros: "https://www.google.com/search?tbm=bks&q=Nome+do+Livro").
+- "url": URL direta confiável (para Bíblia use SEMPRE a Bíblia Católica Ave Maria oficial: "https://www.bibliacatolica.com.br/biblia-ave-maria/<livro>/<capitulo>/" onde <livro> é o slug católico em minúsculas como 'sao-mateus', 'sao-marcos', 'sao-lucas', 'sao-joao', 'genesis', 'salmos', 'i-corintios', etc.; para Vaticano use link do vatican.va; para livros use link de busca do Google Livros: "https://www.google.com/search?tbm=bks&q=Nome+do+Livro"). NUNCA use bibliaonline.com.br.
 
 Retorne APENAS um array JSON de objetos, sem formatações Markdown adicionais nem comentários.
 `;
@@ -253,10 +327,10 @@ Retorne APENAS um array JSON de objetos, sem formatações Markdown adicionais n
 
       // 3. Detecta Citações Bíblicas clássicas
       // Ex: Mt 28, 19-20 | Gn 1, 1-31 | 1Cor 12, 4-11 | Sl 8, 4-10
-      const bibleRegex = /\b(Gn|Gênesis|Ex|Êxodo|Lv|Nm|Dt|Sl|Salmo|Is|Isaías|Jr|Mt|Mateus|Mc|Marcos|Lc|Lucas|Jo|João|At|Atos|Rm|Romanos|1Cor|2Cor|Gl|Ef|Fp|Cl|1Ts|2Ts|1Tm|2Tm|Tt|Hb|Tg|1Pe|2Pe|1Jo|Ap)\.?\s*([0-9]{1,3})\s*[,:]\s*([0-9]{1,3}(?:\s*[-–]\s*[0-9]{1,3})?)/gi;
+      const bibleRegex = /\b(Gn|Gênesis|Genesis|Ex|Êxodo|Exodo|Lv|Levítico|Levitico|Nm|Números|Numeros|Dt|Deuteronômio|Deuteronomio|Js|Josué|Josue|Jz|Juízes|Juizes|Rt|Rute|1Sm|2Sm|1Rs|2Rs|1Cr|2Cr|Ed|Ne|Tb|Jdt|Et|1Mc|2Mc|Jó|Sl|Salmo|Salmos|Pr|Pv|Provérbios|Proverbios|Ec|Qo|Eclesiastes|Ct|Cântico|Canticos|Sb|Sabedoria|Eclo|Sirácida|Siracida|Is|Isaías|Isaias|Jr|Jeremias|Lm|Br|Baruc|Ez|Ezequiel|Dn|Daniel|Os|Oseias|Oséias|Jl|Joel|Am|Amós|Amos|Ab|Jn|Jonas|Mq|Miqueias|Miquéias|Na|Naum|Hc|Habacuc|Habacuque|Sf|Sofonias|Ag|Ageu|Zc|Zacarias|Ml|Malaquias|Mt|Mateus|Mc|Marcos|Lc|Lucas|Jo|João|Joao|At|Atos|Rm|Romanos|1Cor|2Cor|1Co|2Co|Gl|Gálatas|Galatas|Ef|Efésios|Efesios|Fp|Fl|Filipenses|Cl|Colossenses|1Ts|2Ts|1Tm|2Tm|Tt|Fm|Hb|Hebreus|Tg|Tiago|1Pe|2Pe|1Jo|2Jo|3Jo|Jd|Ap|Apocalipse)\.?\s*([0-9]{1,3})\s*[,:]\s*([0-9]{1,3}(?:\s*[-–]\s*[0-9]{1,3})?)/gi;
       let bibleMatch;
       while ((bibleMatch = bibleRegex.exec(text)) !== null) {
-        const rawBook = bibleMatch[1].toLowerCase().replace('.', '');
+        const rawBook = bibleMatch[1].toLowerCase().replace(/\s+/g, '').replace('.', '');
         const cap = bibleMatch[2];
         const vers = bibleMatch[3].replace(/\s+/g, '');
         const bookSlug = BIBLE_BOOKS_MAP[rawBook] || rawBook;
@@ -264,8 +338,8 @@ Retorne APENAS um array JSON de objetos, sem formatações Markdown adicionais n
         results.push({
           type: 'biblia',
           citation: `${bibleMatch[1]} ${cap}, ${vers}`,
-          url: `https://www.bibliaonline.com.br/nvi/${bookSlug}/${cap}/${vers}`,
-          description: `Sagrada Escritura: Leitura orante de ${bibleMatch[1]} capítulo ${cap}, versículos ${vers}.`
+          url: `https://www.bibliacatolica.com.br/biblia-ave-maria/${bookSlug}/${cap}/`,
+          description: `Sagrada Escritura (Bíblia Ave Maria): Leitura orante de ${bibleMatch[1]} capítulo ${cap}, versículos ${vers}.`
         });
       }
 
@@ -283,12 +357,12 @@ Retorne APENAS um array JSON de objetos, sem formatações Markdown adicionais n
         if (!seen.has(key)) {
           seen.add(key);
 
-          // Garante fallback de URL segura se ausente
+          // Garante fallback de URL segura se ausente ou redireciona bibliaonline para Bíblia Católica
           let url = r.url;
-          if (!url || !url.startsWith('http')) {
-            if (r.type === 'biblia') {
-              url = `https://www.bibliaonline.com.br/nvi/busca?q=${encodeURIComponent(r.citation)}`;
-            } else if (r.type === 'cic') {
+          if (r.type === 'biblia' || (url && url.includes('bibliaonline.com.br'))) {
+            url = resolveBibliaCatolicaUrl(r.citation, url);
+          } else if (!url || !url.startsWith('http')) {
+            if (r.type === 'cic') {
               url = 'https://www.vatican.va/archive/cathechism_po/index_new/p1s1c1_po.html';
             } else if (r.type === 'vaticano') {
               url = `https://www.vatican.va/content/vatican/pt.html`;

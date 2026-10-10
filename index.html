@@ -1975,7 +1975,7 @@
           </button>
           <button id="btn-subtab-catequistas" onclick="switchOrganogramaSubTab('catequistas')" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition text-slate-600 hover:text-slate-900 hover:bg-slate-100">
             <span>👥 Dados dos Catequistas</span>
-            <span class="bg-amber-100 text-amber-900 text-[10px] font-black px-2 py-0.5 rounded-full border border-amber-300">76 Cadastrados</span>
+            <span id="badge-subtab-catequistas-count" class="bg-amber-100 text-amber-900 text-[10px] font-black px-2 py-0.5 rounded-full border border-amber-300">Carregando...</span>
           </button>
         </div>
 
@@ -2194,7 +2194,7 @@
               </div>
               <h3 class="text-2xl sm:text-3xl font-black font-heading text-white flex items-center gap-2.5">
                 <span>Quadro de Catequistas &amp; Contatos</span>
-                <span id="badge-total-catequistas" class="text-xs bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 px-3 py-1 rounded-full font-sans font-bold">76 Cadastrados</span>
+                <span id="badge-total-catequistas" class="text-xs bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 px-3 py-1 rounded-full font-sans font-bold">Carregando...</span>
               </h3>
               <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
                 Dados pessoais completos integrados ao Organograma de Turmas: Nome completo, data de nascimento, WhatsApp com link direto, e-mail, paróquia habitual e turmas atribuídas.
@@ -2216,19 +2216,19 @@
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5 pt-4 border-t border-slate-700/60 text-center">
             <div class="bg-slate-900/60 p-3 rounded-2xl border border-slate-700/50">
               <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Total Catequistas</span>
-              <span class="text-xl sm:text-2xl font-black text-amber-300 font-heading" id="stat-total-cats">76</span>
+              <span class="text-xl sm:text-2xl font-black text-amber-300 font-heading" id="stat-total-cats">—</span>
             </div>
             <div class="bg-slate-900/60 p-3 rounded-2xl border border-slate-700/50">
               <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Turmas Vinculadas</span>
-              <span class="text-xl sm:text-2xl font-black text-emerald-300 font-heading">44</span>
+              <span class="text-xl sm:text-2xl font-black text-emerald-300 font-heading" id="stat-total-cats-turmas">—</span>
             </div>
             <div class="bg-slate-900/60 p-3 rounded-2xl border border-slate-700/50">
               <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Etapas Atendidas</span>
-              <span class="text-xl sm:text-2xl font-black text-sky-300 font-heading">6</span>
+              <span class="text-xl sm:text-2xl font-black text-sky-300 font-heading" id="stat-total-cats-etapas">—</span>
             </div>
             <div class="bg-slate-900/60 p-3 rounded-2xl border border-slate-700/50">
-              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">WhatsApp Direto</span>
-              <span class="text-xl sm:text-2xl font-black text-green-400 font-heading">100%</span>
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Fotos 3x4 Validadas</span>
+              <span class="text-xl sm:text-2xl font-black text-indigo-300 font-heading" id="stat-total-fotos-cats">—</span>
             </div>
           </div>
         </div>
@@ -2243,7 +2243,7 @@
 
             <div class="flex items-center gap-2 flex-wrap">
               <select id="sel-filter-catequistas-etapa" onchange="filterCatequistasList()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-700 outline-none focus:border-[#d4a94f]">
-                <option value="all">Todas as Etapas (76)</option>
+                <option value="all" id="opt-filter-cats-all">Todas as Etapas</option>
                 <option value="Pré Eucaristia">Pré Eucaristia</option>
                 <option value="Eucaristia I">Eucaristia I</option>
                 <option value="Eucaristia II">Eucaristia II</option>
@@ -2295,8 +2295,8 @@
             </table>
           </div>
           <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
-            <span id="catequistas-table-stats">Exibindo 76 catequistas cadastrados.</span>
-            <span class="text-[11px] text-slate-400">Fonte: downloads/Cadastro Catequese 2026 (respostas).xlsx</span>
+            <span id="catequistas-table-stats">Carregando catequistas cadastrados...</span>
+            <span class="text-[11px] text-slate-400">Pastoral da Catequese • Santuário ICM</span>
           </div>
         </div>
 
@@ -3668,6 +3668,9 @@
 
             <!-- Ações em Modo Edição -->
             <div id="modal-cat-footer-edit-actions" class="hidden flex items-center gap-2">
+              <button type="button" onclick="if (currentCatequistaForPhoto && currentCatequistaForPhoto.id) deleteCatequista(currentCatequistaForPhoto.id)" class="px-3.5 py-2 bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-700 font-bold rounded-xl text-xs transition inline-flex items-center gap-1.5 border border-rose-200" title="Excluir este catequista do cadastro oficial">
+                <span>🗑️</span> <span>Excluir Catequista</span>
+              </button>
               <button type="button" onclick="toggleCatequistaEditMode(false)" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl text-xs transition">
                 Cancelar
               </button>
@@ -6360,6 +6363,9 @@
             if (typeof syncCatequistasFromFirestore === 'function') {
               syncCatequistasFromFirestore();
             }
+            if (window.WikiKB && typeof window.WikiKB.setupCloudSync === 'function') {
+              window.WikiKB.setupCloudSync(true);
+            }
           }
         });
       }
@@ -8909,14 +8915,36 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     // Correlacionados com as 44 Turmas do Organograma Oficial
     // =========================================================
     const STORAGE_KEY_CATEQUISTAS_2026 = 'catequese_catequistas_2026_v1';
+    const STORAGE_KEY_CATEQUISTAS_DELETED = 'catequese_catequistas_deleted_v1';
     const SEED_CATEQUISTAS_2026 = (typeof window !== 'undefined' && Array.isArray(window.SEED_CATEQUISTAS_2026) && window.SEED_CATEQUISTAS_2026.length > 0)
       ? window.SEED_CATEQUISTAS_2026
       : [];
+
+    function getDeletedCatequistasIds() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY_CATEQUISTAS_DELETED);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) return new Set(parsed);
+        }
+      } catch (e) {}
+      return new Set();
+    }
+
+    function addDeletedCatequistaId(id) {
+      if (!id) return;
+      try {
+        const set = getDeletedCatequistasIds();
+        set.add(id);
+        localStorage.setItem(STORAGE_KEY_CATEQUISTAS_DELETED, JSON.stringify(Array.from(set)));
+      } catch (e) {}
+    }
 
     function getCatequistasRegistrationData() {
       const seedSource = (typeof window !== 'undefined' && Array.isArray(window.SEED_CATEQUISTAS_2026) && window.SEED_CATEQUISTAS_2026.length > 0)
         ? window.SEED_CATEQUISTAS_2026
         : SEED_CATEQUISTAS_2026;
+      const deletedIds = getDeletedCatequistasIds();
 
       try {
         const stored = localStorage.getItem(STORAGE_KEY_CATEQUISTAS_2026);
@@ -8926,12 +8954,13 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             let changed = false;
             // Remove duplicidade conhecida (Ronaldo Buril: cat-2026-72 unificado em cat-2026-71)
             const preLen = parsed.length;
-            parsed = parsed.filter(p => p.id !== 'cat-2026-72');
+            parsed = parsed.filter(p => p.id !== 'cat-2026-72' && !deletedIds.has(p.id) && !p.deleted && p.ativo !== false);
             if (parsed.length !== preLen) changed = true;
 
             // Sincroniza e mescla fotos 3x4 e funções acumuladas do dataset oficial SEM sobrescrever edições do usuário
             if (Array.isArray(seedSource)) {
               seedSource.forEach(seedCat => {
+                if (deletedIds.has(seedCat.id) || seedCat.deleted || seedCat.ativo === false) return;
                 const found = parsed.find(p => p.id === seedCat.id || (p.row && p.row === seedCat.row) || (p.nomeCompleto && normCatString(p.nomeCompleto) === normCatString(seedCat.nomeCompleto)));
                 if (found) {
                   // Apenas preenche a foto padrão se o registro local NÃO tiver foto, NÃO tiver removido intencionalmente e NUNCA tiver sido editado
@@ -8972,7 +9001,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       } catch (e) {
         console.warn('Erro ao carregar dados de catequistas do storage:', e);
       }
-      return seedSource;
+      return (Array.isArray(seedSource) ? seedSource : []).filter(s => !deletedIds.has(s.id) && !s.deleted && s.ativo !== false);
     }
 
     async function syncCatequistasToFirestore() {
@@ -9051,11 +9080,23 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         const list = getCatequistasRegistrationData();
         let changed = false;
 
+        const deletedIds = getDeletedCatequistasIds();
         snapshot.forEach(docSnap => {
           const cloudData = docSnap.data();
           const cloudId = (cloudData && cloudData.id) || docSnap.id;
           if (!cloudData || !cloudId) return;
           if (!cloudData.id) cloudData.id = cloudId;
+
+          // Se estiver marcado como excluído na nuvem
+          if (cloudData.deleted || cloudData.ativo === false || deletedIds.has(cloudId)) {
+            addDeletedCatequistaId(cloudId);
+            const delIdx = list.findIndex(c => c.id === cloudId);
+            if (delIdx !== -1) {
+              list.splice(delIdx, 1);
+              changed = true;
+            }
+            return;
+          }
 
           const idx = list.findIndex(c => c.id === cloudId || (c.nomeCompleto && cloudData.nomeCompleto && normCatString(c.nomeCompleto) === normCatString(cloudData.nomeCompleto)));
           if (idx !== -1) {
@@ -9109,7 +9150,14 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           if (typeof filterCatequistasList === 'function') {
             filterCatequistasList();
           }
+          if (typeof updateCatequistasCounters === 'function') {
+            updateCatequistasCounters();
+          }
           console.log(`✅ Base de catequistas atualizada da nuvem (${snapshot.size} registros).`);
+        } else {
+          if (typeof updateCatequistasCounters === 'function') {
+            updateCatequistasCounters();
+          }
         }
       } catch (e) {
         console.warn('Sync Firestore catequistas mantido localmente:', e);
@@ -9122,6 +9170,149 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       } catch (e) {
         console.warn('Erro ao salvar dados de catequistas no storage:', e);
       }
+      if (typeof updateCatequistasCounters === 'function') {
+        updateCatequistasCounters();
+      }
+    }
+
+    function updateCatequistasCounters() {
+      const all = getCatequistasRegistrationData();
+      const count = Array.isArray(all) ? all.length : 0;
+
+      // 1. Badge na sub-aba do Organograma
+      const subtabBadge = document.getElementById('badge-subtab-catequistas-count');
+      if (subtabBadge) {
+        subtabBadge.textContent = `${count} Cadastrados`;
+      }
+
+      // 2. Badge no título do Quadro de Catequistas
+      const badgeTotal = document.getElementById('badge-total-catequistas');
+      if (badgeTotal) {
+        badgeTotal.textContent = `${count} Cadastrados`;
+      }
+
+      // 3. Stat card: Total Catequistas
+      const statTotalCats = document.getElementById('stat-total-cats');
+      if (statTotalCats) {
+        statTotalCats.textContent = count;
+      }
+
+      // 4. Stat card: Turmas Vinculadas
+      const statTurmas = document.getElementById('stat-total-cats-turmas');
+      if (statTurmas) {
+        const org = (typeof getActiveOrganograma === 'function') ? getActiveOrganograma() : null;
+        let totalT = 0;
+        if (org && org.stages) {
+          totalT = org.stages.reduce((acc, st) => acc + (st.turmas ? st.turmas.length : 0), 0);
+        } else {
+          totalT = 44;
+        }
+        statTurmas.textContent = totalT;
+      }
+
+      // 5. Stat card: Etapas Atendidas
+      const statEtapas = document.getElementById('stat-total-cats-etapas');
+      if (statEtapas) {
+        const etapasSet = new Set();
+        all.forEach(c => {
+          if (c.etapaPrincipal) etapasSet.add(c.etapaPrincipal);
+          if (Array.isArray(c.turmas)) c.turmas.forEach(t => { if (t.stage) etapasSet.add(t.stage); });
+        });
+        statEtapas.textContent = etapasSet.size > 0 ? etapasSet.size : 6;
+      }
+
+      // 6. Stat card: Fotos 3x4 Validadas
+      const statFotos = document.getElementById('stat-total-fotos-cats');
+      if (statFotos) {
+        const countFotos = all.filter(c => c.foto && !c.fotoRemoved).length;
+        statFotos.textContent = countFotos;
+      }
+
+      // 7. Opção "Todas as Etapas" no filtro select
+      const optAll = document.getElementById('opt-filter-cats-all') || document.querySelector('#sel-filter-catequistas-etapa option[value="all"]');
+      if (optAll) {
+        optAll.textContent = `Todas as Etapas (${count})`;
+      }
+    }
+
+    async function deleteCatequista(id) {
+      if (!id) return;
+      if (typeof canCadastrarCatequista === 'function' && !canCadastrarCatequista()) {
+        alert('⚠️ Operação não permitida: Apenas o Master Admin, Coordenação Geral e Vice-Coordenação têm permissão para excluir catequistas.');
+        return;
+      }
+
+      const list = getCatequistasRegistrationData();
+      const cat = list.find(c => c.id === id);
+      if (!cat) {
+        alert('Catequista não encontrado no cadastro.');
+        return;
+      }
+
+      if (!confirm(`Deseja realmente excluir o(a) catequista "${cat.nomeCompleto}" do cadastro oficial?`)) {
+        return;
+      }
+
+      // 1. Marca no set de excluídos para evitar ressuscitação do SEED
+      addDeletedCatequistaId(id);
+
+      // 2. Remove do armazenamento local
+      const updatedList = list.filter(c => c.id !== id);
+      saveCatequistasRegistrationData(updatedList);
+
+      // 3. Atualiza no Firestore sob proteção RBAC e merge construtivo (sem deleção destrutiva)
+      if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
+        const userEmail = (window.appAuthState && window.appAuthState.user && window.appAuthState.user.email) || '';
+        const userName = (window.appAuthState && window.appAuthState.user && (window.appAuthState.user.displayName || window.appAuthState.user.email)) || 'Coordenação';
+        window.firebaseDb.collection('catequistas').doc(id).set({
+          id: id,
+          nomeCompleto: cat.nomeCompleto,
+          deleted: true,
+          ativo: false,
+          deletedAt: new Date().toISOString(),
+          deletedBy: userName,
+          deletedByEmail: userEmail,
+          updatedAt: new Date().toISOString()
+        }, { merge: true }).then(() => {
+          console.log('✅ Catequista marcado como excluído no Firestore:', id);
+        }).catch(err => {
+          console.warn('Erro ao atualizar exclusão no Firestore:', err);
+        });
+      }
+
+      // 4. Registro perene de Auditoria LGPD (Art. 37)
+      if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
+        const userEmail = (window.appAuthState && window.appAuthState.user && window.appAuthState.user.email) || '';
+        const userName = (window.appAuthState && window.appAuthState.user && (window.appAuthState.user.displayName || window.appAuthState.user.email)) || 'Coordenação';
+        window.ICM_CONFIG.logAuditEvent('CATEQUISTA_DELETE', `catequista:${cat.nomeCompleto}`, {
+          catId: id,
+          nomeCompleto: cat.nomeCompleto,
+          deletedBy: userName,
+          deletedByEmail: userEmail,
+          timestamp: new Date().toISOString()
+        });
+      }
+
+      // 5. Remove da escala do Organograma Ativo se estiver alocado em alguma turma
+      if (typeof removeCatequistaFromOrganograma === 'function') {
+        removeCatequistaFromOrganograma(cat);
+      }
+
+      // 6. Fecha modal de detalhes se estiver aberto com este catequista
+      if (typeof closeCatequistaModal === 'function') {
+        const modal = document.getElementById('modal-catequista-detalhes');
+        if (modal && !modal.classList.contains('hidden') && typeof currentCatequistaForPhoto !== 'undefined' && currentCatequistaForPhoto && currentCatequistaForPhoto.id === id) {
+          closeCatequistaModal();
+        }
+      }
+
+      // 7. Atualiza tabela e todos os contadores da interface
+      if (typeof filterCatequistasList === 'function') {
+        filterCatequistasList();
+      }
+      updateCatequistasCounters();
+
+      alert(`✅ Catequista "${cat.nomeCompleto}" excluído(a) com sucesso do cadastro e desvinculado(a) do Organograma.`);
     }
 
     function normCatString(str) {
@@ -9207,6 +9398,256 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         }
         return `<span class="font-medium text-slate-800 mr-1">${n}</span>`;
       }).join(' ');
+    }
+
+    // =========================================================================
+    // INTEGRAÇÃO BIDIRECIONAL: CATEQUISTAS <-> ORGANOGRAMA DE TURMAS
+    // =========================================================================
+
+    function getCatequistaDisplayName(cat) {
+      if (!cat) return '';
+      if (cat.apelido && cat.apelido.trim()) return cat.apelido.trim();
+      if (cat.nomeConhecido && cat.nomeConhecido.trim()) return cat.nomeConhecido.trim();
+      const parts = (cat.nomeCompleto || '').trim().split(/\s+/).filter(Boolean);
+      if (parts.length <= 2) return cat.nomeCompleto.trim();
+      return `${parts[0]} ${parts[parts.length - 1]}`;
+    }
+
+    function isNameMatchCatequista(nameStr, cat) {
+      if (!nameStr || !cat) return false;
+      const cleanName = normCatString(nameStr);
+      if (!cleanName) return false;
+      if (cat.nomeCompleto && normCatString(cat.nomeCompleto) === cleanName) return true;
+      if (cat.apelido && normCatString(cat.apelido) === cleanName) return true;
+      if (cat.nomeConhecido && normCatString(cat.nomeConhecido) === cleanName) return true;
+
+      const parts = (cat.nomeCompleto || '').trim().split(/\s+/).filter(Boolean);
+      if (parts.length > 2) {
+        const shortName = normCatString(`${parts[0]} ${parts[parts.length - 1]}`);
+        if (shortName === cleanName) return true;
+      }
+      return false;
+    }
+
+    function splitCatechistString(str) {
+      if (!str) return [];
+      const trimmed = str.trim();
+      if (!trimmed || trimmed === '—' || trimmed.toLowerCase() === 'a definir' || trimmed.toLowerCase() === 'sem catequista') {
+        return [];
+      }
+      return trimmed.split(/\s+e\s+|,\s*|\s+e\/ou\s+/).map(s => s.trim()).filter(Boolean);
+    }
+
+    function joinCatechistArray(names) {
+      const clean = (names || []).map(n => n.trim()).filter(Boolean);
+      if (clean.length === 0) return 'A definir';
+      if (clean.length === 1) return clean[0];
+      if (clean.length === 2) return `${clean[0]} e ${clean[1]}`;
+      return `${clean.slice(0, -1).join(', ')} e ${clean[clean.length - 1]}`;
+    }
+
+    function addCatequistaToOrganograma(catequista, stageName, turmaName, funcao = 'Catequista Titular') {
+      if (!catequista || !stageName || !turmaName) return false;
+      if (turmaName === 'sem_turma' || turmaName === 'todas') return false;
+
+      const data = (typeof getOrganogramasData === 'function') ? getOrganogramasData() : null;
+      if (!data) return false;
+      const activeId = (typeof getActiveOrganogramaId === 'function') ? getActiveOrganogramaId() : 'org-2026';
+      const org = data[activeId];
+      if (!org || !org.stages) return false;
+
+      let targetStage = org.stages.find(st => normCatString(st.name) === normCatString(stageName));
+      if (!targetStage) {
+        targetStage = org.stages.find(st => normCatString(st.name).includes(normCatString(stageName)) || normCatString(stageName).includes(normCatString(st.name)));
+      }
+      if (!targetStage || !targetStage.turmas) return false;
+
+      const targetTurma = targetStage.turmas.find(t => normCatString(t.turma) === normCatString(turmaName));
+      if (!targetTurma) return false;
+
+      const dispName = getCatequistaDisplayName(catequista);
+      const isAux = (funcao && funcao.toLowerCase().includes('auxiliar'));
+      let changed = false;
+
+      if (isAux) {
+        if (!targetTurma.auxiliares) targetTurma.auxiliares = [];
+        const exists = targetTurma.auxiliares.some(a => isNameMatchCatequista(a, catequista));
+        if (!exists) {
+          targetTurma.auxiliares.push(dispName);
+          changed = true;
+        }
+      } else {
+        const existingNames = splitCatechistString(targetTurma.catechists);
+        const exists = existingNames.some(n => isNameMatchCatequista(n, catequista));
+        if (!exists) {
+          existingNames.push(dispName);
+          targetTurma.catechists = joinCatechistArray(existingNames);
+          targetTurma.semCatequista = false;
+          changed = true;
+        }
+      }
+
+      if (changed) {
+        saveOrganogramasData(data);
+        if (typeof renderOrganogramaAll === 'function') renderOrganogramaAll();
+      }
+      return changed;
+    }
+
+    function removeCatequistaFromOrganograma(catequista) {
+      if (!catequista) return false;
+      const data = (typeof getOrganogramasData === 'function') ? getOrganogramasData() : null;
+      if (!data) return false;
+      const activeId = (typeof getActiveOrganogramaId === 'function') ? getActiveOrganogramaId() : 'org-2026';
+      const org = data[activeId];
+      if (!org || !org.stages) return false;
+
+      let changed = false;
+
+      org.stages.forEach(st => {
+        (st.turmas || []).forEach(t => {
+          const curTitulares = splitCatechistString(t.catechists);
+          const filteredTitulares = curTitulares.filter(n => !isNameMatchCatequista(n, catequista));
+          if (filteredTitulares.length !== curTitulares.length) {
+            if (filteredTitulares.length === 0) {
+              t.catechists = 'A definir';
+              t.semCatequista = true;
+            } else {
+              t.catechists = joinCatechistArray(filteredTitulares);
+            }
+            changed = true;
+          }
+
+          if (Array.isArray(t.auxiliares)) {
+            const preLen = t.auxiliares.length;
+            t.auxiliares = t.auxiliares.filter(n => !isNameMatchCatequista(n, catequista));
+            if (t.auxiliares.length !== preLen) {
+              changed = true;
+            }
+          }
+        });
+      });
+
+      if (changed) {
+        saveOrganogramasData(data);
+        if (typeof renderOrganogramaAll === 'function') renderOrganogramaAll();
+      }
+      return changed;
+    }
+
+    function updateCatequistaInOrganograma(cat) {
+      if (!cat) return false;
+      const data = (typeof getOrganogramasData === 'function') ? getOrganogramasData() : null;
+      if (!data) return false;
+      const activeId = (typeof getActiveOrganogramaId === 'function') ? getActiveOrganogramaId() : 'org-2026';
+      const org = data[activeId];
+      if (!org || !org.stages) return false;
+
+      const newDispName = getCatequistaDisplayName(cat);
+      let changed = false;
+
+      org.stages.forEach(st => {
+        (st.turmas || []).forEach(t => {
+          const titularNames = splitCatechistString(t.catechists);
+          let tChanged = false;
+          const mappedTitulares = titularNames.map(n => {
+            if (isNameMatchCatequista(n, cat)) {
+              tChanged = true;
+              return newDispName;
+            }
+            return n;
+          });
+          if (tChanged) {
+            t.catechists = joinCatechistArray(mappedTitulares);
+            changed = true;
+          }
+
+          if (Array.isArray(t.auxiliares)) {
+            let aChanged = false;
+            t.auxiliares = t.auxiliares.map(n => {
+              if (isNameMatchCatequista(n, cat)) {
+                aChanged = true;
+                return newDispName;
+              }
+              return n;
+            });
+            if (aChanged) changed = true;
+          }
+        });
+      });
+
+      if (changed) {
+        saveOrganogramasData(data);
+        if (typeof renderOrganogramaAll === 'function') renderOrganogramaAll();
+      }
+      return changed;
+    }
+
+    function syncOrganogramaTurmaToCatequistas(stageName, turmaName, catechistsStr, auxiliaresList) {
+      const allCats = getCatequistasRegistrationData();
+      let changed = false;
+
+      const titularNames = splitCatechistString(catechistsStr);
+      const auxNames = Array.isArray(auxiliaresList) ? auxiliaresList : [];
+      const assignedCatIds = new Set();
+
+      titularNames.forEach(name => {
+        const cat = findCatequistaByName(name, stageName);
+        if (cat) {
+          assignedCatIds.add(cat.id);
+          if (!Array.isArray(cat.turmas)) cat.turmas = [];
+          const idx = cat.turmas.findIndex(t => normCatString(t.stage) === normCatString(stageName) && normCatString(t.turma) === normCatString(turmaName));
+          if (idx === -1) {
+            cat.turmas.push({
+              stage: stageName,
+              turma: turmaName,
+              funcao: 'Catequista Titular',
+              dayTime: 'Ano Pastoral 2026',
+              room: 'Centro Catequético'
+            });
+            changed = true;
+          } else if (cat.turmas[idx].funcao && cat.turmas[idx].funcao.includes('Auxiliar')) {
+            cat.turmas[idx].funcao = 'Catequista Titular';
+            changed = true;
+          }
+        }
+      });
+
+      auxNames.forEach(name => {
+        const cat = findCatequistaByName(name, stageName);
+        if (cat) {
+          assignedCatIds.add(cat.id);
+          if (!Array.isArray(cat.turmas)) cat.turmas = [];
+          const idx = cat.turmas.findIndex(t => normCatString(t.stage) === normCatString(stageName) && normCatString(t.turma) === normCatString(turmaName));
+          if (idx === -1) {
+            cat.turmas.push({
+              stage: stageName,
+              turma: turmaName,
+              funcao: 'Auxiliar / Em Formação',
+              dayTime: 'Ano Pastoral 2026',
+              room: 'Centro Catequético'
+            });
+            changed = true;
+          }
+        }
+      });
+
+      // Se catequistas que tinham essa turma atribuída não constam mais nela, remove
+      allCats.forEach(c => {
+        if (!assignedCatIds.has(c.id) && Array.isArray(c.turmas)) {
+          const preLen = c.turmas.length;
+          c.turmas = c.turmas.filter(t => !(normCatString(t.stage) === normCatString(stageName) && normCatString(t.turma) === normCatString(turmaName)));
+          if (c.turmas.length !== preLen) {
+            changed = true;
+          }
+        }
+      });
+
+      if (changed) {
+        saveCatequistasRegistrationData(allCats);
+        if (typeof filterCatequistasList === 'function') filterCatequistasList();
+        if (typeof updateCatequistasCounters === 'function') updateCatequistasCounters();
+      }
     }
 
     let currentCatequistaForPhoto = null;
@@ -9919,7 +10360,12 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         });
       }
 
-      // 4. Atualiza a tabela na tela
+      // 4. Sincroniza com os cards do Organograma Ativo se estiver alocado em turmas
+      if (typeof updateCatequistaInOrganograma === 'function') {
+        updateCatequistaInOrganograma(list[idx]);
+      }
+
+      // 5. Atualiza a tabela na tela
       filterCatequistasList();
 
       // 5. Retorna ao modo de visualização com dados atualizados
@@ -10031,6 +10477,9 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       const statTotalCats = document.getElementById('stat-total-cats');
       if (statTotalCats) {
         statTotalCats.textContent = all.length;
+      }
+      if (typeof updateCatequistasCounters === 'function') {
+        updateCatequistasCounters();
       }
       if (typeof updateCadastrarCatequistaVisibility === 'function') {
         updateCadastrarCatequistaVisibility();
@@ -10193,6 +10642,9 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
                 ${canEdit ? `
                 <button onclick="openCatequistaModal('${c.id}', true)" class="p-1.5 bg-amber-500/20 hover:bg-[#d4a94f] hover:text-slate-950 text-amber-900 rounded-lg transition text-xs font-bold border border-amber-500/40" title="Editar dados cadastrais de ${c.nomeCompleto}">
                   ✏️ Editar
+                </button>
+                <button onclick="deleteCatequista('${c.id}')" class="p-1.5 bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-700 rounded-lg transition text-xs font-bold border border-rose-200" title="Excluir cadastro de ${c.nomeCompleto}">
+                  🗑️
                 </button>` : ''}
               </div>
             </td>
@@ -10517,10 +10969,27 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         });
       }
 
-      // 5. Atualiza a tabela na tela e fecha o modal
+      // 5. Se vinculou a uma turma, adiciona automaticamente à escala do Organograma Ativo
+      if (turmaVal && turmaVal !== 'sem_turma' && turmaVal !== 'todas') {
+        let stageName = etapaPrincipal;
+        let turmaName = turmaVal;
+        if (turmaVal.includes('•')) {
+          const parts = turmaVal.split('•').map(s => s.trim());
+          stageName = parts[0] || etapaPrincipal;
+          turmaName = parts[1] || turmaVal;
+        }
+        if (typeof addCatequistaToOrganograma === 'function') {
+          addCatequistaToOrganograma(newCatequista, stageName, turmaName, funcaoPrincipal);
+        }
+      }
+
+      // 6. Atualiza a tabela na tela e fecha o modal
       newCatTempFoto = null;
       closeCadastrarCatequistaModal();
       filterCatequistasList();
+      if (typeof updateCatequistasCounters === 'function') {
+        updateCatequistasCounters();
+      }
 
       alert(`✅ Catequista ${nomeCompleto} cadastrado(a) com sucesso na Pastoral da Catequese 2026!`);
     }
@@ -11263,6 +11732,9 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       renderOrganogramaTree();
       renderOrganogramaCoordinators();
       renderScheduleTable();
+      if (typeof updateCatequistasCounters === 'function') {
+        updateCatequistasCounters();
+      }
     }
 
     // =============================================
@@ -11524,6 +11996,11 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       saveOrganogramasData(data);
       closeTurmaModal();
       renderOrganogramaAll();
+
+      // Sincroniza fichas dos catequistas com os nomes vinculados a esta turma
+      if (typeof syncOrganogramaTurmaToCatequistas === 'function') {
+        syncOrganogramaTurmaToCatequistas(etapaName, turmaName, catechists, auxiliares);
+      }
     }
 
     function deleteTurma(turmaId) {
@@ -11541,6 +12018,24 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       if (!org) return;
 
       (org.stages || []).forEach(st => {
+        const found = (st.turmas || []).find(t => t.id === turmaId);
+        if (found) {
+          // Desvincula esta turma dos perfis dos catequistas
+          const allCats = getCatequistasRegistrationData();
+          let cChanged = false;
+          allCats.forEach(c => {
+            if (Array.isArray(c.turmas)) {
+              const preLen = c.turmas.length;
+              c.turmas = c.turmas.filter(t => !(normCatString(t.stage) === normCatString(st.name) && normCatString(t.turma) === normCatString(found.turma)));
+              if (c.turmas.length !== preLen) cChanged = true;
+            }
+          });
+          if (cChanged) {
+            saveCatequistasRegistrationData(allCats);
+            if (typeof filterCatequistasList === 'function') filterCatequistasList();
+            if (typeof updateCatequistasCounters === 'function') updateCatequistasCounters();
+          }
+        }
         st.turmas = (st.turmas || []).filter(t => t.id !== turmaId);
       });
 
@@ -11759,6 +12254,9 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         if (typeof updateCadastrarCatequistaVisibility === 'function') updateCadastrarCatequistaVisibility();
         if (typeof syncCatequistasFromFirestore === 'function') syncCatequistasFromFirestore();
         if (typeof renderCatequistasList === 'function') renderCatequistasList();
+        if (typeof updateCatequistasCounters === 'function') updateCatequistasCounters();
+      } else {
+        if (typeof updateCatequistasCounters === 'function') updateCatequistasCounters();
       }
     }
 
@@ -23396,6 +23894,12 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       populateTurmasSelect('Crisma Adultos', 'Turma 03');
       selectRoom('sala-01', false);
       initNavScroll();
+      if (typeof updateCatequistasCounters === 'function') {
+        updateCatequistasCounters();
+      }
+      if (typeof filterCatequistasList === 'function') {
+        filterCatequistasList();
+      }
       if (window.location.hash) {
         const hashTab = window.location.hash.replace('#', '');
         if (document.getElementById('view-' + hashTab)) {
