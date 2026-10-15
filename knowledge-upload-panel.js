@@ -674,14 +674,45 @@
         if (mdSection) mdSection.classList.remove('hidden');
 
         if (typeof mammoth !== 'undefined') {
-          if (editor) editor.value = '⏳ Convertendo documento Word para Markdown...';
+          if (editor) editor.value = '⏳ Convertendo documento Word com imagens e formatação de alta fidelidade...';
           try {
             const arrayBuffer = await file.arrayBuffer();
-            const result = await mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
+            const mammothOptions = {
+              convertImage: mammoth.images.imgElement(function(image) {
+                return image.read("base64").then(function(imageBuffer) {
+                  return {
+                    src: "data:" + image.contentType + ";base64," + imageBuffer
+                  };
+                });
+              }),
+              styleMap: [
+                "p[style-name='Heading 1'] => h1:fresh",
+                "p[style-name='Heading 2'] => h2:fresh",
+                "p[style-name='Heading 3'] => h3:fresh",
+                "p[style-name='Título 1'] => h1:fresh",
+                "p[style-name='Título 2'] => h2:fresh",
+                "p[style-name='Título 3'] => h3:fresh",
+                "p[style-name='Title'] => h1:fresh",
+                "p[style-name='Subtitle'] => h2:fresh",
+                "r[style-name='Strong'] => strong",
+                "r[style-name='Emphasis'] => em",
+                "u => u",
+                "strike => del"
+              ]
+            };
+
+            const result = await mammoth.convertToHtml({ arrayBuffer: arrayBuffer }, mammothOptions);
             const html = result.value;
 
             const turndown = getTurndown();
             let md = turndown ? turndown.turndown(html) : html;
+
+            // Pós-processamento inteligente de títulos e callouts litúrgicos no Markdown
+            md = md.replace(/^(\*{2}|)(MATERIAIS NECESSÁRIOS|REFERÊNCIAS BIBLIOGRÁFICAS|OBJETIVO|ACOLHIDA|DINÂMICA|CONTEÚDO|ORAÇÃO INICIAL|ORAÇÃO FINAL|AVISOS)(\:{0,1})(\*{2}|)$/gmi, '\n## $2\n');
+            md = md.replace(/^(\*{2}|)(\d+[\.\-\)]\s+[^\n]+)(\*{2}|)$/gm, '\n### $2\n');
+            md = md.replace(/^(Ação|Atenção|Dica|Dinâmica)\:\s*(.+)$/gmi, '\n<div class="wiki-callout wiki-callout-action"><div class="wiki-callout-title">🎯 Ação do Catequista</div>\n\n$1: $2\n</div>\n');
+            md = md.replace(/^(CIC[\s\-\:\§]+.+)$/gmi, '\n<div class="wiki-callout wiki-callout-catechism"><div class="wiki-callout-title">⛪ Catecismo da Igreja Católica</div>\n\n$1\n</div>\n');
+
             if (editor) editor.value = md;
 
             // Ativa aba de prévia para mostrar ao usuário imediatamente
@@ -693,7 +724,7 @@
           }
         }
       }
-      // --- CASO 2: PDF (EXTRAÇÃO DE TEXTO VIA PDF.JS & ARQUIVO PARA STORAGE) ---
+      // --- CASO 2: PDF (EXTRAÇÃO ESTRUTURADA EM PARÁGRAFOS & ARQUIVO PARA STORAGE) ---
       else if (ext === 'pdf') {
         this.currentDetectedType = 'document';
         if (iconEl) iconEl.textContent = '📕';
@@ -704,24 +735,43 @@
         if (mdSection) mdSection.classList.remove('hidden');
 
         if (typeof pdfjsLib !== 'undefined') {
-          if (editor) editor.value = '⏳ Extraindo páginas e texto do PDF...';
+          if (editor) editor.value = '⏳ Extraindo páginas e parágrafos do PDF...';
           try {
             const arrayBuffer = await file.arrayBuffer();
             const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
             let extractedMd = `# ${fileName.replace(/\.pdf$/i, '')}\n\n`;
 
-            for (let i = 1; i <= Math.min(pdf.numPages, 30); i++) {
+            for (let i = 1; i <= Math.min(pdf.numPages, 35); i++) {
               const page = await pdf.getPage(i);
               const textContent = await page.getTextContent();
-              const pageStr = textContent.items.map(item => item.str).join(' ');
-              if (pageStr.trim()) {
-                extractedMd += `### Página ${i}\n\n${pageStr}\n\n`;
+              let pageText = '';
+              let lastY = null;
+
+              for (const item of textContent.items) {
+                if (!item.str) continue;
+                const curY = item.transform ? item.transform[5] : null;
+                if (lastY !== null && curY !== null) {
+                  const diff = Math.abs(lastY - curY);
+                  if (diff > 22) {
+                    pageText += '\n\n';
+                  } else if (diff > 9) {
+                    pageText += '\n';
+                  } else {
+                    pageText += ' ';
+                  }
+                }
+                pageText += item.str;
+                lastY = curY;
+              }
+
+              if (pageText.trim()) {
+                extractedMd += `### Página ${i}\n\n${pageText.trim()}\n\n`;
               }
             }
             if (editor) editor.value = extractedMd;
           } catch (err) {
             console.warn('PDF.js texto fallback:', err);
-            if (editor) editor.value = `# ${fileName}\n\nArquivo PDF anexado para download e consulta.`;
+            if (editor) editor.value = `# ${fileName}\n\nArquivo PDF anexado para download e consulta no leitor integrado.`;
           }
         }
       }

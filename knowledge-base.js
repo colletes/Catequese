@@ -1987,10 +1987,44 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
       const wordCount = (docNode.contentMarkdown || '').split(/\s+/).filter(Boolean).length;
       const readMinutes = Math.max(1, Math.ceil(wordCount / 200));
 
+      // Visualizador dedicado de PDF no topo do artigo
+      const isPdfDoc = docNode.isPdf || docNode.extension === 'pdf' || (docNode.mediaUrl && docNode.mediaUrl.toLowerCase().includes('.pdf'));
+      const pdfTopViewerHtml = isPdfDoc ? this.renderPdfViewerHtml(docNode) : '';
+
+      // Visualizador dedicado de Slides se houver apresentação associada
+      const isSlideDeck = docNode.slides && Array.isArray(docNode.slides) && docNode.slides.length > 0;
+      const slideTopViewerHtml = isSlideDeck ? this.renderSlideViewerHtml(docNode) : '';
+
       viewer.innerHTML = `
         <article class="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden animate-in fade-in duration-200">
-          <!-- Topo do Artigo -->
-          <div class="p-6 sm:p-8 border-b border-slate-100 bg-gradient-to-b from-slate-50/60 to-white">
+          
+          <!-- Cabeçalho Oficial Paroquial (visível apenas na impressão - 1ª página) -->
+          <div class="wiki-print-header">
+            <div class="wiki-print-header-top">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 26pt;">⛪</span>
+                <div>
+                  <div style="font-size: 14pt; font-weight: 800; color: #064e3b; text-transform: uppercase; letter-spacing: 0.04em;">
+                    Santuário Imaculado Coração de Maria
+                  </div>
+                  <div style="font-size: 9.5pt; color: #475569; font-weight: 600;">
+                    Pastoral da Catequese • Arquidiocese de São Paulo
+                  </div>
+                </div>
+              </div>
+              <div style="text-align: right; font-size: 9pt; color: #334155; font-weight: 700;">
+                <span style="background: #ecfdf5; color: #065f46; padding: 3px 10px; border-radius: 9999px; border: 1px solid #a7f3d0;">
+                  ${docNode.etapa || 'Crisma Adultos'}
+                </span>
+                <div style="margin-top: 4px; font-size: 8.5pt; color: #64748b;">Ano Catequético 2026</div>
+              </div>
+            </div>
+            <h1 class="wiki-print-title">${docNode.title}</h1>
+            <p class="wiki-print-subtitle">Material oficial de formação catequética • Atualizado em ${updatedStr}</p>
+          </div>
+
+          <!-- Topo do Artigo na Interface Web -->
+          <div class="p-6 sm:p-8 border-b border-slate-100 bg-gradient-to-b from-slate-50/60 to-white no-print">
             <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
               <div class="flex items-center gap-2">
                 <span class="text-lg">📄</span>
@@ -1998,6 +2032,8 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
                 <span class="text-xs text-slate-500 font-medium">
                   • ⏱️ ${readMinutes} min de leitura
                 </span>
+                ${isPdfDoc ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-900 border border-red-200">PDF Integrado</span>' : ''}
+                ${isSlideDeck ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-900 border border-purple-200">Slide Viewer</span>' : ''}
               </div>
 
               <!-- Ações do Documento -->
@@ -2028,11 +2064,11 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
                 </button>
                 <button
                   type="button"
-                  onclick="window.print()"
-                  class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
-                  title="Imprimir documento formatado"
+                  onclick="window.WikiKB.printDocument('${docNode.id}')"
+                  class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  title="Imprimir documento em formato oficial A4 da Paróquia"
                 >
-                  <span>🖨️</span> <span>Imprimir</span>
+                  <span>🖨️</span> <span>Imprimir A4</span>
                 </button>
                 ${isCoordOrAdmin ? `
                   <button
@@ -2066,15 +2102,40 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
             </div>
           </div>
 
-          <!-- Corpo do Markdown Estilizado -->
+          <!-- Área de Visualizadores Especiais (PDF no Topo ou Slides) -->
+          <div class="px-6 sm:px-10 pt-6 no-print">
+            ${pdfTopViewerHtml}
+            ${slideTopViewerHtml}
+          </div>
+
+          <!-- Corpo do Conteúdo / Markdown Estilizado -->
           <div class="p-6 sm:p-10 wiki-prose leading-relaxed">
+            ${isPdfDoc ? '<div class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-4 pb-2 border-b border-slate-200 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Camada de Texto Estruturado & Referências:</div>' : ''}
             ${htmlBody}
+          </div>
+
+          <!-- Rodapé Oficial Paroquial (visível apenas na impressão) -->
+          <div class="wiki-print-footer">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <strong>Santuário Imaculado Coração de Maria</strong> — Pastoral da Catequese
+                <span style="margin: 0 4px;">•</span> catequese@santuarioicm.org.br
+              </div>
+              <div style="font-weight: 700;">
+                Etapa: ${docNode.etapa || 'Crisma Adultos'}
+              </div>
+            </div>
           </div>
 
           <!-- Seção Inferior: Fontes Oficiais e Referências -->
           ${this.buildReferencesSectionHtml(docNode.references, docNode)}
         </article>
       `;
+
+      // Inicializa Slide Viewer interativo se houver
+      if (isSlideDeck) {
+        setTimeout(() => this.initSlideViewer(docNode.slides), 50);
+      }
 
       // Anexa evento de Lightbox em todas as imagens do Markdown
       setTimeout(() => {
@@ -2272,59 +2333,64 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
       }
       // --- VISUALIZADOR DE APRESENTAÇÃO PPTX ---
       else if (isPpt) {
-        const encodedUrl = encodeURIComponent(mediaNode.mediaUrl);
-        const officeEmbed = `https://view.officeapps.live.com/op/embed.aspx?src=${encodedUrl}`;
+        if (mediaNode.slides && mediaNode.slides.length > 0) {
+          playerHtml = this.renderSlideViewerHtml(mediaNode);
+          setTimeout(() => this.initSlideViewer(mediaNode.slides), 50);
+        } else {
+          const encodedUrl = encodeURIComponent(mediaNode.mediaUrl || '');
+          const officeEmbed = `https://view.officeapps.live.com/op/embed.aspx?src=${encodedUrl}`;
 
-        playerHtml = `
-          <div class="space-y-4">
-            <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-100 p-3 rounded-2xl border border-slate-200 text-xs">
-              <div class="flex items-center gap-2">
-                <span class="font-bold text-slate-700">Visualizador ativo:</span>
-                <span id="wiki-ppt-provider-label" class="bg-white px-2.5 py-1 rounded-lg border border-slate-300 font-semibold text-slate-800">
-                  Microsoft Office Online
-                </span>
+          playerHtml = `
+            <div class="space-y-4">
+              <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-100 p-3 rounded-2xl border border-slate-200 text-xs">
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-slate-700">Visualizador ativo:</span>
+                  <span id="wiki-ppt-provider-label" class="bg-white px-2.5 py-1 rounded-lg border border-slate-300 font-semibold text-slate-800">
+                    Microsoft Office Online
+                  </span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onclick="window.WikiKB.togglePptProvider('${mediaNode.mediaUrl}')"
+                    class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-200 text-slate-800 font-bold border border-slate-300 shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
+                    title="Alternar entre Microsoft Office Viewer e Google Docs Viewer"
+                  >
+                    <span>🔄</span> <span>Alternar Visualizador</span>
+                  </button>
+                  <button
+                    type="button"
+                    onclick="window.WikiKB.toggleIframeFullscreen('wiki-ppt-iframe')"
+                    class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
+                    title="Tela cheia"
+                  >
+                    <span>⛶</span> <span>Tela Cheia</span>
+                  </button>
+                </div>
               </div>
 
-              <div class="flex items-center gap-2">
-                <button
-                  type="button"
-                  onclick="window.WikiKB.togglePptProvider('${mediaNode.mediaUrl}')"
-                  class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-200 text-slate-800 font-bold border border-slate-300 shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
-                  title="Alternar entre Microsoft Office Viewer e Google Docs Viewer"
-                >
-                  <span>🔄</span> <span>Alternar Visualizador</span>
-                </button>
-                <button
-                  type="button"
-                  onclick="window.WikiKB.toggleIframeFullscreen('wiki-ppt-iframe')"
-                  class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
-                  title="Tela cheia"
-                >
-                  <span>⛶</span> <span>Tela Cheia</span>
-                </button>
+              <!-- Container do Iframe -->
+              <div id="wiki-ppt-container" class="w-full h-[580px] bg-slate-900 rounded-3xl overflow-hidden border border-slate-200 shadow-xl relative">
+                <iframe
+                  id="wiki-ppt-iframe"
+                  src="${officeEmbed}"
+                  class="w-full h-full border-0"
+                  title="Pré-visualização da Apresentação"
+                  allowfullscreen="true"
+                  loading="lazy"
+                ></iframe>
+              </div>
+
+              <div class="flex items-center justify-between text-xs text-slate-500 px-2">
+                <span>Caso a prévia não carregue na sua rede, utilize o botão de download direto.</span>
+                <a href="${mediaNode.mediaUrl}" download target="_blank" class="font-bold text-amber-700 hover:underline">
+                  Baixar arquivo original (${mediaNode.extension ? mediaNode.extension.toUpperCase() : 'PPTX'} ${fileSizeStr}) ↓
+                </a>
               </div>
             </div>
-
-            <!-- Container do Iframe -->
-            <div id="wiki-ppt-container" class="w-full h-[580px] bg-slate-900 rounded-3xl overflow-hidden border border-slate-200 shadow-xl relative">
-              <iframe
-                id="wiki-ppt-iframe"
-                src="${officeEmbed}"
-                class="w-full h-full border-0"
-                title="Pré-visualização da Apresentação"
-                allowfullscreen="true"
-                loading="lazy"
-              ></iframe>
-            </div>
-
-            <div class="flex items-center justify-between text-xs text-slate-500 px-2">
-              <span>Caso a prévia não carregue na sua rede, utilize o botão de download direto.</span>
-              <a href="${mediaNode.mediaUrl}" download target="_blank" class="font-bold text-amber-700 hover:underline">
-                Baixar arquivo original (${mediaNode.extension ? mediaNode.extension.toUpperCase() : 'PPTX'} ${fileSizeStr}) ↓
-              </a>
-            </div>
-          </div>
-        `;
+          `;
+        }
       }
 
       viewer.innerHTML = `
@@ -2533,6 +2599,337 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
       if (!el) return;
       if (el.requestFullscreen) el.requestFullscreen();
       else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    },
+
+    // ========================================================================
+    // 9. LEITOR DEDICADO DE PDF E VISUALIZADOR DE SLIDES (ALTA FIDELIDADE)
+    // ========================================================================
+    renderPdfViewerHtml: function (docNode) {
+      const pdfUrl = docNode.mediaUrl || docNode.pdfUrl || (docNode.fullLocalPath ? `file://${docNode.fullLocalPath}` : '');
+      const pageCountStr = docNode.pageCount ? ` (${docNode.pageCount} páginas)` : '';
+      const isLocal = !docNode.mediaUrl && docNode.fullLocalPath;
+
+      return `
+        <div class="wiki-pdf-viewer mb-6">
+          <div class="wiki-pdf-toolbar">
+            <div class="flex items-center gap-2">
+              <span class="text-base">📕</span>
+              <span class="font-bold text-xs uppercase tracking-wider text-slate-200">
+                Leitor de PDF Original ${pageCountStr}
+              </span>
+            </div>
+            <div class="flex items-center gap-2 flex-wrap">
+              ${pdfUrl ? `
+                <a
+                  href="${pdfUrl}"
+                  target="_blank"
+                  class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center gap-1.5"
+                  title="Abrir PDF em nova aba para leitura e impressão do navegador"
+                >
+                  <span>↗</span> <span>Abrir Separado</span>
+                </a>
+                <a
+                  href="${pdfUrl}"
+                  download
+                  class="px-3 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-2xs"
+                  title="Baixar arquivo PDF original completo"
+                >
+                  <span>📥</span> <span>Baixar PDF</span>
+                </a>
+              ` : `
+                <span class="text-xs text-slate-400">Arquivo local: ${docNode.fileName || docNode.title}</span>
+              `}
+              <button
+                type="button"
+                onclick="window.WikiKB.toggleIframeFullscreen('wiki-pdf-embed-frame')"
+                class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center gap-1.5"
+                title="Tela Cheia"
+              >
+                <span>⛶</span> <span>Tela Cheia</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="w-full h-[580px] bg-slate-900 overflow-hidden relative">
+            ${pdfUrl ? `
+              <iframe
+                id="wiki-pdf-embed-frame"
+                src="${pdfUrl}#view=FitH&toolbar=1"
+                class="w-full h-full border-0"
+                title="Visualizador do PDF Original"
+                loading="lazy"
+              ></iframe>
+            ` : `
+              <div class="flex flex-col items-center justify-center h-full text-slate-400 text-sm p-8 text-center space-y-3">
+                <span class="text-4xl">📄</span>
+                <p class="font-bold text-slate-200">${docNode.title}.pdf</p>
+                <p class="text-xs max-w-md">O arquivo original está no seu Mac em: <br><code class="text-emerald-400">${docNode.fullLocalPath || docNode.relativePath}</code></p>
+                <p class="text-xs text-slate-400">Você pode ler o texto integral e as referências extraídas logo abaixo.</p>
+              </div>
+            `}
+          </div>
+        </div>
+      `;
+    },
+
+    // --- SLIDE VIEWER INTERATIVO PARA APRESENTAÇÕES ---
+    activeSlidesList: [],
+    activeSlideIndex: 0,
+    slideKeyHandlerAttached: false,
+
+    renderSlideViewerHtml: function (node) {
+      const slides = node.slides || [];
+      if (!slides.length) return '';
+
+      const total = slides.length;
+      const initialSlide = slides[0];
+      const pptUrl = node.mediaUrl || '';
+
+      const thumbsHtml = slides.map((s, idx) => `
+        <div
+          class="wiki-slide-thumb ${idx === 0 ? 'active' : ''}"
+          id="wiki-slide-thumb-${idx}"
+          onclick="window.WikiKB.goToSlide(${idx})"
+          title="Slide ${idx + 1}: ${s.title || ''}"
+        >
+          <div class="font-bold text-[9px] text-slate-300">#${idx + 1}</div>
+          <div class="truncate text-[8.5px] mt-0.5">${s.title || 'Slide'}</div>
+        </div>
+      `).join('');
+
+      return `
+        <div id="wiki-slide-viewer-box" class="wiki-slide-viewer mb-6">
+          <!-- Barra Superior do Slide Viewer -->
+          <div class="bg-slate-950 p-3 sm:p-4 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <span class="text-lg">📽️</span>
+              <span class="font-bold text-xs uppercase tracking-wider text-purple-400 font-heading">
+                Slide Viewer Interativo
+              </span>
+              <span id="wiki-slide-counter-badge" class="bg-slate-800 text-slate-300 text-xs px-2 py-0.5 rounded-full font-mono font-bold">
+                Slide 1 de ${total}
+              </span>
+            </div>
+
+            <!-- Controles de Navegação -->
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                onclick="window.WikiKB.prevSlide()"
+                id="wiki-slide-prev-btn"
+                class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center gap-1 active:scale-95 cursor-pointer"
+                title="Slide Anterior (←)"
+              >
+                <span>◀</span> <span class="hidden sm:inline">Anterior</span>
+              </button>
+
+              <button
+                type="button"
+                onclick="window.WikiKB.nextSlide()"
+                id="wiki-slide-next-btn"
+                class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold transition flex items-center gap-1 shadow-md active:scale-95 cursor-pointer"
+                title="Próximo Slide (→)"
+              >
+                <span class="hidden sm:inline">Próximo</span> <span>▶</span>
+              </button>
+
+              <button
+                type="button"
+                onclick="window.WikiKB.toggleSlideNotes()"
+                id="wiki-slide-notes-toggle-btn"
+                class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition flex items-center gap-1 cursor-pointer"
+                title="Mostrar/Ocultar Notas do Catequista"
+              >
+                <span>💡</span> <span class="hidden sm:inline">Notas</span>
+              </button>
+
+              <button
+                type="button"
+                onclick="window.WikiKB.toggleSlideFullscreen()"
+                class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition flex items-center gap-1 cursor-pointer"
+                title="Modo Apresentação / Tela Cheia (F)"
+              >
+                <span>⛶</span>
+              </button>
+
+              ${pptUrl ? `
+                <a
+                  href="${pptUrl}"
+                  download
+                  class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-bold transition flex items-center gap-1"
+                  title="Baixar arquivo de apresentação original"
+                >
+                  <span>📥</span>
+                </a>
+              ` : ''}
+            </div>
+          </div>
+
+          <!-- Palco do Slide Ativo -->
+          <div id="wiki-slide-stage" class="wiki-slide-stage">
+            <h2 id="wiki-slide-title" class="wiki-slide-card-title">
+              ${initialSlide.title}
+            </h2>
+            <ul id="wiki-slide-bullets" class="wiki-slide-card-bullets">
+              ${(initialSlide.bullets || []).map(b => `<li>${b}</li>`).join('') || '<li class="text-slate-400 italic">Slide visual / capa de apresentação</li>'}
+            </ul>
+          </div>
+
+          <!-- Gaveta de Notas do Catequista (Opcional) -->
+          <div id="wiki-slide-notes-drawer" class="wiki-slide-notes-drawer ${initialSlide.notes ? '' : 'hidden'}">
+            <div class="flex items-center gap-2 text-amber-400 text-xs font-bold uppercase tracking-wider mb-1 font-heading">
+              <span>💡</span> <span>Orientações para o Catequista:</span>
+            </div>
+            <p id="wiki-slide-notes-text" class="text-slate-300 leading-relaxed text-xs sm:text-sm">
+              ${initialSlide.notes || 'Nenhuma orientação específica gravada para este slide.'}
+            </p>
+          </div>
+
+          <!-- Barra de Miniaturas dos Slides -->
+          <div class="wiki-slide-thumbnails">
+            ${thumbsHtml}
+          </div>
+
+          <!-- Dica de Navegação -->
+          <div class="bg-slate-950 px-4 py-1.5 text-[10px] text-slate-500 flex items-center justify-between border-t border-slate-900">
+            <span>Dica: Use as teclas <strong>←</strong> e <strong>→</strong> do teclado para avançar ou voltar slides.</span>
+            <span>Apresentação Pastoral ICM</span>
+          </div>
+        </div>
+      `;
+    },
+
+    initSlideViewer: function (slides) {
+      if (!slides || !slides.length) return;
+      this.activeSlidesList = slides;
+      this.activeSlideIndex = 0;
+      this.updateSlideDisplay();
+
+      // Anexa teclado uma única vez
+      if (!this.slideKeyHandlerAttached) {
+        this.slideKeyHandlerAttached = true;
+        window.addEventListener('keydown', e => {
+          const viewerBox = document.getElementById('wiki-slide-viewer-box');
+          if (!viewerBox) return;
+
+          if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+            e.preventDefault();
+            window.WikiKB.nextSlide();
+          } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+            e.preventDefault();
+            window.WikiKB.prevSlide();
+          } else if (e.key === 'f' && !e.target.matches('input, textarea')) {
+            window.WikiKB.toggleSlideFullscreen();
+          }
+        });
+      }
+    },
+
+    goToSlide: function (idx) {
+      if (!this.activeSlidesList || idx < 0 || idx >= this.activeSlidesList.length) return;
+      this.activeSlideIndex = idx;
+      this.updateSlideDisplay();
+    },
+
+    nextSlide: function () {
+      if (!this.activeSlidesList || this.activeSlideIndex >= this.activeSlidesList.length - 1) return;
+      this.activeSlideIndex++;
+      this.updateSlideDisplay();
+    },
+
+    prevSlide: function () {
+      if (!this.activeSlidesList || this.activeSlideIndex <= 0) return;
+      this.activeSlideIndex--;
+      this.updateSlideDisplay();
+    },
+
+    updateSlideDisplay: function () {
+      const slides = this.activeSlidesList;
+      if (!slides || !slides.length) return;
+      const cur = slides[this.activeSlideIndex];
+      if (!cur) return;
+
+      const titleEl = document.getElementById('wiki-slide-title');
+      const bulletsEl = document.getElementById('wiki-slide-bullets');
+      const badgeEl = document.getElementById('wiki-slide-counter-badge');
+      const notesDrawer = document.getElementById('wiki-slide-notes-drawer');
+      const notesText = document.getElementById('wiki-slide-notes-text');
+      const prevBtn = document.getElementById('wiki-slide-prev-btn');
+      const nextBtn = document.getElementById('wiki-slide-next-btn');
+
+      if (titleEl) titleEl.textContent = cur.title || `Slide ${this.activeSlideIndex + 1}`;
+      if (bulletsEl) {
+        if (cur.bullets && cur.bullets.length) {
+          bulletsEl.innerHTML = cur.bullets.map(b => `<li>${b}</li>`).join('');
+        } else {
+          bulletsEl.innerHTML = '<li class="text-slate-400 italic">Slide visual / tópico de abertura</li>';
+        }
+      }
+
+      if (badgeEl) {
+        badgeEl.textContent = `Slide ${this.activeSlideIndex + 1} de ${slides.length}`;
+      }
+
+      if (notesText && notesDrawer) {
+        if (cur.notes && cur.notes.trim()) {
+          notesText.textContent = cur.notes;
+          notesDrawer.classList.remove('hidden');
+        } else {
+          notesText.textContent = 'Sem anotações complementares para este slide.';
+        }
+      }
+
+      if (prevBtn) prevBtn.disabled = this.activeSlideIndex === 0;
+      if (nextBtn) nextBtn.disabled = this.activeSlideIndex === slides.length - 1;
+
+      // Atualiza miniatura ativa e rola para ela
+      document.querySelectorAll('.wiki-slide-thumb').forEach((thumb, idx) => {
+        if (idx === this.activeSlideIndex) {
+          thumb.classList.add('active');
+          thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        } else {
+          thumb.classList.remove('active');
+        }
+      });
+    },
+
+    toggleSlideNotes: function () {
+      const notesDrawer = document.getElementById('wiki-slide-notes-drawer');
+      if (notesDrawer) {
+        notesDrawer.classList.toggle('hidden');
+      }
+    },
+
+    toggleSlideFullscreen: function () {
+      const box = document.getElementById('wiki-slide-viewer-box');
+      if (!box) return;
+      if (!document.fullscreenElement) {
+        if (box.requestFullscreen) box.requestFullscreen();
+        else if (box.webkitRequestFullscreen) box.webkitRequestFullscreen();
+        box.classList.add('wiki-slide-fullscreen');
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+        box.classList.remove('wiki-slide-fullscreen');
+      }
+    },
+
+    // --- IMPRESSÃO PROFISSIONAL A4 DA PARÓQUIA ---
+    printDocument: function (docId) {
+      document.body.classList.add('printing-wiki-doc');
+
+      const cleanup = () => {
+        document.body.classList.remove('printing-wiki-doc');
+        window.removeEventListener('afterprint', cleanup);
+      };
+
+      window.addEventListener('afterprint', cleanup);
+
+      // Pequeno timeout para permitir aplicação do CSS antes do diálogo de impressão nativo
+      setTimeout(() => {
+        window.print();
+        // Fallback caso afterprint não dispare em navegadores antigos
+        setTimeout(cleanup, 2500);
+      }, 50);
     },
 
     // --- MODAL LIGHTBOX DE IMAGENS ---

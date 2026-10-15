@@ -391,3 +391,362 @@
   color: #ffffff;
   box-shadow: 0 1px 3px rgba(5, 150, 105, 0.4);
 }
+
+/* ==========================================================================
+   CALLOUTS LITÚRGICOS E DIDÁTICOS DE ALTA FIDELIDADE
+   ========================================================================== */
+
+.wiki-callout-bible {
+  background: linear-gradient(135deg, #fdfbf7 0%, #fff9ec 100%);
+  border-left: 4px solid #d4a94f;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+  box-shadow: 0 1px 3px rgba(212, 169, 79, 0.1);
+  color: #451a03;
+}
+
+.wiki-callout-catechism,
+.wiki-callout-cic {
+  background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%);
+  border-left: 4px solid #6366f1;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+  box-shadow: 0 1px 3px rgba(99, 102, 241, 0.1);
+  color: #1e1b4b;
+}
+
+.wiki-callout-action {
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  border-left: 4px solid #10b981;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.1);
+  color: #064e3b;
+}
+
+.wiki-callout-liturgy {
+  background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+  border-left: 4px solid #8b5cf6;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+  box-shadow: 0 1px 3px rgba(139, 92, 246, 0.1);
+  color: #3b0764;
+}
+
+.wiki-callout-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-family: 'Questrial', sans-serif;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+/* ==========================================================================
+   SLIDE VIEWER INTERATIVO PARA APRESENTAÇÕES (PPTX / PPT)
+   ========================================================================== */
+
+.wiki-slide-viewer {
+  background: #0f172a;
+  border-radius: 1.5rem;
+  color: #ffffff;
+  overflow: hidden;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  border: 1px solid #1e293b;
+  margin-bottom: 2rem;
+}
+
+.wiki-slide-stage {
+  aspect-ratio: 16 / 9;
+  min-height: 340px;
+  max-height: 520px;
+  background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+  padding: 2.5rem 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  overflow-y: auto;
+}
+
+.wiki-slide-fullscreen .wiki-slide-stage {
+  max-height: calc(100vh - 120px);
+  aspect-ratio: auto;
+}
+
+.wiki-slide-card-title {
+  font-family: 'Questrial', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #fbbf24;
+  margin-bottom: 1.5rem;
+  line-height: 1.25;
+}
+
+.wiki-slide-card-bullets {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #f1f5f9;
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.wiki-slide-card-bullets li {
+  position: relative;
+  padding-left: 1.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.wiki-slide-card-bullets li::before {
+  content: "✦";
+  position: absolute;
+  left: 0;
+  color: #10b981;
+  font-size: 0.9rem;
+}
+
+.wiki-slide-thumbnails {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding: 0.75rem 1rem;
+  background: #090d16;
+  border-top: 1px solid #1e293b;
+  scrollbar-width: thin;
+}
+
+.wiki-slide-thumb {
+  flex-shrink: 0;
+  width: 90px;
+  height: 54px;
+  background: #1e293b;
+  border: 2px solid #334155;
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.4rem;
+  font-size: 0.65rem;
+  overflow: hidden;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.wiki-slide-thumb:hover {
+  border-color: #64748b;
+  transform: translateY(-2px);
+}
+
+.wiki-slide-thumb.active {
+  border-color: #10b981;
+  background: #064e3b;
+  color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.4);
+}
+
+.wiki-slide-notes-drawer {
+  background: #1e293b;
+  border-top: 1px solid #334155;
+  padding: 1rem 1.5rem;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+}
+
+/* ==========================================================================
+   LEITOR DE PDF DEDICADO DE ALTA FIDELIDADE
+   ========================================================================== */
+
+.wiki-pdf-viewer {
+  background: #f8fafc;
+  border-radius: 1.5rem;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+}
+
+.wiki-pdf-toolbar {
+  background: #0f172a;
+  color: #ffffff;
+  padding: 0.65rem 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.wiki-pdf-canvas-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem;
+  max-height: 700px;
+  overflow-y: auto;
+  background: #475569;
+}
+
+.wiki-pdf-canvas {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  border-radius: 0.5rem;
+  max-width: 100%;
+  height: auto;
+  background: #ffffff;
+}
+
+/* ==========================================================================
+   LAYOUT OFICIAL DE IMPRESSÃO A4 (PARÓQUIA ICM - CATEQUESE)
+   ========================================================================== */
+
+.wiki-print-header,
+.wiki-print-footer {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 15mm 15mm 15mm 15mm;
+  }
+
+  body.printing-wiki-doc {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Oculta tudo exceto a área de conteúdo do documento da Wiki */
+  body.printing-wiki-doc #app-header,
+  body.printing-wiki-doc header,
+  body.printing-wiki-doc nav,
+  body.printing-wiki-doc aside,
+  body.printing-wiki-doc footer,
+  body.printing-wiki-doc .wiki-sidebar-tree,
+  body.printing-wiki-doc .no-print,
+  body.printing-wiki-doc #wiki-image-lightbox,
+  body.printing-wiki-doc .modal,
+  body.printing-wiki-doc #app-nav-tabs,
+  body.printing-wiki-doc [id^="modal-"] {
+    display: none !important;
+  }
+
+  body.printing-wiki-doc .wiki-container {
+    display: block !important;
+    min-height: auto !important;
+  }
+
+  body.printing-wiki-doc #wiki-content-viewer {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  body.printing-wiki-doc article {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Cabeçalho oficial paroquial (apenas na primeira página) */
+  body.printing-wiki-doc .wiki-print-header {
+    display: block !important;
+    border-bottom: 2px solid #064e3b !important;
+    padding-bottom: 12px !important;
+    margin-bottom: 20px !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+
+  body.printing-wiki-doc .wiki-print-header-top {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 8px !important;
+  }
+
+  body.printing-wiki-doc .wiki-print-title {
+    font-size: 18pt !important;
+    font-weight: 800 !important;
+    color: #064e3b !important;
+    line-height: 1.2 !important;
+    margin: 6px 0 2px 0 !important;
+  }
+
+  body.printing-wiki-doc .wiki-print-subtitle {
+    font-size: 9.5pt !important;
+    color: #475569 !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* Rodapé oficial paroquial (repetido no rodapé de todas as páginas) */
+  body.printing-wiki-doc .wiki-print-footer {
+    display: block !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    border-top: 1px solid #cbd5e1 !important;
+    padding-top: 6px !important;
+    font-size: 8pt !important;
+    color: #64748b !important;
+    background: #ffffff !important;
+  }
+
+  /* Evita quebras no meio de parágrafos, tópicos e tabelas */
+  body.printing-wiki-doc .wiki-prose p,
+  body.printing-wiki-doc .wiki-prose li,
+  body.printing-wiki-doc .wiki-prose blockquote,
+  body.printing-wiki-doc .wiki-prose tr,
+  body.printing-wiki-doc .wiki-prose .wiki-callout,
+  body.printing-wiki-doc .wiki-prose .wiki-callout-bible,
+  body.printing-wiki-doc .wiki-prose .wiki-callout-catechism,
+  body.printing-wiki-doc .wiki-prose .wiki-callout-action,
+  body.printing-wiki-doc .wiki-prose .wiki-callout-liturgy,
+  body.printing-wiki-doc .wiki-ref-card {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Evita títulos órfãos no fim da página */
+  body.printing-wiki-doc .wiki-prose h1,
+  body.printing-wiki-doc .wiki-prose h2,
+  body.printing-wiki-doc .wiki-prose h3,
+  body.printing-wiki-doc .wiki-prose h4 {
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+    color: #064e3b !important;
+  }
+
+  /* Preservação fiel de cores */
+  body.printing-wiki-doc * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Ajuste de tabelas para impressão */
+  body.printing-wiki-doc .wiki-prose table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin: 12px 0 !important;
+    font-size: 9pt !important;
+  }
+
+  body.printing-wiki-doc .wiki-prose th {
+    background-color: #0f172a !important;
+    color: #ffffff !important;
+  }
+
+  body.printing-wiki-doc .wiki-prose td {
+    border: 1px solid #e2e8f0 !important;
+    padding: 6px 8px !important;
+  }
+}

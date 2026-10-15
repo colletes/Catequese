@@ -104,97 +104,31 @@ def infer_etapa(folder_name):
 
 
 def extract_docx_markdown(file_path):
-    """Converte arquivo DOCX em Markdown limpo usando python-docx"""
-    if not HAS_DOCX:
-        return None
+    """Converte arquivo DOCX em Markdown rico usando build_crisma_adultos_acervo"""
     try:
-        doc = docx.Document(file_path)
-        md_lines = []
-        for p in doc.paragraphs:
-            text = p.text.strip()
-            if not text:
-                continue
-
-            # Mapeamento de estilos de cabeçalho
-            style_name = (p.style.name or '').lower()
-            if 'heading 1' in style_name or 'título 1' in style_name:
-                md_lines.append(f"\n# {text}\n")
-            elif 'heading 2' in style_name or 'título 2' in style_name:
-                md_lines.append(f"\n## {text}\n")
-            elif 'heading 3' in style_name or 'título 3' in style_name:
-                md_lines.append(f"\n### {text}\n")
-            elif 'list' in style_name or 'bullet' in style_name:
-                md_lines.append(f"- {text}")
-            else:
-                # Trata formatação interna (negrito, itálico)
-                runs_text = []
-                for run in p.runs:
-                    r_text = run.text
-                    if not r_text:
-                        continue
-                    if run.bold and run.italic:
-                        r_text = f"***{r_text}***"
-                    elif run.bold:
-                        r_text = f"**{r_text}**"
-                    elif run.italic:
-                        r_text = f"*{r_text}*"
-                    runs_text.append(r_text)
-                formatted_p = "".join(runs_text).strip()
-                if formatted_p:
-                    md_lines.append(formatted_p)
-
-        # Trata tabelas simples do DOCX
-        for table in doc.tables:
-            md_lines.append("\n")
-            for row_idx, row in enumerate(table.rows):
-                row_cells = [c.text.strip().replace('\n', ' ') for c in row.cells]
-                md_lines.append("| " + " | ".join(row_cells) + " |")
-                if row_idx == 0:
-                    md_lines.append("| " + " | ".join(["---"] * len(row_cells)) + " |")
-            md_lines.append("\n")
-
-        return "\n\n".join(md_lines)
+        from build_crisma_adultos_acervo import convert_docx_to_markdown
+        content, _ = convert_docx_to_markdown(file_path)
+        return content
     except Exception as e:
         return f"# Erro na conversão do DOCX\n\nNão foi possível ler o arquivo: {str(e)}"
 
 
-def extract_pdf_text(file_path, max_pages=25):
-    """Extrai texto estruturado de PDF usando PyMuPDF (fitz)"""
-    if not HAS_FITZ:
-        return None
+def extract_pdf_text(file_path, max_pages=35):
+    """Extrai texto estruturado em blocos de PDF usando build_crisma_adultos_acervo"""
     try:
-        doc = fitz.open(file_path)
-        pages_text = []
-        for page_num in range(min(len(doc), max_pages)):
-            page = doc[page_num]
-            text = page.get_text()
-            if text.strip():
-                pages_text.append(f"### Página {page_num + 1}\n\n{text.strip()}")
-        doc.close()
-        return "\n\n".join(pages_text)
+        from build_crisma_adultos_acervo import convert_pdf_to_markdown
+        content, _ = convert_pdf_to_markdown(file_path, max_pages=max_pages)
+        return content
     except Exception as e:
         return f"# Erro na extração do PDF\n\n{str(e)}"
 
 
 def extract_pptx_markdown(file_path):
-    """Extrai slides de apresentação PPTX em seções Markdown"""
-    if not HAS_PPTX:
-        return None
+    """Extrai slides estruturados de apresentação PPTX usando build_crisma_adultos_acervo"""
     try:
-        from pptx import Presentation
-        prs = Presentation(file_path)
-        slides_md = []
-        for idx, slide in enumerate(prs.slides, 1):
-            slide_texts = []
-            for shape in slide.shapes:
-                if shape.has_text_frame:
-                    for paragraph in shape.text_frame.paragraphs:
-                        t = paragraph.text.strip()
-                        if t:
-                            slide_texts.append(t)
-            if slide_texts:
-                slides_md.append(f"### Slide {idx}\n\n" + "\n\n".join(slide_texts))
-        return "\n\n---\n\n".join(slides_md) if slides_md else "*(Apresentação sem texto legível)*"
+        from build_crisma_adultos_acervo import convert_pptx_to_slides
+        content, _ = convert_pptx_to_slides(file_path)
+        return content
     except Exception as e:
         return f"# Erro na conversão do PPTX\n\nNão foi possível ler a apresentação: {str(e)}"
 
