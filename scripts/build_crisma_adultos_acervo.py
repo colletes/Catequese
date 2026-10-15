@@ -574,6 +574,18 @@ def build_crisma_adultos_acervo(source_path=DEFAULT_SOURCE_PATH):
                 node["pageCount"] = page_count
                 node["pdfLocalPath"] = full_path
 
+            if ext in ('pptx', 'ppt'):
+                node["isPresentation"] = True
+                node["isPdf"] = True
+                pdf_rel = f"acervo/apresentacoes/{base_name}.pdf"
+                pdf_full = os.path.join(os.path.dirname(__file__), "..", pdf_rel)
+                if os.path.exists(pdf_full):
+                    node["pdfUrl"] = pdf_rel
+                media_rel = f"acervo/apresentacoes/{f}"
+                media_full = os.path.join(os.path.dirname(__file__), "..", media_rel)
+                if os.path.exists(media_full):
+                    node["mediaUrl"] = media_rel
+
             if slides_data:
                 node["slides"] = slides_data
                 node["slideCount"] = len(slides_data)

@@ -2331,66 +2331,111 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
           </div>
         `;
       }
-      // --- VISUALIZADOR DE APRESENTAÇÃO PPTX ---
+      // --- VISUALIZADOR DE APRESENTAÇÃO DE SLIDES NA ÍNTEGRA ---
       else if (isPpt) {
-        if (mediaNode.slides && mediaNode.slides.length > 0) {
-          playerHtml = this.renderSlideViewerHtml(mediaNode);
-          setTimeout(() => this.initSlideViewer(mediaNode.slides), 50);
-        } else {
-          const encodedUrl = encodeURIComponent(mediaNode.mediaUrl || '');
-          const officeEmbed = `https://view.officeapps.live.com/op/embed.aspx?src=${encodedUrl}`;
+        const pptPdfUrl = mediaNode.pdfUrl || (
+          (mediaNode.fileName || mediaNode.title)
+            ? `acervo/apresentacoes/${encodeURIComponent(mediaNode.fileName ? mediaNode.fileName.replace(/\.(pptx|ppt)$/i, '.pdf') : mediaNode.title + '.pdf')}`
+            : ''
+        );
+        const pptDownloadUrl = mediaNode.mediaUrl || (
+          (mediaNode.fileName || mediaNode.title)
+            ? `acervo/apresentacoes/${encodeURIComponent(mediaNode.fileName || (mediaNode.title + '.' + (mediaNode.extension || 'pptx')))}`
+            : ''
+        );
+        const hasSlidesOutline = mediaNode.slides && mediaNode.slides.length > 0;
 
-          playerHtml = `
-            <div class="space-y-4">
-              <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-100 p-3 rounded-2xl border border-slate-200 text-xs">
-                <div class="flex items-center gap-2">
-                  <span class="font-bold text-slate-700">Visualizador ativo:</span>
-                  <span id="wiki-ppt-provider-label" class="bg-white px-2.5 py-1 rounded-lg border border-slate-300 font-semibold text-slate-800">
-                    Microsoft Office Online
+        playerHtml = `
+          <div class="space-y-4">
+            <!-- Barra Superior da Apresentação na Íntegra -->
+            <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-900 text-white p-3.5 rounded-2xl border border-slate-800 shadow-md">
+              <div class="flex items-center gap-2">
+                <span class="text-xl">📽️</span>
+                <div>
+                  <span class="font-bold text-xs uppercase tracking-wider text-purple-400 font-heading">
+                    Apresentação de Slides na Íntegra
                   </span>
-                </div>
-
-                <div class="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onclick="window.WikiKB.togglePptProvider('${mediaNode.mediaUrl}')"
-                    class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-200 text-slate-800 font-bold border border-slate-300 shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
-                    title="Alternar entre Microsoft Office Viewer e Google Docs Viewer"
-                  >
-                    <span>🔄</span> <span>Alternar Visualizador</span>
-                  </button>
-                  <button
-                    type="button"
-                    onclick="window.WikiKB.toggleIframeFullscreen('wiki-ppt-iframe')"
-                    class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
-                    title="Tela cheia"
-                  >
-                    <span>⛶</span> <span>Tela Cheia</span>
-                  </button>
+                  <p class="text-[11px] text-slate-400">Exibição vetorial completa com todos os slides, gráficos, imagens sacras e diagramas originais</p>
                 </div>
               </div>
 
-              <!-- Container do Iframe -->
-              <div id="wiki-ppt-container" class="w-full h-[580px] bg-slate-900 rounded-3xl overflow-hidden border border-slate-200 shadow-xl relative">
-                <iframe
-                  id="wiki-ppt-iframe"
-                  src="${officeEmbed}"
-                  class="w-full h-full border-0"
-                  title="Pré-visualização da Apresentação"
-                  allowfullscreen="true"
-                  loading="lazy"
-                ></iframe>
-              </div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onclick="window.WikiKB.toggleIframeFullscreen('wiki-ppt-embed-frame')"
+                  class="px-3.5 py-1.5 rounded-xl bg-purple-700 hover:bg-purple-600 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer active:scale-95"
+                  title="Modo Apresentação em Tela Cheia (F)"
+                >
+                  <span>⛶</span> <span>Tela Cheia</span>
+                </button>
 
-              <div class="flex items-center justify-between text-xs text-slate-500 px-2">
-                <span>Caso a prévia não carregue na sua rede, utilize o botão de download direto.</span>
-                <a href="${mediaNode.mediaUrl}" download target="_blank" class="font-bold text-amber-700 hover:underline">
-                  Baixar arquivo original (${mediaNode.extension ? mediaNode.extension.toUpperCase() : 'PPTX'} ${fileSizeStr}) ↓
-                </a>
+                ${hasSlidesOutline ? `
+                  <button
+                    type="button"
+                    onclick="document.getElementById('wiki-ppt-outline-container')?.classList.toggle('hidden')"
+                    class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+                    title="Ver tópicos e notas pedagógicas para o catequista"
+                  >
+                    <span>💡</span> <span>Roteiro / Notas</span>
+                  </button>
+                ` : ''}
+
+                ${pptDownloadUrl ? `
+                  <a
+                    href="${pptDownloadUrl}"
+                    download
+                    class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer active:scale-95"
+                    title="Baixar arquivo original editável (.${mediaNode.extension ? mediaNode.extension.toUpperCase() : 'PPTX'})"
+                  >
+                    <span>📥</span> <span>Baixar .${mediaNode.extension ? mediaNode.extension.toUpperCase() : 'PPTX'}</span>
+                  </a>
+                ` : ''}
               </div>
             </div>
-          `;
-        }
+
+            <!-- Palco de Visualização da Apresentação (Na Íntegra) -->
+            <div class="w-full h-[620px] bg-slate-950 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl relative">
+              <iframe
+                id="wiki-ppt-embed-frame"
+                src="${pptPdfUrl}#view=FitH&toolbar=1"
+                class="w-full h-full border-0"
+                title="Apresentação de Slides na Íntegra"
+                loading="lazy"
+                allowfullscreen="true"
+              ></iframe>
+            </div>
+
+            <!-- Roteiro e Notas Pedagógicas (Gaveta Opcional) -->
+            ${hasSlidesOutline ? `
+              <div id="wiki-ppt-outline-container" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-5 text-white space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                  <h4 class="font-bold text-xs uppercase tracking-wider text-purple-400 font-heading">
+                    💡 Roteiro Pedagógico & Notas do Catequista (${mediaNode.slides.length} slides)
+                  </h4>
+                  <button onclick="document.getElementById('wiki-ppt-outline-container').classList.add('hidden')" class="text-xs text-slate-400 hover:text-white">✕ Fechar</button>
+                </div>
+                <div class="space-y-3 max-h-96 overflow-y-auto pr-2 text-xs">
+                  ${mediaNode.slides.map(s => `
+                    <div class="p-3 bg-slate-950/80 rounded-xl border border-slate-800">
+                      <strong class="text-amber-400 text-xs block mb-1">Slide ${s.slideNumber}: ${s.title}</strong>
+                      ${s.bullets && s.bullets.length ? `<ul class="list-disc list-inside text-slate-300 space-y-0.5">${s.bullets.map(b => `<li>${b}</li>`).join('')}</ul>` : ''}
+                      ${s.notes ? `<p class="mt-2 text-amber-200/90 bg-amber-950/30 p-2 rounded-lg border border-amber-900/30"><strong>Nota:</strong> ${s.notes}</p>` : ''}
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+
+            <div class="flex flex-wrap items-center justify-between text-xs text-slate-500 px-2 gap-2">
+              <span>💡 Dica: Role ou use as setas do leitor acima para navegar pelos slides na íntegra.</span>
+              ${pptPdfUrl ? `
+                <a href="${pptPdfUrl}" target="_blank" class="font-bold text-purple-700 hover:underline">
+                  Abrir apresentação em tela cheia / nova aba ↗
+                </a>
+              ` : ''}
+            </div>
+          </div>
+        `;
       }
 
       viewer.innerHTML = `
