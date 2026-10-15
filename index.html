@@ -86,13 +86,13 @@
     .col-freeze-idx {
       position: sticky;
       left: 0;
-      width: 44px;
-      min-width: 44px;
-      max-width: 44px;
+      width: 54px;
+      min-width: 54px;
+      max-width: 54px;
     }
     .col-freeze-name {
       position: sticky;
-      left: 44px;
+      left: 54px;
       min-width: 210px;
       border-right: 2px solid #e2e8f0;
       box-shadow: 3px 0 6px -2px rgba(0, 0, 0, 0.08);
@@ -206,7 +206,8 @@
       body.printing-chamada {
         page: landscape-print;
       }
-      body.print-mode-portrait {
+      body.print-mode-portrait,
+      body.printing-fichas {
         page: portrait-print;
       }
 
@@ -252,9 +253,43 @@
       }
 
       /* ======================================================== */
+      /* 1.1 IMPRESSÃO DE FICHAS CADASTRAIS (CATEQUISTAS/ALUNOS)   */
+      /* ======================================================== */
+      body.printing-fichas > *:not(#printable-fichas-area) {
+        display: none !important;
+      }
+      body.printing-fichas #printable-fichas-area {
+        display: block !important;
+        position: static !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        visibility: visible !important;
+      }
+      body.printing-fichas #printable-fichas-area * {
+        visibility: visible !important;
+      }
+      body.printing-fichas .ficha-print-sheet {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 0 10mm 0 !important;
+        box-sizing: border-box !important;
+        page-break-after: always !important;
+        break-after: page !important;
+      }
+      body.printing-fichas .ficha-print-sheet:last-child {
+        page-break-after: auto !important;
+        break-after: auto !important;
+        padding-bottom: 0 !important;
+      }
+
+      /* ======================================================== */
       /* 2. IMPRESSÃO DO ORGANOGRAMA (ÁRVORE GRÁFICA)              */
       /* ======================================================== */
       body.printing-organograma-tree #printable-chamada-area,
+      body.printing-organograma-tree #printable-fichas-area,
       body.printing-organograma-tree #auth-gate,
       body.printing-organograma-tree header,
       body.printing-organograma-tree nav,
@@ -338,6 +373,7 @@
       /* 3. IMPRESSÃO DO ORGANOGRAMA (PLANILHA / TABELA DE TURMAS)  */
       /* ======================================================== */
       body.printing-organograma-table #printable-chamada-area,
+      body.printing-organograma-table #printable-fichas-area,
       body.printing-organograma-table #auth-gate,
       body.printing-organograma-table header,
       body.printing-organograma-table nav,
@@ -383,27 +419,28 @@
       /* ======================================================== */
       /* 4. IMPRESSÃO DAS PÁGINAS DO PORTAL (PLANTAS & GUIAS)      */
       /* ======================================================== */
-      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table) #printable-chamada-area,
-      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table) #auth-gate,
-      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table) header,
-      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table) nav,
-      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table) footer,
-      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table) [id^="modal-"],
-      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table) .fixed,
-      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table) .no-print {
+      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table):not(.printing-fichas) #printable-chamada-area,
+      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table):not(.printing-fichas) #printable-fichas-area,
+      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table):not(.printing-fichas) #auth-gate,
+      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table):not(.printing-fichas) header,
+      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table):not(.printing-fichas) nav,
+      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table):not(.printing-fichas) footer,
+      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table):not(.printing-fichas) [id^="modal-"],
+      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table):not(.printing-fichas) .fixed,
+      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table):not(.printing-fichas) .no-print {
         display: none !important;
       }
-      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table) main {
+      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table):not(.printing-fichas) main {
         display: block !important;
         width: 100% !important;
         max-width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
       }
-      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table) .tab-view.hidden {
+      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table):not(.printing-fichas) .tab-view.hidden {
         display: none !important;
       }
-      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table) .tab-view:not(.hidden) {
+      body:not(.printing-chamada):not(.printing-organograma-tree):not(.printing-organograma-table):not(.printing-fichas) .tab-view:not(.hidden) {
         display: block !important;
         width: 100% !important;
         margin: 0 !important;
@@ -2209,6 +2246,10 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 <span>Exportar Planilha (CSV)</span>
               </button>
+              <button id="btn-print-cats" onclick="imprimirFichasCatequistasSelecionados()" class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-[#d4a94f] border border-[#d4a94f]/50 font-bold px-4 py-2 rounded-xl text-xs shadow-md transition transform active:scale-95 font-heading" title="Imprimir fichas oficiais em PDF (com Brasão do Santuário)">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                <span>Imprimir Fichas (<span id="count-selected-cats">0</span>)</span>
+              </button>
             </div>
           </div>
 
@@ -2268,6 +2309,9 @@
             <table class="w-full text-left text-xs sm:text-sm border-collapse">
               <thead>
                 <tr class="bg-slate-900 text-white border-b-2 border-[#d4a94f] select-none text-xs sm:text-sm">
+                  <th class="py-3 px-3 text-center w-10">
+                    <input type="checkbox" id="chk-cat-select-all" onchange="toggleSelectAllCatequistas(this.checked)" class="rounded text-amber-500 focus:ring-amber-400 w-4 h-4 cursor-pointer" title="Selecionar todos os catequistas exibidos" />
+                  </th>
                   <th id="th-cat-nome" onclick="setCatequistasSort('nome')" class="py-3 px-4 font-heading cursor-pointer hover:bg-slate-800 transition text-[#d4a94f]" title="Ordenar por Nome Completo">
                     <span>Catequista (Nome Completo)</span><span class="sort-icon text-[10px] text-amber-300 font-bold"> ▲</span>
                   </th>
@@ -2746,6 +2790,14 @@
             <span id="badge-chamada-alerta-subtab" class="hidden bg-rose-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse">0 em alerta</span>
           </button>
         </div>
+        <div id="cadastro-subtab-quick-actions" class="flex items-center gap-2 flex-wrap">
+          <button type="button" id="btn-print-selected-alunos" onclick="imprimirFichasAlunosSelecionados()" class="inline-flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-[#d4a94f] border border-[#d4a94f]/50 px-3.5 py-1.5 rounded-xl text-xs font-bold transition shadow-xs" title="Imprimir fichas em PDF dos catequizandos selecionados">
+            <span>🖨️</span> <span>Imprimir Fichas (<span id="count-selected-alunos">0</span>)</span>
+          </button>
+          <button type="button" onclick="imprimirTodasFichasTurmaAtual()" class="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 px-3 py-1.5 rounded-xl text-xs font-bold transition" title="Imprimir fichas de todos os catequizandos matriculados nesta turma">
+            <span>📑</span> <span>Todas as Fichas da Turma</span>
+          </button>
+        </div>
         <div id="chamada-subtab-quick-actions" class="hidden flex items-center gap-2">
           <button type="button" onclick="openPrintChamadaModal()" class="inline-flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-[#d4a94f] border border-[#d4a94f]/50 px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-xs">
             <span>🖨️</span> <span>Imprimir / Salvar PDF</span>
@@ -2761,8 +2813,11 @@
             <table class="w-full text-left text-xs sm:text-sm border-collapse">
               <thead class="sticky top-0 z-20 bg-slate-900 text-white select-none">
                 <tr class="border-b-2 border-indigo-500 bg-slate-900 text-xs">
-                  <th id="th-aluno-idx" onclick="setAlunosSort('idx')" class="py-3 px-3 font-heading text-center col-freeze-idx cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Posição">
-                    <span>#</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
+                  <th id="th-aluno-idx" class="py-3 px-2 font-heading text-center col-freeze-idx select-none">
+                    <div class="flex items-center justify-center gap-1">
+                      <input type="checkbox" id="chk-aluno-select-all" onchange="toggleSelectAllAlunos(this.checked)" class="rounded text-indigo-500 focus:ring-indigo-400 w-3.5 h-3.5 cursor-pointer" title="Selecionar todos os catequizandos exibidos" />
+                      <span onclick="setAlunosSort('idx')" class="cursor-pointer hover:underline" title="Ordenar por Posição">#</span>
+                    </div>
                   </th>
                   <th id="th-aluno-nome" onclick="setAlunosSort('nome')" class="py-3 px-3.5 font-heading col-freeze-name cursor-pointer hover:bg-slate-800 transition text-[#d4a94f]" title="Ordenar por Nome (Padrão Alfabético)">
                     <span>Nome Completo</span><span class="sort-icon text-[10px] text-amber-300"> ▲</span>
@@ -3107,13 +3162,18 @@
           </div>
 
           <!-- Footer Buttons -->
-          <div class="pt-3 border-t border-slate-200 flex items-center justify-end gap-2">
-            <button type="button" onclick="closeAlunoModal()" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-100 transition">
-              Cancelar
+          <div class="pt-3 border-t border-slate-200 flex items-center justify-between gap-2">
+            <button id="btn-print-aluno-modal" type="button" onclick="imprimirFichaAlunoModal()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-[#d4a94f] border border-[#d4a94f]/50 font-bold rounded-xl text-xs sm:text-sm shadow-xs transition inline-flex items-center gap-1.5" title="Imprimir Ficha Cadastral em PDF">
+              <span>🖨️</span> <span>Imprimir Ficha</span>
             </button>
-            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl text-xs sm:text-sm font-bold shadow transition">
-              Salvar Catequizando
-            </button>
+            <div class="flex items-center gap-2 ml-auto">
+              <button type="button" onclick="closeAlunoModal()" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-100 transition">
+                Cancelar
+              </button>
+              <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl text-xs sm:text-sm font-bold shadow transition">
+                Salvar Catequizando
+              </button>
+            </div>
           </div>
 
         </form>
@@ -3482,7 +3542,10 @@
               <p id="modal-cat-etapa-sub" class="text-xs text-slate-300">
                 Crisma Jovem • Santuário Imaculado Coração de Maria
               </p>
-              <div class="pt-1">
+              <div class="pt-1 flex items-center gap-2 flex-wrap">
+                <button type="button" onclick="imprimirFichaCatequistaAtual()" class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-[#d4a94f] border border-[#d4a94f]/50 font-bold px-3 py-1.5 rounded-xl text-xs transition shadow-xs" title="Imprimir Ficha Cadastral em PDF">
+                  <span>🖨️</span> <span>Imprimir Ficha</span>
+                </button>
                 <button type="button" id="btn-cat-start-edit" onclick="toggleCatequistaEditMode(true)" class="hidden inline-flex items-center gap-1.5 bg-[#d4a94f] hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs transition shadow-xs">
                   <span>✏️</span> <span>Editar Dados</span>
                 </button>
@@ -3661,6 +3724,9 @@
             <!-- Ações em Modo Visualização -->
             <button id="modal-cat-footer-close" type="button" onclick="closeCatequistaModal()" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs transition">
               Fechar Ficha
+            </button>
+            <button type="button" onclick="imprimirFichaCatequistaAtual()" class="px-4 py-2 bg-[#d4a94f] hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs transition inline-flex items-center gap-1.5 shadow-xs" title="Imprimir Ficha Cadastral em PDF">
+              <span>🖨️</span> <span>Imprimir Ficha</span>
             </button>
             <button id="btn-cat-footer-edit" type="button" onclick="toggleCatequistaEditMode(true)" class="hidden px-4 py-2 bg-gradient-to-r from-amber-500 to-[#d4a94f] hover:from-amber-600 hover:to-[#c39943] text-slate-950 font-bold rounded-xl text-xs shadow-xs transition inline-flex items-center gap-1.5" title="Editar dados cadastrais">
               <span>✏️</span> <span>Editar Cadastro</span>
@@ -10552,12 +10618,13 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       if (filtered.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="7" class="py-8 text-center text-slate-400">
+            <td colspan="8" class="py-8 text-center text-slate-400">
               Nenhum catequista encontrado com os filtros selecionados.
               ${canCadastrarCatequista() ? '<div class="mt-2"><button onclick="openCadastrarCatequistaModal()" class="text-xs font-bold text-amber-600 hover:underline">➕ Deseja cadastrar um novo catequista?</button></div>' : ''}
             </td>
           </tr>
         `;
+        if (typeof updateCatequistasSelectionUI === 'function') updateCatequistasSelectionUI();
         return;
       }
 
@@ -10612,8 +10679,13 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             }).join(' ')
           : `<span class="text-slate-600">${c.funcaoPrincipal || 'Catequista'}</span>`;
 
+        const isChecked = typeof selectedCatequistasIds !== 'undefined' && selectedCatequistasIds.has(c.id);
+
         return `
-          <tr class="hover:bg-amber-50/40 transition group">
+          <tr class="hover:bg-amber-50/40 transition group ${isChecked ? 'bg-amber-50/70' : ''}">
+            <td class="py-2.5 px-3 text-center" onclick="event.stopPropagation()">
+              <input type="checkbox" class="chk-cat-row rounded text-amber-500 focus:ring-amber-400 w-4 h-4 cursor-pointer" value="${c.id}" ${isChecked ? 'checked' : ''} onchange="toggleSelectCatequista('${c.id}', this.checked)" />
+            </td>
             <td class="py-2.5 px-4">
               <div class="flex items-center gap-3">
                 ${photoHtml}
@@ -10639,6 +10711,9 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
                 <button onclick="openCatequistaModal('${c.id}')" class="p-1.5 bg-slate-100 hover:bg-[#d4a94f] hover:text-slate-950 text-slate-700 rounded-lg transition text-xs font-bold" title="Ver ficha completa">
                   👁️ Ficha
                 </button>
+                <button onclick="imprimirFichaCatequistaIndividual('${c.id}')" class="p-1.5 bg-slate-100 hover:bg-[#d4a94f] hover:text-slate-950 text-slate-700 rounded-lg transition text-xs font-bold" title="Imprimir ficha cadastral oficial em PDF">
+                  🖨️
+                </button>
                 ${canEdit ? `
                 <button onclick="openCatequistaModal('${c.id}', true)" class="p-1.5 bg-amber-500/20 hover:bg-[#d4a94f] hover:text-slate-950 text-amber-900 rounded-lg transition text-xs font-bold border border-amber-500/40" title="Editar dados cadastrais de ${c.nomeCompleto}">
                   ✏️ Editar
@@ -10651,6 +10726,10 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           </tr>
         `;
       }).join('');
+
+      if (typeof updateCatequistasSelectionUI === 'function') {
+        updateCatequistasSelectionUI();
+      }
     }
 
     function exportarCatequistasCSV() {
@@ -21120,6 +21199,9 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
     function handleTurmaChange(turma) {
       currentAlunosTurma = turma;
+      if (typeof selectedAlunosIds !== 'undefined') {
+        selectedAlunosIds.clear();
+      }
       updateTurmaInfoBanner();
       renderAlunosTable();
       if (typeof syncTurmaAlunosFromFirestore === 'function') {
@@ -21691,9 +21773,16 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         );
         const isPendenteSecretaria = a.statusAprovacao === 'pendente_coordenacao';
 
+        const isChecked = typeof selectedAlunosIds !== 'undefined' && selectedAlunosIds.has(a.id);
+
         return `
-          <tr class="hover:bg-slate-50/80 transition group ${isPendenteSecretaria ? 'bg-amber-50/40' : ''}">
-            <td class="py-2.5 px-3 text-center font-bold text-slate-400 text-xs col-freeze-idx">${idx + 1}</td>
+          <tr class="hover:bg-slate-50/80 transition group ${isPendenteSecretaria ? 'bg-amber-50/40' : ''} ${isChecked ? 'bg-indigo-50/70' : ''}">
+            <td class="py-2.5 px-2 text-center font-bold text-slate-500 text-xs col-freeze-idx" onclick="event.stopPropagation()">
+              <div class="flex items-center justify-center gap-1.5">
+                <input type="checkbox" class="chk-aluno-row rounded text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5 cursor-pointer" value="${a.id}" ${isChecked ? 'checked' : ''} onchange="toggleSelectAluno('${a.id}', this.checked)" />
+                <span class="text-slate-400 font-mono text-[11px]">${idx + 1}</span>
+              </div>
+            </td>
             <td class="py-2.5 px-3.5 col-freeze-name">
               <div class="font-bold text-slate-900 leading-snug flex items-center gap-1.5 flex-wrap">
                 <span>${a.nome}</span>
@@ -21721,6 +21810,9 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
                 <button onclick="aprovarInscricaoAluno('${a.id}')" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10.5px] font-black transition flex items-center gap-1 shadow-2xs" title="Homologar e Aprovar Inscrição">
                   <span>✓</span> <span>Aprovar</span>
                 </button>` : ''}
+                <button onclick="imprimirFichaAlunoIndividual('${a.id}')" class="p-1 rounded text-slate-500 hover:text-[#b88d36] hover:bg-amber-50 transition" title="Imprimir Ficha Cadastral em PDF">
+                  🖨️
+                </button>
                 <button onclick="editAluno('${a.id}')" class="p-1 rounded text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition" title="Editar Catequizando">
                   ✏️
                 </button>
@@ -21733,6 +21825,10 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           </tr>
         `;
       }).join('');
+
+      if (typeof updateAlunosSelectionUI === 'function') {
+        updateAlunosSelectionUI();
+      }
     }
 
     function openAlunoModal(alunoData = null) {
@@ -21740,10 +21836,12 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       const title = document.getElementById('modal-aluno-title');
       const sub = document.getElementById('modal-aluno-subtitle');
       const form = document.getElementById('form-aluno');
+      const btnPrint = document.getElementById('btn-print-aluno-modal');
 
       if (!modal || !form) return;
 
       if (alunoData) {
+        if (btnPrint) btnPrint.classList.remove('hidden');
         if (title) title.textContent = 'Editar Catequizando';
         if (sub) sub.textContent = `${currentAlunosTurma} • ${currentAlunosEtapa}`;
         document.getElementById('aluno-id').value = alunoData.id || '';
@@ -21762,6 +21860,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         if (document.getElementById('aluno-resp-nome')) document.getElementById('aluno-resp-nome').value = alunoData.nomeResponsavel || '';
         if (document.getElementById('aluno-resp-cpf')) document.getElementById('aluno-resp-cpf').value = alunoData.cpfResponsavel || '';
       } else {
+        if (btnPrint) btnPrint.classList.add('hidden');
         if (title) title.textContent = 'Cadastrar Novo Catequizando';
         if (sub) sub.textContent = `${currentAlunosTurma} • ${currentAlunosEtapa}`;
         form.reset();
@@ -22331,6 +22430,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       const viewCadastro = document.getElementById('subview-alunos-cadastro');
       const viewChamada = document.getElementById('subview-alunos-chamada');
       const quickActions = document.getElementById('chamada-subtab-quick-actions');
+      const cadQuickActions = document.getElementById('cadastro-subtab-quick-actions');
 
       if (tab === 'chamada') {
         if (btnCadastro) {
@@ -22344,6 +22444,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         if (viewCadastro) viewCadastro.classList.add('hidden');
         if (viewChamada) viewChamada.classList.remove('hidden');
         if (quickActions) quickActions.classList.remove('hidden');
+        if (cadQuickActions) cadQuickActions.classList.add('hidden');
         renderChamadaSection();
         // Puxa da nuvem ao abrir a aba: o sync inicial pode rodar antes do login concluir e falhar sem retry.
         syncTurmaChamadasFromFirestore(currentAlunosEtapa, currentAlunosTurma);
@@ -22359,6 +22460,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         if (viewCadastro) viewCadastro.classList.remove('hidden');
         if (viewChamada) viewChamada.classList.add('hidden');
         if (quickActions) quickActions.classList.add('hidden');
+        if (cadQuickActions) cadQuickActions.classList.remove('hidden');
         renderAlunosTable();
       }
     }
@@ -23651,17 +23753,741 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
     // Vincula evento global afterprint para restaurar o DOM
     window.addEventListener('afterprint', () => {
-      document.body.classList.remove('printing-chamada', 'printing-organograma-tree', 'printing-organograma-table');
+      document.body.classList.remove('printing-chamada', 'printing-organograma-tree', 'printing-organograma-table', 'printing-fichas');
       const printableArea = document.getElementById('printable-chamada-area');
       if (printableArea) {
         printableArea.classList.add('hidden');
         printableArea.innerHTML = '';
+      }
+      const printableFichasArea = document.getElementById('printable-fichas-area');
+      if (printableFichasArea) {
+        printableFichasArea.classList.add('hidden');
+        printableFichasArea.innerHTML = '';
       }
     });
 
     // Função pública chamada pelos botões de tela
     function printTurmaChamada() {
       openPrintChamadaModal();
+    }
+
+    // ==============================================================
+    // SISTEMA DE IMPRESSÃO DE FICHAS CADASTRAIS (CATEQUISTAS & CATEQUIZANDOS)
+    // Em conformidade com a identidade visual do Santuário ICM
+    // ==============================================================
+
+    let selectedCatequistasIds = new Set();
+    let selectedAlunosIds = new Set();
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function calculateAgeFromDob(dob) {
+      if (!dob || typeof dob !== 'string' || dob.toLowerCase().includes('não') || dob.toLowerCase().includes('nao')) return null;
+      const parts = dob.trim().split(/[-/]/);
+      let birthDate = null;
+      if (parts.length === 3) {
+        if (parts[0].length === 4) {
+          birthDate = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        } else {
+          birthDate = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+        }
+      }
+      if (!birthDate || isNaN(birthDate.getTime())) return null;
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      return age >= 0 ? age : null;
+    }
+
+    // Gerador de Ficha Oficial do Catequista
+    function generateFichaCatequistaHtml(cat) {
+      if (!cat) return '';
+      const emitidoEm = new Date().toLocaleDateString('pt-BR') + ' às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      const age = calculateAgeFromDob(cat.dataNascimento);
+      const ageStr = age !== null ? ` (${age} anos)` : '';
+
+      const funcoes = (Array.isArray(cat.funcoes) && cat.funcoes.length > 0)
+        ? cat.funcoes
+        : [cat.funcaoPrincipal || 'Catequista'];
+
+      const funcoesBadges = funcoes.map(f => {
+        const isCoord = f.includes('Coord') || f.includes('Geral');
+        const bg = isCoord ? '#fef3c7' : '#e0e7ff';
+        const color = isCoord ? '#92400e' : '#3730a3';
+        const border = isCoord ? '#fde68a' : '#c7d2fe';
+        return `<span style="display: inline-block; font-size: 8.5px; font-weight: 800; text-transform: uppercase; background: ${bg}; color: ${color}; border: 1px solid ${border}; padding: 2px 7px; border-radius: 9999px; letter-spacing: 0.5px;">${isCoord ? '⭐ ' : ''}${escapeHtml(f)}</span>`;
+      }).join(' ');
+
+      const photoHtml = (cat.foto && !cat.fotoRemoved)
+        ? `<div style="text-align: center; flex-shrink: 0; margin-left: 14px;">
+             <img src="${cat.foto}" alt="${escapeHtml(cat.nomeCompleto)}" style="width: 82px; height: 108px; object-fit: cover; border-radius: 6px; border: 1.5px solid #cbd5e1; display: block; box-shadow: 0 1px 3px rgba(0,0,0,0.08);" />
+             <span style="font-size: 7.5px; font-weight: 800; text-transform: uppercase; color: #64748b; display: block; margin-top: 3px; letter-spacing: 0.5px;">Foto 3x4 Oficial</span>
+           </div>`
+        : `<div style="width: 82px; height: 108px; border-radius: 6px; border: 1.5px dashed #cbd5e1; background: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; font-size: 8.5px; font-weight: bold; text-align: center; flex-shrink: 0; margin-left: 14px; box-sizing: border-box; padding: 4px;">
+             <div style="font-size: 20px; line-height: 1;">👤</div>
+             <div style="margin-top: 4px; line-height: 1.1;">FOTO 3x4<br><span style="font-size: 7px; font-weight: normal; color: #cbd5e1;">(Não anexada)</span></div>
+           </div>`;
+
+      // Turmas
+      let turmasTableHtml = '';
+      if (Array.isArray(cat.turmas) && cat.turmas.length > 0) {
+        turmasTableHtml = `
+          <table style="width: 100%; border-collapse: collapse; font-size: 9.5px; margin-top: 4px;">
+            <thead>
+              <tr style="background: #f1f5f9; border-bottom: 1.5px solid #cbd5e1; color: #334155; text-align: left;">
+                <th style="padding: 5px 8px; font-weight: 800;">Etapa Catequética</th>
+                <th style="padding: 5px 8px; font-weight: 800;">Turma</th>
+                <th style="padding: 5px 8px; font-weight: 800;">Função</th>
+                <th style="padding: 5px 8px; font-weight: 800;">Dia &amp; Horário</th>
+                <th style="padding: 5px 8px; font-weight: 800;">Sala Oficial</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${cat.turmas.map((t, idx) => `
+                <tr style="border-bottom: 1px solid #e2e8f0; background: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+                  <td style="padding: 5px 8px; font-weight: 700; color: #0f172a;">${escapeHtml(t.stage)}</td>
+                  <td style="padding: 5px 8px; color: #334155;">${escapeHtml(t.turma)}</td>
+                  <td style="padding: 5px 8px; color: #64748b;">${escapeHtml(t.funcao || 'Catequista')}</td>
+                  <td style="padding: 5px 8px; color: #334155;">${escapeHtml(t.dayTime || '—')}</td>
+                  <td style="padding: 5px 8px; font-weight: 600; color: #0f172a;">${escapeHtml(t.room || 'Espaço a definir')}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      } else {
+        turmasTableHtml = `<div style="font-size: 10px; color: #64748b; font-style: italic; padding: 6px 0;">Sem turma regular cadastrada (Atuação na Coordenação Geral ou Apoio Pastoral).</div>`;
+      }
+
+      return `
+        <div class="ficha-print-sheet" style="font-family: 'Questrial', 'Nunito', -apple-system, sans-serif; color: #0f172a; width: 100%; box-sizing: border-box; background: #ffffff;">
+          
+          <!-- Cabeçalho Oficial -->
+          <div style="border-bottom: 2px solid #0f172a; padding-bottom: 8px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <img src="./brasao-icm.png" alt="Brasão Santuário ICM" style="height: 54px; width: auto; object-fit: contain; flex-shrink: 0;" />
+              <div>
+                <div style="font-size: 8.5px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: #475569;">Arquidiocese de Brasília • Santuário Imaculado Coração de Maria</div>
+                <div style="font-size: 15px; font-weight: 900; color: #0f172a; letter-spacing: -0.2px; text-transform: uppercase; margin-top: 1px;">PASTORAL DA CATEQUESE — FICHA CADASTRAL DO CATEQUISTA</div>
+                <div style="font-size: 8.5px; color: #64748b; margin-top: 1px;">Santuário Imaculado Coração de Maria • SMPW Quadra 5, Conjunto 13, Lote 01 — Park Way, Brasília-DF • Ano Pastoral 2026</div>
+              </div>
+            </div>
+            <div style="text-align: right; font-size: 8.5px; color: #64748b; line-height: 1.3; flex-shrink: 0;">
+              <div style="background: #f1f5f9; border: 1px solid #cbd5e1; padding: 2px 7px; border-radius: 4px; font-weight: 800; color: #0f172a; display: inline-block;">DOCUMENTO OFICIAL</div>
+              <div style="margin-top: 3px;">Emissão: ${emitidoEm}</div>
+            </div>
+          </div>
+
+          <!-- Banner de Identificação com Foto -->
+          <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 10px 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: 8px; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 0.8px;">Catequista Responsável:</div>
+              <div style="font-size: 18px; font-weight: 900; color: #0f172a; line-height: 1.2; margin-top: 1px;">${escapeHtml(cat.nomeCompleto)}</div>
+              ${(cat.apelido || cat.nomeConhecido) ? `<div style="font-size: 11px; font-weight: 700; color: #b45309; margin-top: 2px;">Conhecido(a) como: <strong>${escapeHtml(cat.apelido || cat.nomeConhecido)}</strong></div>` : ''}
+              <div style="margin-top: 5px;">${funcoesBadges}</div>
+              <div style="font-size: 9.5px; color: #64748b; margin-top: 4px;">
+                Paróquia Habitual: <strong style="color: #334155;">${escapeHtml(cat.paroquia || 'Santuário Imaculado Coração de Maria')}</strong>
+              </div>
+            </div>
+            ${photoHtml}
+          </div>
+
+          <!-- Bloco 1: Dados Pessoais & Documentação -->
+          <div style="margin-bottom: 10px;">
+            <div style="background: #0f172a; color: #ffffff; padding: 4px 10px; border-radius: 6px 6px 0 0; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; display: flex; align-items: center; gap: 6px;">
+              <span>👤</span> <span>1. Informações Pessoais &amp; Identificação</span>
+            </div>
+            <div style="border: 1.5px solid #cbd5e1; border-top: none; border-radius: 0 0 6px 6px; padding: 8px 12px; background: #ffffff; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px 12px;">
+              <div>
+                <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; color: #64748b; display: block;">Data de Nascimento / Idade</span>
+                <strong style="color: #0f172a; font-size: 10.5px;">${cat.dataNascimento ? escapeHtml(cat.dataNascimento) + ageStr : '—'}</strong>
+              </div>
+              <div>
+                <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; color: #64748b; display: block;">Estado Civil</span>
+                <strong style="color: #0f172a; font-size: 10.5px;">${escapeHtml(cat.estadoCivil || '—')}</strong>
+              </div>
+              <div>
+                <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; color: #64748b; display: block;">Profissão / Ocupação</span>
+                <strong style="color: #0f172a; font-size: 10.5px;">${escapeHtml(cat.profissao || '—')}</strong>
+              </div>
+              <div>
+                <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; color: #64748b; display: block;">Paróquia de Origem</span>
+                <strong style="color: #0f172a; font-size: 10.5px;">${escapeHtml(cat.paroquia || 'Santuário ICM')}</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bloco 2: Contato & Endereço Residencial -->
+          <div style="margin-bottom: 10px;">
+            <div style="background: #0f172a; color: #ffffff; padding: 4px 10px; border-radius: 6px 6px 0 0; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; display: flex; align-items: center; gap: 6px;">
+              <span>📞</span> <span>2. Contato &amp; Endereço Residencial</span>
+            </div>
+            <div style="border: 1.5px solid #cbd5e1; border-top: none; border-radius: 0 0 6px 6px; padding: 8px 12px; background: #ffffff; display: grid; grid-template-columns: 1fr 1.3fr 2fr; gap: 8px 12px;">
+              <div>
+                <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; color: #64748b; display: block;">Telefone / WhatsApp</span>
+                <strong style="color: #0f172a; font-size: 10.5px;">${escapeHtml(cat.telefone || '—')}</strong>
+              </div>
+              <div>
+                <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; color: #64748b; display: block;">E-mail</span>
+                <strong style="color: #0f172a; font-size: 10.5px;">${escapeHtml(cat.email || '—')}</strong>
+              </div>
+              <div>
+                <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; color: #64748b; display: block;">Endereço Residencial</span>
+                <strong style="color: #0f172a; font-size: 10.5px;">${escapeHtml(cat.endereco || '—')}</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bloco 3: Atuação Pastoral & Turmas Vinculadas -->
+          <div style="margin-bottom: 12px;">
+            <div style="background: #0f172a; color: #ffffff; padding: 4px 10px; border-radius: 6px 6px 0 0; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; display: flex; align-items: center; gap: 6px;">
+              <span>⛪</span> <span>3. Atuação Pastoral &amp; Turmas Atribuídas (2026)</span>
+            </div>
+            <div style="border: 1.5px solid #cbd5e1; border-top: none; border-radius: 0 0 6px 6px; padding: 6px 10px; background: #ffffff;">
+              ${turmasTableHtml}
+            </div>
+          </div>
+
+          <!-- Rodapé Institucional -->
+          <div style="border-top: 1px solid #cbd5e1; padding-top: 6px; margin-top: 8px; font-size: 8px; color: #64748b; text-align: center; line-height: 1.4;">
+            Santuário Imaculado Coração de Maria • SMPW Quadra 5, Conjunto 13, Lote 01 — Park Way, Brasília-DF<br>
+            Sistema Integrado da Pastoral da Catequese • Documento gerado eletronicamente em conformidade com a LGPD (Lei nº 13.709/2018).
+          </div>
+
+        </div>
+      `;
+    }
+
+    // Gerador de Ficha Oficial do Catequizando
+    function generateFichaCatequizandoHtml(aluno, etapa, turma) {
+      if (!aluno) return '';
+      const emitidoEm = new Date().toLocaleDateString('pt-BR') + ' às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      const age = calculateAgeFromDob(aluno.dataNascimento);
+      const ageStr = age !== null ? ` (${age} anos)` : '';
+
+      const effectiveEtapa = etapa || currentAlunosEtapa || 'Catequese 2026';
+      const effectiveTurma = turma || currentAlunosTurma || 'Turma';
+
+      const info = (typeof masterScheduleList !== 'undefined' && Array.isArray(masterScheduleList))
+        ? masterScheduleList.find(t => t.stage === effectiveEtapa && t.turma === effectiveTurma)
+        : null;
+
+      const room = info ? info.room : 'Sala a definir';
+      const catechists = info ? info.catechists : 'Catequistas da turma';
+      const dayTime = info ? info.dayTime : 'Horário dos encontros';
+
+      const isApproved = aluno.statusAprovacao !== 'pendente_coordenacao';
+
+      return `
+        <div class="ficha-print-sheet" style="font-family: 'Questrial', 'Nunito', -apple-system, sans-serif; color: #0f172a; width: 100%; box-sizing: border-box; background: #ffffff;">
+          
+          <!-- Cabeçalho Oficial -->
+          <div style="border-bottom: 2px solid #0f172a; padding-bottom: 8px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <img src="./brasao-icm.png" alt="Brasão Santuário ICM" style="height: 54px; width: auto; object-fit: contain; flex-shrink: 0;" />
+              <div>
+                <div style="font-size: 8.5px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: #475569;">Arquidiocese de Brasília • Santuário Imaculado Coração de Maria</div>
+                <div style="font-size: 15px; font-weight: 900; color: #0f172a; letter-spacing: -0.2px; text-transform: uppercase; margin-top: 1px;">PASTORAL DA CATEQUESE — FICHA CADASTRAL DO CATEQUIZANDO</div>
+                <div style="font-size: 8.5px; color: #64748b; margin-top: 1px;">Santuário Imaculado Coração de Maria • SMPW Quadra 5, Conjunto 13, Lote 01 — Park Way, Brasília-DF • Ano Pastoral 2026</div>
+              </div>
+            </div>
+            <div style="text-align: right; font-size: 8.5px; color: #64748b; line-height: 1.3; flex-shrink: 0;">
+              <div style="background: #f1f5f9; border: 1px solid #cbd5e1; padding: 2px 7px; border-radius: 4px; font-weight: 800; color: #0f172a; display: inline-block;">DOCUMENTO OFICIAL</div>
+              <div style="margin-top: 3px;">Emissão: ${emitidoEm}</div>
+            </div>
+          </div>
+
+          <!-- Banner de Identificação com Turma e Status -->
+          <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 10px 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: 8px; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 0.8px;">Nome Completo do Catequizando:</div>
+              <div style="font-size: 18px; font-weight: 900; color: #0f172a; line-height: 1.2; margin-top: 1px;">${escapeHtml(aluno.nome)}</div>
+              <div style="font-size: 11px; font-weight: 800; color: #4338ca; margin-top: 3px;">
+                ${escapeHtml(effectiveEtapa)} • ${escapeHtml(effectiveTurma)} • ${escapeHtml(room)}
+              </div>
+              <div style="font-size: 9.5px; color: #64748b; margin-top: 3px;">
+                Catequistas: <strong style="color: #334155;">${escapeHtml(catechists)}</strong> • Horário: <strong style="color: #334155;">${escapeHtml(dayTime)}</strong>
+              </div>
+            </div>
+            <div style="text-align: right; flex-shrink: 0; margin-left: 14px;">
+              <div style="background: ${isApproved ? '#ecfdf5' : '#fef3c7'}; border: 1.5px solid ${isApproved ? '#a7f3d0' : '#fde68a'}; color: ${isApproved ? '#065f46' : '#92400e'}; padding: 4px 10px; border-radius: 6px; font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">
+                ${isApproved ? '✓ Matrícula Regular' : '⏳ Em Homologação'}
+              </div>
+              <div style="font-size: 8px; color: #64748b; margin-top: 3px;">
+                Cód: #${escapeHtml(aluno.id || 'CAD')}
+              </div>
+            </div>
+          </div>
+
+          <!-- Bloco 1: Dados Pessoais do Catequizando -->
+          <div style="margin-bottom: 10px;">
+            <div style="background: #0f172a; color: #ffffff; padding: 4px 10px; border-radius: 6px 6px 0 0; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; display: flex; align-items: center; gap: 6px;">
+              <span>👤</span> <span>1. Informações Pessoais &amp; Contato</span>
+            </div>
+            <div style="border: 1.5px solid #cbd5e1; border-top: none; border-radius: 0 0 6px 6px; padding: 8px 12px; background: #ffffff; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px 12px;">
+              <div>
+                <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; color: #64748b; display: block;">Data de Nascimento / Idade</span>
+                <strong style="color: #0f172a; font-size: 10.5px;">${aluno.dataNascimento ? escapeHtml(aluno.dataNascimento) + ageStr : '—'}</strong>
+              </div>
+              <div>
+                <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; color: #64748b; display: block;">CPF</span>
+                <strong style="color: #0f172a; font-size: 10.5px;">${escapeHtml(aluno.cpf || '—')}</strong>
+              </div>
+              <div>
+                <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; color: #64748b; display: block;">Estado Civil / Afetivo</span>
+                <strong style="color: #0f172a; font-size: 10.5px;">${escapeHtml(aluno.estadoCivil || '—')}</strong>
+              </div>
+              <div>
+                <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; color: #64748b; display: block;">Telefone / WhatsApp</span>
+                <strong style="color: #0f172a; font-size: 10.5px;">${escapeHtml(aluno.contato || '—')}</strong>
+              </div>
+              <div>
+                <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; color: #64748b; display: block;">E-mail</span>
+                <strong style="color: #0f172a; font-size: 10.5px;">${escapeHtml(aluno.email || '—')}</strong>
+              </div>
+              <div>
+                <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; color: #64748b; display: block;">Endereço Residencial</span>
+                <strong style="color: #0f172a; font-size: 10.5px;">${escapeHtml(aluno.endereco || '—')}</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bloco 2: Filiação & Responsáveis Legais (LGPD Art. 14) -->
+          <div style="margin-bottom: 10px;">
+            <div style="background: #0f172a; color: #ffffff; padding: 4px 10px; border-radius: 6px 6px 0 0; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; display: flex; align-items: center; gap: 6px;">
+              <span>🛡️</span> <span>2. Filiação &amp; Responsáveis Legais (Art. 14 LGPD • Menores de 18 Anos)</span>
+            </div>
+            <div style="border: 1.5px solid #cbd5e1; border-top: none; border-radius: 0 0 6px 6px; padding: 8px 12px; background: #ffffff; display: grid; grid-template-columns: 2fr 1fr; gap: 8px 12px;">
+              <div>
+                <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; color: #64748b; display: block;">Nome do Responsável Legal</span>
+                <strong style="color: #0f172a; font-size: 10.5px;">${escapeHtml(aluno.nomeResponsavel || '—')}</strong>
+              </div>
+              <div>
+                <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; color: #64748b; display: block;">CPF do Responsável</span>
+                <strong style="color: #0f172a; font-size: 10.5px;">${escapeHtml(aluno.cpfResponsavel || '—')}</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bloco 3: Situação Sacramental & Vida Religiosa -->
+          <div style="margin-bottom: 10px;">
+            <div style="background: #0f172a; color: #ffffff; padding: 4px 10px; border-radius: 6px 6px 0 0; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; display: flex; align-items: center; gap: 6px;">
+              <span>✝</span> <span>3. Situação Sacramental &amp; Observações Canônicas</span>
+            </div>
+            <div style="border: 1.5px solid #cbd5e1; border-top: none; border-radius: 0 0 6px 6px; padding: 8px 12px; background: #ffffff; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px 12px;">
+              <div>
+                <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; color: #64748b; display: block;">Batizado(a) na Igreja Católica?</span>
+                <strong style="color: #0f172a; font-size: 10.5px;">${escapeHtml(aluno.batizado || 'Não informado')}</strong>
+              </div>
+              <div>
+                <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; color: #64748b; display: block;">Possui 1ª Eucaristia?</span>
+                <strong style="color: #0f172a; font-size: 10.5px;">${escapeHtml(aluno.primeiraEucaristia || 'Não informado')}</strong>
+              </div>
+              <div>
+                <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; color: #64748b; display: block;">Impedimento Canônico?</span>
+                <strong style="color: #0f172a; font-size: 10.5px;">${escapeHtml(aluno.impedido || 'Não')}</strong>
+              </div>
+              ${aluno.justificativa ? `
+                <div style="grid-column: span 3; background: #fffbeb; border: 1px solid #fef3c7; padding: 5px 8px; border-radius: 5px;">
+                  <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; color: #92400e; display: block;">Justificativa do Impedimento / Pendência:</span>
+                  <div style="color: #78350f; font-size: 10px; margin-top: 1px;">${escapeHtml(aluno.justificativa)}</div>
+                </div>
+              ` : ''}
+              ${aluno.observacoes ? `
+                <div style="grid-column: span 3; background: #f8fafc; border: 1px solid #e2e8f0; padding: 5px 8px; border-radius: 5px;">
+                  <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; color: #475569; display: block;">Observações &amp; Anotações Pastorais:</span>
+                  <div style="color: #334155; font-size: 10px; margin-top: 1px;">${escapeHtml(aluno.observacoes)}</div>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+
+          <!-- Bloco 4: Matrícula & Homologação -->
+          <div style="margin-bottom: 12px;">
+            <div style="background: #0f172a; color: #ffffff; padding: 4px 10px; border-radius: 6px 6px 0 0; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; display: flex; align-items: center; gap: 6px;">
+              <span>📋</span> <span>4. Dados da Matrícula &amp; Homologação Pastoral</span>
+            </div>
+            <div style="border: 1.5px solid #cbd5e1; border-top: none; border-radius: 0 0 6px 6px; padding: 8px 12px; background: #ffffff; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px 12px;">
+              <div>
+                <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; color: #64748b; display: block;">Etapa &amp; Turma</span>
+                <strong style="color: #0f172a; font-size: 10.5px;">${escapeHtml(effectiveEtapa)} — ${escapeHtml(effectiveTurma)}</strong>
+              </div>
+              <div>
+                <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; color: #64748b; display: block;">Local do Encontro</span>
+                <strong style="color: #0f172a; font-size: 10.5px;">${escapeHtml(room)}</strong>
+              </div>
+              <div>
+                <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; color: #64748b; display: block;">Homologação</span>
+                <strong style="color: #0f172a; font-size: 10.5px;">${aluno.aprovadoPor ? `Aprovado por ${escapeHtml(aluno.aprovadoPor)}` : 'Matrícula Oficial da Turma'}</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rodapé Institucional -->
+          <div style="border-top: 1px solid #cbd5e1; padding-top: 6px; margin-top: 8px; font-size: 8px; color: #64748b; text-align: center; line-height: 1.4;">
+            Santuário Imaculado Coração de Maria • SMPW Quadra 5, Conjunto 13, Lote 01 — Park Way, Brasília-DF<br>
+            Sistema Integrado da Pastoral da Catequese • Documento gerado eletronicamente em conformidade com o ECA e a LGPD (Lei nº 13.709/2018).
+          </div>
+
+        </div>
+      `;
+    }
+
+    // Dispara a impressão física ou Salvamento em PDF com as fichas geradas
+    function executePrintFichas(fichasHtml, auditLabel, auditMeta) {
+      const printableArea = document.getElementById('printable-fichas-area');
+      if (!printableArea) {
+        window.print();
+        return;
+      }
+
+      printableArea.innerHTML = fichasHtml;
+      printableArea.classList.remove('hidden');
+      document.body.classList.add('printing-fichas');
+
+      if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
+        window.ICM_CONFIG.logAuditEvent('PRINT_FICHAS', auditLabel || 'Fichas Cadastrais', auditMeta || {});
+      }
+
+      setTimeout(() => {
+        window.print();
+
+        setTimeout(() => {
+          document.body.classList.remove('printing-fichas');
+          printableArea.classList.add('hidden');
+          printableArea.innerHTML = '';
+        }, 1000);
+      }, 150);
+    }
+
+    // =============================================
+    // CONTROLES DE SELEÇÃO & IMPRESSÃO: CATEQUISTAS
+    // =============================================
+
+    function toggleSelectAllCatequistas(selectAll) {
+      const searchInput = document.getElementById('input-search-catequistas');
+      const stageFilter = document.getElementById('sel-filter-catequistas-etapa');
+      const parishFilter = document.getElementById('sel-filter-catequistas-paroquia');
+      const q = (searchInput ? searchInput.value : '').toLowerCase().trim();
+      const stageVal = stageFilter ? stageFilter.value : 'all';
+      const parishVal = parishFilter ? parishFilter.value : 'all';
+
+      const all = getCatequistasRegistrationData();
+      const filtered = all.filter(c => {
+        if (stageVal !== 'all') {
+          const matchStage = (c.etapaPrincipal && c.etapaPrincipal.includes(stageVal)) ||
+                             (c.turmas && c.turmas.some(t => t.stage.includes(stageVal))) ||
+                             (c.funcoes && c.funcoes.some(f => f.includes(stageVal))) ||
+                             (stageVal === 'Geral' && ((c.funcoes && c.funcoes.some(f => f.includes('Coord') || f.includes('Geral'))) || c.funcaoPrincipal.includes('Coord') || c.funcaoPrincipal.includes('Sem turma')));
+          if (!matchStage) return false;
+        }
+        if (parishVal === 'Santuário') {
+          if (!c.paroquia.toLowerCase().includes('santuário') && !c.paroquia.toLowerCase().includes('imaculado')) return false;
+        } else if (parishVal === 'outras') {
+          if (c.paroquia.toLowerCase().includes('santuário') || c.paroquia.toLowerCase().includes('imaculado')) return false;
+        }
+        if (q) {
+          const matchQuery = c.nomeCompleto.toLowerCase().includes(q) ||
+                             c.telefone.toLowerCase().includes(q) ||
+                             c.email.toLowerCase().includes(q) ||
+                             c.paroquia.toLowerCase().includes(q) ||
+                             c.etapaPrincipal.toLowerCase().includes(q) ||
+                             (c.funcaoPrincipal && c.funcaoPrincipal.toLowerCase().includes(q)) ||
+                             (c.funcoes && c.funcoes.some(f => f.toLowerCase().includes(q))) ||
+                             (c.turmas && c.turmas.some(t => `${t.stage} ${t.turma}`.toLowerCase().includes(q)));
+          if (!matchQuery) return false;
+        }
+        return true;
+      });
+
+      if (selectAll) {
+        filtered.forEach(c => selectedCatequistasIds.add(c.id));
+      } else {
+        filtered.forEach(c => selectedCatequistasIds.delete(c.id));
+      }
+
+      document.querySelectorAll('.chk-cat-row').forEach(cb => {
+        cb.checked = selectAll;
+        const row = cb.closest('tr');
+        if (row) {
+          if (selectAll) row.classList.add('bg-amber-50/70');
+          else row.classList.remove('bg-amber-50/70');
+        }
+      });
+
+      updateCatequistasSelectionUI();
+    }
+
+    function toggleSelectCatequista(id, isSelected) {
+      if (isSelected) {
+        selectedCatequistasIds.add(id);
+      } else {
+        selectedCatequistasIds.delete(id);
+      }
+      updateCatequistasSelectionUI();
+    }
+
+    function updateCatequistasSelectionUI() {
+      const countEl = document.getElementById('count-selected-cats');
+      if (countEl) countEl.textContent = selectedCatequistasIds.size;
+
+      const chkAll = document.getElementById('chk-cat-select-all');
+      if (chkAll) {
+        const rows = document.querySelectorAll('.chk-cat-row');
+        if (rows.length === 0) {
+          chkAll.checked = false;
+          chkAll.indeterminate = false;
+        } else {
+          const checkedCount = document.querySelectorAll('.chk-cat-row:checked').length;
+          chkAll.checked = checkedCount === rows.length;
+          chkAll.indeterminate = checkedCount > 0 && checkedCount < rows.length;
+        }
+      }
+    }
+
+    function imprimirFichasCatequistasSelecionados() {
+      const all = getCatequistasRegistrationData();
+      let targetCats = [];
+
+      if (selectedCatequistasIds.size === 0) {
+        // Obter visíveis no filtro atual
+        const searchInput = document.getElementById('input-search-catequistas');
+        const stageFilter = document.getElementById('sel-filter-catequistas-etapa');
+        const parishFilter = document.getElementById('sel-filter-catequistas-paroquia');
+        const q = (searchInput ? searchInput.value : '').toLowerCase().trim();
+        const stageVal = stageFilter ? stageFilter.value : 'all';
+        const parishVal = parishFilter ? parishFilter.value : 'all';
+
+        const visibleCats = all.filter(c => {
+          if (stageVal !== 'all') {
+            const matchStage = (c.etapaPrincipal && c.etapaPrincipal.includes(stageVal)) ||
+                               (c.turmas && c.turmas.some(t => t.stage.includes(stageVal))) ||
+                               (c.funcoes && c.funcoes.some(f => f.includes(stageVal))) ||
+                               (stageVal === 'Geral' && ((c.funcoes && c.funcoes.some(f => f.includes('Coord') || f.includes('Geral'))) || c.funcaoPrincipal.includes('Coord') || c.funcaoPrincipal.includes('Sem turma')));
+            if (!matchStage) return false;
+          }
+          if (parishVal === 'Santuário') {
+            if (!c.paroquia.toLowerCase().includes('santuário') && !c.paroquia.toLowerCase().includes('imaculado')) return false;
+          } else if (parishVal === 'outras') {
+            if (c.paroquia.toLowerCase().includes('santuário') || c.paroquia.toLowerCase().includes('imaculado')) return false;
+          }
+          if (q) {
+            const matchQuery = c.nomeCompleto.toLowerCase().includes(q) ||
+                               c.telefone.toLowerCase().includes(q) ||
+                               c.email.toLowerCase().includes(q) ||
+                               c.paroquia.toLowerCase().includes(q) ||
+                               c.etapaPrincipal.toLowerCase().includes(q) ||
+                               (c.funcaoPrincipal && c.funcaoPrincipal.toLowerCase().includes(q)) ||
+                               (c.funcoes && c.funcoes.some(f => f.toLowerCase().includes(q))) ||
+                               (c.turmas && c.turmas.some(t => `${t.stage} ${t.turma}`.toLowerCase().includes(q)));
+            if (!matchQuery) return false;
+          }
+          return true;
+        });
+
+        if (visibleCats.length === 0) {
+          alert('Nenhum catequista encontrado para imprimir.');
+          return;
+        }
+
+        const confirmAll = confirm(`Nenhum catequista foi selecionado individualmente.\n\nDeseja imprimir as fichas de todos os ${visibleCats.length} catequistas exibidos atualmente na lista?`);
+        if (!confirmAll) return;
+        targetCats = visibleCats;
+      } else {
+        targetCats = all.filter(c => selectedCatequistasIds.has(c.id));
+      }
+
+      if (targetCats.length === 0) {
+        alert('Nenhum catequista selecionado.');
+        return;
+      }
+
+      const fullHtml = targetCats.map(c => generateFichaCatequistaHtml(c)).join('');
+      executePrintFichas(fullHtml, 'Catequistas Lote', { count: targetCats.length });
+    }
+
+    function imprimirFichaCatequistaIndividual(id) {
+      const all = getCatequistasRegistrationData();
+      const cat = all.find(c => c.id === id) || findCatequistaByName(id);
+      if (!cat) {
+        alert('Catequista não encontrado.');
+        return;
+      }
+      const html = generateFichaCatequistaHtml(cat);
+      executePrintFichas(html, `Catequista: ${cat.nomeCompleto}`, { catId: cat.id });
+    }
+
+    function imprimirFichaCatequistaAtual() {
+      if (currentCatequistaForPhoto && currentCatequistaForPhoto.id) {
+        imprimirFichaCatequistaIndividual(currentCatequistaForPhoto.id);
+      } else {
+        alert('Nenhum catequista aberto no momento.');
+      }
+    }
+
+    // =============================================
+    // CONTROLES DE SELEÇÃO & IMPRESSÃO: CATEQUIZANDOS
+    // =============================================
+
+    function toggleSelectAllAlunos(selectAll) {
+      const alunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma);
+      const searchInput = document.getElementById('search-alunos-turma');
+      const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
+
+      const filtered = alunos.filter(a => {
+        if (!query) return true;
+        return (a.nome || '').toLowerCase().includes(query) ||
+               (a.cpf || '').toLowerCase().includes(query) ||
+               (a.dataNascimento || '').toLowerCase().includes(query) ||
+               (a.email || '').toLowerCase().includes(query) ||
+               (a.endereco || '').toLowerCase().includes(query) ||
+               (a.estadoCivil || '').toLowerCase().includes(query) ||
+               (a.justificativa || '').toLowerCase().includes(query) ||
+               (a.impedido || '').toLowerCase().includes(query) ||
+               (a.contato || '').toLowerCase().includes(query);
+      });
+
+      if (selectAll) {
+        filtered.forEach(a => selectedAlunosIds.add(a.id));
+      } else {
+        filtered.forEach(a => selectedAlunosIds.delete(a.id));
+      }
+
+      document.querySelectorAll('.chk-aluno-row').forEach(cb => {
+        cb.checked = selectAll;
+        const row = cb.closest('tr');
+        if (row) {
+          if (selectAll) row.classList.add('bg-indigo-50/70');
+          else row.classList.remove('bg-indigo-50/70');
+        }
+      });
+
+      updateAlunosSelectionUI();
+    }
+
+    function toggleSelectAluno(id, isSelected) {
+      if (isSelected) {
+        selectedAlunosIds.add(id);
+      } else {
+        selectedAlunosIds.delete(id);
+      }
+      updateAlunosSelectionUI();
+    }
+
+    function updateAlunosSelectionUI() {
+      const countEl = document.getElementById('count-selected-alunos');
+      if (countEl) countEl.textContent = selectedAlunosIds.size;
+
+      const chkAll = document.getElementById('chk-aluno-select-all');
+      if (chkAll) {
+        const rows = document.querySelectorAll('.chk-aluno-row');
+        if (rows.length === 0) {
+          chkAll.checked = false;
+          chkAll.indeterminate = false;
+        } else {
+          const checkedCount = document.querySelectorAll('.chk-aluno-row:checked').length;
+          chkAll.checked = checkedCount === rows.length;
+          chkAll.indeterminate = checkedCount > 0 && checkedCount < rows.length;
+        }
+      }
+    }
+
+    function imprimirFichasAlunosSelecionados() {
+      const alunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma);
+      let targetAlunos = [];
+
+      if (selectedAlunosIds.size === 0) {
+        if (alunos.length === 0) {
+          alert('Nenhum catequizando matriculado nesta turma para imprimir.');
+          return;
+        }
+        const confirmAll = confirm(`Nenhum catequizando foi selecionado individualmente.\n\nDeseja imprimir as fichas de todos os ${alunos.length} catequizandos da turma "${currentAlunosTurma} (${currentAlunosEtapa})"?`);
+        if (!confirmAll) return;
+        targetAlunos = alunos;
+      } else {
+        targetAlunos = alunos.filter(a => selectedAlunosIds.has(a.id));
+      }
+
+      if (targetAlunos.length === 0) {
+        alert('Nenhum catequizando selecionado.');
+        return;
+      }
+
+      const fullHtml = targetAlunos.map(a => generateFichaCatequizandoHtml(a, currentAlunosEtapa, currentAlunosTurma)).join('');
+      executePrintFichas(fullHtml, `Catequizandos Lote: ${currentAlunosTurma}`, {
+        etapa: currentAlunosEtapa,
+        turma: currentAlunosTurma,
+        count: targetAlunos.length
+      });
+    }
+
+    function imprimirTodasFichasTurmaAtual() {
+      const alunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma);
+      if (alunos.length === 0) {
+        alert('Nenhum catequizando matriculado nesta turma.');
+        return;
+      }
+      const fullHtml = alunos.map(a => generateFichaCatequizandoHtml(a, currentAlunosEtapa, currentAlunosTurma)).join('');
+      executePrintFichas(fullHtml, `Turma Completa: ${currentAlunosTurma}`, {
+        etapa: currentAlunosEtapa,
+        turma: currentAlunosTurma,
+        count: alunos.length
+      });
+    }
+
+    function imprimirFichaAlunoIndividual(id) {
+      const alunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma);
+      let aluno = alunos.find(a => a.id === id);
+      let etapa = currentAlunosEtapa;
+      let turma = currentAlunosTurma;
+
+      if (!aluno) {
+        // Busca global no banco de alunos se não encontrado na turma atual
+        const db = getAlunosDatabase();
+        for (const [key, list] of Object.entries(db)) {
+          const found = (list || []).find(a => a.id === id);
+          if (found) {
+            aluno = found;
+            const parts = key.split('__');
+            if (parts.length >= 2) {
+              etapa = parts[0];
+              turma = parts[1];
+            }
+            break;
+          }
+        }
+      }
+
+      if (!aluno) {
+        alert('Catequizando não encontrado.');
+        return;
+      }
+
+      const html = generateFichaCatequizandoHtml(aluno, etapa, turma);
+      executePrintFichas(html, `Catequizando: ${aluno.nome}`, {
+        alunoId: aluno.id,
+        turma: turma
+      });
+    }
+
+    function imprimirFichaAlunoModal() {
+      const id = document.getElementById('aluno-id')?.value;
+      if (!id) {
+        alert('Salve o catequizando antes de imprimir a ficha cadastral oficial.');
+        return;
+      }
+      imprimirFichaAlunoIndividual(id);
     }
 
     // =============================================
@@ -23917,6 +24743,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
   <!-- ÁREA DE IMPRESSÃO ISOLADA (Filho direto de <body> para @media print) -->
   <!-- ============================================================== -->
   <div id="printable-chamada-area" class="hidden"></div>
+  <div id="printable-fichas-area" class="hidden"></div>
 
 </body>
 </html>
