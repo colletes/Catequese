@@ -577,14 +577,32 @@ def build_crisma_adultos_acervo(source_path=DEFAULT_SOURCE_PATH):
             if ext in ('pptx', 'ppt'):
                 node["isPresentation"] = True
                 node["isPdf"] = True
-                pdf_rel = f"acervo/apresentacoes/{base_name}.pdf"
-                pdf_full = os.path.join(os.path.dirname(__file__), "..", pdf_rel)
-                if os.path.exists(pdf_full):
-                    node["pdfUrl"] = pdf_rel
-                media_rel = f"acervo/apresentacoes/{f}"
-                media_full = os.path.join(os.path.dirname(__file__), "..", media_rel)
-                if os.path.exists(media_full):
-                    node["mediaUrl"] = media_rel
+                safe_slug = slugify(base_name)
+                # Define URL do PDF vetorial convertido
+                safe_pdf_rel = f"/acervo/apresentacoes/{safe_slug}.pdf"
+                safe_pdf_full = os.path.join(os.path.dirname(__file__), "..", safe_pdf_rel.lstrip("/"))
+                orig_pdf_rel = f"/acervo/apresentacoes/{base_name}.pdf"
+                orig_pdf_full = os.path.join(os.path.dirname(__file__), "..", orig_pdf_rel.lstrip("/"))
+
+                if os.path.exists(safe_pdf_full):
+                    node["pdfUrl"] = safe_pdf_rel
+                elif os.path.exists(orig_pdf_full):
+                    node["pdfUrl"] = orig_pdf_rel
+                else:
+                    node["pdfUrl"] = safe_pdf_rel
+
+                # Define URL para download do arquivo editável original
+                safe_media_rel = f"/acervo/apresentacoes/{safe_slug}.{ext}"
+                safe_media_full = os.path.join(os.path.dirname(__file__), "..", safe_media_rel.lstrip("/"))
+                orig_media_rel = f"/acervo/apresentacoes/{f}"
+                orig_media_full = os.path.join(os.path.dirname(__file__), "..", orig_media_rel.lstrip("/"))
+
+                if os.path.exists(safe_media_full):
+                    node["mediaUrl"] = safe_media_rel
+                elif os.path.exists(orig_media_full):
+                    node["mediaUrl"] = orig_media_rel
+                else:
+                    node["mediaUrl"] = safe_media_rel
 
             if slides_data:
                 node["slides"] = slides_data

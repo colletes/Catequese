@@ -2333,16 +2333,30 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
       }
       // --- VISUALIZADOR DE APRESENTAÇÃO DE SLIDES NA ÍNTEGRA ---
       else if (isPpt) {
-        const pptPdfUrl = mediaNode.pdfUrl || (
-          (mediaNode.fileName || mediaNode.title)
-            ? `acervo/apresentacoes/${encodeURIComponent(mediaNode.fileName ? mediaNode.fileName.replace(/\.(pptx|ppt)$/i, '.pdf') : mediaNode.title + '.pdf')}`
-            : ''
-        );
-        const pptDownloadUrl = mediaNode.mediaUrl || (
-          (mediaNode.fileName || mediaNode.title)
-            ? `acervo/apresentacoes/${encodeURIComponent(mediaNode.fileName || (mediaNode.title + '.' + (mediaNode.extension || 'pptx')))}`
-            : ''
-        );
+        const toSafeSlug = function (str) {
+          if (!str) return '';
+          return str
+            .normalize('NFKD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .trim()
+            .replace(/[-\s]+/g, '-');
+        };
+
+        const baseSlug = toSafeSlug(mediaNode.fileName ? mediaNode.fileName.replace(/\.(pptx|ppt)$/i, '') : mediaNode.title);
+        const ext = (mediaNode.extension || 'pptx').toLowerCase();
+
+        let pptPdfUrl = mediaNode.pdfUrl || (baseSlug ? `/acervo/apresentacoes/${baseSlug}.pdf` : '');
+        if (pptPdfUrl && !pptPdfUrl.startsWith('/') && !pptPdfUrl.startsWith('http')) {
+          pptPdfUrl = '/' + pptPdfUrl;
+        }
+
+        let pptDownloadUrl = mediaNode.mediaUrl || (baseSlug ? `/acervo/apresentacoes/${baseSlug}.${ext}` : '');
+        if (pptDownloadUrl && !pptDownloadUrl.startsWith('/') && !pptDownloadUrl.startsWith('http')) {
+          pptDownloadUrl = '/' + pptDownloadUrl;
+        }
+
         const hasSlidesOutline = mediaNode.slides && mediaNode.slides.length > 0;
 
         playerHtml = `
@@ -2650,9 +2664,12 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
     // 9. LEITOR DEDICADO DE PDF E VISUALIZADOR DE SLIDES (ALTA FIDELIDADE)
     // ========================================================================
     renderPdfViewerHtml: function (docNode) {
-      const pdfUrl = docNode.mediaUrl || docNode.pdfUrl || (docNode.fullLocalPath ? `file://${docNode.fullLocalPath}` : '');
+      let pdfUrl = docNode.pdfUrl || docNode.mediaUrl || (docNode.fullLocalPath ? `file://${docNode.fullLocalPath}` : '');
+      if (pdfUrl && !pdfUrl.startsWith('/') && !pdfUrl.startsWith('http') && !pdfUrl.startsWith('file://')) {
+        pdfUrl = '/' + pdfUrl;
+      }
       const pageCountStr = docNode.pageCount ? ` (${docNode.pageCount} páginas)` : '';
-      const isLocal = !docNode.mediaUrl && docNode.fullLocalPath;
+      const isLocal = !docNode.mediaUrl && !docNode.pdfUrl && docNode.fullLocalPath;
 
       return `
         <div class="wiki-pdf-viewer mb-6">

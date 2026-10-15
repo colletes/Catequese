@@ -1,6 +1,6 @@
 # ⛪ Relatório de Pré-Validação — Acervo Crisma de Adultos
 
-> **Data de Geração:** 14/10/2026 às 20:34
+> **Data de Geração:** 14/10/2026 às 21:47
 > **Diretório Escaneado:** `/Users/thiagocarvalho/Public/Crisma de Adultos`
 > **Status:** Prévia concluída (Merge Construtivo pronto para conferência)
 
