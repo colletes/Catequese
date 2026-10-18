@@ -498,6 +498,11 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
 
     resolveDocPdfUrl: function (docNode) {
       if (!docNode) return '';
+      const ext = (docNode.extension || '').toLowerCase();
+      const isPpt = ext === 'pptx' || ext === 'ppt' || docNode.type === 'presentation' || (docNode.mimeType && docNode.mimeType.includes('presentation'));
+      if (isPpt) {
+        return this.resolvePresentationUrls(docNode).pptPdfUrl;
+      }
       let url = this.cleanWebUrl(docNode.pdfUrl) || this.cleanWebUrl(docNode.mediaUrl);
       if (!url && (docNode.isPdf || docNode.extension === 'pdf' || (docNode.fileName && docNode.fileName.toLowerCase().endsWith('.pdf')))) {
         const baseSlug = this.toSafeSlug(docNode.fileName ? docNode.fileName.replace(/\.pdf$/i, '') : docNode.title);
@@ -1483,12 +1488,9 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
         this.renderMediaViewer(node);
       }
 
-      // Em telas mobile, recolhe suavemente a sidebar se selecionou um documento
-      if (window.innerWidth < 768 && node.type !== 'folder') {
-        const treeCol = document.getElementById('wiki-tree-column');
-        if (treeCol && !treeCol.classList.contains('hidden')) {
-          this.toggleMobileSidebar(false);
-        }
+      // Em telas mobile, fecha a gaveta lateral ao selecionar qualquer item (pasta ou arquivo)
+      if (window.innerWidth < 768) {
+        this.toggleMobileSidebar(false);
       }
     },
 
@@ -2391,79 +2393,30 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
       }
       // --- VISUALIZADOR DE APRESENTAÇÃO DE SLIDES NA ÍNTEGRA ---
       else if (isPpt) {
-        const { pptPdfUrl, pptDownloadUrl, baseSlug, ext } = this.resolvePresentationUrls(mediaNode);
+        const { pptPdfUrl, pptDownloadUrl } = this.resolvePresentationUrls(mediaNode);
         const hasSlidesOutline = mediaNode.slides && mediaNode.slides.length > 0;
 
         playerHtml = `
           <div class="space-y-4">
-            <!-- Barra Superior da Apresentação na Íntegra -->
-            <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-900 text-white p-3.5 rounded-2xl border border-slate-800 shadow-md">
-              <div class="flex items-center gap-2">
-                <span class="text-xl">📽️</span>
-                <div>
-                  <span class="font-bold text-xs uppercase tracking-wider text-purple-400 font-heading">
-                    Apresentação de Slides na Íntegra
-                  </span>
-                  <p class="text-[11px] text-slate-400">Exibição vetorial completa com todos os slides, gráficos, imagens sacras e diagramas originais</p>
-                </div>
-              </div>
-
-              <div class="flex items-center gap-2 flex-wrap">
-                <button
-                  type="button"
-                  onclick="window.WikiKB.toggleIframeFullscreen('wiki-ppt-embed-frame')"
-                  class="px-3.5 py-1.5 rounded-xl bg-purple-700 hover:bg-purple-600 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer active:scale-95"
-                  title="Modo Apresentação em Tela Cheia (F)"
-                >
-                  <span>⛶</span> <span>Tela Cheia</span>
-                </button>
-
-                ${hasSlidesOutline ? `
-                  <button
-                    type="button"
-                    onclick="document.getElementById('wiki-ppt-outline-container')?.classList.toggle('hidden')"
-                    class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
-                    title="Ver tópicos e notas pedagógicas para o catequista"
-                  >
-                    <span>💡</span> <span>Roteiro / Notas</span>
-                  </button>
-                ` : ''}
-
-                ${pptDownloadUrl ? `
-                  <a
-                    href="${pptDownloadUrl}"
-                    download
-                    class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer active:scale-95"
-                    title="Baixar arquivo original editável (.${mediaNode.extension ? mediaNode.extension.toUpperCase() : 'PPTX'})"
-                  >
-                    <span>📥</span> <span>Baixar .${mediaNode.extension ? mediaNode.extension.toUpperCase() : 'PPTX'}</span>
-                  </a>
-                ` : ''}
-              </div>
-            </div>
-
-            <!-- Palco de Visualização da Apresentação (Na Íntegra) -->
-            <div class="w-full h-[620px] bg-slate-950 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl relative">
-              <iframe
-                id="wiki-ppt-embed-frame"
-                src="${pptPdfUrl}#view=FitH&toolbar=1"
-                class="w-full h-full border-0"
-                title="Apresentação de Slides na Íntegra"
-                loading="lazy"
-                allowfullscreen="true"
-              ></iframe>
-            </div>
+            <!-- Palco de Visualização Universal da Apresentação com PDF.js -->
+            ${this.renderPdfViewerHtml(mediaNode)}
 
             <!-- Roteiro e Notas Pedagógicas (Gaveta Opcional) -->
             ${hasSlidesOutline ? `
-              <div id="wiki-ppt-outline-container" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-5 text-white space-y-4">
+              <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 text-white space-y-3">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-                  <h4 class="font-bold text-xs uppercase tracking-wider text-purple-400 font-heading">
-                    💡 Roteiro Pedagógico & Notas do Catequista (${mediaNode.slides.length} slides)
+                  <h4 class="font-bold text-xs uppercase tracking-wider text-purple-400 font-heading flex items-center gap-1.5">
+                    <span>💡</span> <span>Roteiro Pedagógico & Notas do Catequista (${mediaNode.slides.length} slides)</span>
                   </h4>
-                  <button onclick="document.getElementById('wiki-ppt-outline-container').classList.add('hidden')" class="text-xs text-slate-400 hover:text-white">✕ Fechar</button>
+                  <button
+                    type="button"
+                    onclick="document.getElementById('wiki-ppt-outline-container')?.classList.toggle('hidden')"
+                    class="text-xs text-slate-300 hover:text-white px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 transition cursor-pointer"
+                  >
+                    Alternar Detalhes
+                  </button>
                 </div>
-                <div class="space-y-3 max-h-96 overflow-y-auto pr-2 text-xs">
+                <div id="wiki-ppt-outline-container" class="space-y-3 max-h-96 overflow-y-auto pr-2 text-xs">
                   ${mediaNode.slides.map(s => `
                     <div class="p-3 bg-slate-950/80 rounded-xl border border-slate-800">
                       <strong class="text-amber-400 text-xs block mb-1">Slide ${s.slideNumber}: ${s.title}</strong>
@@ -2476,7 +2429,7 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
             ` : ''}
 
             <div class="flex flex-wrap items-center justify-between text-xs text-slate-500 px-2 gap-2">
-              <span>💡 Dica: Role ou use as setas do leitor acima para navegar pelos slides na íntegra.</span>
+              <span>💡 Dica: No celular, toque nos botões ◀ / ▶ ou amplie com ＋ / － para visualizar cada slide em alta definição.</span>
               ${pptPdfUrl ? `
                 <a href="${pptPdfUrl}" target="_blank" class="font-bold text-purple-700 hover:underline">
                   Abrir apresentação em tela cheia / nova aba ↗
@@ -2557,9 +2510,11 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
         </article>
       `;
 
-      // Inicializa eventos do áudio customizado se for áudio
+      // Inicializa player customizado conforme o tipo de mídia
       if (isAudio) {
         setTimeout(() => this.initCustomAudioPlayer(), 50);
+      } else if (isPpt) {
+        setTimeout(() => this.initPdfViewer(mediaNode), 60);
       }
     },
 
@@ -2729,38 +2684,41 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
     },
 
     renderPdfViewerHtml: function (docNode) {
+      const ext = (docNode.extension || '').toLowerCase();
+      const isPpt = ext === 'pptx' || ext === 'ppt' || docNode.type === 'presentation' || (docNode.mimeType && docNode.mimeType.includes('presentation'));
       const pdfUrl = this.resolveDocPdfUrl(docNode);
-      const pageCountStr = docNode.pageCount ? ` (${docNode.pageCount} páginas)` : '';
+      const pageCountStr = docNode.pageCount ? ` (${docNode.pageCount} ${isPpt ? 'slides' : 'páginas'})` : '';
       const isCloudOrWebUrl = !!pdfUrl;
+      const { pptDownloadUrl } = isPpt ? this.resolvePresentationUrls(docNode) : { pptDownloadUrl: '' };
 
       if (!isCloudOrWebUrl) {
         // Fallback elegante quando o binário original ainda não foi disponibilizado na nuvem
         return `
-          <div class="wiki-pdf-viewer mb-6 bg-slate-950 border border-slate-800 rounded-3xl overflow-hidden p-6 sm:p-8">
+          <div class="wiki-pdf-viewer mb-6 bg-slate-950 border border-slate-800 rounded-3xl overflow-hidden p-5 sm:p-8">
             <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4">
               <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-2xl text-amber-400 shrink-0">
-                📕
+                ${isPpt ? '📽️' : '📕'}
               </div>
               <div class="flex-1 text-center sm:text-left space-y-2">
                 <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                   <h4 class="font-bold text-sm text-slate-100 font-heading">
-                    Leitor de PDF Original ${pageCountStr}
+                    ${isPpt ? 'Apresentação de Slides Original' : 'Leitor de PDF Original'} ${pageCountStr}
                   </h4>
                   <span class="px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-bold">
                     ⏳ Sincronização em Nuvem Pendente
                   </span>
                 </div>
                 <p class="text-xs text-slate-400 leading-relaxed max-w-2xl">
-                  O arquivo binário original (<strong class="text-slate-300">${docNode.fileName || docNode.title}.pdf</strong>) está catalogado no acervo local e aguarda upload para a nuvem.
-                  Toda a estrutura pedagógica e o texto integral deste material já foram transcritos e estão disponíveis para leitura, pesquisa e impressão logo abaixo.
+                  O arquivo original (<strong class="text-slate-300">${docNode.fileName || docNode.title}.${ext || (isPpt ? 'pptx' : 'pdf')}</strong>) está catalogado no acervo e aguarda upload na nuvem.
+                  Todo o conteúdo e estrutura pedagógica já estão disponíveis para leitura e consulta logo abaixo.
                 </p>
                 <div class="pt-2 flex flex-wrap items-center justify-center sm:justify-start gap-3">
                   <button
                     type="button"
-                    onclick="document.querySelector('.wiki-prose')?.scrollIntoView({ behavior: 'smooth' })"
+                    onclick="document.querySelector('.wiki-prose, #wiki-ppt-outline-container')?.scrollIntoView({ behavior: 'smooth' })"
                     class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer active:scale-95"
                   >
-                    <span>📖</span> <span>Ler Texto Transcrito Abaixo</span>
+                    <span>📖</span> <span>Consultar Conteúdo Abaixo</span>
                   </button>
                   <button
                     type="button"
@@ -2781,31 +2739,31 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
         <div id="wiki-pdf-viewer-root" class="wiki-pdf-viewer mb-6">
           <div class="wiki-pdf-toolbar">
             <div class="flex items-center gap-2">
-              <span class="text-base">📕</span>
+              <span class="text-base">${isPpt ? '📽️' : '📕'}</span>
               <span class="font-bold text-xs uppercase tracking-wider text-slate-200">
-                Leitor de PDF Universal
+                ${isPpt ? 'Slides na Íntegra' : 'Leitor de PDF'}
               </span>
-              <span id="wiki-pdf-page-badge" class="bg-slate-800 text-slate-300 text-xs px-2.5 py-0.5 rounded-full font-mono font-bold border border-slate-700">
-                Pág. <span id="wiki-pdf-current-page-num">1</span> de <span id="wiki-pdf-total-pages">${docNode.pageCount || '?'}</span>
+              <span id="wiki-pdf-page-badge" class="bg-slate-800 text-slate-300 text-xs px-2 sm:px-2.5 py-0.5 rounded-full font-mono font-bold border border-slate-700">
+                ${isPpt ? 'Slide' : 'Pág.'} <span id="wiki-pdf-current-page-num">1</span> de <span id="wiki-pdf-total-pages">${docNode.pageCount || '?'}</span>
               </span>
             </div>
 
             <!-- Controles de Navegação e Zoom -->
-            <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+            <div class="flex items-center gap-1 sm:gap-2 flex-wrap">
               <!-- Botão Anterior -->
               <button
                 type="button"
                 id="wiki-pdf-btn-prev"
                 onclick="window.WikiKB.pdfPrevPage()"
-                class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer active:scale-95"
-                title="Página Anterior (←)"
+                class="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer active:scale-95"
+                title="${isPpt ? 'Slide Anterior' : 'Página Anterior'} (←)"
               >
                 <span>◀</span> <span class="hidden sm:inline">Anterior</span>
               </button>
 
               <!-- Input de Página Direta -->
-              <div class="flex items-center text-xs text-slate-400 gap-1 bg-slate-800/80 px-2 py-1 rounded-lg border border-slate-700">
-                <span>Ir:</span>
+              <div class="flex items-center text-xs text-slate-400 gap-1 bg-slate-800/80 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-lg border border-slate-700">
+                <span class="hidden sm:inline">Ir:</span>
                 <input
                   id="wiki-pdf-page-input"
                   type="number"
@@ -2813,7 +2771,7 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
                   max="${docNode.pageCount || 999}"
                   value="1"
                   onchange="window.WikiKB.pdfGoToPage(this.value)"
-                  class="w-10 text-center bg-slate-900 text-white font-mono rounded px-1 py-0.5 border border-slate-600 text-xs"
+                  class="w-9 sm:w-10 text-center bg-slate-900 text-white font-mono rounded px-1 py-0.5 border border-slate-600 text-xs"
                 />
               </div>
 
@@ -2822,8 +2780,8 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
                 type="button"
                 id="wiki-pdf-btn-next"
                 onclick="window.WikiKB.pdfNextPage()"
-                class="px-2.5 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold transition flex items-center gap-1 shadow-2xs disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer active:scale-95"
-                title="Próxima Página (→)"
+                class="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold transition flex items-center gap-1 shadow-2xs disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer active:scale-95"
+                title="${isPpt ? 'Próximo Slide' : 'Próxima Página'} (→)"
               >
                 <span class="hidden sm:inline">Próxima</span> <span>▶</span>
               </button>
@@ -2835,20 +2793,20 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
               <button
                 type="button"
                 onclick="window.WikiKB.pdfZoomOut()"
-                class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition cursor-pointer"
+                class="px-2 py-1 sm:px-2 sm:py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition cursor-pointer"
                 title="Diminuir Zoom (-)"
               >
                 <span>🔍－</span>
               </button>
 
               <!-- Zoom Label -->
-              <span id="wiki-pdf-zoom-label" class="text-[11px] font-mono text-slate-300 w-11 text-center">100%</span>
+              <span id="wiki-pdf-zoom-label" class="text-[11px] font-mono text-slate-300 w-9 sm:w-11 text-center">100%</span>
 
               <!-- Zoom In -->
               <button
                 type="button"
                 onclick="window.WikiKB.pdfZoomIn()"
-                class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition cursor-pointer"
+                class="px-2 py-1 sm:px-2 sm:py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition cursor-pointer"
                 title="Aumentar Zoom (+)"
               >
                 <span>🔍＋</span>
@@ -2858,7 +2816,7 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
               <button
                 type="button"
                 onclick="window.WikiKB.pdfFitWidth()"
-                class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition hidden sm:inline-flex items-center gap-1 cursor-pointer"
+                class="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition hidden sm:inline-flex items-center gap-1 cursor-pointer"
                 title="Ajustar à Largura"
               >
                 <span>↔</span> <span>Ajustar</span>
@@ -2871,25 +2829,36 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
               <a
                 href="${pdfUrl}"
                 target="_blank"
-                class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center gap-1"
+                class="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center gap-1"
                 title="Abrir em Nova Aba"
               >
                 <span>↗</span> <span class="hidden md:inline">Nova Aba</span>
               </a>
 
+              ${isPpt && pptDownloadUrl ? `
+                <a
+                  href="${pptDownloadUrl}"
+                  download
+                  class="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg bg-purple-700 hover:bg-purple-600 text-white text-xs font-bold transition flex items-center gap-1 shadow-2xs"
+                  title="Baixar arquivo original editável (.${(docNode.extension || 'PPTX').toUpperCase()})"
+                >
+                  <span>📥</span> <span class="hidden sm:inline">Baixar .${(docNode.extension || 'PPTX').toUpperCase()}</span>
+                </a>
+              ` : ''}
+
               <a
                 href="${pdfUrl}"
                 download
-                class="px-2.5 py-1.5 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center gap-1 shadow-2xs"
-                title="Baixar PDF Original"
+                class="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center gap-1 shadow-2xs"
+                title="${isPpt ? 'Baixar Apresentação em PDF' : 'Baixar PDF Original'}"
               >
-                <span>📥</span> <span class="hidden md:inline">Baixar</span>
+                <span>📥</span> <span class="hidden md:inline">${isPpt ? 'Baixar PDF' : 'Baixar'}</span>
               </a>
 
               <button
                 type="button"
                 onclick="window.WikiKB.togglePdfFullscreen()"
-                class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center gap-1 cursor-pointer"
+                class="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center gap-1 cursor-pointer"
                 title="Tela Cheia"
               >
                 <span>⛶</span>
@@ -2898,10 +2867,10 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
           </div>
 
           <!-- Palco de Renderização Canvas do PDF.js -->
-          <div id="wiki-pdf-canvas-container" class="wiki-pdf-canvas-container min-h-[420px] max-h-[720px] overflow-auto flex flex-col items-center justify-start p-4 bg-slate-900 relative">
+          <div id="wiki-pdf-canvas-container" class="wiki-pdf-canvas-container min-h-[300px] sm:min-h-[420px] max-h-[720px] overflow-auto flex flex-col items-center justify-start p-2 sm:p-4 bg-slate-900 relative">
             <div id="wiki-pdf-spinner" class="my-auto py-12 flex flex-col items-center justify-center text-slate-300 space-y-3">
               <div class="w-8 h-8 border-3 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
-              <p class="text-xs font-semibold">Carregando visualizador de PDF...</p>
+              <p class="text-xs font-semibold">${isPpt ? 'Carregando slides...' : 'Carregando visualizador de PDF...'}</p>
             </div>
             <canvas id="wiki-pdf-canvas" class="wiki-pdf-canvas hidden"></canvas>
           </div>
@@ -3094,8 +3063,9 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
       try {
         const page = await state.pdfDoc.getPage(state.pageNum || 1);
         const unscaledViewport = page.getViewport({ scale: 1.0 });
-        const availableWidth = Math.max(container.clientWidth - 48, 320);
-        state.scale = Math.min(Math.max(availableWidth / unscaledViewport.width, 0.6), 2.5);
+        const pad = window.innerWidth < 640 ? 16 : 48;
+        const availableWidth = Math.max((container.clientWidth || window.innerWidth) - pad, 200);
+        state.scale = Math.min(Math.max(availableWidth / unscaledViewport.width, 0.2), 3.0);
         if (renderImmediately !== false) {
           this.renderPdfPage(state.pageNum || 1);
         } else {
@@ -3537,12 +3507,22 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
 
     toggleMobileSidebar: function (forceState) {
       const treeCol = document.getElementById('wiki-tree-column');
+      const backdrop = document.getElementById('wiki-mobile-backdrop');
       if (!treeCol) return;
-      if (typeof forceState === 'boolean') {
-        if (forceState) treeCol.classList.remove('hidden');
-        else treeCol.classList.add('hidden');
+
+      const isOpening = typeof forceState === 'boolean'
+        ? forceState
+        : !treeCol.classList.contains('mobile-open');
+
+      if (isOpening) {
+        treeCol.classList.add('mobile-open');
+        treeCol.classList.remove('hidden');
+        if (backdrop) backdrop.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden-mobile-wiki');
       } else {
-        treeCol.classList.toggle('hidden');
+        treeCol.classList.remove('mobile-open');
+        if (backdrop) backdrop.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden-mobile-wiki');
       }
     },
 
@@ -3556,10 +3536,22 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
         }
       }
 
-      // Fecha o lightbox de imagem com a tecla Esc
+      // Redimensionamento de tela reajusta o zoom do PDF/Slides automaticamente
+      let resizeTimer = null;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+          if (this.pdfViewerState && this.pdfViewerState.pdfDoc) {
+            this.pdfFitWidth(true);
+          }
+        }, 200);
+      });
+
+      // Fecha o lightbox ou gaveta lateral com a tecla Esc
       document.addEventListener('keydown', e => {
         if (e.key === 'Escape') {
           this.closeImageLightbox();
+          this.toggleMobileSidebar(false);
         }
       });
     }

@@ -767,3 +767,67 @@
     padding: 6px 8px !important;
   }
 }
+
+/* ==========================================================================
+   GAVETA MOBILE DA ÁRVORE DE PASTAS & RESPONSIVIDADE
+   ========================================================================== */
+
+@media (max-width: 767px) {
+  /* Em telas mobile, a coluna nunca flutua sobre o texto por rolagem comum */
+  #wiki-tree-column {
+    display: none;
+    position: static !important;
+  }
+
+  /* Quando ativada pelo botão Pastas, vira gaveta modal lateral */
+  #wiki-tree-column.mobile-open {
+    display: flex !important;
+    flex-direction: column !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    width: 86vw !important;
+    max-width: 340px !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    z-index: 9999 !important;
+    border-radius: 0 1.5rem 1.5rem 0 !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    animation: wikiSlideInLeft 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+
+  body.overflow-hidden-mobile-wiki {
+    overflow: hidden !important;
+  }
+
+  .wiki-pdf-toolbar {
+    padding: 0.5rem 0.75rem !important;
+    gap: 0.5rem !important;
+  }
+
+  .wiki-pdf-canvas-container {
+    padding: 0.5rem !important;
+    max-height: 65vh !important;
+  }
+}
+
+@keyframes wikiSlideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Otimização de renderização do canvas PDF */
+.wiki-pdf-canvas {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
