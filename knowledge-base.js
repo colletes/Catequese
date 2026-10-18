@@ -1402,6 +1402,7 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
     // 3. SELEÇÃO E NAVEGAÇÃO DE NÓS
     // ========================================================================
     selectNode: function (nodeId) {
+      this.cleanupPdfViewer();
       const node = this.getNode(nodeId);
       if (!node) {
         // Fallback para raiz
@@ -2137,6 +2138,11 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
         setTimeout(() => this.initSlideViewer(docNode.slides), 50);
       }
 
+      // Inicializa Leitor de PDF Universal (PDF.js) se for documento PDF
+      if (isPdfDoc) {
+        setTimeout(() => this.initPdfViewer(docNode), 60);
+      }
+
       // Anexa evento de Lightbox em todas as imagens do Markdown
       setTimeout(() => {
         const imgs = viewer.querySelectorAll('.wiki-prose img');
@@ -2663,75 +2669,425 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
     // ========================================================================
     // 9. LEITOR DEDICADO DE PDF E VISUALIZADOR DE SLIDES (ALTA FIDELIDADE)
     // ========================================================================
+    pdfViewerState: {
+      pdfDoc: null,
+      pageNum: 1,
+      numPages: 0,
+      scale: 1.0,
+      isRendering: false,
+      pageNumPending: null,
+      currentRenderTask: null,
+      currentDocNode: null
+    },
+
+    cleanupPdfViewer: function () {
+      if (this.pdfViewerState.currentRenderTask) {
+        try {
+          this.pdfViewerState.currentRenderTask.cancel();
+        } catch (e) {}
+        this.pdfViewerState.currentRenderTask = null;
+      }
+      this.pdfViewerState.pdfDoc = null;
+      this.pdfViewerState.isRendering = false;
+      this.pdfViewerState.pageNumPending = null;
+      this.pdfViewerState.currentDocNode = null;
+    },
+
     renderPdfViewerHtml: function (docNode) {
-      let pdfUrl = docNode.pdfUrl || docNode.mediaUrl || (docNode.fullLocalPath ? `file://${docNode.fullLocalPath}` : '');
+      let pdfUrl = docNode.pdfUrl || docNode.mediaUrl || '';
       if (pdfUrl && !pdfUrl.startsWith('/') && !pdfUrl.startsWith('http') && !pdfUrl.startsWith('file://')) {
         pdfUrl = '/' + pdfUrl;
       }
       const pageCountStr = docNode.pageCount ? ` (${docNode.pageCount} páginas)` : '';
-      const isLocal = !docNode.mediaUrl && !docNode.pdfUrl && docNode.fullLocalPath;
+      const isCloudOrWebUrl = pdfUrl && !pdfUrl.startsWith('file://');
 
+      if (!isCloudOrWebUrl) {
+        // Fallback elegante quando o binário original ainda não foi disponibilizado na nuvem
+        return `
+          <div class="wiki-pdf-viewer mb-6 bg-slate-950 border border-slate-800 rounded-3xl overflow-hidden p-6 sm:p-8">
+            <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+              <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-2xl text-amber-400 shrink-0">
+                📕
+              </div>
+              <div class="flex-1 text-center sm:text-left space-y-2">
+                <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                  <h4 class="font-bold text-sm text-slate-100 font-heading">
+                    Leitor de PDF Original ${pageCountStr}
+                  </h4>
+                  <span class="px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-bold">
+                    ⏳ Sincronização em Nuvem Pendente
+                  </span>
+                </div>
+                <p class="text-xs text-slate-400 leading-relaxed max-w-2xl">
+                  O arquivo binário original (<strong class="text-slate-300">${docNode.fileName || docNode.title}.pdf</strong>) está catalogado no acervo local e aguarda upload para a nuvem.
+                  Toda a estrutura pedagógica e o texto integral deste material já foram transcritos e estão disponíveis para leitura, pesquisa e impressão logo abaixo.
+                </p>
+                <div class="pt-2 flex flex-wrap items-center justify-center sm:justify-start gap-3">
+                  <button
+                    type="button"
+                    onclick="document.querySelector('.wiki-prose')?.scrollIntoView({ behavior: 'smooth' })"
+                    class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer active:scale-95"
+                  >
+                    <span>📖</span> <span>Ler Texto Transcrito Abaixo</span>
+                  </button>
+                  <button
+                    type="button"
+                    onclick="window.print()"
+                    class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>🖨️</span> <span>Imprimir / Salvar PDF</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // Visualizador interativo universal de PDF via PDF.js
       return `
-        <div class="wiki-pdf-viewer mb-6">
+        <div id="wiki-pdf-viewer-root" class="wiki-pdf-viewer mb-6">
           <div class="wiki-pdf-toolbar">
             <div class="flex items-center gap-2">
               <span class="text-base">📕</span>
               <span class="font-bold text-xs uppercase tracking-wider text-slate-200">
-                Leitor de PDF Original ${pageCountStr}
+                Leitor de PDF Universal
+              </span>
+              <span id="wiki-pdf-page-badge" class="bg-slate-800 text-slate-300 text-xs px-2.5 py-0.5 rounded-full font-mono font-bold border border-slate-700">
+                Pág. <span id="wiki-pdf-current-page-num">1</span> de <span id="wiki-pdf-total-pages">${docNode.pageCount || '?'}</span>
               </span>
             </div>
-            <div class="flex items-center gap-2 flex-wrap">
-              ${pdfUrl ? `
-                <a
-                  href="${pdfUrl}"
-                  target="_blank"
-                  class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center gap-1.5"
-                  title="Abrir PDF em nova aba para leitura e impressão do navegador"
-                >
-                  <span>↗</span> <span>Abrir Separado</span>
-                </a>
-                <a
-                  href="${pdfUrl}"
-                  download
-                  class="px-3 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-2xs"
-                  title="Baixar arquivo PDF original completo"
-                >
-                  <span>📥</span> <span>Baixar PDF</span>
-                </a>
-              ` : `
-                <span class="text-xs text-slate-400">Arquivo local: ${docNode.fileName || docNode.title}</span>
-              `}
+
+            <!-- Controles de Navegação e Zoom -->
+            <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+              <!-- Botão Anterior -->
               <button
                 type="button"
-                onclick="window.WikiKB.toggleIframeFullscreen('wiki-pdf-embed-frame')"
-                class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center gap-1.5"
+                id="wiki-pdf-btn-prev"
+                onclick="window.WikiKB.pdfPrevPage()"
+                class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer active:scale-95"
+                title="Página Anterior (←)"
+              >
+                <span>◀</span> <span class="hidden sm:inline">Anterior</span>
+              </button>
+
+              <!-- Input de Página Direta -->
+              <div class="flex items-center text-xs text-slate-400 gap-1 bg-slate-800/80 px-2 py-1 rounded-lg border border-slate-700">
+                <span>Ir:</span>
+                <input
+                  id="wiki-pdf-page-input"
+                  type="number"
+                  min="1"
+                  max="${docNode.pageCount || 999}"
+                  value="1"
+                  onchange="window.WikiKB.pdfGoToPage(this.value)"
+                  class="w-10 text-center bg-slate-900 text-white font-mono rounded px-1 py-0.5 border border-slate-600 text-xs"
+                />
+              </div>
+
+              <!-- Botão Próxima -->
+              <button
+                type="button"
+                id="wiki-pdf-btn-next"
+                onclick="window.WikiKB.pdfNextPage()"
+                class="px-2.5 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold transition flex items-center gap-1 shadow-2xs disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer active:scale-95"
+                title="Próxima Página (→)"
+              >
+                <span class="hidden sm:inline">Próxima</span> <span>▶</span>
+              </button>
+
+              <!-- Divisor -->
+              <span class="text-slate-600 hidden sm:inline">|</span>
+
+              <!-- Zoom Out -->
+              <button
+                type="button"
+                onclick="window.WikiKB.pdfZoomOut()"
+                class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition cursor-pointer"
+                title="Diminuir Zoom (-)"
+              >
+                <span>🔍－</span>
+              </button>
+
+              <!-- Zoom Label -->
+              <span id="wiki-pdf-zoom-label" class="text-[11px] font-mono text-slate-300 w-11 text-center">100%</span>
+
+              <!-- Zoom In -->
+              <button
+                type="button"
+                onclick="window.WikiKB.pdfZoomIn()"
+                class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition cursor-pointer"
+                title="Aumentar Zoom (+)"
+              >
+                <span>🔍＋</span>
+              </button>
+
+              <!-- Ajustar Largura -->
+              <button
+                type="button"
+                onclick="window.WikiKB.pdfFitWidth()"
+                class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition hidden sm:inline-flex items-center gap-1 cursor-pointer"
+                title="Ajustar à Largura"
+              >
+                <span>↔</span> <span>Ajustar</span>
+              </button>
+
+              <!-- Divisor -->
+              <span class="text-slate-600 hidden md:inline">|</span>
+
+              <!-- Ações -->
+              <a
+                href="${pdfUrl}"
+                target="_blank"
+                class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center gap-1"
+                title="Abrir em Nova Aba"
+              >
+                <span>↗</span> <span class="hidden md:inline">Nova Aba</span>
+              </a>
+
+              <a
+                href="${pdfUrl}"
+                download
+                class="px-2.5 py-1.5 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center gap-1 shadow-2xs"
+                title="Baixar PDF Original"
+              >
+                <span>📥</span> <span class="hidden md:inline">Baixar</span>
+              </a>
+
+              <button
+                type="button"
+                onclick="window.WikiKB.togglePdfFullscreen()"
+                class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center gap-1 cursor-pointer"
                 title="Tela Cheia"
               >
-                <span>⛶</span> <span>Tela Cheia</span>
+                <span>⛶</span>
               </button>
             </div>
           </div>
 
-          <div class="w-full h-[580px] bg-slate-900 overflow-hidden relative">
-            ${pdfUrl ? `
-              <iframe
-                id="wiki-pdf-embed-frame"
-                src="${pdfUrl}#view=FitH&toolbar=1"
-                class="w-full h-full border-0"
-                title="Visualizador do PDF Original"
-                loading="lazy"
-              ></iframe>
-            ` : `
-              <div class="flex flex-col items-center justify-center h-full text-slate-400 text-sm p-8 text-center space-y-3">
-                <span class="text-4xl">📄</span>
-                <p class="font-bold text-slate-200">${docNode.title}.pdf</p>
-                <p class="text-xs max-w-md">O arquivo original está no seu Mac em: <br><code class="text-emerald-400">${docNode.fullLocalPath || docNode.relativePath}</code></p>
-                <p class="text-xs text-slate-400">Você pode ler o texto integral e as referências extraídas logo abaixo.</p>
-              </div>
-            `}
+          <!-- Palco de Renderização Canvas do PDF.js -->
+          <div id="wiki-pdf-canvas-container" class="wiki-pdf-canvas-container min-h-[420px] max-h-[720px] overflow-auto flex flex-col items-center justify-start p-4 bg-slate-900 relative">
+            <div id="wiki-pdf-spinner" class="my-auto py-12 flex flex-col items-center justify-center text-slate-300 space-y-3">
+              <div class="w-8 h-8 border-3 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
+              <p class="text-xs font-semibold">Carregando visualizador de PDF...</p>
+            </div>
+            <canvas id="wiki-pdf-canvas" class="wiki-pdf-canvas hidden"></canvas>
           </div>
         </div>
       `;
+    },
+
+    initPdfViewer: async function (docNode) {
+      this.cleanupPdfViewer();
+
+      const container = document.getElementById('wiki-pdf-canvas-container');
+      const canvas = document.getElementById('wiki-pdf-canvas');
+      if (!container || !canvas) return;
+
+      let pdfUrl = docNode.pdfUrl || docNode.mediaUrl;
+      if (!pdfUrl || pdfUrl.startsWith('file://')) {
+        return; // Fallback já exibido no template
+      }
+      if (!pdfUrl.startsWith('/') && !pdfUrl.startsWith('http')) {
+        pdfUrl = '/' + pdfUrl;
+      }
+
+      this.pdfViewerState.currentDocNode = docNode;
+      this.pdfViewerState.pageNum = 1;
+
+      if (typeof pdfjsLib === 'undefined') {
+        container.innerHTML = `
+          <div class="py-12 px-6 text-center text-slate-300 space-y-3">
+            <span class="text-3xl">⚠️</span>
+            <p class="text-sm font-bold text-slate-200">Biblioteca PDF.js não disponível.</p>
+            <p class="text-xs text-slate-400">Você pode abrir o arquivo diretamente no navegador pelo botão acima.</p>
+          </div>
+        `;
+        return;
+      }
+
+      try {
+        const loadingTask = pdfjsLib.getDocument({
+          url: pdfUrl,
+          cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',
+          cMapPacked: true
+        });
+
+        const pdfDoc = await loadingTask.promise;
+        this.pdfViewerState.pdfDoc = pdfDoc;
+        this.pdfViewerState.numPages = pdfDoc.numPages;
+
+        const totalEl = document.getElementById('wiki-pdf-total-pages');
+        if (totalEl) totalEl.textContent = pdfDoc.numPages;
+
+        const pageInput = document.getElementById('wiki-pdf-page-input');
+        if (pageInput) {
+          pageInput.max = pdfDoc.numPages;
+          pageInput.value = 1;
+        }
+
+        // Ajusta largura inicial automaticamente
+        await this.pdfFitWidth(false);
+      } catch (err) {
+        console.warn('Erro ao carregar PDF via PDF.js:', err);
+        container.innerHTML = `
+          <div class="py-12 px-6 flex flex-col items-center justify-center text-slate-300 space-y-3 text-center">
+            <span class="text-3xl">⚠️</span>
+            <p class="text-sm font-bold text-slate-100">Não foi possível carregar a prévia do PDF.</p>
+            <p class="text-xs text-slate-400 max-w-md">O documento pode estar temporariamente inacessível na nuvem ou requer conexão direta.</p>
+            <div class="flex items-center gap-2 pt-2">
+              <a href="${pdfUrl}" target="_blank" class="px-3.5 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition">
+                Abrir Separado ↗
+              </a>
+              <button type="button" onclick="window.WikiKB.initPdfViewer(window.WikiKB.pdfViewerState.currentDocNode)" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold transition">
+                Tentar Novamente 🔄
+              </button>
+            </div>
+          </div>
+        `;
+      }
+    },
+
+    renderPdfPage: async function (num) {
+      const state = this.pdfViewerState;
+      if (!state.pdfDoc) return;
+      if (num < 1) num = 1;
+      if (num > state.numPages) num = state.numPages;
+      state.pageNum = num;
+
+      const pageInput = document.getElementById('wiki-pdf-page-input');
+      if (pageInput) pageInput.value = num;
+
+      const curBadge = document.getElementById('wiki-pdf-current-page-num');
+      if (curBadge) curBadge.textContent = num;
+
+      const prevBtn = document.getElementById('wiki-pdf-btn-prev');
+      const nextBtn = document.getElementById('wiki-pdf-btn-next');
+      if (prevBtn) prevBtn.disabled = (num <= 1);
+      if (nextBtn) nextBtn.disabled = (num >= state.numPages);
+
+      const zoomLabel = document.getElementById('wiki-pdf-zoom-label');
+      if (zoomLabel) zoomLabel.textContent = `${Math.round(state.scale * 100)}%`;
+
+      if (state.isRendering) {
+        state.pageNumPending = num;
+        return;
+      }
+      state.isRendering = true;
+
+      const canvas = document.getElementById('wiki-pdf-canvas');
+      const spinner = document.getElementById('wiki-pdf-spinner');
+      if (!canvas) {
+        state.isRendering = false;
+        return;
+      }
+
+      try {
+        const page = await state.pdfDoc.getPage(num);
+        const viewport = page.getViewport({ scale: state.scale });
+        const ctx = canvas.getContext('2d');
+
+        const outputScale = window.devicePixelRatio || 1;
+        canvas.width = Math.floor(viewport.width * outputScale);
+        canvas.height = Math.floor(viewport.height * outputScale);
+        canvas.style.width = Math.floor(viewport.width) + 'px';
+        canvas.style.height = Math.floor(viewport.height) + 'px';
+
+        const transform = outputScale !== 1
+          ? [outputScale, 0, 0, outputScale, 0, 0]
+          : null;
+
+        const renderContext = {
+          canvasContext: ctx,
+          transform: transform,
+          viewport: viewport
+        };
+
+        if (state.currentRenderTask) {
+          try { state.currentRenderTask.cancel(); } catch (e) {}
+        }
+
+        state.currentRenderTask = page.render(renderContext);
+        await state.currentRenderTask.promise;
+        state.currentRenderTask = null;
+
+        if (spinner) spinner.classList.add('hidden');
+        canvas.classList.remove('hidden');
+      } catch (err) {
+        if (err && err.name === 'RenderingCancelledException') {
+          // Cancelamento intencional ao avançar rapidamente
+        } else {
+          console.warn('Erro na renderização da página:', err);
+        }
+      } finally {
+        state.isRendering = false;
+        if (state.pageNumPending !== null) {
+          const next = state.pageNumPending;
+          state.pageNumPending = null;
+          this.renderPdfPage(next);
+        }
+      }
+    },
+
+    pdfPrevPage: function () {
+      if (this.pdfViewerState.pageNum <= 1) return;
+      this.renderPdfPage(this.pdfViewerState.pageNum - 1);
+    },
+
+    pdfNextPage: function () {
+      if (this.pdfViewerState.pageNum >= this.pdfViewerState.numPages) return;
+      this.renderPdfPage(this.pdfViewerState.pageNum + 1);
+    },
+
+    pdfGoToPage: function (val) {
+      const page = parseInt(val, 10);
+      if (!isNaN(page)) {
+        this.renderPdfPage(page);
+      }
+    },
+
+    pdfZoomIn: function () {
+      this.pdfViewerState.scale = Math.min(this.pdfViewerState.scale + 0.2, 3.0);
+      this.renderPdfPage(this.pdfViewerState.pageNum);
+    },
+
+    pdfZoomOut: function () {
+      this.pdfViewerState.scale = Math.max(this.pdfViewerState.scale - 0.2, 0.5);
+      this.renderPdfPage(this.pdfViewerState.pageNum);
+    },
+
+    pdfFitWidth: async function (renderImmediately = true) {
+      const state = this.pdfViewerState;
+      if (!state.pdfDoc) return;
+      const container = document.getElementById('wiki-pdf-canvas-container');
+      if (!container) return;
+
+      try {
+        const page = await state.pdfDoc.getPage(state.pageNum || 1);
+        const unscaledViewport = page.getViewport({ scale: 1.0 });
+        const availableWidth = Math.max(container.clientWidth - 48, 320);
+        state.scale = Math.min(Math.max(availableWidth / unscaledViewport.width, 0.6), 2.5);
+        if (renderImmediately !== false) {
+          this.renderPdfPage(state.pageNum || 1);
+        } else {
+          await this.renderPdfPage(state.pageNum || 1);
+        }
+      } catch (e) {
+        state.scale = 1.0;
+        this.renderPdfPage(state.pageNum || 1);
+      }
+    },
+
+    togglePdfFullscreen: function () {
+      const el = document.getElementById('wiki-pdf-viewer-root');
+      if (!el) return;
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        if (el.requestFullscreen) el.requestFullscreen();
+        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      }
     },
 
     // --- SLIDE VIEWER INTERATIVO PARA APRESENTAÇÕES ---
