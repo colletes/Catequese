@@ -8,8 +8,36 @@
   'use strict';
 
   const COLLECTION_NAME = 'knowledge_nodes';
-  const STORAGE_CACHE_KEY = 'catequese_wiki_nodes_cache_v2';
+  const STORAGE_CACHE_KEY = 'catequese_wiki_nodes_cache_v3';
   let unsubscribeSnapshot = null;
+
+  function getAppBasePath() {
+    if (typeof window === 'undefined' || !window.location) return '';
+    if (window.location.protocol === 'file:') return '';
+    let path = window.location.pathname || '';
+    path = path.replace(/\/[^\/]*\.[^\/]+$/, '');
+    path = path.replace(/\/+$/, '');
+    return path;
+  }
+
+  function toAppUrl(url) {
+    if (!url || typeof url !== 'string' || url.startsWith('file://')) return '';
+    let trimmed = url.trim();
+    if (
+      trimmed.startsWith('http://') ||
+      trimmed.startsWith('https://') ||
+      trimmed.startsWith('data:') ||
+      trimmed.startsWith('blob:')
+    ) {
+      return trimmed;
+    }
+    const basePath = getAppBasePath();
+    const cleanRel = trimmed.startsWith('/') ? trimmed.slice(1) : trimmed;
+    if (basePath && (cleanRel === basePath.slice(1) || cleanRel.startsWith(basePath.slice(1) + '/'))) {
+      return '/' + cleanRel;
+    }
+    return basePath ? `${basePath}/${cleanRel}` : `/${cleanRel}`;
+  }
 
   function toSafeSlug(str) {
     if (!str) return '';
@@ -52,10 +80,15 @@
       }
     }
 
+    if (node.pdfUrl) node.pdfUrl = toAppUrl(node.pdfUrl);
+    if (node.mediaUrl) node.mediaUrl = toAppUrl(node.mediaUrl);
+
     return node;
   }
 
   window.KnowledgeService = {
+    getAppBasePath: getAppBasePath,
+    toAppUrl: toAppUrl,
     // Retorna a instância ativa do Firestore
     getDb: function () {
       if (window.firebaseDb) return window.firebaseDb;
@@ -71,12 +104,12 @@
       return !!this.getDb();
     },
 
-    // Cache local offline com auto-higienização e fallback v1 -> v2
+    // Cache local offline com auto-higienização e fallback v2 -> v1
     getLocalCache: function () {
       try {
         let raw = localStorage.getItem(STORAGE_CACHE_KEY);
         if (!raw) {
-          raw = localStorage.getItem('catequese_wiki_nodes_cache_v1');
+          raw = localStorage.getItem('catequese_wiki_nodes_cache_v2') || localStorage.getItem('catequese_wiki_nodes_cache_v1');
         }
         if (raw) {
           const parsed = JSON.parse(raw);
@@ -107,7 +140,8 @@
     // Busca o acervo estático de Crisma de Adultos (220 materiais) como carga segura
     fetchStaticAcervoSeed: async function () {
       try {
-        const resp = await fetch('/scripts/crisma_adultos_seed.json');
+        const seedUrl = toAppUrl('scripts/crisma_adultos_seed.json');
+        const resp = await fetch(seedUrl);
         if (!resp.ok) return null;
         const data = await resp.json();
         if (data && Array.isArray(data.nodes) && data.nodes.length > 0) {

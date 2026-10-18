@@ -487,13 +487,42 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
         .replace(/[-\s]+/g, '-');
     },
 
-    cleanWebUrl: function (url) {
+    getAppBasePath: function () {
+      if (window.KnowledgeService && typeof window.KnowledgeService.getAppBasePath === 'function') {
+        return window.KnowledgeService.getAppBasePath();
+      }
+      if (typeof window === 'undefined' || !window.location) return '';
+      if (window.location.protocol === 'file:') return '';
+      let path = window.location.pathname || '';
+      path = path.replace(/\/[^\/]*\.[^\/]+$/, '');
+      path = path.replace(/\/+$/, '');
+      return path;
+    },
+
+    toAppUrl: function (url) {
+      if (window.KnowledgeService && typeof window.KnowledgeService.toAppUrl === 'function') {
+        return window.KnowledgeService.toAppUrl(url);
+      }
       if (!url || typeof url !== 'string' || url.startsWith('file://')) return '';
       let trimmed = url.trim();
-      if (trimmed && !trimmed.startsWith('/') && !trimmed.startsWith('http')) {
-        trimmed = '/' + trimmed;
+      if (
+        trimmed.startsWith('http://') ||
+        trimmed.startsWith('https://') ||
+        trimmed.startsWith('data:') ||
+        trimmed.startsWith('blob:')
+      ) {
+        return trimmed;
       }
-      return trimmed;
+      const basePath = this.getAppBasePath();
+      const cleanRel = trimmed.startsWith('/') ? trimmed.slice(1) : trimmed;
+      if (basePath && (cleanRel === basePath.slice(1) || cleanRel.startsWith(basePath.slice(1) + '/'))) {
+        return '/' + cleanRel;
+      }
+      return basePath ? `${basePath}/${cleanRel}` : `/${cleanRel}`;
+    },
+
+    cleanWebUrl: function (url) {
+      return this.toAppUrl(url);
     },
 
     resolveDocPdfUrl: function (docNode) {
@@ -504,8 +533,8 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
         return this.resolvePresentationUrls(docNode).pptPdfUrl;
       }
       const baseSlug = this.toSafeSlug(docNode.fileName ? docNode.fileName.replace(/\.pdf$/i, '') : docNode.title);
-      // Sempre prioriza o slug ASCII seguro garantido no hosting
-      let url = (baseSlug ? `/acervo/documentos/${baseSlug}.pdf` : '') || this.cleanWebUrl(docNode.pdfUrl) || this.cleanWebUrl(docNode.mediaUrl);
+      // Sempre prioriza o slug ASCII seguro garantido no hosting com prefixo correto para o ambiente
+      let url = (baseSlug ? this.toAppUrl(`/acervo/documentos/${baseSlug}.pdf`) : '') || this.toAppUrl(docNode.pdfUrl) || this.toAppUrl(docNode.mediaUrl);
       return url;
     },
 
@@ -514,9 +543,9 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
       const baseSlug = this.toSafeSlug(mediaNode.fileName ? mediaNode.fileName.replace(/\.(pptx|ppt)$/i, '') : mediaNode.title);
       const ext = (mediaNode.extension || (mediaNode.fileName && mediaNode.fileName.toLowerCase().endsWith('.ppt') ? 'ppt' : 'pptx')).toLowerCase();
 
-      // Sempre prioriza o slug ASCII seguro garantido no hosting
-      let pptPdfUrl = (baseSlug ? `/acervo/apresentacoes/${baseSlug}.pdf` : '') || this.cleanWebUrl(mediaNode.pdfUrl);
-      let pptDownloadUrl = (baseSlug ? `/acervo/apresentacoes/${baseSlug}.${ext}` : '') || this.cleanWebUrl(mediaNode.mediaUrl);
+      // Sempre prioriza o slug ASCII seguro garantido no hosting com prefixo correto para o ambiente
+      let pptPdfUrl = (baseSlug ? this.toAppUrl(`/acervo/apresentacoes/${baseSlug}.pdf`) : '') || this.toAppUrl(mediaNode.pdfUrl);
+      let pptDownloadUrl = (baseSlug ? this.toAppUrl(`/acervo/apresentacoes/${baseSlug}.${ext}`) : '') || this.toAppUrl(mediaNode.mediaUrl);
 
       return { pptPdfUrl, pptDownloadUrl, baseSlug, ext };
     },
