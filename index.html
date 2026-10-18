@@ -23819,7 +23819,11 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       if (selStatus) selStatus.value = 'all';
 
       if (window.ColumnFilterEngine) {
-        window.ColumnFilterEngine.clearTableFilters('table-cadastro-geral');
+        if (typeof window.ColumnFilterEngine.clearTableFilters === 'function') {
+          window.ColumnFilterEngine.clearTableFilters('table-cadastro-geral');
+        } else if (typeof window.ColumnFilterEngine.clearAll === 'function') {
+          window.ColumnFilterEngine.clearAll('table-cadastro-geral');
+        }
       }
 
       renderCadastroGeralTable();
