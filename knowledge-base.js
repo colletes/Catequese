@@ -550,6 +550,16 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
       return { pptPdfUrl, pptDownloadUrl, baseSlug, ext };
     },
 
+    resolveVideoUrls: function (mediaNode) {
+      if (!mediaNode) return { mp4Url: '', movUrl: '', downloadUrl: '' };
+      const baseSlug = this.toSafeSlug(mediaNode.fileName ? mediaNode.fileName.replace(/\.(mov|mp4|m4v|avi)$/i, '') : mediaNode.title);
+      let mp4Url = (baseSlug ? this.toAppUrl(`/acervo/videos/${baseSlug}.mp4`) : '') || this.toAppUrl(mediaNode.mediaUrl);
+      let movUrl = (baseSlug ? this.toAppUrl(`/acervo/videos/${baseSlug}.mov`) : '');
+      let downloadUrl = mp4Url || movUrl || this.toAppUrl(mediaNode.mediaUrl);
+
+      return { mp4Url, movUrl, downloadUrl };
+    },
+
     // Inicialização do módulo
     init: function () {
       console.log('📚 WikiKB: Inicializando Base de Conhecimento...');
@@ -2260,53 +2270,85 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
 
       // --- PLAYER DE VÍDEO ---
       if (isVideo) {
-        playerHtml = `
-          <div class="space-y-4">
-            <div class="relative bg-black rounded-3xl overflow-hidden shadow-2xl border border-slate-800">
-              <video
-                id="wiki-active-video"
-                controls
-                playsinline
-                class="w-full max-h-[500px] object-contain"
-                preload="metadata"
-              >
-                <source src="${mediaNode.mediaUrl}" type="video/mp4">
-                Seu navegador não suporta a reprodução deste vídeo.
-              </video>
-            </div>
+        const { mp4Url, movUrl, downloadUrl } = this.resolveVideoUrls(mediaNode);
+        const hasVideoSource = !!(mp4Url || movUrl || mediaNode.mediaUrl);
 
-            <!-- Barra de Controles Complementares do Vídeo -->
-            <div class="bg-slate-900 text-white p-3.5 rounded-2xl border border-slate-800 flex flex-wrap items-center justify-between gap-3 shadow-md">
-              <div class="flex items-center gap-2">
-                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Velocidade:</span>
-                <div class="flex items-center gap-1">
-                  <button onclick="window.WikiKB.setVideoPlaybackRate(1.0)" class="wiki-video-speed-btn wiki-speed-btn active" data-rate="1">1x</button>
-                  <button onclick="window.WikiKB.setVideoPlaybackRate(1.25)" class="wiki-video-speed-btn wiki-speed-btn" data-rate="1.25">1.25x</button>
-                  <button onclick="window.WikiKB.setVideoPlaybackRate(1.5)" class="wiki-video-speed-btn wiki-speed-btn" data-rate="1.5">1.5x</button>
-                  <button onclick="window.WikiKB.setVideoPlaybackRate(2.0)" class="wiki-video-speed-btn wiki-speed-btn" data-rate="2">2x</button>
+        if (!hasVideoSource) {
+          playerHtml = `
+            <div class="wiki-pdf-viewer mb-6 bg-slate-950 border border-slate-800 rounded-3xl overflow-hidden p-5 sm:p-8">
+              <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-2xl text-amber-400 shrink-0">
+                  🎬
+                </div>
+                <div class="flex-1 text-center sm:text-left space-y-2">
+                  <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                    <h4 class="font-bold text-sm text-slate-100 font-heading">
+                      Vídeo de Apoio Catequético ${fileSizeStr ? `(${fileSizeStr})` : ''}
+                    </h4>
+                    <span class="px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-bold">
+                      ⏳ Sincronização em Nuvem Pendente
+                    </span>
+                  </div>
+                  <p class="text-xs text-slate-400 leading-relaxed max-w-2xl">
+                    O arquivo original (<strong class="text-slate-300">${mediaNode.fileName || mediaNode.title}</strong>) está catalogado no acervo e aguarda upload na nuvem.
+                  </p>
                 </div>
               </div>
+            </div>
+          `;
+        } else {
+          playerHtml = `
+            <div class="space-y-4">
+              <div class="relative bg-black rounded-3xl overflow-hidden shadow-2xl border border-slate-800 aspect-video flex items-center justify-center">
+                <video
+                  id="wiki-active-video"
+                  controls
+                  playsinline
+                  class="w-full h-full object-contain"
+                  preload="metadata"
+                >
+                  ${mp4Url ? `<source src="${mp4Url}" type="video/mp4">` : ''}
+                  ${movUrl ? `<source src="${movUrl}" type="video/quicktime">` : ''}
+                  ${mediaNode.mediaUrl ? `<source src="${this.cleanWebUrl(mediaNode.mediaUrl)}">` : ''}
+                  Seu navegador não suporta a reprodução direta deste vídeo.
+                </video>
+              </div>
 
-              <div class="flex items-center gap-2">
-                <button
-                  onclick="window.WikiKB.toggleVideoFullscreen()"
-                  class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
-                  title="Tela cheia"
-                >
-                  <span>⛶</span> <span>Tela Cheia</span>
-                </button>
-                <a
-                  href="${mediaNode.mediaUrl}"
-                  download
-                  target="_blank"
-                  class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
-                >
-                  <span>📥</span> <span>Baixar Vídeo</span>
-                </a>
+              <!-- Barra de Controles Complementares do Vídeo -->
+              <div class="bg-slate-900 text-white p-3.5 rounded-2xl border border-slate-800 flex flex-wrap items-center justify-between gap-3 shadow-md">
+                <div class="flex items-center gap-2">
+                  <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Velocidade:</span>
+                  <div class="flex items-center gap-1">
+                    <button onclick="window.WikiKB.setVideoPlaybackRate(1.0)" class="wiki-video-speed-btn wiki-speed-btn active" data-rate="1">1x</button>
+                    <button onclick="window.WikiKB.setVideoPlaybackRate(1.25)" class="wiki-video-speed-btn wiki-speed-btn" data-rate="1.25">1.25x</button>
+                    <button onclick="window.WikiKB.setVideoPlaybackRate(1.5)" class="wiki-video-speed-btn wiki-speed-btn" data-rate="1.5">1.5x</button>
+                    <button onclick="window.WikiKB.setVideoPlaybackRate(2.0)" class="wiki-video-speed-btn wiki-speed-btn" data-rate="2">2x</button>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <button
+                    onclick="window.WikiKB.toggleVideoFullscreen()"
+                    class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                    title="Tela cheia"
+                  >
+                    <span>⛶</span> <span>Tela Cheia</span>
+                  </button>
+                  ${downloadUrl ? `
+                    <a
+                      href="${downloadUrl}"
+                      download
+                      target="_blank"
+                      class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                    >
+                      <span>📥</span> <span>Baixar Vídeo</span>
+                    </a>
+                  ` : ''}
+                </div>
               </div>
             </div>
-          </div>
-        `;
+          `;
+        }
       }
       // --- PLAYER DE ÁUDIO CUSTOMIZADO ---
       else if (isAudio) {
@@ -2468,7 +2510,7 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
 
       const finalDownloadUrl = isPpt
         ? this.resolvePresentationUrls(mediaNode).pptDownloadUrl
-        : this.cleanWebUrl(mediaNode.mediaUrl);
+        : (isVideo ? this.resolveVideoUrls(mediaNode).downloadUrl : this.cleanWebUrl(mediaNode.mediaUrl));
 
       viewer.innerHTML = `
         <article class="bg-white rounded-3xl border border-slate-200/90 shadow-sm p-6 sm:p-8 space-y-6 animate-in fade-in duration-200">

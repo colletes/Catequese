@@ -8,7 +8,7 @@
   'use strict';
 
   const COLLECTION_NAME = 'knowledge_nodes';
-  const STORAGE_CACHE_KEY = 'catequese_wiki_nodes_cache_v3';
+  const STORAGE_CACHE_KEY = 'catequese_wiki_nodes_cache_v4';
   let unsubscribeSnapshot = null;
 
   function getAppBasePath() {
@@ -55,6 +55,8 @@
     const ext = (node.extension || '').toLowerCase();
     const isPdf = node.isPdf || ext === 'pdf' || (node.fileName && node.fileName.toLowerCase().endsWith('.pdf'));
     const isPpt = node.type === 'presentation' || ext === 'pptx' || ext === 'ppt';
+    const isAudio = ext === 'mp3' || ext === 'wav' || ext === 'm4a';
+    const isVideo = ext === 'mov' || ext === 'mp4' || ext === 'm4v' || ext === 'avi' || (node.type === 'media' && !isAudio && !isPpt && !isPdf);
 
     // Limpa referências a paths locais no Mac (file://)
     if (typeof node.mediaUrl === 'string' && node.mediaUrl.startsWith('file://')) {
@@ -77,6 +79,11 @@
       if (slug) {
         if (!node.pdfUrl) node.pdfUrl = `/acervo/apresentacoes/${slug}.pdf`;
         if (!node.mediaUrl) node.mediaUrl = `/acervo/apresentacoes/${slug}.${ext || 'pptx'}`;
+      }
+    } else if (isVideo) {
+      if (!node.mediaUrl) {
+        const slug = toSafeSlug(node.fileName ? node.fileName.replace(/\.(mov|mp4|m4v|avi)$/i, '') : node.title);
+        if (slug) node.mediaUrl = `/acervo/videos/${slug}.mp4`;
       }
     }
 
@@ -104,12 +111,12 @@
       return !!this.getDb();
     },
 
-    // Cache local offline com auto-higienização e fallback v2 -> v1
+    // Cache local offline com auto-higienização e fallback v3 -> v2 -> v1
     getLocalCache: function () {
       try {
         let raw = localStorage.getItem(STORAGE_CACHE_KEY);
         if (!raw) {
-          raw = localStorage.getItem('catequese_wiki_nodes_cache_v2') || localStorage.getItem('catequese_wiki_nodes_cache_v1');
+          raw = localStorage.getItem('catequese_wiki_nodes_cache_v3') || localStorage.getItem('catequese_wiki_nodes_cache_v2') || localStorage.getItem('catequese_wiki_nodes_cache_v1');
         }
         if (raw) {
           const parsed = JSON.parse(raw);

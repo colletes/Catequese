@@ -45,13 +45,13 @@
   </script>
 
   <!-- Estilos e Módulos da Base de Conhecimento (Wiki Confluence) -->
-  <link rel="stylesheet" href="knowledge-base.css?v=20261018-v5">
-  <script src="knowledge-service.js?v=20261018-v5"></script>
-  <script src="gemini-reference-extractor.js?v=20261018-v5"></script>
-  <script src="knowledge-upload-panel.js?v=20261018-v5"></script>
-  <script src="knowledge-base.js?v=20261018-v5"></script>
+  <link rel="stylesheet" href="knowledge-base.css?v=20261018-v6">
+  <script src="knowledge-service.js?v=20261018-v6"></script>
+  <script src="gemini-reference-extractor.js?v=20261018-v6"></script>
+  <script src="knowledge-upload-panel.js?v=20261018-v6"></script>
+  <script src="knowledge-base.js?v=20261018-v6"></script>
   <!-- Motor Universal de Filtros por Coluna (Estilo Excel/Sheets) -->
-  <script src="column-filter-engine.js?v=20261018-v1"></script>
+  <script src="column-filter-engine.js?v=20261018-v2"></script>
   
   <!-- Tipografia Oficial do Santuário (Questrial, Nunito, Marcellus, Outfit, Roboto) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -3093,6 +3093,7 @@
             </table>
           </div>
         </div>
+      </div>
 
       <!-- SUBVIEW 3: HISTÓRICO DE DESISTENTES DA TURMA -->
       <div id="subview-alunos-desistentes" class="hidden space-y-4">
@@ -23612,13 +23613,15 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       const activeFiltersBar = document.getElementById('cg-active-filters-bar');
       const activeFiltersChips = document.getElementById('cg-active-filters-chips');
       if (activeFiltersBar && window.ColumnFilterEngine) {
-        const activeState = window.ColumnFilterEngine.getActiveFiltersState('table-cadastro-geral');
-        const activeKeys = Object.keys(activeState);
+        const activeState = (typeof window.ColumnFilterEngine.getActiveFiltersState === 'function')
+          ? window.ColumnFilterEngine.getActiveFiltersState('table-cadastro-geral')
+          : {};
+        const activeKeys = Object.keys(activeState || {});
         if (activeKeys.length > 0) {
           activeFiltersBar.classList.remove('hidden');
           if (activeFiltersChips) {
             activeFiltersChips.innerHTML = activeKeys.map(k => {
-              const count = activeState[k].length;
+              const count = Array.isArray(activeState[k]) ? activeState[k].length : 0;
               return `<span class="bg-amber-200 text-amber-950 font-bold px-2 py-0.5 rounded-md text-[10px]">${k}: ${count} sel.</span>`;
             }).join(' ');
           }
@@ -24120,7 +24123,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       const cadQuickActions = document.getElementById('cadastro-subtab-quick-actions');
 
       const badgeCad = document.getElementById('badge-total-alunos-subtab');
-      const badgeDes = document.getElementById('badge-total-desistentes-subtab');
+      const badgeDes = document.getElementById('badge-desistentes-alunos-subtab');
 
       // Reset all buttons to inactive
       if (btnCadastro) {

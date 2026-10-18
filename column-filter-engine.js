@@ -46,6 +46,27 @@
     },
 
     /**
+     * Retorna o mapa de filtros ativos serializado em formato de objeto { colKey: Array<string> }
+     */
+    getActiveFiltersState(tableId) {
+      const filters = this.getActiveFilters(tableId);
+      const res = {};
+      for (const k in filters) {
+        if (filters[k] && filters[k].size > 0) {
+          res[k] = Array.from(filters[k]);
+        }
+      }
+      return res;
+    },
+
+    /**
+     * Alias para clearAll
+     */
+    clearTableFilters(tableId) {
+      return this.clearAll(tableId);
+    },
+
+    /**
      * Verifica se uma coluna específica tem filtro ativo
      */
     hasActiveFilter(tableId, colKey) {
