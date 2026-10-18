@@ -377,8 +377,9 @@ O Sacramento da Crisma confirma e aperfeiçoa a graça batismal, concedendo-nos 
       etapa: 'Crisma Jovem',
       order: 2,
       createdAt: '2026-04-12T15:00:00Z',
-      mediaUrl: 'https://imaculadocoracaodf.com.br/materiais/crisma_pentecostes_2026.pptx',
-      fileSizeBytes: 8500000,
+      mediaUrl: '/acervo/apresentacoes/a-biblia.pptx',
+      pdfUrl: '/acervo/apresentacoes/a-biblia.pdf',
+      fileSizeBytes: 7208895,
       description: 'Slides com ilustrações dinâmicas, passagens dos Atos dos Apóstolos e testemunhos juvenis.'
     },
 
@@ -474,6 +475,50 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
     isFirestoreEmpty: true,
     isSyncing: false,
     hasInitializedListener: false,
+    // Funções utilitárias de resolução determinística de arquivos web
+    toSafeSlug: function (str) {
+      if (!str) return '';
+      return str
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9_\s-]/g, '')
+        .trim()
+        .replace(/[-\s]+/g, '-');
+    },
+
+    cleanWebUrl: function (url) {
+      if (!url || typeof url !== 'string' || url.startsWith('file://')) return '';
+      let trimmed = url.trim();
+      if (trimmed && !trimmed.startsWith('/') && !trimmed.startsWith('http')) {
+        trimmed = '/' + trimmed;
+      }
+      return trimmed;
+    },
+
+    resolveDocPdfUrl: function (docNode) {
+      if (!docNode) return '';
+      let url = this.cleanWebUrl(docNode.pdfUrl) || this.cleanWebUrl(docNode.mediaUrl);
+      if (!url && (docNode.isPdf || docNode.extension === 'pdf' || (docNode.fileName && docNode.fileName.toLowerCase().endsWith('.pdf')))) {
+        const baseSlug = this.toSafeSlug(docNode.fileName ? docNode.fileName.replace(/\.pdf$/i, '') : docNode.title);
+        if (baseSlug) {
+          url = `/acervo/documentos/${baseSlug}.pdf`;
+        }
+      }
+      return url;
+    },
+
+    resolvePresentationUrls: function (mediaNode) {
+      if (!mediaNode) return { pptPdfUrl: '', pptDownloadUrl: '', baseSlug: '', ext: 'pptx' };
+      const baseSlug = this.toSafeSlug(mediaNode.fileName ? mediaNode.fileName.replace(/\.(pptx|ppt)$/i, '') : mediaNode.title);
+      const ext = (mediaNode.extension || 'pptx').toLowerCase();
+
+      let pptPdfUrl = this.cleanWebUrl(mediaNode.pdfUrl) || (baseSlug ? `/acervo/apresentacoes/${baseSlug}.pdf` : '');
+      let pptDownloadUrl = this.cleanWebUrl(mediaNode.mediaUrl) || (baseSlug ? `/acervo/apresentacoes/${baseSlug}.${ext}` : '');
+
+      return { pptPdfUrl, pptDownloadUrl, baseSlug, ext };
+    },
+
     // Inicialização do módulo
     init: function () {
       console.log('📚 WikiKB: Inicializando Base de Conhecimento...');
@@ -481,7 +526,7 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
       let hasValidCache = false;
       if (window.KnowledgeService && typeof window.KnowledgeService.getLocalCache === 'function') {
         const cached = window.KnowledgeService.getLocalCache();
-        if (cached && Array.isArray(cached) && cached.length > 0) {
+        if (cached && Array.isArray(cached) && cached.length > 20) {
           this.nodes = cached;
           hasValidCache = true;
         }
@@ -489,8 +534,15 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
 
       if (!hasValidCache) {
         this.nodes = JSON.parse(JSON.stringify(INITIAL_WIKI_NODES));
-        if (window.KnowledgeService && window.KnowledgeService.saveLocalCache) {
-          window.KnowledgeService.saveLocalCache(this.nodes);
+        if (window.KnowledgeService && typeof window.KnowledgeService.fetchStaticAcervoSeed === 'function') {
+          window.KnowledgeService.fetchStaticAcervoSeed().then(loadedNodes => {
+            if (loadedNodes && loadedNodes.length > this.nodes.length) {
+              console.log(`📦 WikiKB: Acervo completo carregado via semente estática (${loadedNodes.length} itens).`);
+              this.nodes = loadedNodes;
+              this.renderTree();
+              if (this.activeNodeId) this.selectNode(this.activeNodeId);
+            }
+          });
         }
       }
 
@@ -1989,7 +2041,7 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
       const readMinutes = Math.max(1, Math.ceil(wordCount / 200));
 
       // Visualizador dedicado de PDF no topo do artigo
-      const isPdfDoc = docNode.isPdf || docNode.extension === 'pdf' || (docNode.mediaUrl && docNode.mediaUrl.toLowerCase().includes('.pdf'));
+      const isPdfDoc = docNode.isPdf || docNode.extension === 'pdf' || (docNode.fileName && docNode.fileName.toLowerCase().endsWith('.pdf')) || (docNode.pdfUrl && docNode.pdfUrl.toLowerCase().includes('.pdf')) || (docNode.mediaUrl && docNode.mediaUrl.toLowerCase().includes('.pdf'));
       const pdfTopViewerHtml = isPdfDoc ? this.renderPdfViewerHtml(docNode) : '';
 
       // Visualizador dedicado de Slides se houver apresentação associada
@@ -2339,30 +2391,7 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
       }
       // --- VISUALIZADOR DE APRESENTAÇÃO DE SLIDES NA ÍNTEGRA ---
       else if (isPpt) {
-        const toSafeSlug = function (str) {
-          if (!str) return '';
-          return str
-            .normalize('NFKD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .toLowerCase()
-            .replace(/[^a-z0-9\s-]/g, '')
-            .trim()
-            .replace(/[-\s]+/g, '-');
-        };
-
-        const baseSlug = toSafeSlug(mediaNode.fileName ? mediaNode.fileName.replace(/\.(pptx|ppt)$/i, '') : mediaNode.title);
-        const ext = (mediaNode.extension || 'pptx').toLowerCase();
-
-        let pptPdfUrl = mediaNode.pdfUrl || (baseSlug ? `/acervo/apresentacoes/${baseSlug}.pdf` : '');
-        if (pptPdfUrl && !pptPdfUrl.startsWith('/') && !pptPdfUrl.startsWith('http')) {
-          pptPdfUrl = '/' + pptPdfUrl;
-        }
-
-        let pptDownloadUrl = mediaNode.mediaUrl || (baseSlug ? `/acervo/apresentacoes/${baseSlug}.${ext}` : '');
-        if (pptDownloadUrl && !pptDownloadUrl.startsWith('/') && !pptDownloadUrl.startsWith('http')) {
-          pptDownloadUrl = '/' + pptDownloadUrl;
-        }
-
+        const { pptPdfUrl, pptDownloadUrl, baseSlug, ext } = this.resolvePresentationUrls(mediaNode);
         const hasSlidesOutline = mediaNode.slides && mediaNode.slides.length > 0;
 
         playerHtml = `
@@ -2458,6 +2487,10 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
         `;
       }
 
+      const finalDownloadUrl = isPpt
+        ? this.resolvePresentationUrls(mediaNode).pptDownloadUrl
+        : this.cleanWebUrl(mediaNode.mediaUrl);
+
       viewer.innerHTML = `
         <article class="bg-white rounded-3xl border border-slate-200/90 shadow-sm p-6 sm:p-8 space-y-6 animate-in fade-in duration-200">
           <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
@@ -2482,14 +2515,16 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
               >
                 <span>🔗</span> <span>Copiar Link</span>
               </button>
-              <a
-                href="${mediaNode.mediaUrl}"
-                target="_blank"
-                download
-                class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center gap-2 shadow-xs cursor-pointer"
-              >
-                <span>📥</span> <span>Baixar Arquivo</span>
-              </a>
+              ${finalDownloadUrl ? `
+                <a
+                  href="${finalDownloadUrl}"
+                  target="_blank"
+                  download
+                  class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center gap-2 shadow-xs cursor-pointer"
+                >
+                  <span>📥</span> <span>Baixar Arquivo</span>
+                </a>
+              ` : ''}
               ${isCoordOrAdmin ? `
                 <button
                   type="button"
@@ -2694,12 +2729,9 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
     },
 
     renderPdfViewerHtml: function (docNode) {
-      let pdfUrl = docNode.pdfUrl || docNode.mediaUrl || '';
-      if (pdfUrl && !pdfUrl.startsWith('/') && !pdfUrl.startsWith('http') && !pdfUrl.startsWith('file://')) {
-        pdfUrl = '/' + pdfUrl;
-      }
+      const pdfUrl = this.resolveDocPdfUrl(docNode);
       const pageCountStr = docNode.pageCount ? ` (${docNode.pageCount} páginas)` : '';
-      const isCloudOrWebUrl = pdfUrl && !pdfUrl.startsWith('file://');
+      const isCloudOrWebUrl = !!pdfUrl;
 
       if (!isCloudOrWebUrl) {
         // Fallback elegante quando o binário original ainda não foi disponibilizado na nuvem
@@ -2884,12 +2916,9 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
       const canvas = document.getElementById('wiki-pdf-canvas');
       if (!container || !canvas) return;
 
-      let pdfUrl = docNode.pdfUrl || docNode.mediaUrl;
-      if (!pdfUrl || pdfUrl.startsWith('file://')) {
+      const pdfUrl = this.resolveDocPdfUrl(docNode);
+      if (!pdfUrl) {
         return; // Fallback já exibido no template
-      }
-      if (!pdfUrl.startsWith('/') && !pdfUrl.startsWith('http')) {
-        pdfUrl = '/' + pdfUrl;
       }
 
       this.pdfViewerState.currentDocNode = docNode;
@@ -3101,7 +3130,7 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
 
       const total = slides.length;
       const initialSlide = slides[0];
-      const pptUrl = node.mediaUrl || '';
+      const pptUrl = this.resolvePresentationUrls(node).pptDownloadUrl || this.cleanWebUrl(node.mediaUrl);
 
       const thumbsHtml = slides.map((s, idx) => `
         <div

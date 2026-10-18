@@ -8,8 +8,52 @@
   'use strict';
 
   const COLLECTION_NAME = 'knowledge_nodes';
-  const STORAGE_CACHE_KEY = 'catequese_wiki_nodes_cache_v1';
+  const STORAGE_CACHE_KEY = 'catequese_wiki_nodes_cache_v2';
   let unsubscribeSnapshot = null;
+
+  function toSafeSlug(str) {
+    if (!str) return '';
+    return str
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9_\s-]/g, '')
+      .trim()
+      .replace(/[-\s]+/g, '-');
+  }
+
+  function sanitizeNodeUrls(node) {
+    if (!node) return node;
+    const ext = (node.extension || '').toLowerCase();
+    const isPdf = node.isPdf || ext === 'pdf' || (node.fileName && node.fileName.toLowerCase().endsWith('.pdf'));
+    const isPpt = node.type === 'presentation' || ext === 'pptx' || ext === 'ppt';
+
+    // Limpa referências a paths locais no Mac (file://)
+    if (typeof node.mediaUrl === 'string' && node.mediaUrl.startsWith('file://')) {
+      node.mediaUrl = '';
+    }
+    if (typeof node.pdfUrl === 'string' && node.pdfUrl.startsWith('file://')) {
+      node.pdfUrl = '';
+    }
+
+    if (isPdf) {
+      if (!node.pdfUrl) {
+        const slug = toSafeSlug(node.fileName ? node.fileName.replace(/\.pdf$/i, '') : node.title);
+        if (slug) node.pdfUrl = `/acervo/documentos/${slug}.pdf`;
+      }
+      if (!node.mediaUrl) {
+        node.mediaUrl = node.pdfUrl;
+      }
+    } else if (isPpt) {
+      const slug = toSafeSlug(node.fileName ? node.fileName.replace(/\.(pptx|ppt)$/i, '') : node.title);
+      if (slug) {
+        if (!node.pdfUrl) node.pdfUrl = `/acervo/apresentacoes/${slug}.pdf`;
+        if (!node.mediaUrl) node.mediaUrl = `/acervo/apresentacoes/${slug}.${ext || 'pptx'}`;
+      }
+    }
+
+    return node;
+  }
 
   window.KnowledgeService = {
     // Retorna a instância ativa do Firestore
@@ -27,11 +71,22 @@
       return !!this.getDb();
     },
 
-    // Cache local offline
+    // Cache local offline com auto-higienização e fallback v1 -> v2
     getLocalCache: function () {
       try {
-        const raw = localStorage.getItem(STORAGE_CACHE_KEY);
-        return raw ? JSON.parse(raw) : null;
+        let raw = localStorage.getItem(STORAGE_CACHE_KEY);
+        if (!raw) {
+          raw = localStorage.getItem('catequese_wiki_nodes_cache_v1');
+        }
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            const sanitized = parsed.map(sanitizeNodeUrls);
+            try { localStorage.setItem(STORAGE_CACHE_KEY, JSON.stringify(sanitized)); } catch (e) {}
+            return sanitized;
+          }
+        }
+        return null;
       } catch (e) {
         console.warn('KnowledgeService: Erro ao ler cache local da wiki:', e);
         return null;
@@ -40,10 +95,30 @@
 
     saveLocalCache: function (nodes) {
       try {
-        localStorage.setItem(STORAGE_CACHE_KEY, JSON.stringify(nodes));
+        if (Array.isArray(nodes)) {
+          const sanitized = nodes.map(sanitizeNodeUrls);
+          localStorage.setItem(STORAGE_CACHE_KEY, JSON.stringify(sanitized));
+        }
       } catch (e) {
         console.warn('KnowledgeService: Erro ao salvar cache local da wiki:', e);
       }
+    },
+
+    // Busca o acervo estático de Crisma de Adultos (220 materiais) como carga segura
+    fetchStaticAcervoSeed: async function () {
+      try {
+        const resp = await fetch('/scripts/crisma_adultos_seed.json');
+        if (!resp.ok) return null;
+        const data = await resp.json();
+        if (data && Array.isArray(data.nodes) && data.nodes.length > 0) {
+          const sanitized = data.nodes.map(sanitizeNodeUrls);
+          this.saveLocalCache(sanitized);
+          return sanitized;
+        }
+      } catch (err) {
+        console.warn('KnowledgeService: Erro ao carregar seed estático do acervo:', err);
+      }
+      return null;
     },
 
     // Checa se o usuário atual tem permissão para editar/criar na Wiki
@@ -115,8 +190,9 @@
 
             console.log(`☁️ KnowledgeService: ${nodes.length} nós recebidos do Firestore.`);
             if (nodes.length > 0) {
-              this.saveLocalCache(nodes);
-              if (onDataCallback) onDataCallback(nodes, true, false);
+              const sanitized = nodes.map(sanitizeNodeUrls);
+              this.saveLocalCache(sanitized);
+              if (onDataCallback) onDataCallback(sanitized, true, false);
             } else {
               // Coleção vazia no Firestore
               const cached = this.getLocalCache();
@@ -126,7 +202,13 @@
           err => {
             console.warn('KnowledgeService: Listener do Firestore reportou aviso/erro:', err);
             const cached = this.getLocalCache();
-            if (onDataCallback) onDataCallback(cached || null, false, false);
+            if (cached && cached.length > 20) {
+              if (onDataCallback) onDataCallback(cached, false, false);
+            } else {
+              this.fetchStaticAcervoSeed().then(seedNodes => {
+                if (onDataCallback) onDataCallback(seedNodes || cached || null, false, false);
+              });
+            }
             if (onErrorCallback) onErrorCallback(err);
           }
         );
