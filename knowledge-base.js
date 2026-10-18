@@ -503,23 +503,20 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
       if (isPpt) {
         return this.resolvePresentationUrls(docNode).pptPdfUrl;
       }
-      let url = this.cleanWebUrl(docNode.pdfUrl) || this.cleanWebUrl(docNode.mediaUrl);
-      if (!url && (docNode.isPdf || docNode.extension === 'pdf' || (docNode.fileName && docNode.fileName.toLowerCase().endsWith('.pdf')))) {
-        const baseSlug = this.toSafeSlug(docNode.fileName ? docNode.fileName.replace(/\.pdf$/i, '') : docNode.title);
-        if (baseSlug) {
-          url = `/acervo/documentos/${baseSlug}.pdf`;
-        }
-      }
+      const baseSlug = this.toSafeSlug(docNode.fileName ? docNode.fileName.replace(/\.pdf$/i, '') : docNode.title);
+      // Sempre prioriza o slug ASCII seguro garantido no hosting
+      let url = (baseSlug ? `/acervo/documentos/${baseSlug}.pdf` : '') || this.cleanWebUrl(docNode.pdfUrl) || this.cleanWebUrl(docNode.mediaUrl);
       return url;
     },
 
     resolvePresentationUrls: function (mediaNode) {
       if (!mediaNode) return { pptPdfUrl: '', pptDownloadUrl: '', baseSlug: '', ext: 'pptx' };
       const baseSlug = this.toSafeSlug(mediaNode.fileName ? mediaNode.fileName.replace(/\.(pptx|ppt)$/i, '') : mediaNode.title);
-      const ext = (mediaNode.extension || 'pptx').toLowerCase();
+      const ext = (mediaNode.extension || (mediaNode.fileName && mediaNode.fileName.toLowerCase().endsWith('.ppt') ? 'ppt' : 'pptx')).toLowerCase();
 
-      let pptPdfUrl = this.cleanWebUrl(mediaNode.pdfUrl) || (baseSlug ? `/acervo/apresentacoes/${baseSlug}.pdf` : '');
-      let pptDownloadUrl = this.cleanWebUrl(mediaNode.mediaUrl) || (baseSlug ? `/acervo/apresentacoes/${baseSlug}.${ext}` : '');
+      // Sempre prioriza o slug ASCII seguro garantido no hosting
+      let pptPdfUrl = (baseSlug ? `/acervo/apresentacoes/${baseSlug}.pdf` : '') || this.cleanWebUrl(mediaNode.pdfUrl);
+      let pptDownloadUrl = (baseSlug ? `/acervo/apresentacoes/${baseSlug}.${ext}` : '') || this.cleanWebUrl(mediaNode.mediaUrl);
 
       return { pptPdfUrl, pptDownloadUrl, baseSlug, ext };
     },
