@@ -50,6 +50,8 @@
   <script src="gemini-reference-extractor.js?v=20261018-v4"></script>
   <script src="knowledge-upload-panel.js?v=20261018-v4"></script>
   <script src="knowledge-base.js?v=20261018-v4"></script>
+  <!-- Motor Universal de Filtros por Coluna (Estilo Excel/Sheets) -->
+  <script src="column-filter-engine.js?v=20261018-v1"></script>
   
   <!-- Tipografia Oficial do Santuário (Questrial, Nunito, Marcellus, Outfit, Roboto) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -728,12 +730,21 @@
         </div>
       </button>
 
-      <!-- 5. Catequizandos -->
+      <!-- 5. Catequizandos & Turmas -->
       <button onclick="switchTab('alunos')" id="sidebar-tab-alunos" class="sidebar-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition group border border-transparent hover:bg-slate-900">
         <span class="w-8 h-8 rounded-xl bg-indigo-950 text-indigo-400 border border-indigo-500/30 flex items-center justify-center text-sm flex-shrink-0">📋</span>
         <div class="flex-1 min-w-0">
-          <div class="text-xs font-bold text-slate-200 group-hover:text-indigo-300">Catequizandos & Chamadas</div>
+          <div class="text-xs font-bold text-slate-200 group-hover:text-indigo-300">Catequizandos &amp; Chamadas</div>
           <div class="text-[10px] text-slate-400 truncate">Listas de presença e chamada oficial</div>
+        </div>
+      </button>
+
+      <!-- 5.1 Cadastro Geral Consolidado (Exclusivo Master Admin & Coordenação) -->
+      <button onclick="switchTab('cadastro-geral')" id="sidebar-tab-cadastro-geral" class="sidebar-tab-btn hidden w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition group border border-transparent hover:bg-slate-900">
+        <span class="w-8 h-8 rounded-xl bg-amber-950 text-amber-400 border border-amber-500/30 flex items-center justify-center text-sm flex-shrink-0">🗂️</span>
+        <div class="flex-1 min-w-0">
+          <div class="text-xs font-bold text-slate-200 group-hover:text-amber-300">Cadastro Geral</div>
+          <div class="text-[10px] text-slate-400 truncate">Todas as turmas e alunos (Coord.)</div>
         </div>
       </button>
 
@@ -2299,6 +2310,13 @@
                 <option value="Santuário">Santuário ICM</option>
                 <option value="outras">Outras Paróquias</option>
               </select>
+
+              <select id="sel-filter-catequistas-status" onchange="filterCatequistasList()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-700 outline-none focus:border-[#d4a94f]">
+                <option value="all">Todos os Status</option>
+                <option value="ativo" selected>🟢 Apenas Ativos</option>
+                <option value="afastado">🟡 Afastados (Sabático)</option>
+                <option value="inativo">⚪ Inativos</option>
+              </select>
             </div>
           </div>
         </div>
@@ -2306,14 +2324,23 @@
         <!-- Tabela Completa de Catequistas -->
         <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
           <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs sm:text-sm border-collapse">
+            <table id="table-catequistas-list" class="w-full text-left text-xs sm:text-sm border-collapse">
               <thead>
                 <tr class="bg-slate-900 text-white border-b-2 border-[#d4a94f] select-none text-xs sm:text-sm">
                   <th class="py-3 px-3 text-center w-10">
                     <input type="checkbox" id="chk-cat-select-all" onchange="toggleSelectAllCatequistas(this.checked)" class="rounded text-amber-500 focus:ring-amber-400 w-4 h-4 cursor-pointer" title="Selecionar todos os catequistas exibidos" />
                   </th>
                   <th id="th-cat-nome" onclick="setCatequistasSort('nome')" class="py-3 px-4 font-heading cursor-pointer hover:bg-slate-800 transition text-[#d4a94f]" title="Ordenar por Nome Completo">
-                    <span>Catequista (Nome Completo)</span><span class="sort-icon text-[10px] text-amber-300 font-bold"> ▲</span>
+                    <div class="flex items-center justify-between gap-1">
+                      <span>Catequista (Nome Completo)</span><span class="sort-icon text-[10px] text-amber-300 font-bold"> ▲</span>
+                      <span id="filter-btn-cat-nome"></span>
+                    </div>
+                  </th>
+                  <th id="th-cat-status" onclick="setCatequistasSort('status')" class="py-3 px-3 font-heading cursor-pointer hover:bg-slate-800 transition text-center min-w-[95px]" title="Ordenar por Status Funcional">
+                    <div class="flex items-center justify-center gap-1">
+                      <span>Status</span><span class="sort-icon text-[10px] text-slate-400 font-normal"> ↕</span>
+                      <span id="filter-btn-cat-status"></span>
+                    </div>
                   </th>
                   <th id="th-cat-nasc" onclick="setCatequistasSort('dataNascimento')" class="py-3 px-4 font-heading cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Data de Nascimento">
                     <span>Data Nasc.</span><span class="sort-icon text-[10px] text-slate-400 font-normal"> ↕</span>
@@ -2325,10 +2352,16 @@
                     <span>E-mail</span><span class="sort-icon text-[10px] text-slate-400 font-normal"> ↕</span>
                   </th>
                   <th id="th-cat-paroquia" onclick="setCatequistasSort('paroquia')" class="py-3 px-4 font-heading cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Paróquia Habitual">
-                    <span>Paróquia Habitual</span><span class="sort-icon text-[10px] text-slate-400 font-normal"> ↕</span>
+                    <div class="flex items-center justify-between gap-1">
+                      <span>Paróquia Habitual</span><span class="sort-icon text-[10px] text-slate-400 font-normal"> ↕</span>
+                      <span id="filter-btn-cat-paroquia"></span>
+                    </div>
                   </th>
                   <th id="th-cat-turma" onclick="setCatequistasSort('turmas')" class="py-3 px-4 font-heading cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Etapa &amp; Turma(s)">
-                    <span>Etapa &amp; Turma(s) 2026</span><span class="sort-icon text-[10px] text-slate-400 font-normal"> ↕</span>
+                    <div class="flex items-center justify-between gap-1">
+                      <span>Etapa &amp; Turma(s) 2026</span><span class="sort-icon text-[10px] text-slate-400 font-normal"> ↕</span>
+                      <span id="filter-btn-cat-etapa"></span>
+                    </div>
                   </th>
                   <th class="py-3 px-4 text-center font-heading" style="width: 130px;">Ações</th>
                 </tr>
@@ -2758,8 +2791,12 @@
           <!-- Contadores / KPIs -->
           <div class="flex items-center gap-2 flex-wrap">
             <div class="bg-white border border-indigo-200 px-3 py-1.5 rounded-xl text-center shadow-2xs">
-              <div class="text-[10px] uppercase font-bold text-slate-500">Inscritos</div>
+              <div class="text-[10px] uppercase font-bold text-slate-500">Inscritos Ativos</div>
               <div id="kpi-total-alunos" class="text-base font-black text-indigo-950 font-heading">0</div>
+            </div>
+            <div class="bg-white border border-amber-200 px-3 py-1.5 rounded-xl text-center shadow-2xs">
+              <div class="text-[10px] uppercase font-bold text-amber-700">Desistentes</div>
+              <div id="kpi-desistentes" class="text-base font-black text-amber-800 font-heading">0</div>
             </div>
             <div class="bg-white border border-indigo-200 px-3 py-1.5 rounded-xl text-center shadow-2xs">
               <div class="text-[10px] uppercase font-bold text-slate-500">Batizados</div>
@@ -2778,9 +2815,9 @@
 
       </div>
 
-      <!-- Sub-Abas de Navegação: Cadastro vs Diário de Chamada -->
+      <!-- Sub-Abas de Navegação: Cadastro vs Diário de Chamada vs Desistentes -->
       <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-2">
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
           <button type="button" id="subtab-btn-cadastro" onclick="switchAlunosSubTab('cadastro')" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition shadow-xs bg-indigo-600 text-white border border-indigo-700">
             <span>📋</span> <span>Cadastro e Fichas</span>
             <span id="badge-total-alunos-subtab" class="bg-white/20 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full">0</span>
@@ -2788,6 +2825,10 @@
           <button type="button" id="subtab-btn-chamada" onclick="switchAlunosSubTab('chamada')" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200">
             <span>✅</span> <span>Diário de Chamada &amp; Frequência</span>
             <span id="badge-chamada-alerta-subtab" class="hidden bg-rose-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse">0 em alerta</span>
+          </button>
+          <button type="button" id="subtab-btn-desistentes" onclick="switchAlunosSubTab('desistentes')" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200">
+            <span>🚪</span> <span>Histórico de Desistentes</span>
+            <span id="badge-desistentes-alunos-subtab" class="bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-extrabold px-2 py-0.5 rounded-full">0</span>
           </button>
         </div>
         <div id="cadastro-subtab-quick-actions" class="flex items-center gap-2 flex-wrap">
@@ -2810,7 +2851,7 @@
         <!-- Tabela Principal de Catequizandos (Com cabeçalho e coluna de nome congelados) -->
         <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
           <div class="table-freeze-container">
-            <table class="w-full text-left text-xs sm:text-sm border-collapse">
+            <table id="table-alunos-turma" class="w-full text-left text-xs sm:text-sm border-collapse">
               <thead class="sticky top-0 z-20 bg-slate-900 text-white select-none">
                 <tr class="border-b-2 border-indigo-500 bg-slate-900 text-xs">
                   <th id="th-aluno-idx" class="py-3 px-2 font-heading text-center col-freeze-idx select-none">
@@ -2820,7 +2861,10 @@
                     </div>
                   </th>
                   <th id="th-aluno-nome" onclick="setAlunosSort('nome')" class="py-3 px-3.5 font-heading col-freeze-name cursor-pointer hover:bg-slate-800 transition text-[#d4a94f]" title="Ordenar por Nome (Padrão Alfabético)">
-                    <span>Nome Completo</span><span class="sort-icon text-[10px] text-amber-300"> ▲</span>
+                    <div class="flex items-center justify-between gap-1">
+                      <span>Nome Completo</span><span class="sort-icon text-[10px] text-amber-300"> ▲</span>
+                      <span id="filter-btn-aluno-nome"></span>
+                    </div>
                   </th>
                   <th id="th-aluno-cpf" onclick="setAlunosSort('cpf')" class="py-3 px-2.5 font-heading text-center min-w-[110px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por CPF">
                     <span>CPF</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
@@ -2829,25 +2873,43 @@
                     <span>Data Nasc.</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
                   </th>
                   <th id="th-aluno-contato" onclick="setAlunosSort('contato')" class="py-3 px-3 font-heading min-w-[130px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Telefone">
-                    <span>Telefone</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
+                    <div class="flex items-center justify-between gap-1">
+                      <span>Telefone</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
+                      <span id="filter-btn-aluno-contato"></span>
+                    </div>
                   </th>
                   <th id="th-aluno-email" onclick="setAlunosSort('email')" class="py-3 px-3 font-heading min-w-[160px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por E-mail">
-                    <span>E-mail</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
+                    <div class="flex items-center justify-between gap-1">
+                      <span>E-mail</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
+                      <span id="filter-btn-aluno-email"></span>
+                    </div>
                   </th>
                   <th id="th-aluno-endereco" onclick="setAlunosSort('endereco')" class="py-3 px-3.5 font-heading min-w-[210px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Endereço">
                     <span>Endereço</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
                   </th>
                   <th id="th-aluno-estado-civil" onclick="setAlunosSort('estadoCivil')" class="py-3 px-3 font-heading min-w-[150px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Estado Civil">
-                    <span>Estado Civil</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
+                    <div class="flex items-center justify-between gap-1">
+                      <span>Estado Civil</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
+                      <span id="filter-btn-aluno-estado-civil"></span>
+                    </div>
                   </th>
                   <th id="th-aluno-batizado" onclick="setAlunosSort('batizado')" class="py-3 px-2.5 font-heading text-center min-w-[85px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Batismo">
-                    <span>Batizado?</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
+                    <div class="flex items-center justify-center gap-1">
+                      <span>Batizado?</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
+                      <span id="filter-btn-aluno-batizado"></span>
+                    </div>
                   </th>
                   <th id="th-aluno-eucaristia" onclick="setAlunosSort('primeiraEucaristia')" class="py-3 px-2.5 font-heading text-center min-w-[85px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por 1ª Eucaristia">
-                    <span>1ª Euc.?</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
+                    <div class="flex items-center justify-center gap-1">
+                      <span>1ª Euc.?</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
+                      <span id="filter-btn-aluno-eucaristia"></span>
+                    </div>
                   </th>
                   <th id="th-aluno-impedido" onclick="setAlunosSort('impedido')" class="py-3 px-2.5 font-heading text-center min-w-[95px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Impedimento">
-                    <span>Impedido?</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
+                    <div class="flex items-center justify-center gap-1">
+                      <span>Impedido?</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
+                      <span id="filter-btn-aluno-impedido"></span>
+                    </div>
                   </th>
                   <th id="th-aluno-justificativa" onclick="setAlunosSort('justificativa')" class="py-3 px-3 font-heading min-w-[170px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Justificativa">
                     <span>Justificativa</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
@@ -3027,6 +3089,236 @@
           </div>
         </div>
 
+      <!-- SUBVIEW 3: HISTÓRICO DE DESISTENTES DA TURMA -->
+      <div id="subview-alunos-desistentes" class="hidden space-y-4">
+        <div class="bg-amber-50/90 border border-amber-200/90 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">🚪</span>
+            <div>
+              <h4 class="text-sm font-bold text-amber-950 font-heading">Histórico de Catequizandos Desistentes</h4>
+              <p class="text-xs text-amber-800">
+                Catequizandos que interromperam a participação nesta turma. Os dados cadastrais e histórico de chamadas anteriores permanecem salvos e podem ser reativados a qualquer momento.
+              </p>
+            </div>
+          </div>
+          <button type="button" onclick="exportTurmaDesistentesCSV()" class="inline-flex items-center gap-1.5 bg-amber-900 hover:bg-amber-950 text-white font-bold px-3 py-2 rounded-xl text-xs transition shadow-xs self-start sm:self-center">
+            <span>📥</span> <span>Exportar Desistentes</span>
+          </button>
+        </div>
+
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="table-freeze-container">
+            <table class="w-full text-left text-xs sm:text-sm border-collapse">
+              <thead class="sticky top-0 z-20 bg-slate-900 text-white select-none">
+                <tr class="border-b-2 border-amber-500 bg-slate-900 text-xs">
+                  <th class="py-3 px-3 font-heading text-center w-12">#</th>
+                  <th class="py-3 px-3.5 font-heading text-amber-300">Nome Completo</th>
+                  <th class="py-3 px-2.5 font-heading text-center min-w-[110px]">Data Desistência</th>
+                  <th class="py-3 px-3 font-heading min-w-[180px]">Motivo / Justificativa</th>
+                  <th class="py-3 px-3 font-heading min-w-[130px]">Telefone</th>
+                  <th class="py-3 px-3 font-heading min-w-[160px]">E-mail</th>
+                  <th class="py-3 px-2.5 font-heading text-center min-w-[85px]">Batizado?</th>
+                  <th class="py-3 px-2.5 font-heading text-center min-w-[85px]">1ª Euc.?</th>
+                  <th class="py-3 px-3 font-heading text-center min-w-[130px] no-print">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="alunos-desistentes-table-body" class="divide-y divide-slate-100">
+                <!-- Renderizado via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB: CADASTRO GERAL DE CATEQUIZANDOS       -->
+    <!-- (Consolidado: Master Admin & Coordenação)  -->
+    <!-- ========================================== -->
+    <section id="view-cadastro-geral" class="tab-view hidden space-y-6">
+
+      <!-- Header Banner -->
+      <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-amber-950 text-white p-6 sm:p-8 rounded-3xl border-2 border-amber-500/40 shadow-xl relative overflow-hidden">
+        <div class="absolute -top-20 -right-20 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+              <span class="text-xs font-bold uppercase tracking-wider text-amber-300 font-heading">Governança Pastoral • Visão Unificada</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-bold font-heading text-white flex items-center gap-2">
+              <span>🗂️</span> <span>Cadastro Geral de Catequizandos</span>
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
+              Base de dados consolidada com todos os catequizandos inscritos em todas as etapas e turmas. Pesquisa, filtros inteligentes por coluna estilo Excel e gestão de status.
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 self-start sm:self-center">
+            <button onclick="exportCadastroGeralCSV()" class="inline-flex items-center gap-1.5 bg-[#d4a94f] hover:bg-amber-600 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs sm:text-sm transition shadow" title="Exportar toda a base consolidada para planilha CSV/Excel">
+              <span>📥</span> <span>Exportar Base Completa</span>
+            </button>
+            <button onclick="clearAllCadastroGeralFilters()" class="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 px-3.5 py-2 rounded-xl text-xs sm:text-sm transition font-medium" title="Limpar todos os filtros por coluna aplicados">
+              <span>🔄</span> <span>Limpar Filtros</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Contadores / KPIs Globais -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mt-6 pt-5 border-t border-slate-800">
+          <div class="bg-white/5 border border-white/10 p-3 rounded-2xl text-center">
+            <div class="text-[10px] uppercase font-bold text-slate-400">Total Geral</div>
+            <div id="kpi-cg-total" class="text-xl font-black text-white font-heading">0</div>
+          </div>
+          <div class="bg-emerald-950/40 border border-emerald-500/30 p-3 rounded-2xl text-center">
+            <div class="text-[10px] uppercase font-bold text-emerald-300">Ativos</div>
+            <div id="kpi-cg-ativos" class="text-xl font-black text-emerald-400 font-heading">0</div>
+          </div>
+          <div class="bg-amber-950/40 border border-amber-500/30 p-3 rounded-2xl text-center">
+            <div class="text-[10px] uppercase font-bold text-amber-300">Desistentes</div>
+            <div id="kpi-cg-desistentes" class="text-xl font-black text-amber-400 font-heading">0</div>
+          </div>
+          <div class="bg-indigo-950/40 border border-indigo-500/30 p-3 rounded-2xl text-center">
+            <div class="text-[10px] uppercase font-bold text-indigo-300">Batizados</div>
+            <div id="kpi-cg-batizados" class="text-xl font-black text-indigo-400 font-heading">0</div>
+          </div>
+          <div class="bg-purple-950/40 border border-purple-500/30 p-3 rounded-2xl text-center">
+            <div class="text-[10px] uppercase font-bold text-purple-300">1ª Eucaristia</div>
+            <div id="kpi-cg-eucaristia" class="text-xl font-black text-purple-400 font-heading">0</div>
+          </div>
+          <div class="bg-rose-950/40 border border-rose-500/30 p-3 rounded-2xl text-center">
+            <div class="text-[10px] uppercase font-bold text-rose-300">Impedidos</div>
+            <div id="kpi-cg-impedidos" class="text-xl font-black text-rose-400 font-heading">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Barra de Filtros e Busca Rápida -->
+      <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          
+          <!-- Busca Geral -->
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Busca Rápida na Base Geral</label>
+            <div class="relative">
+              <input type="text" id="search-cadastro-geral" oninput="renderCadastroGeralTable()" placeholder="Buscar por nome, CPF, telefone, e-mail, etapa ou turma..." class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-9 pr-3 py-2.5 text-xs sm:text-sm text-slate-800 focus:bg-white focus:ring-2 focus:ring-amber-400 outline-none">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">🔍</span>
+            </div>
+          </div>
+
+          <!-- Filtro de Etapa -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Filtrar por Etapa</label>
+            <select id="sel-filter-cg-etapa" onchange="renderCadastroGeralTable()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-800 focus:bg-white focus:ring-2 focus:ring-amber-400 outline-none">
+              <option value="all">Todas as Etapas</option>
+              <option value="Pré Eucaristia">Pré Eucaristia</option>
+              <option value="Eucaristia I">Eucaristia I</option>
+              <option value="Eucaristia II">Eucaristia II</option>
+              <option value="Perseverança">Perseverança</option>
+              <option value="Crisma Jovem">Crisma Jovem</option>
+              <option value="Crisma Adultos">Crisma Adultos</option>
+            </select>
+          </div>
+
+          <!-- Filtro de Status -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Filtrar por Status</label>
+            <select id="sel-filter-cg-status" onchange="renderCadastroGeralTable()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-800 focus:bg-white focus:ring-2 focus:ring-amber-400 outline-none">
+              <option value="all">Todos os Status</option>
+              <option value="ativo" selected>🟢 Apenas Ativos</option>
+              <option value="inativo_desistente">🔴 Apenas Desistentes</option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- Indicador de Filtros de Coluna Ativos -->
+        <div id="cg-active-filters-bar" class="hidden flex items-center justify-between bg-amber-50 border border-amber-200 px-3.5 py-2 rounded-xl text-xs text-amber-900">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="font-bold">Filtros de coluna ativos:</span>
+            <div id="cg-active-filters-chips" class="flex items-center gap-1.5 flex-wrap"></div>
+          </div>
+          <button type="button" onclick="clearAllCadastroGeralFilters()" class="text-xs font-bold text-rose-700 hover:underline">
+            ✕ Limpar Filtros de Coluna
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabela Consolidada -->
+      <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="table-freeze-container">
+          <table id="table-cadastro-geral" class="w-full text-left text-xs sm:text-sm border-collapse">
+            <thead class="sticky top-0 z-20 bg-slate-900 text-white select-none">
+              <tr class="border-b-2 border-amber-500 bg-slate-900 text-xs">
+                <th class="py-3 px-2 font-heading text-center col-freeze-idx">#</th>
+                <th class="py-3 px-3 font-heading text-amber-300 col-freeze-name" id="th-cg-nome">
+                  <div class="flex items-center justify-between gap-1">
+                    <span>Nome Completo</span>
+                    <span id="filter-btn-cg-nome"></span>
+                  </div>
+                </th>
+                <th class="py-3 px-3 font-heading min-w-[130px]" id="th-cg-etapa">
+                  <div class="flex items-center justify-between gap-1">
+                    <span>Etapa</span>
+                    <span id="filter-btn-cg-etapa"></span>
+                  </div>
+                </th>
+                <th class="py-3 px-2.5 font-heading min-w-[100px]" id="th-cg-turma">
+                  <div class="flex items-center justify-between gap-1">
+                    <span>Turma</span>
+                    <span id="filter-btn-cg-turma"></span>
+                  </div>
+                </th>
+                <th class="py-3 px-2.5 font-heading text-center min-w-[105px]" id="th-cg-status">
+                  <div class="flex items-center justify-center gap-1">
+                    <span>Status</span>
+                    <span id="filter-btn-cg-status"></span>
+                  </div>
+                </th>
+                <th class="py-3 px-3 font-heading min-w-[130px]" id="th-cg-contato">
+                  <div class="flex items-center justify-between gap-1">
+                    <span>Telefone</span>
+                    <span id="filter-btn-cg-contato"></span>
+                  </div>
+                </th>
+                <th class="py-3 px-3 font-heading min-w-[150px]" id="th-cg-email">
+                  <div class="flex items-center justify-between gap-1">
+                    <span>E-mail</span>
+                    <span id="filter-btn-cg-email"></span>
+                  </div>
+                </th>
+                <th class="py-3 px-2.5 font-heading text-center min-w-[85px]" id="th-cg-batizado">
+                  <div class="flex items-center justify-center gap-1">
+                    <span>Batizado</span>
+                    <span id="filter-btn-cg-batizado"></span>
+                  </div>
+                </th>
+                <th class="py-3 px-2.5 font-heading text-center min-w-[85px]" id="th-cg-eucaristia">
+                  <div class="flex items-center justify-center gap-1">
+                    <span>1ª Euc.</span>
+                    <span id="filter-btn-cg-eucaristia"></span>
+                  </div>
+                </th>
+                <th class="py-3 px-2.5 font-heading text-center min-w-[95px]" id="th-cg-impedido">
+                  <div class="flex items-center justify-center gap-1">
+                    <span>Impedido</span>
+                    <span id="filter-btn-cg-impedido"></span>
+                  </div>
+                </th>
+                <th class="py-3 px-3 font-heading min-w-[150px]" id="th-cg-responsavel">
+                  <div class="flex items-center justify-between gap-1">
+                    <span>Responsável</span>
+                    <span id="filter-btn-cg-responsavel"></span>
+                  </div>
+                </th>
+                <th class="py-3 px-2.5 font-heading text-center no-print w-24">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="cadastro-geral-table-body" class="divide-y divide-slate-100">
+              <!-- Renderizado via JS -->
+            </tbody>
+          </table>
+        </div>
       </div>
 
     </section>
@@ -3149,6 +3441,27 @@
                 <div>
                   <label class="block text-[10.5px] font-bold text-slate-700 uppercase tracking-wider mb-1">CPF do Responsável</label>
                   <input type="text" id="aluno-resp-cpf" placeholder="Ex: 000.000.000-00" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-xs bg-white focus:ring-2 focus:ring-amber-400 outline-none" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Status do Catequizando (Ativo vs Desistente) -->
+            <div class="sm:col-span-2 p-3.5 bg-slate-100/90 rounded-2xl border border-slate-300">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-1">Status da Inscrição *</label>
+                  <select id="aluno-status" onchange="toggleAlunoDesistenciaFields(this.value)" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold bg-white focus:ring-2 focus:ring-indigo-400 outline-none">
+                    <option value="ativo">🟢 Ativo (Matriculado e Frequente)</option>
+                    <option value="inativo_desistente">🔴 Inativo (Desistente do Curso)</option>
+                  </select>
+                </div>
+                <div id="container-aluno-data-desistencia" class="hidden">
+                  <label class="block text-xs font-bold text-amber-900 uppercase tracking-wider mb-1">Data da Desistência</label>
+                  <input type="text" id="aluno-data-desistencia" placeholder="Ex: DD/MM/AAAA" class="w-full border border-amber-300 rounded-xl px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-amber-400 outline-none font-medium" />
+                </div>
+                <div id="container-aluno-motivo-desistencia" class="hidden sm:col-span-2">
+                  <label class="block text-xs font-bold text-amber-900 uppercase tracking-wider mb-1">Motivo da Desistência (Opcional)</label>
+                  <input type="text" id="aluno-motivo-desistencia" placeholder="Ex: Mudança de horário, compromissos profissionais, transferência..." class="w-full border border-amber-300 rounded-xl px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-amber-400 outline-none" />
                 </div>
               </div>
             </div>
@@ -3526,6 +3839,9 @@
             </div>
             <div class="space-y-1.5 flex-1 min-w-0">
               <div class="flex flex-wrap items-center gap-2">
+                <span id="modal-cat-status-badge" class="inline-block text-[10px] font-bold uppercase tracking-wider text-emerald-300 bg-emerald-950/80 border border-emerald-500/40 px-2.5 py-0.5 rounded-full font-heading">
+                  🟢 Ativo
+                </span>
                 <span id="modal-cat-funcao-badge" class="inline-block text-[10px] font-bold uppercase tracking-wider text-amber-300 bg-amber-950/80 border border-amber-500/40 px-2.5 py-0.5 rounded-full font-heading">
                   Catequista Titular
                 </span>
@@ -3707,6 +4023,31 @@
                   <div>
                     <label class="block text-slate-700 font-bold mb-1">Função / Título Principal</label>
                     <input type="text" id="edit-cat-funcao-principal" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-900 bg-white outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition" placeholder="Ex: Catequista Titular, Auxiliar, Coordenador(a)..." />
+                  </div>
+
+                  <!-- Status Funcional & Afastamento Sabático -->
+                  <div class="sm:col-span-2 p-3 bg-white rounded-xl border border-amber-300 shadow-2xs space-y-2">
+                    <label class="block text-slate-800 font-bold text-xs mb-1">Status Funcional do Catequista *</label>
+                    <select id="edit-cat-status" onchange="handleCatequistaStatusChange(this.value)" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 bg-white outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition">
+                      <option value="ativo">🟢 Ativo (Ministrando Encontros)</option>
+                      <option value="afastado">🟡 Afastado (Período Sabático / Licença)</option>
+                      <option value="inativo">⚪ Inativo (Desligado)</option>
+                    </select>
+
+                    <!-- Opções específicas de afastamento para o ano pastoral 2026 -->
+                    <div id="edit-cat-afastamento-box" class="hidden mt-2 p-3 bg-amber-50/90 rounded-xl border border-amber-300 space-y-2 text-xs">
+                      <div class="font-bold text-amber-950 flex items-center gap-1.5">
+                        <span>⏸️</span> <span>Opção de Turma para o Ano Pastoral Corrente (2026):</span>
+                      </div>
+                      <label class="flex items-start gap-2 cursor-pointer text-amber-900 font-medium">
+                        <input type="radio" name="cat-afastado-turma-action" value="desvincular" checked class="mt-0.5 text-amber-700 focus:ring-amber-500" />
+                        <span><strong>Desvincular das turmas ativas de 2026</strong> (libera a vaga no mural/organograma para outro catequista assumir, mantendo o histórico de etapas)</span>
+                      </label>
+                      <label class="flex items-start gap-2 cursor-pointer text-amber-900 font-medium">
+                        <input type="radio" name="cat-afastado-turma-action" value="manter_tag" class="mt-0.5 text-amber-700 focus:ring-amber-500" />
+                        <span><strong>Manter vínculo na turma</strong> exibindo etiqueta visual de <em>"Afastado (Sabático)"</em></span>
+                      </label>
+                    </div>
                   </div>
                 </div>
 
@@ -5963,6 +6304,7 @@
       paroquial: 'Salão Paroquial (Subsolo)',
       guia: 'Organograma & Turmas',
       alunos: 'Catequizandos & Chamadas',
+      'cadastro-geral': 'Cadastro Geral de Catequizandos',
       eventos: 'Eventos & Retiros',
       papeis: 'Papéis & Atribuições',
       conhecimento: 'Base de Conhecimento'
@@ -6003,6 +6345,10 @@
       } else if (tabId === 'conhecimento') {
         if (window.WikiKB && typeof window.WikiKB.init === 'function') {
           setTimeout(() => window.WikiKB.init(), 30);
+        }
+      } else if (tabId === 'cadastro-geral') {
+        if (typeof renderCadastroGeralTable === 'function') {
+          setTimeout(renderCadastroGeralTable, 20);
         }
       }
 
@@ -6874,6 +7220,16 @@
           if (typeof updateUserMgmtBadges === 'function') updateUserMgmtBadges();
         } else {
           btnUserMgmt.classList.add('hidden');
+        }
+      }
+
+      // Aba de Cadastro Geral Consolidado (Master Admin e Coordenação Geral)
+      const btnCadastroGeralTab = document.getElementById('sidebar-tab-cadastro-geral');
+      if (btnCadastroGeralTab) {
+        if (role === window.ICM_CONFIG.ROLES.MASTER_ADMIN || role === window.ICM_CONFIG.ROLES.COORD_GERAL || role === window.ICM_CONFIG.ROLES.VICE_COORD_GERAL) {
+          btnCadastroGeralTab.classList.remove('hidden');
+        } else {
+          btnCadastroGeralTab.classList.add('hidden');
         }
       }
 
@@ -9087,9 +9443,18 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           if (Array.isArray(parsed) && parsed.length > 0) {
             let changed = false;
             // Remove duplicidade conhecida (Ronaldo Buril: cat-2026-72 unificado em cat-2026-71)
+            // Preserva todos os registros (não remove inativos ou afastados)
             const preLen = parsed.length;
-            parsed = parsed.filter(p => p.id !== 'cat-2026-72' && !deletedIds.has(p.id) && !p.deleted && p.ativo !== false);
+            parsed = parsed.filter(p => p.id !== 'cat-2026-72' && !deletedIds.has(p.id) && !p.deleted);
             if (parsed.length !== preLen) changed = true;
+
+            // Garante inicialização do campo status
+            parsed.forEach(p => {
+              if (!p.status) {
+                p.status = p.ativo === false ? 'inativo' : 'ativo';
+                changed = true;
+              }
+            });
 
             // Higienização de coordenação de etapa 2026 para Piante e Tiago Milfont
             parsed.forEach(p => {
@@ -9118,7 +9483,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             // Sincroniza e mescla fotos 3x4 e funções acumuladas do dataset oficial SEM sobrescrever edições do usuário
             if (Array.isArray(seedSource)) {
               seedSource.forEach(seedCat => {
-                if (deletedIds.has(seedCat.id) || seedCat.deleted || seedCat.ativo === false) return;
+                if (deletedIds.has(seedCat.id) || seedCat.deleted) return;
                 const found = parsed.find(p => p.id === seedCat.id || (p.row && p.row === seedCat.row) || (p.nomeCompleto && normCatString(p.nomeCompleto) === normCatString(seedCat.nomeCompleto)));
                 if (found) {
                   // Apenas preenche a foto padrão se o registro local NÃO tiver foto, NÃO tiver removido intencionalmente e NUNCA tiver sido editado
@@ -9145,6 +9510,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
                     }
                   }
                 } else {
+                  if (!seedCat.status) seedCat.status = seedCat.ativo === false ? 'inativo' : 'ativo';
                   parsed.push(seedCat);
                   changed = true;
                 }
@@ -9159,7 +9525,10 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       } catch (e) {
         console.warn('Erro ao carregar dados de catequistas do storage:', e);
       }
-      return (Array.isArray(seedSource) ? seedSource : []).filter(s => !deletedIds.has(s.id) && !s.deleted && s.ativo !== false);
+      return (Array.isArray(seedSource) ? seedSource : []).filter(s => !deletedIds.has(s.id) && !s.deleted).map(s => {
+        if (!s.status) s.status = s.ativo === false ? 'inativo' : 'ativo';
+        return s;
+      });
     }
 
     async function syncCatequistasToFirestore() {
@@ -10190,6 +10559,21 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       const nomeCompEl = document.getElementById('modal-cat-nome-completo');
       if (nomeCompEl) nomeCompEl.textContent = cat.nomeCompleto;
 
+      const badgeStatusEl = document.getElementById('modal-cat-status-badge');
+      if (badgeStatusEl) {
+        const cStatus = cat.status || (cat.ativo === false ? 'inativo' : 'ativo');
+        if (cStatus === 'afastado') {
+          badgeStatusEl.innerHTML = `<span class="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-900 border border-amber-500/40">🟡 Afastado (Sabático)</span>`;
+          badgeStatusEl.classList.remove('hidden');
+        } else if (cStatus === 'inativo') {
+          badgeStatusEl.innerHTML = `<span class="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-900 border border-rose-500/40">🔴 Inativo</span>`;
+          badgeStatusEl.classList.remove('hidden');
+        } else {
+          badgeStatusEl.innerHTML = `<span class="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-900 border border-emerald-500/40">🟢 Ativo</span>`;
+          badgeStatusEl.classList.remove('hidden');
+        }
+      }
+
       const badgeFuncao = document.getElementById('modal-cat-funcao-badge');
       if (badgeFuncao) {
         const funcoesList = (Array.isArray(cat.funcoes) && cat.funcoes.length > 0)
@@ -10568,6 +10952,16 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         const elFuncao = document.getElementById('edit-cat-funcao-principal');
         if (elFuncao) elFuncao.value = cat.funcaoPrincipal || 'Catequista Titular';
 
+        const elStatus = document.getElementById('edit-cat-status');
+        if (elStatus) {
+          elStatus.value = cat.status || (cat.ativo === false ? 'inativo' : 'ativo');
+        }
+        if (typeof handleCatequistaStatusChange === 'function') {
+          handleCatequistaStatusChange(elStatus ? elStatus.value : 'ativo');
+        }
+        const elMotivo = document.getElementById('edit-cat-status-motivo');
+        if (elMotivo) elMotivo.value = cat.motivoAfastamento || '';
+
         // Inicializa tags para o modo de edição
         if (Array.isArray(cat.funcoes) && cat.funcoes.length > 0) {
           currentEditingTags = [...cat.funcoes];
@@ -10658,6 +11052,30 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       list[idx].paroquia = paroquia || 'Santuário do Imaculado Coração de Maria';
       if (etapaPrincipal) list[idx].etapaPrincipal = etapaPrincipal;
 
+      // Status pastoral (Ativo, Afastado/Sabático, Inativo)
+      const statusVal = document.getElementById('edit-cat-status')?.value || 'ativo';
+      const motivoAfastamento = (document.getElementById('edit-cat-status-motivo')?.value || '').trim();
+      const turmaAction = document.querySelector('input[name="cat-afastado-turma-action"]:checked')?.value || 'desvincular';
+
+      list[idx].status = statusVal;
+      list[idx].ativo = (statusVal === 'ativo');
+      list[idx].motivoAfastamento = motivoAfastamento;
+
+      // Se for afastado ou inativo e a opção de desvinculação das turmas ativas de 2026 for escolhida:
+      if (statusVal === 'afastado' || statusVal === 'inativo') {
+        if (turmaAction === 'desvincular') {
+          if (Array.isArray(list[idx].turmas) && list[idx].turmas.length > 0) {
+            list[idx].turmasHistorico = list[idx].turmasHistorico || [];
+            list[idx].turmas.forEach(t => {
+              if (!list[idx].turmasHistorico.some(h => h.stage === t.stage && h.turma === t.turma)) {
+                list[idx].turmasHistorico.push({ ...t, arquivadoEm: new Date().toISOString() });
+              }
+            });
+            list[idx].turmas = [];
+          }
+        }
+      }
+
       // Atualiza tags e funções ativas
       list[idx].funcoes = (currentEditingTags && currentEditingTags.length > 0)
         ? [...currentEditingTags]
@@ -10713,6 +11131,10 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           funcaoPrincipal: list[idx].funcaoPrincipal,
           funcoes: list[idx].funcoes,
           turmas: list[idx].turmas || [],
+          turmasHistorico: list[idx].turmasHistorico || [],
+          status: list[idx].status || 'ativo',
+          ativo: list[idx].ativo !== false,
+          motivoAfastamento: list[idx].motivoAfastamento || '',
           foto: list[idx].foto !== undefined ? list[idx].foto : null,
           fotoFaceDetected: list[idx].fotoFaceDetected || false,
           fotoRemoved: list[idx].fotoRemoved || false,
@@ -10732,6 +11154,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         const userName = (window.appAuthState && window.appAuthState.user && (window.appAuthState.user.displayName || window.appAuthState.user.email)) || 'Coordenação';
         window.ICM_CONFIG.logAuditEvent('CATEQUISTA_UPDATE_DATA', `catequista:${nomeCompleto}`, {
           catId: catId,
+          status: list[idx].status,
+          motivoAfastamento: list[idx].motivoAfastamento,
           updatedBy: userName,
           updatedByEmail: userEmail,
           timestamp: new Date().toISOString()
@@ -10770,6 +11194,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     function updateCatequistasSortHeadersUI() {
       const colMap = {
         'nome': 'th-cat-nome',
+        'status': 'th-cat-status',
         'dataNascimento': 'th-cat-nasc',
         'telefone': 'th-cat-telefone',
         'email': 'th-cat-email',
@@ -10808,19 +11233,56 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       const searchInput = document.getElementById('input-search-catequistas');
       const stageFilter = document.getElementById('sel-filter-catequistas-etapa');
       const parishFilter = document.getElementById('sel-filter-catequistas-paroquia');
+      const statusFilter = document.getElementById('sel-filter-catequistas-status');
 
       const q = (searchInput ? searchInput.value : '').toLowerCase().trim();
       const stageVal = stageFilter ? stageFilter.value : 'all';
       const parishVal = parishFilter ? parishFilter.value : 'all';
+      const statusVal = statusFilter ? statusFilter.value : 'all';
+
+      if (window.ColumnFilterEngine) {
+        window.ColumnFilterEngine.registerTable('table-catequistas-list', {
+          getDataset: () => getCatequistasRegistrationData().map(c => ({
+            ...c,
+            statusLabel: (c.status === 'afastado' ? 'Afastado' : (c.status === 'inativo' || c.ativo === false ? 'Inativo' : 'Ativo')),
+            etapaDisplay: c.etapaPrincipal || 'Geral'
+          })),
+          columns: [
+            { key: 'nomeCompleto', title: 'Catequista' },
+            { key: 'statusLabel', title: 'Status' },
+            { key: 'paroquia', title: 'Paróquia Habitual' },
+            { key: 'etapaDisplay', title: 'Etapa Principal' }
+          ],
+          onFilterChange: () => filterCatequistasList()
+        });
+
+        [
+          { id: 'filter-btn-cat-nome', key: 'nomeCompleto', title: 'Catequista' },
+          { id: 'filter-btn-cat-status', key: 'statusLabel', title: 'Status' },
+          { id: 'filter-btn-cat-paroquia', key: 'paroquia', title: 'Paróquia Habitual' },
+          { id: 'filter-btn-cat-etapa', key: 'etapaDisplay', title: 'Etapa Principal' }
+        ].forEach(k => {
+          const el = document.getElementById(k.id);
+          if (el && !el.hasChildNodes()) {
+            el.innerHTML = window.ColumnFilterEngine.renderFilterButtonHtml('table-catequistas-list', k.key, k.title);
+          }
+        });
+        window.ColumnFilterEngine.updateHeaderIcons('table-catequistas-list');
+      }
 
       const all = getCatequistasRegistrationData();
-      const filtered = all.filter(c => {
+      let filtered = all.filter(c => {
         if (stageVal !== 'all') {
           const matchStage = (c.etapaPrincipal && c.etapaPrincipal.includes(stageVal)) ||
                              (c.turmas && c.turmas.some(t => t.stage.includes(stageVal))) ||
                              (c.funcoes && c.funcoes.some(f => f.includes(stageVal))) ||
                              (stageVal === 'Geral' && ((c.funcoes && c.funcoes.some(f => f.includes('Coord') || f.includes('Geral'))) || c.funcaoPrincipal.includes('Coord') || c.funcaoPrincipal.includes('Sem turma')));
           if (!matchStage) return false;
+        }
+
+        if (statusVal !== 'all') {
+          const catStatus = c.status || (c.ativo === false ? 'inativo' : 'ativo');
+          if (catStatus !== statusVal) return false;
         }
 
         if (parishVal === 'Santuário') {
@@ -10844,6 +11306,14 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         return true;
       });
 
+      if (window.ColumnFilterEngine) {
+        filtered = window.ColumnFilterEngine.filterDataset('table-catequistas-list', filtered.map(c => ({
+          ...c,
+          statusLabel: (c.status === 'afastado' ? 'Afastado' : (c.status === 'inativo' || c.ativo === false ? 'Inativo' : 'Ativo')),
+          etapaDisplay: c.etapaPrincipal || 'Geral'
+        })));
+      }
+
       const statsEl = document.getElementById('catequistas-table-stats');
       if (statsEl) {
         statsEl.innerHTML = `Exibindo <strong>${filtered.length}</strong> de <strong>${all.length}</strong> catequistas cadastrados.`;
@@ -10866,7 +11336,11 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       // Ordenação selecionada pelo usuário
       filtered.sort((a, b) => {
         let cmp = 0;
-        if (catequistasSortColumn === 'dataNascimento') {
+        if (catequistasSortColumn === 'status') {
+          const stA = a.status || (a.ativo === false ? 'inativo' : 'ativo');
+          const stB = b.status || (b.ativo === false ? 'inativo' : 'ativo');
+          cmp = stA.localeCompare(stB);
+        } else if (catequistasSortColumn === 'dataNascimento') {
           const parseDate = (d) => {
             if (!d || typeof d !== 'string' || d.toLowerCase().includes('não') || d.toLowerCase().includes('nao')) return 0;
             const parts = d.trim().split(/[-/]/);
@@ -11011,12 +11485,19 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
                 <div class="min-w-0">
                   <div class="font-bold text-slate-900 text-sm hover:text-[#b88d36] cursor-pointer transition truncate" onclick="openCatequistaModal('${c.id}')">${c.nomeCompleto}</div>
                   <div class="text-[11px] text-slate-500 mt-1 font-medium flex items-center gap-1.5 flex-wrap">
-                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
+                    <span class="inline-block w-1.5 h-1.5 rounded-full ${c.status === 'afastado' ? 'bg-amber-400' : (c.status === 'inativo' || c.ativo === false ? 'bg-slate-400' : 'bg-emerald-500')} shrink-0"></span>
                     ${funcoesBadges}
                     ${(c.foto && !c.fotoRemoved) ? `<span class="inline-flex items-center gap-0.5 text-[9px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-1.5 py-0.2 rounded-full" title="Foto 3x4 no banco protegido por LGPD">📸 3x4</span>` : ''}
                   </div>
                 </div>
               </div>
+            </td>
+            <td class="py-3 px-3 text-center whitespace-nowrap">
+              ${c.status === 'afastado' 
+                ? '<span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300" title="Afastado temporariamente / período sabático">🟡 Afastado</span>' 
+                : (c.status === 'inativo' || c.ativo === false
+                    ? '<span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-300" title="Inativo / desligado">⚪ Inativo</span>'
+                    : '<span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300" title="Ativo em exercício pastoral">🟢 Ativo</span>')}
             </td>
             <td class="py-3 px-4 whitespace-nowrap font-mono text-xs text-slate-700">${c.dataNascimento}</td>
             <td class="py-3 px-4 whitespace-nowrap">${waLink}</td>
@@ -22105,17 +22586,167 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       populateTurmasSelect(etapa, turma);
     }
 
+    // =========================================================================
+    // GESTÃO DE STATUS DE CATEQUIZANDOS & CATEQUISTAS (ATIVO / INATIVO / AFASTADO)
+    // =========================================================================
+    function isAlunoAtivo(a) {
+      if (!a) return false;
+      if (a.status === 'inativo_desistente' || a.status === 'inativo' || a.desistente === true) return false;
+      return true;
+    }
+
+    function toggleAlunoDesistenciaFields(status) {
+      const isDesistente = status === 'inativo_desistente';
+      const containerData = document.getElementById('container-aluno-data-desistencia');
+      const containerMotivo = document.getElementById('container-aluno-motivo-desistencia');
+      if (containerData) {
+        if (isDesistente) containerData.classList.remove('hidden');
+        else containerData.classList.add('hidden');
+      }
+      if (containerMotivo) {
+        if (isDesistente) containerMotivo.classList.remove('hidden');
+        else containerMotivo.classList.add('hidden');
+      }
+      const dataInput = document.getElementById('aluno-data-desistencia');
+      if (isDesistente && dataInput && !dataInput.value) {
+        const today = new Date();
+        const dd = String(today.getDate()).padStart(2, '0');
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const yyyy = today.getFullYear();
+        dataInput.value = `${dd}/${mm}/${yyyy}`;
+      }
+    }
+
+    function handleCatequistaStatusChange(status) {
+      const box = document.getElementById('edit-cat-afastamento-box');
+      if (box) {
+        if (status === 'afastado') box.classList.remove('hidden');
+        else box.classList.add('hidden');
+      }
+    }
+
+    function reativarAluno(id, optEtapa = null, optTurma = null) {
+      const etapa = optEtapa || currentAlunosEtapa;
+      const turma = optTurma || currentAlunosTurma;
+      const key = getTurmaKey(etapa, turma);
+      const db = getAlunosDatabase();
+
+      if (!db[key]) return;
+      const aluno = db[key].find(a => a.id === id);
+      if (!aluno) return;
+
+      if (!confirm(`Deseja realmente reativar a matrícula de "${aluno.nome}" nesta turma? O catequizando voltará a constar nas listas ativas.`)) {
+        return;
+      }
+
+      aluno.status = 'ativo';
+      delete aluno.desistente;
+      delete aluno.dataDesistencia;
+      delete aluno.motivoDesistencia;
+      aluno.reativadoEm = new Date().toISOString();
+
+      saveAlunosDatabase(db);
+
+      if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
+        window.ICM_CONFIG.logAuditEvent('REATIVAR_ALUNO', `${etapa} - ${turma}`, {
+          alunoId: id,
+          alunoNome: aluno.nome
+        });
+      }
+
+      renderAlunosTable();
+      if (typeof renderCadastroGeralTable === 'function') renderCadastroGeralTable();
+      renderPainelPendencias();
+      alert(`✅ Catequizando "${aluno.nome}" reativado com sucesso na turma!`);
+    }
+
+    function marcarAlunoDesistente(id, optEtapa = null, optTurma = null) {
+      const etapa = optEtapa || currentAlunosEtapa;
+      const turma = optTurma || currentAlunosTurma;
+      const key = getTurmaKey(etapa, turma);
+      const db = getAlunosDatabase();
+
+      if (!db[key]) return;
+      const aluno = db[key].find(a => a.id === id);
+      if (!aluno) return;
+
+      const motivo = prompt(`Informe o motivo da desistência de "${aluno.nome}" (opcional):`, 'Desistência a pedido / Incompatibilidade de horários');
+      if (motivo === null) return; // cancelou
+
+      const today = new Date();
+      const dd = String(today.getDate()).padStart(2, '0');
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const yyyy = today.getFullYear();
+
+      aluno.status = 'inativo_desistente';
+      aluno.desistente = true;
+      aluno.dataDesistencia = `${dd}/${mm}/${yyyy}`;
+      aluno.motivoDesistencia = (motivo || '').trim();
+
+      saveAlunosDatabase(db);
+
+      if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
+        window.ICM_CONFIG.logAuditEvent('DESISTENCIA_ALUNO', `${etapa} - ${turma}`, {
+          alunoId: id,
+          alunoNome: aluno.nome,
+          motivo: aluno.motivoDesistencia
+        });
+      }
+
+      renderAlunosTable();
+      if (typeof renderCadastroGeralTable === 'function') renderCadastroGeralTable();
+      renderPainelPendencias();
+      alert(`🚪 Catequizando "${aluno.nome}" movido para o Histórico de Desistentes.`);
+    }
+
     function renderAlunosTable() {
       const tbody = document.getElementById('alunos-table-body');
       if (!tbody) return;
 
-      const alunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma);
-      alunos.forEach((a, i) => { a._originalIdx = i; });
+      const allAlunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma);
+      allAlunos.forEach((a, i) => { a._originalIdx = i; });
+
+      const activeAlunos = allAlunos.filter(isAlunoAtivo);
+      const desistentesAlunos = allAlunos.filter(a => !isAlunoAtivo(a));
+
+      // Registra a tabela com o motor de filtros estilo Excel
+      if (window.ColumnFilterEngine) {
+        window.ColumnFilterEngine.registerTable('table-alunos-turma', {
+          getDataset: () => getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma).filter(isAlunoAtivo),
+          onChange: () => renderAlunosTable(),
+          keyExtractors: {
+            nome: a => a.nome || '',
+            contato: a => a.contato || '',
+            email: a => a.email || '',
+            estadoCivil: a => a.estadoCivil || '',
+            batizado: a => a.batizado || 'Não informado',
+            primeiraEucaristia: a => a.primeiraEucaristia || 'Não informado',
+            impedido: a => a.impedido || 'Não'
+          }
+        });
+
+        const filterKeys = [
+          { id: 'filter-btn-aluno-nome', key: 'nome', title: 'Nome Completo' },
+          { id: 'filter-btn-aluno-contato', key: 'contato', title: 'Telefone' },
+          { id: 'filter-btn-aluno-email', key: 'email', title: 'E-mail' },
+          { id: 'filter-btn-aluno-estado-civil', key: 'estadoCivil', title: 'Estado Civil' },
+          { id: 'filter-btn-aluno-batizado', key: 'batizado', title: 'Batizado' },
+          { id: 'filter-btn-aluno-eucaristia', key: 'primeiraEucaristia', title: '1ª Eucaristia' },
+          { id: 'filter-btn-aluno-impedido', key: 'impedido', title: 'Impedido' }
+        ];
+        filterKeys.forEach(k => {
+          const el = document.getElementById(k.id);
+          if (el && !el.hasChildNodes()) {
+            el.innerHTML = window.ColumnFilterEngine.renderFilterButtonHtml('table-alunos-turma', k.key, k.title);
+          }
+        });
+        window.ColumnFilterEngine.updateHeaderIcons('table-alunos-turma');
+      }
 
       const searchInput = document.getElementById('search-alunos-turma');
       const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
 
-      const filtered = alunos.filter(a => {
+      let filtered = activeAlunos.filter(a => {
         if (!query) return true;
         return (a.nome || '').toLowerCase().includes(query) ||
                (a.cpf || '').toLowerCase().includes(query) ||
@@ -22127,6 +22758,10 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
                (a.impedido || '').toLowerCase().includes(query) ||
                (a.contato || '').toLowerCase().includes(query);
       });
+
+      if (window.ColumnFilterEngine) {
+        filtered = window.ColumnFilterEngine.filterDataset('table-alunos-turma', filtered);
+      }
 
       // Aplica ordenação selecionada pelo usuário
       filtered.sort((a, b) => {
@@ -22179,6 +22814,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
       // Atualiza KPIs
       const kpiTotal = document.getElementById('kpi-total-alunos');
+      const kpiDesistentes = document.getElementById('kpi-desistentes');
       const kpiBatizados = document.getElementById('kpi-batizados');
       const kpiEucaristia = document.getElementById('kpi-eucaristia');
       const kpiImpedidos = document.getElementById('kpi-impedidos');
@@ -22187,7 +22823,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       let eucaristiaCount = 0;
       let impedidosCount = 0;
 
-      alunos.forEach(a => {
+      activeAlunos.forEach(a => {
         const batStr = (a.batizado || '').toLowerCase();
         if (batStr.includes('sim') || batStr.includes('católica') || batStr.includes('batizado')) batizadosCount++;
         const eucStr = (a.primeiraEucaristia || '').toLowerCase();
@@ -22196,14 +22832,18 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         if (impStr === 'sim' || impStr.startsWith('sim') || (a.justificativa && a.justificativa.trim() !== '' && impStr !== 'não' && impStr !== 'nao')) impedidosCount++;
       });
 
-      if (kpiTotal) kpiTotal.textContent = alunos.length;
+      if (kpiTotal) kpiTotal.textContent = activeAlunos.length;
+      if (kpiDesistentes) kpiDesistentes.textContent = desistentesAlunos.length;
       if (kpiBatizados) kpiBatizados.textContent = batizadosCount;
       if (kpiEucaristia) kpiEucaristia.textContent = eucaristiaCount;
       if (kpiImpedidos) kpiImpedidos.textContent = impedidosCount;
 
       // Sincroniza badge de total de catequizandos na sub-aba
       const badgeSubtabCad = document.getElementById('badge-total-alunos-subtab');
-      if (badgeSubtabCad) badgeSubtabCad.textContent = alunos.length;
+      if (badgeSubtabCad) badgeSubtabCad.textContent = activeAlunos.length;
+
+      const badgeSubtabDesistentes = document.getElementById('badge-desistentes-alunos-subtab');
+      if (badgeSubtabDesistentes) badgeSubtabDesistentes.textContent = desistentesAlunos.length;
 
       // Mantém os alertas de chamada e KPIs atualizados
       if (typeof updateChamadaKPIs === 'function') {
@@ -22352,6 +22992,9 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
                 <button onclick="editAluno('${a.id}')" class="p-1 rounded text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition" title="Editar Catequizando">
                   ✏️
                 </button>
+                <button onclick="marcarAlunoDesistente('${a.id}')" class="p-1 rounded text-slate-500 hover:text-amber-600 hover:bg-amber-50 transition" title="Registrar Desistência do Curso">
+                  🚪
+                </button>
                 ${canDelete ? `
                 <button onclick="deleteAluno('${a.id}')" class="p-1 rounded text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition" title="Excluir Catequizando (Coordenação/Master Admin)">
                   🗑️
@@ -22361,6 +23004,51 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           </tr>
         `;
       }).join('');
+
+      // Renderiza Tabela de Desistentes da Turma
+      const tbodyDesistentes = document.getElementById('alunos-desistentes-table-body');
+      if (tbodyDesistentes) {
+        if (desistentesAlunos.length === 0) {
+          tbodyDesistentes.innerHTML = `
+            <tr>
+              <td colspan="9" class="py-8 text-center text-slate-400">
+                Nenhum catequizando desistente registrado nesta turma.
+              </td>
+            </tr>
+          `;
+        } else {
+          tbodyDesistentes.innerHTML = desistentesAlunos.map((a, i) => {
+            const waNum = a.contato ? a.contato.replace(/\D/g, '') : '';
+            const waLink = waNum ? `<a href="https://wa.me/${waNum.startsWith('55') ? waNum : '55' + waNum}" target="_blank" class="text-emerald-700 hover:underline font-mono text-xs font-semibold">📱 ${a.contato}</a>` : '<span class="text-slate-300">—</span>';
+            const emailLink = a.email ? `<a href="mailto:${a.email}" class="text-indigo-600 hover:underline text-xs truncate max-w-[150px] inline-block">${a.email}</a>` : '<span class="text-slate-300">—</span>';
+            return `
+              <tr class="hover:bg-amber-50/50 transition">
+                <td class="py-2.5 px-3 text-center font-mono text-xs text-slate-400">${i + 1}</td>
+                <td class="py-2.5 px-3.5">
+                  <div class="font-bold text-slate-900">${a.nome}</div>
+                  <span class="inline-block text-[10px] font-bold text-amber-900 bg-amber-100 border border-amber-300 px-2 py-0.2 rounded-full">Desistente</span>
+                </td>
+                <td class="py-2.5 px-2.5 text-center text-xs text-slate-600 font-medium">${a.dataDesistencia || 'Não informada'}</td>
+                <td class="py-2.5 px-3 text-xs text-slate-700">${a.motivoDesistencia || a.justificativa || 'Desistência registrada'}</td>
+                <td class="py-2.5 px-3">${waLink}</td>
+                <td class="py-2.5 px-3">${emailLink}</td>
+                <td class="py-2.5 px-2.5 text-center text-xs text-slate-600">${a.batizado || '—'}</td>
+                <td class="py-2.5 px-2.5 text-center text-xs text-slate-600">${a.primeiraEucaristia || '—'}</td>
+                <td class="py-2.5 px-3 text-center no-print">
+                  <div class="flex items-center justify-center gap-1.5">
+                    <button type="button" onclick="reativarAluno('${a.id}')" class="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-1 rounded-xl text-[11px] transition shadow-2xs" title="Reativar matrícula na turma">
+                      <span>🔄</span> <span>Reativar</span>
+                    </button>
+                    <button type="button" onclick="editAluno('${a.id}')" class="p-1 rounded text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition" title="Editar Ficha">
+                      ✏️
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join('');
+        }
+      }
 
       if (typeof updateAlunosSelectionUI === 'function') {
         updateAlunosSelectionUI();
@@ -22395,12 +23083,21 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         document.getElementById('aluno-obs').value = alunoData.observacoes || '';
         if (document.getElementById('aluno-resp-nome')) document.getElementById('aluno-resp-nome').value = alunoData.nomeResponsavel || '';
         if (document.getElementById('aluno-resp-cpf')) document.getElementById('aluno-resp-cpf').value = alunoData.cpfResponsavel || '';
+        const statusVal = alunoData.status || (alunoData.desistente ? 'inativo_desistente' : 'ativo');
+        if (document.getElementById('aluno-status')) document.getElementById('aluno-status').value = statusVal;
+        if (document.getElementById('aluno-data-desistencia')) document.getElementById('aluno-data-desistencia').value = alunoData.dataDesistencia || '';
+        if (document.getElementById('aluno-motivo-desistencia')) document.getElementById('aluno-motivo-desistencia').value = alunoData.motivoDesistencia || '';
+        if (typeof toggleAlunoDesistenciaFields === 'function') toggleAlunoDesistenciaFields(statusVal);
       } else {
         if (btnPrint) btnPrint.classList.add('hidden');
         if (title) title.textContent = 'Cadastrar Novo Catequizando';
         if (sub) sub.textContent = `${currentAlunosTurma} • ${currentAlunosEtapa}`;
         form.reset();
         document.getElementById('aluno-id').value = '';
+        if (document.getElementById('aluno-status')) document.getElementById('aluno-status').value = 'ativo';
+        if (document.getElementById('aluno-data-desistencia')) document.getElementById('aluno-data-desistencia').value = '';
+        if (document.getElementById('aluno-motivo-desistencia')) document.getElementById('aluno-motivo-desistencia').value = '';
+        if (typeof toggleAlunoDesistenciaFields === 'function') toggleAlunoDesistenciaFields('ativo');
       }
 
       modal.classList.remove('hidden');
@@ -22450,6 +23147,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       });
 
       renderAlunosTable();
+      if (typeof renderCadastroGeralTable === 'function') renderCadastroGeralTable();
       renderPainelPendencias();
       alert('✅ Catequizando excluído com sucesso.');
     }
@@ -22477,6 +23175,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
       saveAlunosDatabase(db);
       renderAlunosTable();
+      if (typeof renderCadastroGeralTable === 'function') renderCadastroGeralTable();
       renderPainelPendencias();
 
       window.ICM_CONFIG.logAuditEvent('APPROVE_ALUNO_INSCRICAO', key, {
@@ -22568,6 +23267,10 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       const idField = document.getElementById('aluno-id');
       const isEdit = idField && idField.value;
 
+      const rawStatus = (document.getElementById('aluno-status') ? document.getElementById('aluno-status').value : 'ativo') || 'ativo';
+      const isDesistente = rawStatus === 'inativo_desistente';
+      const rawDataDesistencia = (document.getElementById('aluno-data-desistencia') ? document.getElementById('aluno-data-desistencia').value : '').trim();
+
       const alunoObj = {
         id: isEdit ? idField.value : 'aluno-' + Date.now(),
         nome: (document.getElementById('aluno-nome').value || '').trim(),
@@ -22583,7 +23286,11 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         justificativa: (document.getElementById('aluno-justificativa').value || '').trim(),
         observacoes: (document.getElementById('aluno-obs').value || '').trim(),
         nomeResponsavel: (document.getElementById('aluno-resp-nome') ? document.getElementById('aluno-resp-nome').value : '').trim(),
-        cpfResponsavel: (document.getElementById('aluno-resp-cpf') ? document.getElementById('aluno-resp-cpf').value : '').trim()
+        cpfResponsavel: (document.getElementById('aluno-resp-cpf') ? document.getElementById('aluno-resp-cpf').value : '').trim(),
+        status: rawStatus,
+        desistente: isDesistente,
+        dataDesistencia: isDesistente ? (rawDataDesistencia || new Date().toLocaleDateString('pt-BR')) : '',
+        motivoDesistencia: isDesistente ? (document.getElementById('aluno-motivo-desistencia') ? document.getElementById('aluno-motivo-desistencia').value : '').trim() : ''
       };
 
       if (!alunoObj.nome) {
@@ -22676,6 +23383,9 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       closeAlunoModal();
       renderAlunosTable();
       renderPainelPendencias();
+      if (typeof renderCadastroGeralTable === 'function') {
+        renderCadastroGeralTable();
+      }
       alert(feedbackMsg);
     }
 
@@ -22717,6 +23427,401 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       // Registra evento de exportação na trilha de auditoria
       window.ICM_CONFIG.logAuditEvent('EXPORT_REPORT', `${currentAlunosEtapa} - ${currentAlunosTurma}`, {
         totalAlunos: alunos.length
+      });
+    }
+
+    // Exporta apenas a lista de catequizandos desistentes da turma atual
+    function exportTurmaDesistentesCSV() {
+      const allAlunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma);
+      const desistentes = allAlunos.filter(a => !isAlunoAtivo(a));
+      if (desistentes.length === 0) {
+        alert('Não há catequizandos desistentes registrados nesta turma.');
+        return;
+      }
+
+      const headers = ['Nº', 'Nome Completo', 'Status', 'Data Desistência', 'Motivo Desistência', 'CPF', 'Telefone', 'E-mail', 'Endereço', 'Observações'];
+      const rows = desistentes.map((a, i) => [
+        i + 1,
+        `"${(a.nome || '').replace(/"/g, '""')}"`,
+        `"Desistente"`,
+        `"${(a.dataDesistencia || '').replace(/"/g, '""')}"`,
+        `"${(a.motivoDesistencia || '').replace(/"/g, '""')}"`,
+        `"${(a.cpf || '').replace(/"/g, '""')}"`,
+        `"${(a.contato || '').replace(/"/g, '""')}"`,
+        `"${(a.email || '').replace(/"/g, '""')}"`,
+        `"${(a.endereco || '').replace(/"/g, '""')}"`,
+        `"${(a.observacoes || '').replace(/"/g, '""')}"`
+      ]);
+
+      const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\r\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `Desistentes_${currentAlunosEtapa}_${currentAlunosTurma}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      window.ICM_CONFIG.logAuditEvent('EXPORT_REPORT_DESISTENTES', `${currentAlunosEtapa} - ${currentAlunosTurma}`, {
+        totalDesistentes: desistentes.length
+      });
+    }
+
+    // =============================================
+    // CADASTRO GERAL DE CATEQUIZANDOS (VISÃO CONSOLIDADA)
+    // Acesso Restrito: Master Admin e Coordenação Geral
+    // =============================================
+
+    function getAllCatequizandosConsolidated() {
+      const db = getAlunosDatabase();
+      const list = [];
+      Object.entries(db).forEach(([key, alunos]) => {
+        if (!Array.isArray(alunos)) return;
+        const parts = key.split('__');
+        const defaultStage = parts[0] || 'Etapa Indefinida';
+        const defaultTurma = parts[1] || 'Turma Indefinida';
+
+        alunos.forEach(a => {
+          const ativo = isAlunoAtivo(a);
+          list.push({
+            ...a,
+            turmaKey: key,
+            stage: a.stage || defaultStage,
+            turma: a.turma || defaultTurma,
+            isAtivo: ativo,
+            statusLabel: ativo ? 'Ativo' : 'Desistente',
+            impedidoLabel: (a.impedido && a.impedido.toLowerCase().includes('sim')) ? 'Sim' : 'Não',
+            batizadoLabel: (a.batizado && a.batizado.toLowerCase().includes('sim')) ? 'Sim' : ((a.batizado && a.batizado.toLowerCase().includes('não')) ? 'Não' : (a.batizado || 'Não Informado')),
+            eucaristiaLabel: (a.primeiraEucaristia && a.primeiraEucaristia.toLowerCase().includes('sim')) ? 'Sim' : ((a.primeiraEucaristia && a.primeiraEucaristia.toLowerCase().includes('não')) ? 'Não' : (a.primeiraEucaristia || 'Não Informado'))
+          });
+        });
+      });
+      return list;
+    }
+
+    function renderCadastroGeralTable() {
+      const tbody = document.getElementById('cadastro-geral-table-body');
+      if (!tbody) return;
+
+      // Validação estrita de autorização RBAC
+      const role = window.appAuthState ? window.appAuthState.role : '';
+      const canAccess = (
+        role === window.ICM_CONFIG.ROLES.MASTER_ADMIN ||
+        role === window.ICM_CONFIG.ROLES.COORD_GERAL ||
+        role === window.ICM_CONFIG.ROLES.VICE_COORD_GERAL
+      );
+
+      if (!canAccess) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="11" class="py-12 text-center text-slate-500">
+              <div class="text-3xl mb-2">🔒</div>
+              <p class="font-bold text-slate-700">Acesso Restrito à Coordenação Geral e Master Admin</p>
+              <p class="text-xs text-slate-400 mt-1 max-w-md mx-auto">Em conformidade com a LGPD e as normas pastorais, o Cadastro Geral consolidado de todas as etapas é de acesso exclusivo da Coordenação Geral.</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      // Registra no ColumnFilterEngine
+      if (window.ColumnFilterEngine) {
+        window.ColumnFilterEngine.registerTable('table-cadastro-geral', {
+          getDataset: () => getAllCatequizandosConsolidated(),
+          columns: [
+            { key: 'nome', title: 'Nome Completo' },
+            { key: 'stage', title: 'Etapa' },
+            { key: 'turma', title: 'Turma' },
+            { key: 'statusLabel', title: 'Status' },
+            { key: 'contato', title: 'Telefone' },
+            { key: 'email', title: 'E-mail' },
+            { key: 'batizadoLabel', title: 'Batizado' },
+            { key: 'eucaristiaLabel', title: '1ª Eucaristia' },
+            { key: 'impedidoLabel', title: 'Impedido' },
+            { key: 'nomeResponsavel', title: 'Responsável' }
+          ],
+          onFilterChange: () => renderCadastroGeralTable()
+        });
+
+        [
+          { id: 'filter-btn-cg-nome', key: 'nome', title: 'Nome Completo' },
+          { id: 'filter-btn-cg-etapa', key: 'stage', title: 'Etapa' },
+          { id: 'filter-btn-cg-turma', key: 'turma', title: 'Turma' },
+          { id: 'filter-btn-cg-status', key: 'statusLabel', title: 'Status' },
+          { id: 'filter-btn-cg-contato', key: 'contato', title: 'Telefone' },
+          { id: 'filter-btn-cg-email', key: 'email', title: 'E-mail' },
+          { id: 'filter-btn-cg-batizado', key: 'batizadoLabel', title: 'Batizado' },
+          { id: 'filter-btn-cg-eucaristia', key: 'eucaristiaLabel', title: '1ª Eucaristia' },
+          { id: 'filter-btn-cg-impedido', key: 'impedidoLabel', title: 'Impedido' },
+          { id: 'filter-btn-cg-responsavel', key: 'nomeResponsavel', title: 'Responsável' }
+        ].forEach(k => {
+          const el = document.getElementById(k.id);
+          if (el && !el.hasChildNodes()) {
+            el.innerHTML = window.ColumnFilterEngine.renderFilterButtonHtml('table-cadastro-geral', k.key, k.title);
+          }
+        });
+        window.ColumnFilterEngine.updateHeaderIcons('table-cadastro-geral');
+      }
+
+      // Atualiza barra de filtros ativos
+      const activeFiltersBar = document.getElementById('cg-active-filters-bar');
+      const activeFiltersChips = document.getElementById('cg-active-filters-chips');
+      if (activeFiltersBar && window.ColumnFilterEngine) {
+        const activeState = window.ColumnFilterEngine.getActiveFiltersState('table-cadastro-geral');
+        const activeKeys = Object.keys(activeState);
+        if (activeKeys.length > 0) {
+          activeFiltersBar.classList.remove('hidden');
+          if (activeFiltersChips) {
+            activeFiltersChips.innerHTML = activeKeys.map(k => {
+              const count = activeState[k].length;
+              return `<span class="bg-amber-200 text-amber-950 font-bold px-2 py-0.5 rounded-md text-[10px]">${k}: ${count} sel.</span>`;
+            }).join(' ');
+          }
+        } else {
+          activeFiltersBar.classList.add('hidden');
+        }
+      }
+
+      const rawAll = getAllCatequizandosConsolidated();
+
+      // KPIs globais da paróquia
+      const elTotal = document.getElementById('kpi-cg-total');
+      const elAtivos = document.getElementById('kpi-cg-ativos');
+      const elDesistentes = document.getElementById('kpi-cg-desistentes');
+      const elBatizados = document.getElementById('kpi-cg-batizados');
+      const elEucaristia = document.getElementById('kpi-cg-eucaristia');
+      const elImpedidos = document.getElementById('kpi-cg-impedidos');
+
+      if (elTotal) elTotal.textContent = rawAll.length;
+      if (elAtivos) elAtivos.textContent = rawAll.filter(a => a.isAtivo).length;
+      if (elDesistentes) elDesistentes.textContent = rawAll.filter(a => !a.isAtivo).length;
+      if (elBatizados) elBatizados.textContent = rawAll.filter(a => (a.batizado || '').toLowerCase().includes('sim')).length;
+      if (elEucaristia) elEucaristia.textContent = rawAll.filter(a => (a.primeiraEucaristia || '').toLowerCase().includes('sim')).length;
+      if (elImpedidos) elImpedidos.textContent = rawAll.filter(a => (a.impedido || '').toLowerCase().includes('sim')).length;
+
+      // Filtros rápidos
+      const searchInput = document.getElementById('search-cadastro-geral');
+      const q = (searchInput ? searchInput.value : '').toLowerCase().trim();
+
+      const stageSelect = document.getElementById('sel-filter-cg-etapa');
+      const stageVal = stageSelect ? stageSelect.value : 'all';
+
+      const statusSelect = document.getElementById('sel-filter-cg-status');
+      const statusVal = statusSelect ? statusSelect.value : 'all';
+
+      let filtered = rawAll.filter(a => {
+        if (stageVal !== 'all' && a.stage !== stageVal) return false;
+        if (statusVal === 'ativo' && !a.isAtivo) return false;
+        if (statusVal === 'inativo_desistente' && a.isAtivo) return false;
+
+        if (q) {
+          const fullStr = `${a.nome} ${a.cpf} ${a.contato} ${a.email} ${a.stage} ${a.turma} ${a.endereco} ${a.observacoes} ${a.nomeResponsavel}`.toLowerCase();
+          if (!fullStr.includes(q)) return false;
+        }
+        return true;
+      });
+
+      // Aplica filtros inteligentes por coluna
+      if (window.ColumnFilterEngine) {
+        filtered = window.ColumnFilterEngine.filterDataset('table-cadastro-geral', filtered);
+      }
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="11" class="py-12 text-center text-slate-400">
+              <div class="text-3xl mb-2">🔍</div>
+              <p class="font-semibold text-slate-600">Nenhum catequizando encontrado com os filtros aplicados.</p>
+              <button onclick="clearAllCadastroGeralFilters()" class="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-300 px-3 py-1.5 rounded-xl transition">
+                <span>🔄</span> <span>Redefinir Filtros</span>
+              </button>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map((a, idx) => {
+        let stageBadgeCls = 'bg-slate-100 text-slate-700 border-slate-200';
+        if (a.stage.includes('Pré')) stageBadgeCls = 'bg-rose-50 text-rose-800 border-rose-200';
+        else if (a.stage.includes('Eucaristia I') && !a.stage.includes('II')) stageBadgeCls = 'bg-emerald-50 text-emerald-800 border-emerald-200';
+        else if (a.stage.includes('Eucaristia II')) stageBadgeCls = 'bg-sky-50 text-sky-800 border-sky-200';
+        else if (a.stage.includes('Perseverança')) stageBadgeCls = 'bg-amber-50 text-amber-800 border-amber-200';
+        else if (a.stage.includes('Crisma Jovem')) stageBadgeCls = 'bg-purple-50 text-purple-800 border-purple-200';
+        else if (a.stage.includes('Crisma Adultos')) stageBadgeCls = 'bg-indigo-50 text-indigo-800 border-indigo-200';
+
+        const rawPhone = (a.contato || '').replace(/\D/g, '');
+        const waLink = rawPhone && rawPhone.length >= 8
+          ? `<a href="https://wa.me/55${rawPhone}" target="_blank" class="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-800 font-semibold text-xs transition" title="Conversar no WhatsApp"><span>💬</span> <span>${a.contato}</span></a>`
+          : `<span class="text-slate-500 text-xs">${a.contato || '—'}</span>`;
+
+        const emailLink = a.email
+          ? `<a href="mailto:${a.email}" class="text-indigo-600 hover:text-indigo-800 text-xs truncate max-w-[150px] inline-block underline" title="${a.email}">${a.email}</a>`
+          : `<span class="text-slate-400 text-xs">—</span>`;
+
+        const statusBadge = a.isAtivo
+          ? `<span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300">🟢 Ativo</span>`
+          : `<span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-800 border border-rose-300" title="${a.motivoDesistencia ? 'Motivo: ' + a.motivoDesistencia : 'Desistente'}">🔴 Desistente</span>`;
+
+        const batizadoBadge = (a.batizado || '').toLowerCase().includes('sim')
+          ? `<span class="text-emerald-700 font-bold text-xs">Sim</span>`
+          : ((a.batizado || '').toLowerCase().includes('não') ? `<span class="text-rose-700 font-bold text-xs">Não</span>` : `<span class="text-slate-400 text-xs">—</span>`);
+
+        const eucaristiaBadge = (a.primeiraEucaristia || '').toLowerCase().includes('sim')
+          ? `<span class="text-emerald-700 font-bold text-xs">Sim</span>`
+          : ((a.primeiraEucaristia || '').toLowerCase().includes('não') ? `<span class="text-rose-700 font-bold text-xs">Não</span>` : `<span class="text-slate-400 text-xs">—</span>`);
+
+        const impedidoBadge = (a.impedido || '').toLowerCase().includes('sim')
+          ? `<span class="text-rose-700 font-bold text-xs" title="${a.justificativa || 'Impedimento informado'}">⚠️ Sim</span>`
+          : `<span class="text-slate-400 text-xs">Não</span>`;
+
+        return `
+          <tr class="hover:bg-amber-50/40 transition group">
+            <td class="py-2.5 px-2 text-center text-xs font-mono text-slate-400 col-freeze-idx">${idx + 1}</td>
+            <td class="py-2.5 px-3 col-freeze-name">
+              <div class="font-bold text-slate-900 text-xs sm:text-sm hover:text-amber-700 cursor-pointer transition truncate max-w-[220px]" onclick="openAlunoModalFromGeral('${a.stage}', '${a.turma}', '${a.id}')" title="Clique para editar ficha">${a.nome}</div>
+              <div class="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1.5 flex-wrap">
+                ${a.cpf ? `<span>CPF: ${a.cpf}</span>` : ''}
+                ${!a.isAtivo && a.dataDesistencia ? `<span class="text-rose-600 font-bold">Desistência: ${a.dataDesistencia}</span>` : ''}
+              </div>
+            </td>
+            <td class="py-2.5 px-3">
+              <span class="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-lg border ${stageBadgeCls}">${a.stage}</span>
+            </td>
+            <td class="py-2.5 px-2.5">
+              <span class="inline-flex items-center text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-lg">${a.turma}</span>
+            </td>
+            <td class="py-2.5 px-2.5 text-center whitespace-nowrap">
+              ${statusBadge}
+            </td>
+            <td class="py-2.5 px-3 whitespace-nowrap">
+              ${waLink}
+            </td>
+            <td class="py-2.5 px-3">
+              ${emailLink}
+            </td>
+            <td class="py-2.5 px-2.5 text-center">
+              ${batizadoBadge}
+            </td>
+            <td class="py-2.5 px-2.5 text-center">
+              ${eucaristiaBadge}
+            </td>
+            <td class="py-2.5 px-2.5 text-center">
+              ${impedidoBadge}
+            </td>
+            <td class="py-2.5 px-3 text-xs text-slate-600 truncate max-w-[160px]" title="${a.nomeResponsavel || ''}">
+              ${a.nomeResponsavel || '—'}
+            </td>
+            <td class="py-2.5 px-2.5 text-center whitespace-nowrap no-print">
+              <div class="inline-flex items-center gap-1 justify-center">
+                <button type="button" onclick="openAlunoModalFromGeral('${a.stage}', '${a.turma}', '${a.id}')" class="p-1.5 bg-slate-100 hover:bg-amber-100 hover:text-amber-900 text-slate-700 rounded-lg transition text-xs font-bold" title="Editar dados cadastrais">
+                  ✏️
+                </button>
+                <button type="button" onclick="navegarParaTurmaAluno('${a.stage}', '${a.turma}')" class="p-1.5 bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 rounded-lg transition text-xs font-bold" title="Abrir Turma ${a.turma} (${a.stage})">
+                  🏫
+                </button>
+                <button type="button" onclick="imprimirFichaAlunoIndividual('${a.id}')" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition text-xs font-bold" title="Imprimir Ficha">
+                  🖨️
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function openAlunoModalFromGeral(etapa, turma, alunoId) {
+      currentAlunosEtapa = etapa;
+      currentAlunosTurma = turma;
+      const selEtapa = document.getElementById('sel-etapa-alunos');
+      if (selEtapa) selEtapa.value = etapa;
+      populateTurmasSelect(etapa, turma);
+
+      const db = getAlunosDatabase();
+      const key = getTurmaKey(etapa, turma);
+      const aluno = (db[key] || []).find(a => a.id === alunoId);
+      if (aluno) {
+        window.ICM_CONFIG.logAuditEvent('VIEW_PII_GERAL', `${etapa} - ${turma}`, {
+          alunoId: alunoId,
+          alunoNome: aluno.nome
+        });
+        openAlunoModal(aluno);
+      } else {
+        alert('Catequizando não localizado na base da turma informada.');
+      }
+    }
+
+    function navegarParaTurmaAluno(etapa, turma) {
+      currentAlunosEtapa = etapa;
+      currentAlunosTurma = turma;
+      const selEtapa = document.getElementById('sel-etapa-alunos');
+      if (selEtapa) selEtapa.value = etapa;
+      populateTurmasSelect(etapa, turma);
+      switchTab('alunos');
+    }
+
+    function clearAllCadastroGeralFilters() {
+      const search = document.getElementById('search-cadastro-geral');
+      if (search) search.value = '';
+
+      const selEtapa = document.getElementById('sel-filter-cg-etapa');
+      if (selEtapa) selEtapa.value = 'all';
+
+      const selStatus = document.getElementById('sel-filter-cg-status');
+      if (selStatus) selStatus.value = 'all';
+
+      if (window.ColumnFilterEngine) {
+        window.ColumnFilterEngine.clearTableFilters('table-cadastro-geral');
+      }
+
+      renderCadastroGeralTable();
+    }
+
+    function exportCadastroGeralCSV() {
+      const all = getAllCatequizandosConsolidated();
+      if (all.length === 0) {
+        alert('Não há catequizandos para exportar.');
+        return;
+      }
+
+      const headers = ['Nº', 'Nome Completo', 'Etapa', 'Turma', 'Status', 'Data Desistência', 'Motivo Desistência', 'CPF', 'Data de Nascimento', 'Telefone', 'E-mail', 'Endereço', 'Estado Civil / Afetivo', 'Batizado', '1ª Eucaristia', 'Impedido(a)?', 'Justificativa', 'Responsável Legal (Menor)', 'CPF Responsável', 'Observações'];
+
+      const rows = all.map((a, i) => [
+        i + 1,
+        `"${(a.nome || '').replace(/"/g, '""')}"`,
+        `"${(a.stage || '').replace(/"/g, '""')}"`,
+        `"${(a.turma || '').replace(/"/g, '""')}"`,
+        `"${a.isAtivo ? 'Ativo' : 'Desistente'}"`,
+        `"${(a.dataDesistencia || '').replace(/"/g, '""')}"`,
+        `"${(a.motivoDesistencia || '').replace(/"/g, '""')}"`,
+        `"${(a.cpf || '').replace(/"/g, '""')}"`,
+        `"${(a.dataNascimento || '').replace(/"/g, '""')}"`,
+        `"${(a.contato || '').replace(/"/g, '""')}"`,
+        `"${(a.email || '').replace(/"/g, '""')}"`,
+        `"${(a.endereco || '').replace(/"/g, '""')}"`,
+        `"${(a.estadoCivil || '').replace(/"/g, '""')}"`,
+        `"${(a.batizado || '').replace(/"/g, '""')}"`,
+        `"${(a.primeiraEucaristia || '').replace(/"/g, '""')}"`,
+        `"${(a.impedido || '').replace(/"/g, '""')}"`,
+        `"${(a.justificativa || '').replace(/"/g, '""')}"`,
+        `"${(a.nomeResponsavel || '').replace(/"/g, '""')}"`,
+        `"${(a.cpfResponsavel || '').replace(/"/g, '""')}"`,
+        `"${(a.observacoes || '').replace(/"/g, '""')}"`
+      ]);
+
+      const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\r\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `Cadastro_Geral_Catequese_ICM_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      window.ICM_CONFIG.logAuditEvent('EXPORT_CADASTRO_GERAL_CSV', 'Todas as Etapas', {
+        totalAlunos: all.length
       });
     }
 
@@ -22958,44 +24063,59 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       return dates;
     }
 
-    // Alternador de Sub-Aba: Cadastro vs Diário de Chamada
+    // Alternador de Sub-Aba: Cadastro vs Diário de Chamada vs Histórico de Desistentes
     function switchAlunosSubTab(tab) {
       currentAlunosSubTab = tab;
       const btnCadastro = document.getElementById('subtab-btn-cadastro');
       const btnChamada = document.getElementById('subtab-btn-chamada');
+      const btnDesistentes = document.getElementById('subtab-btn-desistentes');
       const viewCadastro = document.getElementById('subview-alunos-cadastro');
       const viewChamada = document.getElementById('subview-alunos-chamada');
+      const viewDesistentes = document.getElementById('subview-alunos-desistentes');
       const quickActions = document.getElementById('chamada-subtab-quick-actions');
       const cadQuickActions = document.getElementById('cadastro-subtab-quick-actions');
 
+      const badgeCad = document.getElementById('badge-total-alunos-subtab');
+      const badgeDes = document.getElementById('badge-total-desistentes-subtab');
+
+      // Reset all buttons to inactive
+      if (btnCadastro) {
+        btnCadastro.className = 'flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200';
+        if (badgeCad) badgeCad.className = 'bg-slate-200 text-slate-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full';
+      }
+      if (btnChamada) {
+        btnChamada.className = 'flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200';
+      }
+      if (btnDesistentes) {
+        btnDesistentes.className = 'flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200';
+        if (badgeDes) badgeDes.className = 'bg-rose-100 text-rose-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full';
+      }
+
+      if (viewCadastro) viewCadastro.classList.add('hidden');
+      if (viewChamada) viewChamada.classList.add('hidden');
+      if (viewDesistentes) viewDesistentes.classList.add('hidden');
+      if (quickActions) quickActions.classList.add('hidden');
+      if (cadQuickActions) cadQuickActions.classList.add('hidden');
+
       if (tab === 'chamada') {
-        if (btnCadastro) {
-          btnCadastro.className = 'flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200';
-          const badgeCad = document.getElementById('badge-total-alunos-subtab');
-          if (badgeCad) badgeCad.className = 'bg-slate-200 text-slate-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full';
-        }
-        if (btnChamada) {
-          btnChamada.className = 'flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition shadow-xs bg-indigo-600 text-white border border-indigo-700';
-        }
-        if (viewCadastro) viewCadastro.classList.add('hidden');
+        if (btnChamada) btnChamada.className = 'flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition shadow-xs bg-indigo-600 text-white border border-indigo-700';
         if (viewChamada) viewChamada.classList.remove('hidden');
         if (quickActions) quickActions.classList.remove('hidden');
-        if (cadQuickActions) cadQuickActions.classList.add('hidden');
         renderChamadaSection();
-        // Puxa da nuvem ao abrir a aba: o sync inicial pode rodar antes do login concluir e falhar sem retry.
         syncTurmaChamadasFromFirestore(currentAlunosEtapa, currentAlunosTurma);
+      } else if (tab === 'desistentes') {
+        if (btnDesistentes) {
+          btnDesistentes.className = 'flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition shadow-xs bg-rose-600 text-white border border-rose-700';
+          if (badgeDes) badgeDes.className = 'bg-white/20 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full';
+        }
+        if (viewDesistentes) viewDesistentes.classList.remove('hidden');
+        renderAlunosTable();
       } else {
         if (btnCadastro) {
           btnCadastro.className = 'flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition shadow-xs bg-indigo-600 text-white border border-indigo-700';
-          const badgeCad = document.getElementById('badge-total-alunos-subtab');
           if (badgeCad) badgeCad.className = 'bg-white/20 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full';
         }
-        if (btnChamada) {
-          btnChamada.className = 'flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200';
-        }
         if (viewCadastro) viewCadastro.classList.remove('hidden');
-        if (viewChamada) viewChamada.classList.add('hidden');
-        if (quickActions) quickActions.classList.add('hidden');
         if (cadQuickActions) cadQuickActions.classList.remove('hidden');
         renderAlunosTable();
       }
@@ -23087,7 +24207,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
     // Atualiza contadores e KPIs com a regra de 3 faltas
     function updateChamadaKPIs() {
-      const alunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma);
+      const alunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma).filter(isAlunoAtivo);
       const dataTurma = getTurmaChamadasData(currentAlunosEtapa, currentAlunosTurma);
       const dateRecords = (dataTurma.records && dataTurma.records[currentChamadaSelectedDate]) || {};
 
@@ -23192,7 +24312,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       const badgeData = document.getElementById('chamada-dia-badge-data');
       if (!tbody) return;
 
-      const alunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma);
+      const alunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma).filter(isAlunoAtivo);
       const dataTurma = getTurmaChamadasData(currentAlunosEtapa, currentAlunosTurma);
       const currDate = currentChamadaSelectedDate;
 
@@ -23384,7 +24504,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       const tbody = document.getElementById('chamada-matriz-tbody');
       if (!thead || !tbody) return;
 
-      const alunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma);
+      const alunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma).filter(isAlunoAtivo);
       const dataTurma = getTurmaChamadasData(currentAlunosEtapa, currentAlunosTurma);
       const dates = dataTurma.dates || [];
 
@@ -23652,7 +24772,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         return;
       }
 
-      const alunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma);
+      const alunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma).filter(isAlunoAtivo);
       if (alunos.length === 0) {
         alert('Não há catequizandos nesta turma para marcar presença.');
         return;
@@ -23845,7 +24965,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       const optSignatures = document.getElementById('print-opt-signatures') ? document.getElementById('print-opt-signatures').checked : true;
       const optKpis = document.getElementById('print-opt-kpis') ? document.getElementById('print-opt-kpis').checked : true;
 
-      const alunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma);
+      const alunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma).filter(isAlunoAtivo);
       const dataTurma = getTurmaChamadasData(currentAlunosEtapa, currentAlunosTurma);
       let dates = (dataTurma && Array.isArray(dataTurma.dates) && dataTurma.dates.length > 0)
         ? [...dataTurma.dates]
