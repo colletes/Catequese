@@ -8,7 +8,7 @@
   'use strict';
 
   const COLLECTION_NAME = 'knowledge_nodes';
-  const STORAGE_CACHE_KEY = 'catequese_wiki_nodes_cache_v4';
+  const STORAGE_CACHE_KEY = 'catequese_wiki_nodes_cache_v5';
   let unsubscribeSnapshot = null;
 
   function getAppBasePath() {
@@ -111,19 +111,30 @@
       return !!this.getDb();
     },
 
-    // Cache local offline com auto-higienização e fallback v3 -> v2 -> v1
+    // Remove chaves de cache legadas (v1, v2, v3, v4) que causavam QuotaExceededError no localStorage
+    purgeLegacyCaches: function () {
+      const legacyKeys = [
+        'catequese_wiki_nodes_cache_v1',
+        'catequese_wiki_nodes_cache_v2',
+        'catequese_wiki_nodes_cache_v3',
+        'catequese_wiki_nodes_cache_v4'
+      ];
+      legacyKeys.forEach(k => {
+        if (k !== STORAGE_CACHE_KEY) {
+          try { localStorage.removeItem(k); } catch (e) {}
+        }
+      });
+    },
+
+    // Cache local offline com limpeza automática de versões antigas para evitar QuotaExceededError
     getLocalCache: function () {
       try {
-        let raw = localStorage.getItem(STORAGE_CACHE_KEY);
-        if (!raw) {
-          raw = localStorage.getItem('catequese_wiki_nodes_cache_v3') || localStorage.getItem('catequese_wiki_nodes_cache_v2') || localStorage.getItem('catequese_wiki_nodes_cache_v1');
-        }
+        this.purgeLegacyCaches();
+        const raw = localStorage.getItem(STORAGE_CACHE_KEY);
         if (raw) {
           const parsed = JSON.parse(raw);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            const sanitized = parsed.map(sanitizeNodeUrls);
-            try { localStorage.setItem(STORAGE_CACHE_KEY, JSON.stringify(sanitized)); } catch (e) {}
-            return sanitized;
+            return parsed.map(sanitizeNodeUrls);
           }
         }
         return null;
@@ -134,17 +145,33 @@
     },
 
     saveLocalCache: function (nodes) {
+      if (!Array.isArray(nodes)) return;
+      this.purgeLegacyCaches();
+      const sanitized = nodes.map(sanitizeNodeUrls);
       try {
-        if (Array.isArray(nodes)) {
-          const sanitized = nodes.map(sanitizeNodeUrls);
-          localStorage.setItem(STORAGE_CACHE_KEY, JSON.stringify(sanitized));
-        }
+        localStorage.setItem(STORAGE_CACHE_KEY, JSON.stringify(sanitized));
       } catch (e) {
-        console.warn('KnowledgeService: Erro ao salvar cache local da wiki:', e);
+        // Se exceder a cota de 5MB do localStorage (devido a imagens base64 embutidas em DOCX),
+        // remove imagens data:image base64 apenas da cópia de cache local para garantir a persistência da árvore atualizada
+        try {
+          localStorage.removeItem(STORAGE_CACHE_KEY);
+          const compact = sanitized.map(n => {
+            if (n && typeof n.contentMarkdown === 'string' && n.contentMarkdown.includes('data:image/')) {
+              return {
+                ...n,
+                contentMarkdown: n.contentMarkdown.replace(/!\[([^\]]*)\]\(data:image\/[^)]+\)/g, '![$1]()')
+              };
+            }
+            return n;
+          });
+          localStorage.setItem(STORAGE_CACHE_KEY, JSON.stringify(compact));
+        } catch (e2) {
+          console.warn('KnowledgeService: Cota de localStorage insuficiente para cache offline:', e2);
+        }
       }
     },
 
-    // Busca o acervo estático de Crisma de Adultos (220 materiais) como carga segura
+    // Busca o acervo estático de Crisma de Adultos como carga de contingência (somente se Firestore estiver inacessível)
     fetchStaticAcervoSeed: async function () {
       try {
         const seedUrl = toAppUrl('scripts/crisma_adultos_seed.json');
@@ -153,7 +180,7 @@
         const data = await resp.json();
         if (data && Array.isArray(data.nodes) && data.nodes.length > 0) {
           const sanitized = data.nodes.map(sanitizeNodeUrls);
-          this.saveLocalCache(sanitized);
+          // NÃO sobrescreve o cache local com o seed estático para nunca reverter edições feitas no Firestore
           return sanitized;
         }
       } catch (err) {
@@ -242,11 +269,17 @@
           },
           err => {
             console.warn('KnowledgeService: Listener do Firestore reportou aviso/erro:', err);
+            // Se o WikiKB já estiver conectado à nuvem com dados reais, não sobrescreve com fallback
+            if (window.WikiKB && window.WikiKB.cloudConnected && window.WikiKB.nodes && window.WikiKB.nodes.length > 20) {
+              if (onErrorCallback) onErrorCallback(err);
+              return;
+            }
             const cached = this.getLocalCache();
             if (cached && cached.length > 20) {
               if (onDataCallback) onDataCallback(cached, false, false);
             } else {
               this.fetchStaticAcervoSeed().then(seedNodes => {
+                if (window.WikiKB && window.WikiKB.cloudConnected) return;
                 if (onDataCallback) onDataCallback(seedNodes || cached || null, false, false);
               });
             }
@@ -267,10 +300,10 @@
       if (!db) throw new Error('Firestore não está conectado.');
       if (!nodeData || !nodeData.id) throw new Error('Dados do nó inválidos (ID ausente).');
 
-      const dataToSave = {
+      const dataToSave = sanitizeNodeUrls({
         ...nodeData,
         updatedAt: new Date().toISOString()
-      };
+      });
 
       if (!dataToSave.createdAt) {
         dataToSave.createdAt = new Date().toISOString();
@@ -284,6 +317,17 @@
           name: user.displayName || user.email.split('@')[0],
           email: user.email
         };
+      }
+
+      // Atualização otimista imediata em memória e no cache local
+      if (window.WikiKB && Array.isArray(window.WikiKB.nodes)) {
+        const existingIdx = window.WikiKB.nodes.findIndex(n => n.id === dataToSave.id);
+        if (existingIdx >= 0) {
+          window.WikiKB.nodes[existingIdx] = { ...window.WikiKB.nodes[existingIdx], ...dataToSave };
+        } else {
+          window.WikiKB.nodes.push(dataToSave);
+        }
+        this.saveLocalCache(window.WikiKB.nodes);
       }
 
       await db.collection(COLLECTION_NAME).doc(nodeData.id).set(dataToSave, { merge: true });

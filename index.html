@@ -45,11 +45,11 @@
   </script>
 
   <!-- Estilos e Módulos da Base de Conhecimento (Wiki Confluence) -->
-  <link rel="stylesheet" href="knowledge-base.css?v=20261018-v6">
-  <script src="knowledge-service.js?v=20261018-v6"></script>
-  <script src="gemini-reference-extractor.js?v=20261018-v6"></script>
-  <script src="knowledge-upload-panel.js?v=20261018-v6"></script>
-  <script src="knowledge-base.js?v=20261018-v6"></script>
+  <link rel="stylesheet" href="knowledge-base.css?v=20261019-v7">
+  <script src="knowledge-service.js?v=20261019-v7"></script>
+  <script src="gemini-reference-extractor.js?v=20261019-v7"></script>
+  <script src="knowledge-upload-panel.js?v=20261019-v7"></script>
+  <script src="knowledge-base.js?v=20261019-v7"></script>
   <!-- Motor Universal de Filtros por Coluna (Estilo Excel/Sheets) -->
   <script src="column-filter-engine.js?v=20261019-v1"></script>
   
@@ -7278,6 +7278,16 @@
 
       // Atualiza contadores da Central de Notificações
       renderPainelPendencias();
+
+      // Garante sincronização da Base de Conhecimento após desbloqueio de sessão
+      if (window.WikiKB) {
+        if (typeof window.WikiKB.updateAdminActionsVisibility === 'function') {
+          window.WikiKB.updateAdminActionsVisibility();
+        }
+        if (typeof window.WikiKB.setupCloudSync === 'function' && !window.WikiKB.cloudConnected) {
+          window.WikiKB.setupCloudSync(true);
+        }
+      }
 
       // Se for a Lorena, pré-seleciona sua turma oficial (Crisma Adultos • Turma 03)
       if (userData && userData.email && userData.email.toLowerCase().includes('lorena')) {

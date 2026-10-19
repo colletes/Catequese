@@ -272,6 +272,7 @@
             window.WikiKB.expandedFolders.add(parentId);
           }
           if (window.WikiKB) {
+            window.WikiKB.renderTree();
             window.WikiKB.selectNode(folderId);
           }
         } catch (err) {
@@ -647,9 +648,9 @@
       const mdSection = document.getElementById('wiki-markdown-section');
       const editor = document.getElementById('wiki-markdown-editor');
 
-      // Preenche o título se estiver vazio
+      // Preenche o título se estiver vazio preservando separadores com hífen (ex: " - Revisado")
       if (titleInput && !titleInput.value) {
-        const rawTitle = fileName.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+        const rawTitle = fileName.replace(/\.[^/.]+$/, '').replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
         titleInput.value = rawTitle.charAt(0).toUpperCase() + rawTitle.slice(1);
       }
 
@@ -956,6 +957,7 @@
           window.WikiKB.expandedFolders.add(parentId);
         }
         if (window.WikiKB) {
+          window.WikiKB.renderTree();
           window.WikiKB.selectNode(nodeId);
         }
       } catch (err) {
@@ -1118,6 +1120,7 @@
           await window.KnowledgeService.saveNode(docNode);
           alert('✅ Documento atualizado com sucesso no Firestore!');
           modal.classList.add('hidden');
+          window.WikiKB.renderTree();
           window.WikiKB.selectNode(docNode.id);
         } catch (err) {
           console.error('Erro ao editar documento:', err);

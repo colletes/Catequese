@@ -474,6 +474,7 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
     cloudConnected: false,
     isFirestoreEmpty: true,
     isSyncing: false,
+    hasInitialized: false,
     hasInitializedListener: false,
     // Funções utilitárias de resolução determinística de arquivos web
     toSafeSlug: function (str) {
@@ -562,7 +563,24 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
 
     // Inicialização do módulo
     init: function () {
+      // Se já foi inicializado (ex: ao alternar para a aba Base de Conhecimento),
+      // preserva integralmente os nós em memória sincronizados com o Firestore
+      if (this.hasInitialized) {
+        this.updateAdminActionsVisibility();
+        this.renderTree();
+        if (this.activeNodeId && this.getNode(this.activeNodeId)) {
+          this.selectNode(this.activeNodeId);
+        } else if (this.nodes.length > 0) {
+          this.selectNode(this.nodes[0].id);
+        }
+        if (!this.cloudConnected) {
+          this.setupCloudSync(true);
+        }
+        return;
+      }
+
       console.log('📚 WikiKB: Inicializando Base de Conhecimento...');
+      this.hasInitialized = true;
       
       let hasValidCache = false;
       if (window.KnowledgeService && typeof window.KnowledgeService.getLocalCache === 'function') {
@@ -577,8 +595,10 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
         this.nodes = JSON.parse(JSON.stringify(INITIAL_WIKI_NODES));
         if (window.KnowledgeService && typeof window.KnowledgeService.fetchStaticAcervoSeed === 'function') {
           window.KnowledgeService.fetchStaticAcervoSeed().then(loadedNodes => {
+            // NUNCA sobrescreve se o Firestore já tiver entregado dados em nuvem
+            if (this.cloudConnected) return;
             if (loadedNodes && loadedNodes.length > this.nodes.length) {
-              console.log(`📦 WikiKB: Acervo completo carregado via semente estática (${loadedNodes.length} itens).`);
+              console.log(`📦 WikiKB: Acervo de contingência carregado via semente estática (${loadedNodes.length} itens).`);
               this.nodes = loadedNodes;
               this.renderTree();
               if (this.activeNodeId) this.selectNode(this.activeNodeId);
@@ -1302,21 +1322,23 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
     },
 
     setupCloudSync: function (force = false) {
-      if (this.hasInitializedListener && !force) return;
+      if (this.hasInitializedListener && this.cloudConnected && !force) return;
       if (!window.KnowledgeService || typeof window.KnowledgeService.listenNodes !== 'function') return;
 
       this.updateCloudStatusBadge('connecting');
 
       window.KnowledgeService.listenNodes(
         (remoteNodes, isOnline, isFirestoreEmpty) => {
-          this.hasInitializedListener = true;
-          this.cloudConnected = isOnline;
           this.isFirestoreEmpty = !!isFirestoreEmpty;
 
           if (isOnline && remoteNodes && remoteNodes.length > 0) {
+            this.hasInitializedListener = true;
+            this.cloudConnected = true;
             this.nodes = remoteNodes;
             this.updateCloudStatusBadge('cloud', remoteNodes.length);
           } else if (isOnline && isFirestoreEmpty) {
+            this.hasInitializedListener = true;
+            this.cloudConnected = true;
             console.log('🌱 WikiKB: Firestore vazio detectado. Semeando acervo padrão oficial...');
             const defaultNodes = JSON.parse(JSON.stringify(INITIAL_WIKI_NODES));
             this.nodes = defaultNodes;
@@ -1329,7 +1351,7 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
               window.KnowledgeService.saveLocalCache(defaultNodes);
             }
             this.updateCloudStatusBadge('cloud', defaultNodes.length);
-          } else {
+          } else if (!this.cloudConnected) {
             if (remoteNodes && remoteNodes.length > 0) {
               this.nodes = remoteNodes;
             }
@@ -1348,8 +1370,9 @@ Na Constituição Dogmática *Lumen Gentium*, os padres conciliares destacam:
           }
         },
         err => {
-          this.cloudConnected = false;
-          this.updateCloudStatusBadge('offline', this.nodes.length);
+          if (!this.cloudConnected) {
+            this.updateCloudStatusBadge('offline', this.nodes.length);
+          }
         }
       );
     },
