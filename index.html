@@ -2333,13 +2333,13 @@
                   <th id="th-cat-nome" onclick="setCatequistasSort('nome')" class="py-3 px-4 font-heading cursor-pointer hover:bg-slate-800 transition text-[#d4a94f]" title="Ordenar por Nome Completo">
                     <div class="flex items-center justify-between gap-1">
                       <span>Catequista (Nome Completo)</span><span class="sort-icon text-[10px] text-amber-300 font-bold"> ▲</span>
-                      <span id="filter-btn-cat-nome"></span>
+                      <span id="filter-btn-cat-nome" onclick="event.stopPropagation()"></span>
                     </div>
                   </th>
                   <th id="th-cat-status" onclick="setCatequistasSort('status')" class="py-3 px-3 font-heading cursor-pointer hover:bg-slate-800 transition text-center min-w-[95px]" title="Ordenar por Status Funcional">
                     <div class="flex items-center justify-center gap-1">
                       <span>Status</span><span class="sort-icon text-[10px] text-slate-400 font-normal"> ↕</span>
-                      <span id="filter-btn-cat-status"></span>
+                      <span id="filter-btn-cat-status" onclick="event.stopPropagation()"></span>
                     </div>
                   </th>
                   <th id="th-cat-nasc" onclick="setCatequistasSort('dataNascimento')" class="py-3 px-4 font-heading cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Data de Nascimento">
@@ -2354,13 +2354,13 @@
                   <th id="th-cat-paroquia" onclick="setCatequistasSort('paroquia')" class="py-3 px-4 font-heading cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Paróquia Habitual">
                     <div class="flex items-center justify-between gap-1">
                       <span>Paróquia Habitual</span><span class="sort-icon text-[10px] text-slate-400 font-normal"> ↕</span>
-                      <span id="filter-btn-cat-paroquia"></span>
+                      <span id="filter-btn-cat-paroquia" onclick="event.stopPropagation()"></span>
                     </div>
                   </th>
                   <th id="th-cat-turma" onclick="setCatequistasSort('turmas')" class="py-3 px-4 font-heading cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Etapa &amp; Turma(s)">
                     <div class="flex items-center justify-between gap-1">
                       <span>Etapa &amp; Turma(s) 2026</span><span class="sort-icon text-[10px] text-slate-400 font-normal"> ↕</span>
-                      <span id="filter-btn-cat-etapa"></span>
+                      <span id="filter-btn-cat-etapa" onclick="event.stopPropagation()"></span>
                     </div>
                   </th>
                   <th class="py-3 px-4 text-center font-heading" style="width: 130px;">Ações</th>
@@ -2868,7 +2868,7 @@
                   <th id="th-aluno-nome" onclick="setAlunosSort('nome')" class="py-3 px-3.5 font-heading col-freeze-name cursor-pointer hover:bg-slate-800 transition text-[#d4a94f]" title="Ordenar por Nome (Padrão Alfabético)">
                     <div class="flex items-center justify-between gap-1">
                       <span>Nome Completo</span><span class="sort-icon text-[10px] text-amber-300"> ▲</span>
-                      <span id="filter-btn-aluno-nome"></span>
+                      <span id="filter-btn-aluno-nome" onclick="event.stopPropagation()"></span>
                     </div>
                   </th>
                   <th id="th-aluno-cpf" onclick="setAlunosSort('cpf')" class="py-3 px-2.5 font-heading text-center min-w-[110px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por CPF">
@@ -2880,13 +2880,13 @@
                   <th id="th-aluno-contato" onclick="setAlunosSort('contato')" class="py-3 px-3 font-heading min-w-[130px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Telefone">
                     <div class="flex items-center justify-between gap-1">
                       <span>Telefone</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
-                      <span id="filter-btn-aluno-contato"></span>
+                      <span id="filter-btn-aluno-contato" onclick="event.stopPropagation()"></span>
                     </div>
                   </th>
                   <th id="th-aluno-email" onclick="setAlunosSort('email')" class="py-3 px-3 font-heading min-w-[160px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por E-mail">
                     <div class="flex items-center justify-between gap-1">
                       <span>E-mail</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
-                      <span id="filter-btn-aluno-email"></span>
+                      <span id="filter-btn-aluno-email" onclick="event.stopPropagation()"></span>
                     </div>
                   </th>
                   <th id="th-aluno-endereco" onclick="setAlunosSort('endereco')" class="py-3 px-3.5 font-heading min-w-[210px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Endereço">
@@ -2895,25 +2895,25 @@
                   <th id="th-aluno-estado-civil" onclick="setAlunosSort('estadoCivil')" class="py-3 px-3 font-heading min-w-[150px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Estado Civil">
                     <div class="flex items-center justify-between gap-1">
                       <span>Estado Civil</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
-                      <span id="filter-btn-aluno-estado-civil"></span>
+                      <span id="filter-btn-aluno-estado-civil" onclick="event.stopPropagation()"></span>
                     </div>
                   </th>
                   <th id="th-aluno-batizado" onclick="setAlunosSort('batizado')" class="py-3 px-2.5 font-heading text-center min-w-[85px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Batismo">
                     <div class="flex items-center justify-center gap-1">
                       <span>Batizado?</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
-                      <span id="filter-btn-aluno-batizado"></span>
+                      <span id="filter-btn-aluno-batizado" onclick="event.stopPropagation()"></span>
                     </div>
                   </th>
                   <th id="th-aluno-eucaristia" onclick="setAlunosSort('primeiraEucaristia')" class="py-3 px-2.5 font-heading text-center min-w-[85px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por 1ª Eucaristia">
                     <div class="flex items-center justify-center gap-1">
                       <span>1ª Euc.?</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
-                      <span id="filter-btn-aluno-eucaristia"></span>
+                      <span id="filter-btn-aluno-eucaristia" onclick="event.stopPropagation()"></span>
                     </div>
                   </th>
                   <th id="th-aluno-impedido" onclick="setAlunosSort('impedido')" class="py-3 px-2.5 font-heading text-center min-w-[95px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Impedimento">
                     <div class="flex items-center justify-center gap-1">
                       <span>Impedido?</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
-                      <span id="filter-btn-aluno-impedido"></span>
+                      <span id="filter-btn-aluno-impedido" onclick="event.stopPropagation()"></span>
                     </div>
                   </th>
                   <th id="th-aluno-justificativa" onclick="setAlunosSort('justificativa')" class="py-3 px-3 font-heading min-w-[170px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Justificativa">
@@ -3262,65 +3262,67 @@
           <table id="table-cadastro-geral" class="w-full text-left text-xs sm:text-sm border-collapse">
             <thead class="sticky top-0 z-20 bg-slate-900 text-white select-none">
               <tr class="border-b-2 border-amber-500 bg-slate-900 text-xs">
-                <th class="py-3 px-2 font-heading text-center col-freeze-idx">#</th>
-                <th class="py-3 px-3 font-heading text-amber-300 col-freeze-name" id="th-cg-nome">
+                <th class="py-3 px-2 font-heading text-center col-freeze-idx cursor-pointer hover:bg-slate-800 transition" id="th-cg-idx" onclick="setCadastroGeralSort('idx')" title="Ordenar por Posição">
+                  <span>#</span><span class="sort-icon-cg text-[10px] text-slate-400"> ↕</span>
+                </th>
+                <th class="py-3 px-3 font-heading text-[#d4a94f] col-freeze-name cursor-pointer hover:bg-slate-800 transition" id="th-cg-nome" onclick="setCadastroGeralSort('nome')" title="Ordenar por Nome Completo">
                   <div class="flex items-center justify-between gap-1">
-                    <span>Nome Completo</span>
-                    <span id="filter-btn-cg-nome"></span>
+                    <span>Nome Completo</span><span class="sort-icon-cg text-[10px] text-amber-300 font-bold"> ▲</span>
+                    <span id="filter-btn-cg-nome" onclick="event.stopPropagation()"></span>
                   </div>
                 </th>
-                <th class="py-3 px-3 font-heading min-w-[130px]" id="th-cg-etapa">
+                <th class="py-3 px-3 font-heading min-w-[130px] cursor-pointer hover:bg-slate-800 transition" id="th-cg-etapa" onclick="setCadastroGeralSort('stage')" title="Ordenar por Etapa">
                   <div class="flex items-center justify-between gap-1">
-                    <span>Etapa</span>
-                    <span id="filter-btn-cg-etapa"></span>
+                    <span>Etapa</span><span class="sort-icon-cg text-[10px] text-slate-400"> ↕</span>
+                    <span id="filter-btn-cg-etapa" onclick="event.stopPropagation()"></span>
                   </div>
                 </th>
-                <th class="py-3 px-2.5 font-heading min-w-[100px]" id="th-cg-turma">
+                <th class="py-3 px-2.5 font-heading min-w-[100px] cursor-pointer hover:bg-slate-800 transition" id="th-cg-turma" onclick="setCadastroGeralSort('turma')" title="Ordenar por Turma">
                   <div class="flex items-center justify-between gap-1">
-                    <span>Turma</span>
-                    <span id="filter-btn-cg-turma"></span>
+                    <span>Turma</span><span class="sort-icon-cg text-[10px] text-slate-400"> ↕</span>
+                    <span id="filter-btn-cg-turma" onclick="event.stopPropagation()"></span>
                   </div>
                 </th>
-                <th class="py-3 px-2.5 font-heading text-center min-w-[105px]" id="th-cg-status">
+                <th class="py-3 px-2.5 font-heading text-center min-w-[105px] cursor-pointer hover:bg-slate-800 transition" id="th-cg-status" onclick="setCadastroGeralSort('statusLabel')" title="Ordenar por Status">
                   <div class="flex items-center justify-center gap-1">
-                    <span>Status</span>
-                    <span id="filter-btn-cg-status"></span>
+                    <span>Status</span><span class="sort-icon-cg text-[10px] text-slate-400"> ↕</span>
+                    <span id="filter-btn-cg-status" onclick="event.stopPropagation()"></span>
                   </div>
                 </th>
-                <th class="py-3 px-3 font-heading min-w-[130px]" id="th-cg-contato">
+                <th class="py-3 px-3 font-heading min-w-[130px] cursor-pointer hover:bg-slate-800 transition" id="th-cg-contato" onclick="setCadastroGeralSort('contato')" title="Ordenar por Telefone">
                   <div class="flex items-center justify-between gap-1">
-                    <span>Telefone</span>
-                    <span id="filter-btn-cg-contato"></span>
+                    <span>Telefone</span><span class="sort-icon-cg text-[10px] text-slate-400"> ↕</span>
+                    <span id="filter-btn-cg-contato" onclick="event.stopPropagation()"></span>
                   </div>
                 </th>
-                <th class="py-3 px-3 font-heading min-w-[150px]" id="th-cg-email">
+                <th class="py-3 px-3 font-heading min-w-[150px] cursor-pointer hover:bg-slate-800 transition" id="th-cg-email" onclick="setCadastroGeralSort('email')" title="Ordenar por E-mail">
                   <div class="flex items-center justify-between gap-1">
-                    <span>E-mail</span>
-                    <span id="filter-btn-cg-email"></span>
+                    <span>E-mail</span><span class="sort-icon-cg text-[10px] text-slate-400"> ↕</span>
+                    <span id="filter-btn-cg-email" onclick="event.stopPropagation()"></span>
                   </div>
                 </th>
-                <th class="py-3 px-2.5 font-heading text-center min-w-[85px]" id="th-cg-batizado">
+                <th class="py-3 px-2.5 font-heading text-center min-w-[85px] cursor-pointer hover:bg-slate-800 transition" id="th-cg-batizado" onclick="setCadastroGeralSort('batizadoLabel')" title="Ordenar por Batismo">
                   <div class="flex items-center justify-center gap-1">
-                    <span>Batizado</span>
-                    <span id="filter-btn-cg-batizado"></span>
+                    <span>Batizado</span><span class="sort-icon-cg text-[10px] text-slate-400"> ↕</span>
+                    <span id="filter-btn-cg-batizado" onclick="event.stopPropagation()"></span>
                   </div>
                 </th>
-                <th class="py-3 px-2.5 font-heading text-center min-w-[85px]" id="th-cg-eucaristia">
+                <th class="py-3 px-2.5 font-heading text-center min-w-[85px] cursor-pointer hover:bg-slate-800 transition" id="th-cg-eucaristia" onclick="setCadastroGeralSort('eucaristiaLabel')" title="Ordenar por 1ª Eucaristia">
                   <div class="flex items-center justify-center gap-1">
-                    <span>1ª Euc.</span>
-                    <span id="filter-btn-cg-eucaristia"></span>
+                    <span>1ª Euc.</span><span class="sort-icon-cg text-[10px] text-slate-400"> ↕</span>
+                    <span id="filter-btn-cg-eucaristia" onclick="event.stopPropagation()"></span>
                   </div>
                 </th>
-                <th class="py-3 px-2.5 font-heading text-center min-w-[95px]" id="th-cg-impedido">
+                <th class="py-3 px-2.5 font-heading text-center min-w-[95px] cursor-pointer hover:bg-slate-800 transition" id="th-cg-impedido" onclick="setCadastroGeralSort('impedidoLabel')" title="Ordenar por Impedimento">
                   <div class="flex items-center justify-center gap-1">
-                    <span>Impedido</span>
-                    <span id="filter-btn-cg-impedido"></span>
+                    <span>Impedido</span><span class="sort-icon-cg text-[10px] text-slate-400"> ↕</span>
+                    <span id="filter-btn-cg-impedido" onclick="event.stopPropagation()"></span>
                   </div>
                 </th>
-                <th class="py-3 px-3 font-heading min-w-[150px]" id="th-cg-responsavel">
+                <th class="py-3 px-3 font-heading min-w-[150px] cursor-pointer hover:bg-slate-800 transition" id="th-cg-responsavel" onclick="setCadastroGeralSort('nomeResponsavel')" title="Ordenar por Responsável">
                   <div class="flex items-center justify-between gap-1">
-                    <span>Responsável</span>
-                    <span id="filter-btn-cg-responsavel"></span>
+                    <span>Responsável</span><span class="sort-icon-cg text-[10px] text-slate-400"> ↕</span>
+                    <span id="filter-btn-cg-responsavel" onclick="event.stopPropagation()"></span>
                   </div>
                 </th>
                 <th class="py-3 px-2.5 font-heading text-center no-print w-24">Ações</th>
@@ -22834,6 +22836,20 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           else if (!valA) cmp = 1;
           else if (!valB) cmp = -1;
           else cmp = valA.localeCompare(valB);
+        } else if (alunosSortColumn === 'contato') {
+          const numA = (a.contato || '').replace(/\D/g, '');
+          const numB = (b.contato || '').replace(/\D/g, '');
+          if (!numA && !numB) cmp = 0;
+          else if (!numA) cmp = 1;
+          else if (!numB) cmp = -1;
+          else cmp = numA.localeCompare(numB);
+        } else if (alunosSortColumn === 'email') {
+          const eA = (a.email || '').trim().toLowerCase();
+          const eB = (b.email || '').trim().toLowerCase();
+          if (!eA && !eB) cmp = 0;
+          else if (!eA) cmp = 1;
+          else if (!eB) cmp = -1;
+          else cmp = eA.localeCompare(eB, 'pt-BR');
         } else {
           const valA = (a[alunosSortColumn] || '').toString().trim();
           const valB = (b[alunosSortColumn] || '').toString().trim();
@@ -23533,6 +23549,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           const ativo = isAlunoAtivo(a);
           list.push({
             ...a,
+            _originalIdx: list.length + 1,
             turmaKey: key,
             stage: a.stage || defaultStage,
             turma: a.turma || defaultTurma,
@@ -23545,6 +23562,56 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         });
       });
       return list;
+    }
+
+    // Estado de Ordenação para Cadastro Geral (Padrão: Alfabético asc por Nome)
+    let cgSortColumn = 'nome';
+    let cgSortDirection = 'asc';
+
+    function setCadastroGeralSort(col) {
+      if (cgSortColumn === col) {
+        cgSortDirection = cgSortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        cgSortColumn = col;
+        cgSortDirection = 'asc';
+      }
+      updateCadastroGeralSortHeadersUI();
+      renderCadastroGeralTable();
+    }
+
+    function updateCadastroGeralSortHeadersUI() {
+      const colMap = {
+        'idx': 'th-cg-idx',
+        'nome': 'th-cg-nome',
+        'stage': 'th-cg-etapa',
+        'turma': 'th-cg-turma',
+        'statusLabel': 'th-cg-status',
+        'contato': 'th-cg-contato',
+        'email': 'th-cg-email',
+        'batizadoLabel': 'th-cg-batizado',
+        'eucaristiaLabel': 'th-cg-eucaristia',
+        'impedidoLabel': 'th-cg-impedido',
+        'nomeResponsavel': 'th-cg-responsavel'
+      };
+
+      Object.entries(colMap).forEach(([c, thId]) => {
+        const th = document.getElementById(thId);
+        if (!th) return;
+        const iconSpan = th.querySelector('.sort-icon-cg');
+        if (c === cgSortColumn) {
+          th.classList.add('text-[#d4a94f]');
+          if (iconSpan) {
+            iconSpan.textContent = cgSortDirection === 'asc' ? ' ▲' : ' ▼';
+            iconSpan.className = 'sort-icon-cg text-[10px] text-amber-300 font-bold';
+          }
+        } else {
+          th.classList.remove('text-[#d4a94f]');
+          if (iconSpan) {
+            iconSpan.textContent = ' ↕';
+            iconSpan.className = 'sort-icon-cg text-[10px] text-slate-400 font-normal';
+          }
+        }
+      });
     }
 
     function renderCadastroGeralTable() {
@@ -23675,6 +23742,46 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       // Aplica filtros inteligentes por coluna
       if (window.ColumnFilterEngine) {
         filtered = window.ColumnFilterEngine.filterDataset('table-cadastro-geral', filtered);
+      }
+
+      // Aplica ordenação selecionada pelo usuário
+      filtered.sort((a, b) => {
+        let cmp = 0;
+        if (cgSortColumn === 'idx') {
+          cmp = (a._originalIdx ?? 0) - (b._originalIdx ?? 0);
+        } else if (cgSortColumn === 'contato') {
+          const numA = (a.contato || '').replace(/\D/g, '');
+          const numB = (b.contato || '').replace(/\D/g, '');
+          if (!numA && !numB) cmp = 0;
+          else if (!numA) cmp = 1;
+          else if (!numB) cmp = -1;
+          else cmp = numA.localeCompare(numB);
+        } else if (cgSortColumn === 'email') {
+          const eA = (a.email || '').trim().toLowerCase();
+          const eB = (b.email || '').trim().toLowerCase();
+          if (!eA && !eB) cmp = 0;
+          else if (!eA) cmp = 1;
+          else if (!eB) cmp = -1;
+          else cmp = eA.localeCompare(eB, 'pt-BR');
+        } else {
+          const valA = (a[cgSortColumn] || '').toString().trim();
+          const valB = (b[cgSortColumn] || '').toString().trim();
+          if (!valA && !valB) cmp = 0;
+          else if (!valA) cmp = 1;
+          else if (!valB) cmp = -1;
+          else cmp = valA.localeCompare(valB, 'pt-BR', { numeric: true, sensitivity: 'base' });
+        }
+
+        // Desempate alfabético por nome
+        if (cmp === 0) {
+          cmp = (a.nome || '').localeCompare(b.nome || '', 'pt-BR', { sensitivity: 'base' });
+        }
+
+        return cgSortDirection === 'asc' ? cmp : -cmp;
+      });
+
+      if (typeof updateCadastroGeralSortHeadersUI === 'function') {
+        updateCadastroGeralSortHeadersUI();
       }
 
       if (filtered.length === 0) {
@@ -23827,6 +23934,12 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         } else if (typeof window.ColumnFilterEngine.clearAll === 'function') {
           window.ColumnFilterEngine.clearAll('table-cadastro-geral');
         }
+      }
+
+      cgSortColumn = 'nome';
+      cgSortDirection = 'asc';
+      if (typeof updateCadastroGeralSortHeadersUI === 'function') {
+        updateCadastroGeralSortHeadersUI();
       }
 
       renderCadastroGeralTable();
