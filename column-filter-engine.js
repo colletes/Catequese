@@ -24,16 +24,17 @@
      * @param {Object} options { getDataset: Function, onChange: Function, keyExtractors: Object }
      */
     registerTable(tableId, options) {
+      const changeCallback = options.onChange || options.onFilterChange || (() => {});
       if (!tablesState[tableId]) {
         tablesState[tableId] = {
           activeFilters: {},
           datasetFn: options.getDataset || (() => []),
-          onChange: options.onChange || (() => {}),
+          onChange: changeCallback,
           keyExtractors: options.keyExtractors || {}
         };
       } else {
         if (options.getDataset) tablesState[tableId].datasetFn = options.getDataset;
-        if (options.onChange) tablesState[tableId].onChange = options.onChange;
+        if (options.onChange || options.onFilterChange) tablesState[tableId].onChange = changeCallback;
         if (options.keyExtractors) tablesState[tableId].keyExtractors = options.keyExtractors;
       }
     },
@@ -53,7 +54,11 @@
       const res = {};
       for (const k in filters) {
         if (filters[k] && filters[k].size > 0) {
-          res[k] = Array.from(filters[k]);
+          if (filters[k].has('__NO_MATCH__')) {
+            res[k] = [];
+          } else {
+            res[k] = Array.from(filters[k]);
+          }
         }
       }
       return res;
@@ -119,7 +124,9 @@
       if (tablesState[tableId]) {
         tablesState[tableId].activeFilters = {};
         this.updateHeaderIcons(tableId);
-        tablesState[tableId].onChange();
+        if (typeof tablesState[tableId].onChange === 'function') {
+          tablesState[tableId].onChange();
+        }
         this.closePopover();
       }
     },
@@ -128,10 +135,14 @@
      * Limpa o filtro de uma coluna específica
      */
     clearColumnFilter(tableId, colKey) {
-      if (tablesState[tableId] && tablesState[tableId].activeFilters[colKey]) {
-        delete tablesState[tableId].activeFilters[colKey];
-        this.updateHeaderIcons(tableId);
-        tablesState[tableId].onChange();
+      if (tablesState[tableId]) {
+        if (tablesState[tableId].activeFilters && tablesState[tableId].activeFilters[colKey]) {
+          delete tablesState[tableId].activeFilters[colKey];
+          this.updateHeaderIcons(tableId);
+          if (typeof tablesState[tableId].onChange === 'function') {
+            tablesState[tableId].onChange();
+          }
+        }
         this.closePopover();
       }
     },
@@ -148,11 +159,13 @@
 
       btns.forEach(btn => {
         const colKey = btn.getAttribute('data-col-filter-key');
-        const isActive = state.activeFilters[colKey] && state.activeFilters[colKey].size > 0;
+        const colFilter = state.activeFilters[colKey];
+        const isActive = colFilter && colFilter.size > 0;
         if (isActive) {
           btn.classList.add('text-amber-400', 'bg-amber-950/80', 'ring-1', 'ring-amber-400/80', 'scale-110');
           btn.classList.remove('text-slate-400', 'hover:text-slate-200');
-          btn.title = `Filtro ativo: ${state.activeFilters[colKey].size} selecionado(s). Clique para editar.`;
+          const count = colFilter.has('__NO_MATCH__') ? 0 : colFilter.size;
+          btn.title = `Filtro ativo: ${count} selecionado(s). Clique para editar.`;
         } else {
           btn.classList.remove('text-amber-400', 'bg-amber-950/80', 'ring-1', 'ring-amber-400/80', 'scale-110');
           btn.classList.add('text-slate-400', 'hover:text-slate-200');
@@ -258,7 +271,7 @@
             return `
               <label class="filter-item-row flex items-center justify-between gap-2 p-1 rounded-lg hover:bg-indigo-50/80 cursor-pointer text-slate-700 hover:text-indigo-950 transition">
                 <div class="flex items-center gap-2 min-w-0 flex-1">
-                  <input type="checkbox" value="${escapedVal}" ${isChecked ? 'checked' : ''} class="filter-val-chk rounded text-indigo-600 focus:ring-indigo-400 cursor-pointer w-3.5 h-3.5" />
+                  <input type="checkbox" data-val-idx="${idx}" value="${escapedVal}" ${isChecked ? 'checked' : ''} class="filter-val-chk rounded text-indigo-600 focus:ring-indigo-400 cursor-pointer w-3.5 h-3.5" />
                   <span class="truncate text-xs ${val === '(Vazio)' ? 'italic text-slate-400' : 'font-medium'}">${val}</span>
                 </div>
                 <span class="text-[10px] bg-slate-200/80 text-slate-600 px-1.5 py-0.2 rounded-full font-mono">${count}</span>
@@ -338,18 +351,30 @@
       popover.querySelector('#btn-popover-apply').addEventListener('click', () => {
         const selected = new Set();
         chkBoxes.forEach(chk => {
-          if (chk.checked) selected.add(chk.value);
+          if (chk.checked) {
+            const idx = parseInt(chk.getAttribute('data-val-idx'), 10);
+            if (!isNaN(idx) && idx >= 0 && idx < uniqueValues.length) {
+              selected.add(uniqueValues[idx]);
+            } else {
+              selected.add(chk.value);
+            }
+          }
         });
 
         // Se todos foram marcados, considera sem filtro para essa coluna
-        if (selected.size === uniqueValues.length || selected.size === 0) {
+        if (selected.size === uniqueValues.length) {
           delete state.activeFilters[colKey];
+        } else if (selected.size === 0) {
+          // Se nenhum foi marcado, filtra para não exibir registros dessa coluna
+          state.activeFilters[colKey] = new Set(['__NO_MATCH__']);
         } else {
           state.activeFilters[colKey] = selected;
         }
 
         this.updateHeaderIcons(tableId);
-        state.onChange();
+        if (typeof state.onChange === 'function') {
+          state.onChange();
+        }
         this.closePopover();
       });
 

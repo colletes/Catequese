@@ -51,7 +51,7 @@
   <script src="knowledge-upload-panel.js?v=20261018-v6"></script>
   <script src="knowledge-base.js?v=20261018-v6"></script>
   <!-- Motor Universal de Filtros por Coluna (Estilo Excel/Sheets) -->
-  <script src="column-filter-engine.js?v=20261018-v2"></script>
+  <script src="column-filter-engine.js?v=20261019-v1"></script>
   
   <!-- Tipografia Oficial do Santuário (Questrial, Nunito, Marcellus, Outfit, Roboto) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11268,6 +11268,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             { key: 'paroquia', title: 'Paróquia Habitual' },
             { key: 'etapaDisplay', title: 'Etapa Principal' }
           ],
+          onChange: () => filterCatequistasList(),
           onFilterChange: () => filterCatequistasList()
         });
 
@@ -22755,6 +22756,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         window.ColumnFilterEngine.registerTable('table-alunos-turma', {
           getDataset: () => getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma).filter(isAlunoAtivo),
           onChange: () => renderAlunosTable(),
+          onFilterChange: () => renderAlunosTable(),
           keyExtractors: {
             nome: a => a.nome || '',
             contato: a => a.contato || '',
@@ -23586,6 +23588,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             { key: 'impedidoLabel', title: 'Impedido' },
             { key: 'nomeResponsavel', title: 'Responsável' }
           ],
+          onChange: () => renderCadastroGeralTable(),
           onFilterChange: () => renderCadastroGeralTable()
         });
 
