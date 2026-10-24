@@ -42,7 +42,8 @@ window.SEED_CATEQUISTAS_2026 = [
       }
     ],
     "foto": null,
-    "fotoFaceDetected": false
+    "fotoFaceDetected": false,
+    "apelido": "Lorena"
   },
   {
     "id": "cat-2026-1",
@@ -72,7 +73,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Crisma Jovem (Turma 07)"
-    ]
+    ],
+    "apelido": "Vinícius Piante"
   },
   {
     "id": "cat-2026-2",
@@ -102,7 +104,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": false,
     "funcoes": [
       "Catequista Titular — Perseverança (Turma 01)"
-    ]
+    ],
+    "apelido": "Sônia"
   },
   {
     "id": "cat-2026-3",
@@ -132,7 +135,11 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": false,
     "funcoes": [
       "Catequista Titular — Crisma Adultos (Turma 01)"
-    ]
+    ],
+    "apelido": "DANILO PASCOAL COSTA",
+    "status": "afastado",
+    "ativo": false,
+    "motivoAfastamento": "Afastado"
   },
   {
     "id": "cat-2026-4",
@@ -162,7 +169,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Crisma Adultos (Turma 08)"
-    ]
+    ],
+    "apelido": "Victor"
   },
   {
     "id": "cat-2026-5",
@@ -192,7 +200,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Eucaristia I (Turma 08)"
-    ]
+    ],
+    "apelido": "Elza"
   },
   {
     "id": "cat-2026-6",
@@ -222,7 +231,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Eucaristia I (Turma 10)"
-    ]
+    ],
+    "apelido": "Mara"
   },
   {
     "id": "cat-2026-7",
@@ -252,7 +262,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Crisma Jovem (Turma 11)"
-    ]
+    ],
+    "apelido": "Rosi"
   },
   {
     "id": "cat-2026-8",
@@ -282,7 +293,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Auxiliar em Formação — Eucaristia I (Turma 06)"
-    ]
+    ],
+    "apelido": "Marina de Oliveira"
   },
   {
     "id": "cat-2026-9",
@@ -312,7 +324,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Crisma Jovem (Turma 11)"
-    ]
+    ],
+    "apelido": "Pierre"
   },
   {
     "id": "cat-2026-10",
@@ -342,7 +355,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Crisma Adultos (Turma 06)"
-    ]
+    ],
+    "apelido": "Hermes"
   },
   {
     "id": "cat-2026-11",
@@ -372,7 +386,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Crisma Jovem (Turma 04)"
-    ]
+    ],
+    "apelido": "Flávia"
   },
   {
     "id": "cat-2026-12",
@@ -402,7 +417,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Sem turma atualmente (Geral)"
-    ]
+    ],
+    "apelido": "Michel Maisonnave de Oliveira"
   },
   {
     "id": "cat-2026-13",
@@ -432,7 +448,11 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Vice-Coordenador de Etapa (Crisma Jovem)"
-    ]
+    ],
+    "apelido": "Ricardo Pereira Lino",
+    "status": "afastado",
+    "ativo": false,
+    "motivoAfastamento": "Afastado"
   },
   {
     "id": "cat-2026-14",
@@ -462,7 +482,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Crisma Adultos (Turma 02)"
-    ]
+    ],
+    "apelido": "Marcelo"
   },
   {
     "id": "cat-2026-15",
@@ -492,7 +513,11 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Apoio / Substituta — Eucaristia I (Apoio)"
-    ]
+    ],
+    "apelido": "Ana Luiza Brasil de Melo Augusto",
+    "status": "afastado",
+    "ativo": false,
+    "motivoAfastamento": "Afastado"
   },
   {
     "id": "cat-2026-16",
@@ -522,7 +547,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Eucaristia II (Turma 04)"
-    ]
+    ],
+    "apelido": "Maria Laura"
   },
   {
     "id": "cat-2026-17",
@@ -560,7 +586,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "funcoes": [
       "Coordenadora de Etapa (Eucaristia I & II)",
       "Catequista Titular — Eucaristia II (Turma 03)"
-    ]
+    ],
+    "apelido": "Marilian"
   },
   {
     "id": "cat-2026-18",
@@ -598,7 +625,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "funcoes": [
       "Catequista Titular — Crisma Adultos (Turma 04)",
       "Catequista Titular — Crisma Adultos (Turma 07)"
-    ]
+    ],
+    "apelido": "Thiago Malaquias"
   },
   {
     "id": "cat-2026-19",
@@ -628,7 +656,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Crisma Adultos (Turma 01)"
-    ]
+    ],
+    "apelido": "Leticia"
   },
   {
     "id": "cat-2026-20",
@@ -666,7 +695,11 @@ window.SEED_CATEQUISTAS_2026 = [
     "funcoes": [
       "Coordenador de Etapa (Crisma Adultos)",
       "Catequista Titular — Crisma Adultos (Turma 05)"
-    ]
+    ],
+    "apelido": "Daniel Marcio Fernandes Andrade",
+    "status": "afastado",
+    "ativo": false,
+    "motivoAfastamento": "Afastado"
   },
   {
     "id": "cat-2026-21",
@@ -696,7 +729,11 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": false,
     "funcoes": [
       "Catequista Titular — Crisma Jovem (Turma 01)"
-    ]
+    ],
+    "apelido": "Giovanna Lopes de Araujo",
+    "status": "afastado",
+    "ativo": false,
+    "motivoAfastamento": "Afastado"
   },
   {
     "id": "cat-2026-22",
@@ -726,7 +763,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Eucaristia II (Turma 04)"
-    ]
+    ],
+    "apelido": "Suelene"
   },
   {
     "id": "cat-2026-23",
@@ -756,7 +794,11 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Eucaristia II (Turma 05)"
-    ]
+    ],
+    "apelido": "José Henrique Martins da Silva",
+    "status": "afastado",
+    "ativo": false,
+    "motivoAfastamento": "Afastado"
   },
   {
     "id": "cat-2026-24",
@@ -794,7 +836,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "funcoes": [
       "Vice-Coordenador Geral (Coordenação Geral)",
       "Coordenador de Etapa / Vice Geral (Perseverança)"
-    ]
+    ],
+    "apelido": "Andres Gonzalo Reyes Unda"
   },
   {
     "id": "cat-2026-25",
@@ -824,7 +867,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Crisma Jovem (Turma 08)"
-    ]
+    ],
+    "apelido": "José Bernardo"
   },
   {
     "id": "cat-2026-26",
@@ -862,7 +906,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "funcoes": [
       "Vice-Coordenadora de Etapa (Eucaristia II)",
       "Catequista Titular — Eucaristia II (Turma 07)"
-    ]
+    ],
+    "apelido": "Priscila Ayres"
   },
   {
     "id": "cat-2026-27",
@@ -892,7 +937,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Crisma Jovem (Turma 04)"
-    ]
+    ],
+    "apelido": "Amanda Couto Tambellini"
   },
   {
     "id": "cat-2026-28",
@@ -938,7 +984,8 @@ window.SEED_CATEQUISTAS_2026 = [
       "Vice-Coordenadora de Etapa (Pré Eucaristia)",
       "Catequista Titular — Pré Eucaristia (Turma 02)",
       "Auxiliar em Formação — Eucaristia II (Turma 07)"
-    ]
+    ],
+    "apelido": "Ana Luísa Chaves Ribeiro Nascimento"
   },
   {
     "id": "cat-2026-29",
@@ -968,7 +1015,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Eucaristia I (Turma 11)"
-    ]
+    ],
+    "apelido": "Maria Dulcineide"
   },
   {
     "id": "cat-2026-30",
@@ -1006,7 +1054,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "funcoes": [
       "Vice-Coordenadora de Etapa (Crisma Adultos)",
       "Catequista Titular — Crisma Adultos (Turma 02)"
-    ]
+    ],
+    "apelido": "Patrícia Gomes"
   },
   {
     "id": "cat-2026-31",
@@ -1036,7 +1085,11 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Perseverança (Turma 02)"
-    ]
+    ],
+    "apelido": "Rosângela Ferreira dos Santos",
+    "status": "afastado",
+    "ativo": false,
+    "motivoAfastamento": "Afastado"
   },
   {
     "id": "cat-2026-32",
@@ -1066,7 +1119,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Pré Eucaristia (Turma 03)"
-    ]
+    ],
+    "apelido": "Bruna Nogueira"
   },
   {
     "id": "cat-2026-33",
@@ -1096,7 +1150,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Crisma Adultos (Turma 07)"
-    ]
+    ],
+    "apelido": "Thais"
   },
   {
     "id": "cat-2026-34",
@@ -1134,7 +1189,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "funcoes": [
       "Catequista Titular — Pré Eucaristia (Turma 01)",
       "Catequista Titular — Eucaristia II (Turma 08)"
-    ]
+    ],
+    "apelido": "Ane"
   },
   {
     "id": "cat-2026-35",
@@ -1164,7 +1220,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Eucaristia II (Turma 06)"
-    ]
+    ],
+    "apelido": "Solange"
   },
   {
     "id": "cat-2026-36",
@@ -1194,7 +1251,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": false,
     "funcoes": [
       "Catequista Titular — Crisma Jovem (Turma 06)"
-    ]
+    ],
+    "apelido": "Jonatan"
   },
   {
     "id": "cat-2026-37",
@@ -1240,7 +1298,8 @@ window.SEED_CATEQUISTAS_2026 = [
       "Coordenadora de Etapa (Perseverança)",
       "Catequista Titular — Eucaristia I (Turma 10)",
       "Catequista Titular — Crisma Jovem (Turma 09)"
-    ]
+    ],
+    "apelido": "Lanuzia"
   },
   {
     "id": "cat-2026-38",
@@ -1270,7 +1329,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Crisma Adultos (Turma 01)"
-    ]
+    ],
+    "apelido": "Cauã"
   },
   {
     "id": "cat-2026-39",
@@ -1300,7 +1360,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Eucaristia II (Turma 01)"
-    ]
+    ],
+    "apelido": "Bruna Neto"
   },
   {
     "id": "cat-2026-40",
@@ -1338,7 +1399,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "funcoes": [
       "Catequista Titular — Pré Eucaristia (Turma 03)",
       "Auxiliar em Formação — Pré Eucaristia (Turma 03)"
-    ]
+    ],
+    "apelido": "Jullia"
   },
   {
     "id": "cat-2026-41",
@@ -1368,7 +1430,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Crisma Adultos (Turma 01)"
-    ]
+    ],
+    "apelido": "Eduardo"
   },
   {
     "id": "cat-2026-42",
@@ -1406,7 +1469,11 @@ window.SEED_CATEQUISTAS_2026 = [
     "funcoes": [
       "Catequista Titular — Eucaristia II (Turma 01)",
       "Auxiliar em Formação — Eucaristia II (Turma 07)"
-    ]
+    ],
+    "apelido": "Ana Luiza Queiroga Yung",
+    "status": "afastado",
+    "ativo": false,
+    "motivoAfastamento": "Afastado"
   },
   {
     "id": "cat-2026-43",
@@ -1436,7 +1503,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Eucaristia II (Turma 07)"
-    ]
+    ],
+    "apelido": "Camilla"
   },
   {
     "id": "cat-2026-44",
@@ -1466,7 +1534,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Crisma Jovem (Turma 08)"
-    ]
+    ],
+    "apelido": "Priscila Mesquita"
   },
   {
     "id": "cat-2026-45",
@@ -1496,7 +1565,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Crisma Jovem (Turma 02)"
-    ]
+    ],
+    "apelido": "Artur"
   },
   {
     "id": "cat-2026-46",
@@ -1526,7 +1596,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Eucaristia I (Turma 09)"
-    ]
+    ],
+    "apelido": "Gllenda"
   },
   {
     "id": "cat-2026-47",
@@ -1556,7 +1627,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": false,
     "funcoes": [
       "Catequista Titular — Eucaristia II (Turma 03)"
-    ]
+    ],
+    "apelido": "Maria Luisa Barbosa"
   },
   {
     "id": "cat-2026-48",
@@ -1586,7 +1658,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": false,
     "funcoes": [
       "Catequista Titular — Eucaristia I (Turma 03)"
-    ]
+    ],
+    "apelido": "Josy"
   },
   {
     "id": "cat-2026-49",
@@ -1616,7 +1689,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": false,
     "funcoes": [
       "Catequista Titular — Eucaristia I (Turma 03)"
-    ]
+    ],
+    "apelido": "Silene"
   },
   {
     "id": "cat-2026-50",
@@ -1654,7 +1728,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "funcoes": [
       "Catequista Titular — Eucaristia II (Turma 08)",
       "Catequista Titular — Eucaristia II (Turma 09)"
-    ]
+    ],
+    "apelido": "Carlos"
   },
   {
     "id": "cat-2026-51",
@@ -1684,7 +1759,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Crisma Adultos (Turma 03)"
-    ]
+    ],
+    "apelido": "Natanai"
   },
   {
     "id": "cat-2026-52",
@@ -1714,7 +1790,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Eucaristia I (Turma 02)"
-    ]
+    ],
+    "apelido": "Shirley"
   },
   {
     "id": "cat-2026-53",
@@ -1744,7 +1821,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Crisma Adultos (Turma 08)"
-    ]
+    ],
+    "apelido": "Juliana"
   },
   {
     "id": "cat-2026-54",
@@ -1774,7 +1852,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Crisma Adultos (Turma 06)"
-    ]
+    ],
+    "apelido": "Guilherme"
   },
   {
     "id": "cat-2026-55",
@@ -1804,7 +1883,11 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Sem turma atualmente (Geral)"
-    ]
+    ],
+    "apelido": "Leide Jane Muniz da Silva Almeida",
+    "status": "afastado",
+    "ativo": false,
+    "motivoAfastamento": "Afastado"
   },
   {
     "id": "cat-2026-56",
@@ -1842,7 +1925,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "funcoes": [
       "Catequista Titular — Eucaristia I (Turma 04)",
       "Auxiliar em Formação — Eucaristia I (Turma 04)"
-    ]
+    ],
+    "apelido": "Brenda"
   },
   {
     "id": "cat-2026-57",
@@ -1872,7 +1956,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Auxiliar em Formação — Eucaristia I (Turma 05)"
-    ]
+    ],
+    "apelido": "Mariana Alvarenga"
   },
   {
     "id": "cat-2026-58",
@@ -1902,7 +1987,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Eucaristia II (Turma 02)"
-    ]
+    ],
+    "apelido": "Carla"
   },
   {
     "id": "cat-2026-59",
@@ -1932,7 +2018,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Auxiliar em Formação — Eucaristia II (Turma 06)"
-    ]
+    ],
+    "apelido": "Gabriella"
   },
   {
     "id": "cat-2026-60",
@@ -1962,7 +2049,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": false,
     "funcoes": [
       "Catequista Titular — Eucaristia I (Turma 02)"
-    ]
+    ],
+    "apelido": "Tatyane"
   },
   {
     "id": "cat-2026-61",
@@ -1992,7 +2080,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Eucaristia I (Turma 09)"
-    ]
+    ],
+    "apelido": "Danusa"
   },
   {
     "id": "cat-2026-62",
@@ -2022,7 +2111,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Crisma Jovem (Turma 07)"
-    ]
+    ],
+    "apelido": "Tiago Artur"
   },
   {
     "id": "cat-2026-63",
@@ -2052,7 +2142,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Eucaristia I (Turma 06)"
-    ]
+    ],
+    "apelido": "Andréia"
   },
   {
     "id": "cat-2026-64",
@@ -2082,7 +2173,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Perseverança (Turma 01)"
-    ]
+    ],
+    "apelido": "Bruna Cruvinel"
   },
   {
     "id": "cat-2026-65",
@@ -2112,7 +2204,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": false,
     "funcoes": [
       "Catequista Titular — Crisma Adultos (Turma 02)"
-    ]
+    ],
+    "apelido": "Fabio"
   },
   {
     "id": "cat-2026-66",
@@ -2142,7 +2235,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": false,
     "funcoes": [
       "Catequista Titular — Crisma Adultos (Turma 04)"
-    ]
+    ],
+    "apelido": "Lourival"
   },
   {
     "id": "cat-2026-67",
@@ -2172,7 +2266,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Crisma Jovem (Turma 03)"
-    ]
+    ],
+    "apelido": "Monica"
   },
   {
     "id": "cat-2026-68",
@@ -2202,7 +2297,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Eucaristia I (Turma 01)"
-    ]
+    ],
+    "apelido": "Polyana"
   },
   {
     "id": "cat-2026-69",
@@ -2232,7 +2328,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Eucaristia II (Turma 06)"
-    ]
+    ],
+    "apelido": "Nubia"
   },
   {
     "id": "cat-2026-70",
@@ -2262,7 +2359,11 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Crisma Jovem (Turma 01)"
-    ]
+    ],
+    "apelido": "Heloisa Fortes de Castro e Castro",
+    "status": "afastado",
+    "ativo": false,
+    "motivoAfastamento": "Afastado"
   },
   {
     "id": "cat-2026-71",
@@ -2292,7 +2393,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Crisma Adultos (Turma 02)"
-    ]
+    ],
+    "apelido": "Ronaldo"
   },
   {
     "id": "cat-2026-73",
@@ -2322,7 +2424,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Eucaristia I (Turma 07)"
-    ]
+    ],
+    "apelido": "Marina Neiva"
   },
   {
     "id": "cat-2026-74",
@@ -2352,7 +2455,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Eucaristia I (Turma 07)"
-    ]
+    ],
+    "apelido": "Nádia"
   },
   {
     "id": "cat-2026-75",
@@ -2390,7 +2494,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "funcoes": [
       "Coordenadora de Etapa (Pré Eucaristia)",
       "Catequista Titular — Pré Eucaristia (Turma 01)"
-    ]
+    ],
+    "apelido": "Patrícia Guimarães"
   },
   {
     "id": "cat-2026-76",
@@ -2420,7 +2525,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Eucaristia I (Turma 06)"
-    ]
+    ],
+    "apelido": "Fernanda"
   },
   {
     "id": "cat-2026-77",
@@ -2450,7 +2556,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista Titular — Eucaristia II (Turma 02)"
-    ]
+    ],
+    "apelido": "Eliane Bonasser"
   },
   {
     "id": "cat-2026-78",
@@ -2472,7 +2579,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista"
-    ]
+    ],
+    "apelido": "Davi"
   },
   {
     "id": "cat-2026-79",
@@ -2494,7 +2602,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista"
-    ]
+    ],
+    "apelido": "Beatris"
   },
   {
     "id": "cat-2026-80",
@@ -2516,7 +2625,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista"
-    ]
+    ],
+    "apelido": "Joyce"
   },
   {
     "id": "cat-2026-81",
@@ -2538,7 +2648,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista"
-    ]
+    ],
+    "apelido": "Heitor"
   },
   {
     "id": "cat-2026-82",
@@ -2560,7 +2671,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista"
-    ]
+    ],
+    "apelido": "Valdir"
   },
   {
     "id": "cat-2026-83",
@@ -2590,7 +2702,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Vice-Coordenadora de Etapa (Eucaristia I)"
-    ]
+    ],
+    "apelido": "Lara"
   },
   {
     "id": "cat-2026-84",
@@ -2620,7 +2733,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": false,
     "funcoes": [
       "Auxiliar em Formação — Pré Eucaristia (Turma 02)"
-    ]
+    ],
+    "apelido": "Mariana Cavalcante"
   },
   {
     "id": "cat-2026-85",
@@ -2642,7 +2756,11 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": false,
     "funcoes": [
       "Catequista"
-    ]
+    ],
+    "apelido": "Gabriela Couto Tambellini",
+    "status": "afastado",
+    "ativo": false,
+    "motivoAfastamento": "Afastado"
   },
   {
     "id": "cat-2026-86",
@@ -2664,7 +2782,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista"
-    ]
+    ],
+    "apelido": "Klebson"
   },
   {
     "id": "cat-2026-87",
@@ -2718,7 +2837,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista"
-    ]
+    ],
+    "apelido": "Fernanda Fonseca de Sá Andrade"
   },
   {
     "id": "cat-2026-89",
@@ -2740,7 +2860,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista"
-    ]
+    ],
+    "apelido": "Zairo"
   },
   {
     "id": "cat-2026-90",
@@ -2762,7 +2883,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": false,
     "funcoes": [
       "Catequista"
-    ]
+    ],
+    "apelido": "Alessandra"
   },
   {
     "id": "cat-2026-91",
@@ -2784,7 +2906,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista"
-    ]
+    ],
+    "apelido": "Elisa"
   },
   {
     "id": "cat-2026-92",
@@ -2806,7 +2929,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista"
-    ]
+    ],
+    "apelido": "Otávio"
   },
   {
     "id": "cat-2026-93",
@@ -2836,7 +2960,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Vice-Coordenadora de Etapa (Perseverança)"
-    ]
+    ],
+    "apelido": "Beatriz Torres"
   },
   {
     "id": "cat-2026-94",
@@ -2858,7 +2983,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista"
-    ]
+    ],
+    "apelido": "Anderson"
   },
   {
     "id": "cat-2026-95",
@@ -2880,7 +3006,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": true,
     "funcoes": [
       "Catequista"
-    ]
+    ],
+    "apelido": "Marcella"
   },
   {
     "id": "cat-2026-96",
@@ -2902,7 +3029,8 @@ window.SEED_CATEQUISTAS_2026 = [
     "fotoFaceDetected": false,
     "funcoes": [
       "Catequista"
-    ]
+    ],
+    "apelido": "Alda"
   },
   {
     "id": "cat-2026-camila",
@@ -2940,6 +3068,177 @@ window.SEED_CATEQUISTAS_2026 = [
     "funcoes": [
       "Catequista Titular — Eucaristia II (Turma 07)",
       "Catequista Titular — Eucaristia I (Turma 07)"
-    ]
+    ],
+    "apelido": "Camila"
+  },
+  {
+    "id": "cat-2027-alexandre-simas",
+    "row": 98,
+    "nomeCompleto": "Alexandre Simas de Oliveira Júnior",
+    "apelido": "Alexandre",
+    "nomeConhecido": "Alexandre",
+    "dataNascimento": "Não informada",
+    "telefone": "Não informado",
+    "telefoneRaw": "",
+    "email": "",
+    "profissao": "",
+    "estadoCivil": "Solteiro(a)",
+    "endereco": "Santuário ICM - Águas Claras/DF",
+    "paroquia": "Santuário do Imaculado Coração de Maria",
+    "etapaDeclarada": "Crisma de Adultos",
+    "etapaPrincipal": "Crisma de Adultos",
+    "funcaoPrincipal": "Catequista Titular",
+    "funcoes": [
+      "Catequista Titular — Crisma Adultos (Turma 05)"
+    ],
+    "turmas": [
+      {
+        "stage": "Crisma de Adultos",
+        "turma": "Turma 05",
+        "funcao": "Catequista Titular",
+        "dayTime": "Segunda: 20:00 às 22:00",
+        "room": "Sala Anjo da Guarda (Sala 02 - Centro Cat.)"
+      }
+    ],
+    "foto": null,
+    "fotoFaceDetected": false,
+    "status": "ativo",
+    "ativo": true
+  },
+  {
+    "id": "cat-2027-anna-julia-freires",
+    "row": 99,
+    "nomeCompleto": "Anna Júlia Freires",
+    "apelido": "Anna Júlia",
+    "nomeConhecido": "Anna Júlia",
+    "dataNascimento": "Não informada",
+    "telefone": "Não informado",
+    "telefoneRaw": "",
+    "email": "",
+    "profissao": "",
+    "estadoCivil": "Solteira",
+    "endereco": "Santuário ICM - Águas Claras/DF",
+    "paroquia": "Santuário do Imaculado Coração de Maria",
+    "etapaDeclarada": "Eucaristia I",
+    "etapaPrincipal": "Eucaristia I",
+    "funcaoPrincipal": "Catequista Auxiliar",
+    "funcoes": [
+      "Catequista Auxiliar — Eucaristia I (Turma 02)"
+    ],
+    "turmas": [
+      {
+        "stage": "Eucaristia I",
+        "turma": "Turma 02",
+        "funcao": "Catequista Auxiliar",
+        "dayTime": "Sábado: 08:30 às 10:00",
+        "room": "Sala Santa Teresa (Sala 16 - Salão Par.)"
+      }
+    ],
+    "foto": null,
+    "fotoFaceDetected": false,
+    "status": "ativo",
+    "ativo": true
+  },
+  {
+    "id": "cat-2027-joao-paulo-habib",
+    "row": 100,
+    "nomeCompleto": "João Paulo Habib",
+    "apelido": "João Paulo",
+    "nomeConhecido": "João Paulo",
+    "dataNascimento": "Não informada",
+    "telefone": "Não informado",
+    "telefoneRaw": "",
+    "email": "",
+    "profissao": "",
+    "estadoCivil": "Solteiro(a)",
+    "endereco": "Santuário ICM - Águas Claras/DF",
+    "paroquia": "Santuário do Imaculado Coração de Maria",
+    "etapaDeclarada": "Eucaristia I",
+    "etapaPrincipal": "Eucaristia I",
+    "funcaoPrincipal": "Catequista Titular",
+    "funcoes": [
+      "Catequista Titular — Eucaristia I (Turma 07)"
+    ],
+    "turmas": [
+      {
+        "stage": "Eucaristia I",
+        "turma": "Turma 07",
+        "funcao": "Catequista Titular",
+        "dayTime": "Sábado: 10:30 às 12:00",
+        "room": "Sala São Lucas (Sala 13 - Salão Par.)"
+      }
+    ],
+    "foto": null,
+    "fotoFaceDetected": false,
+    "status": "ativo",
+    "ativo": true
+  },
+  {
+    "id": "cat-2027-kellibe-torres",
+    "row": 101,
+    "nomeCompleto": "Kéllibe Torres dos Santos Alves",
+    "apelido": "Kéllibe",
+    "nomeConhecido": "Kéllibe",
+    "dataNascimento": "Não informada",
+    "telefone": "Não informado",
+    "telefoneRaw": "",
+    "email": "",
+    "profissao": "",
+    "estadoCivil": "Solteiro(a)",
+    "endereco": "Santuário ICM - Águas Claras/DF",
+    "paroquia": "Santuário do Imaculado Coração de Maria",
+    "etapaDeclarada": "Crisma Jovem",
+    "etapaPrincipal": "Crisma Jovem",
+    "funcaoPrincipal": "Catequista Titular",
+    "funcoes": [
+      "Catequista Titular — Crisma Jovem (Turma 07)"
+    ],
+    "turmas": [
+      {
+        "stage": "Crisma Jovem",
+        "turma": "Turma 07",
+        "funcao": "Catequista Titular",
+        "dayTime": "Segunda: 20:00 às 21:30",
+        "room": "Sala São Mateus (Sala 11 - Salão Par.)"
+      }
+    ],
+    "foto": null,
+    "fotoFaceDetected": false,
+    "status": "ativo",
+    "ativo": true
+  },
+  {
+    "id": "cat-2027-mariana-garcia",
+    "row": 102,
+    "nomeCompleto": "Mariana Garcia da Silva",
+    "apelido": "Mariana Garcia",
+    "nomeConhecido": "Mariana Garcia",
+    "dataNascimento": "Não informada",
+    "telefone": "Não informado",
+    "telefoneRaw": "",
+    "email": "",
+    "profissao": "",
+    "estadoCivil": "Solteira",
+    "endereco": "Santuário ICM - Águas Claras/DF",
+    "paroquia": "Santuário do Imaculado Coração de Maria",
+    "etapaDeclarada": "Perseverança",
+    "etapaPrincipal": "Perseverança",
+    "funcaoPrincipal": "Catequista Titular",
+    "funcoes": [
+      "Catequista Titular — Perseverança (Turma 01)"
+    ],
+    "turmas": [
+      {
+        "stage": "Perseverança",
+        "turma": "Turma 01",
+        "funcao": "Catequista Titular",
+        "dayTime": "Sábado: 10:30 às 12:00",
+        "room": "Sala São João Bosco (Sala 17 - Salão Par.)"
+      }
+    ],
+    "foto": null,
+    "fotoFaceDetected": false,
+    "status": "ativo",
+    "ativo": true
   }
 ];
