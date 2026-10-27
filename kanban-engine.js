@@ -1144,21 +1144,21 @@
         const targetDocId = boardId || 'board_' + Date.now();
 
         const boardPayload = {
+          id: targetDocId,
           name: name,
-          description: description,
+          description: description || '',
           columns: columns,
-          allowedViewRoles: allowedViewRoles,
-          allowedEditRoles: allowedEditRoles,
+          allowedViewRoles: allowedViewRoles || [],
+          allowedEditRoles: allowedEditRoles || [],
           allowedViewUsers: Array.from(new Set(allowedViewUsers)),
           allowedEditUsers: Array.from(new Set(allowedEditUsers)),
           updatedAt: new Date().toISOString(),
-          updatedBy: user.email
+          updatedBy: user.email || ''
         };
 
         if (!boardId) {
-          boardPayload.id = targetDocId;
           boardPayload.createdAt = new Date().toISOString();
-          boardPayload.createdBy = user.email;
+          boardPayload.createdBy = user.email || '';
         }
 
         await db.collection('kanban_boards').doc(targetDocId).set(boardPayload, { merge: true });
@@ -1608,25 +1608,25 @@
         }
 
         const ticketPayload = {
+          id: targetDocId,
           boardId: this.currentBoardId,
           title: title,
-          descriptionHtml: descriptionHtml,
+          descriptionHtml: descriptionHtml || '',
           status: status,
           priority: priority,
           deadline: deadline || null,
-          color: color,
+          color: color || '#ffffff',
           assigneeEmail: assigneeEmail || null,
           assigneeName: assigneeName || null,
-          attachments: this.currentTicketAttachments,
+          attachments: this.currentTicketAttachments || [],
           followers: Array.from(new Set(followers)),
           updatedAt: new Date().toISOString(),
-          updatedBy: currentUser.email
+          updatedBy: currentUser.email || ''
         };
 
         if (!ticketId) {
-          ticketPayload.id = targetDocId;
-          ticketPayload.creatorEmail = currentUser.email;
-          ticketPayload.creatorName = currentUser.displayName;
+          ticketPayload.creatorEmail = currentUser.email || '';
+          ticketPayload.creatorName = currentUser.displayName || '';
           ticketPayload.createdAt = new Date().toISOString();
         }
 
@@ -1733,17 +1733,24 @@
     },
 
     notifyTicketFollowers: async function (ticket, { action, details }) {
+      if (!ticket) return;
       const followers = Array.isArray(ticket.followers) ? ticket.followers : [];
       const user = this.getCurrentUser();
       const db = this.getDb();
       if (!db || followers.length === 0) return;
+
+      const ticketId = ticket.id || ticket.ticketId || this.currentTicketId || '';
+      if (!ticketId) {
+        console.warn('KanbanEngine: notifyTicketFollowers chamado sem ticketId válido');
+        return;
+      }
 
       const board = this.boards.find(b => b.id === (ticket.boardId || this.currentBoardId)) || { name: 'Lista de Tarefas' };
 
       // Destinatários: todos os seguidores exceto quem causou a alteração
       const targetFollowers = followers
         .map(f => (f || '').toLowerCase().trim())
-        .filter(f => f && f !== user.email.toLowerCase());
+        .filter(f => f && f !== (user.email || '').toLowerCase());
 
       if (targetFollowers.length === 0) return;
 
@@ -1752,14 +1759,14 @@
         const notifDoc = db.collection('kanban_notifications').doc();
         batch.set(notifDoc, {
           recipientEmail: recipientEmail,
-          ticketId: ticket.id,
-          ticketTitle: ticket.title,
-          boardId: board.id || this.currentBoardId,
-          boardName: board.name,
-          action: action,
+          ticketId: ticketId,
+          ticketTitle: ticket.title || 'Sem título',
+          boardId: board.id || this.currentBoardId || '',
+          boardName: board.name || 'Lista de Tarefas',
+          action: action || '',
           details: details || '',
-          actorName: user.displayName,
-          actorEmail: user.email,
+          actorName: user.displayName || 'Usuário',
+          actorEmail: user.email || '',
           read: false,
           createdAt: new Date().toISOString()
         });
