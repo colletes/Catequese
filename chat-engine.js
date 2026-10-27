@@ -50,6 +50,14 @@
         return;
       }
 
+      // Garante sessão ativa no Firebase Auth caso tenha logado via e-mail pastoral
+      if (window.firebase && typeof firebase.auth === 'function') {
+        const auth = firebase.auth();
+        if (!auth.currentUser) {
+          auth.signInAnonymously().catch((e) => console.warn('ChatEngine: anonymous auth fallback:', e));
+        }
+      }
+
       this.user = this._resolveUserProfile(userData);
       console.log('💬 Inicializando Chat Pastoral para:', this.user.displayName, `(${this.user.email})`);
 
