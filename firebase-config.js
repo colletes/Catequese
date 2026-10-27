@@ -76,11 +76,11 @@ const SEED_AUTHORIZED_USERS = [
   },
   {
     email: 'secretaria@imaculadocoracaodf.com.br',
-    displayName: 'Secretária(o) Paroquial',
+    displayName: 'Felipe (Secretaria Paroquial)',
     role: ROLES.SECRETARIA,
     turmaId: 'todas',
-    turmaNome: 'Todas as Turmas (Secretaria)',
-    etapa: 'Todas',
+    turmaNome: 'Secretaria Paroquial',
+    etapa: 'Secretaria',
     status: 'ativo',
     createdAt: '2026-01-01T00:00:00.000Z',
     approvedBy: 'Sistema Oficial'
@@ -115,8 +115,15 @@ function getAuthorizedUsers() {
     if (!list.some(u => u.email && u.email.toLowerCase() === VICE_COORD_GERAL_EMAIL.toLowerCase())) {
       list.splice(2, 0, SEED_AUTHORIZED_USERS[2]);
     }
-    if (!list.some(u => u.role === ROLES.SECRETARIA || (u.email && (u.email.toLowerCase().includes('secretaria') || u.email.toLowerCase().includes('sandra'))))) {
+    if (!list.some(u => u.role === ROLES.SECRETARIA || (u.email && (u.email.toLowerCase().includes('secretaria') || u.email.toLowerCase().includes('sandra') || u.email.toLowerCase().includes('felipe'))))) {
       list.push(SEED_AUTHORIZED_USERS[3]);
+    }
+    // Garante que o nome da Secretaria esteja atualizado para Felipe
+    const secUser = list.find(u => u.email && (u.email.toLowerCase().includes('secretaria') || u.email.toLowerCase().includes('sandra') || u.email.toLowerCase().includes('felipe')));
+    if (secUser) {
+      secUser.displayName = 'Felipe (Secretaria Paroquial)';
+      secUser.role = ROLES.SECRETARIA;
+      secUser.turmaNome = 'Secretaria Paroquial';
     }
     if (!list.some(u => u.email && (u.email.toLowerCase().includes('picmbrasilia') || u.email.toLowerCase().includes('larissa')))) {
       list.push(SEED_AUTHORIZED_USERS[4]);
@@ -163,7 +170,7 @@ function determineUserRole(email) {
   const found = users.find(u => u.email && u.email.trim().toLowerCase() === clean && u.status === 'ativo');
   if (found && found.role) return found.role;
 
-  if (clean.includes('secretaria') || clean.includes('sandra')) return ROLES.SECRETARIA;
+  if (clean.includes('secretaria') || clean.includes('sandra') || clean.includes('felipe')) return ROLES.SECRETARIA;
   if (clean.includes('picmbrasilia') || clean.includes('larissa')) return ROLES.CATEQUISTA;
   return ROLES.PENDENTE;
 }
@@ -177,7 +184,7 @@ function getUserProfile(email) {
   if (clean === MASTER_ADMIN_EMAIL.toLowerCase()) return SEED_AUTHORIZED_USERS[0];
   if (clean === COORD_GERAL_EMAIL.toLowerCase()) return SEED_AUTHORIZED_USERS[1];
   if (clean === VICE_COORD_GERAL_EMAIL.toLowerCase()) return SEED_AUTHORIZED_USERS[2];
-  if (clean.includes('secretaria') || clean.includes('sandra')) return SEED_AUTHORIZED_USERS[3];
+  if (clean.includes('secretaria') || clean.includes('sandra') || clean.includes('felipe')) return SEED_AUTHORIZED_USERS[3];
   if (clean.includes('picmbrasilia') || clean.includes('larissa')) return SEED_AUTHORIZED_USERS[4];
   return null;
 }

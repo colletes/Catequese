@@ -156,9 +156,10 @@
       } else if (email === 'andresprojetos@gmail.com') {
         role = 'vice_coord_geral';
         funcao = 'Vice-Coordenador Geral';
-      } else if (email.includes('secretaria') || email.includes('sandra')) {
+      } else if (email.includes('secretaria') || email.includes('sandra') || email.includes('felipe')) {
         role = 'secretaria';
         funcao = 'Secretaria Paroquial';
+        displayName = 'Felipe (Secretaria Paroquial)';
       }
 
       return {
@@ -1371,14 +1372,46 @@
         });
       });
 
-      // 2. Base de catequistas 2026 oficial (para poder mandar mensagem assíncrona mesmo se offline)
+      // 2. Usuários autorizados da plataforma (Secretaria / Felipe, Coordenação Geral, etc.)
+      const authorized = (window.ICM_CONFIG && typeof window.ICM_CONFIG.getAuthorizedUsers === 'function')
+        ? window.ICM_CONFIG.getAuthorizedUsers()
+        : [];
+      authorized.forEach(u => {
+        if (u.email) {
+          const clean = u.email.toLowerCase().trim();
+          const syntheticUid = u.uid || `user_auth_${clean.replace(/[^a-z0-9]/g, '_')}`;
+          const existingByEmail = Array.from(map.values()).find(item => item.email && item.email.toLowerCase().trim() === clean);
+          if (!existingByEmail && !map.has(syntheticUid)) {
+            let role = u.role || 'catequista';
+            let funcao = u.turmaNome || 'Equipe Pastoral';
+            let dName = u.displayName || clean.split('@')[0];
+            if (clean.includes('secretaria') || clean.includes('felipe') || clean.includes('sandra')) {
+              role = 'secretaria';
+              funcao = 'Secretaria Paroquial';
+              dName = 'Felipe (Secretaria Paroquial)';
+            }
+            map.set(syntheticUid, {
+              uid: syntheticUid,
+              displayName: dName,
+              email: clean,
+              photoURL: u.photoURL || null,
+              role: role,
+              funcao: funcao,
+              etapa: u.etapa || (role === 'secretaria' ? 'Secretaria' : 'Geral')
+            });
+          }
+        }
+      });
+
+      // 3. Base de catequistas 2026 oficial (para poder mandar mensagem assíncrona mesmo se offline)
       if (window.SEED_CATEQUISTAS_2026 && Array.isArray(window.SEED_CATEQUISTAS_2026)) {
         window.SEED_CATEQUISTAS_2026.forEach(cat => {
           if (cat.email) {
             const clean = cat.email.toLowerCase().trim();
             // Gera um UID determinístico se ainda não tiver feito login
             const syntheticUid = `cat_email_${clean.replace(/[^a-z0-9]/g, '_')}`;
-            if (!map.has(syntheticUid)) {
+            const existingByEmail = Array.from(map.values()).find(item => item.email && item.email.toLowerCase().trim() === clean);
+            if (!existingByEmail && !map.has(syntheticUid)) {
               map.set(syntheticUid, {
                 uid: syntheticUid,
                 displayName: cat.nomeCompleto,
