@@ -894,10 +894,11 @@
         <!-- Dropdown Menu -->
         <div
           id="profile-dropdown-menu"
-          class="hidden absolute right-0 mt-2 w-72 sm:w-80 bg-slate-900/98 backdrop-blur-xl border border-slate-700/80 rounded-2xl shadow-2xl z-50 overflow-hidden text-slate-200 divide-y divide-slate-800 animate-in fade-in zoom-in-95 duration-150"
+          style="background-color: #0f172a;"
+          class="hidden absolute right-0 mt-2 w-72 sm:w-80 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl z-50 overflow-hidden text-slate-100 divide-y divide-slate-800 animate-in fade-in zoom-in-95 duration-150"
         >
           <!-- User Profile Info Header -->
-          <div class="p-3.5 bg-gradient-to-b from-slate-800/80 to-slate-900/90 flex items-center gap-3">
+          <div class="p-3.5 bg-slate-800 flex items-center gap-3">
             <div id="dropdown-avatar-badge" class="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 via-[#d4a94f] to-[#b88d36] text-slate-950 font-black text-sm flex items-center justify-center shadow-md flex-shrink-0 font-heading">
               TC
             </div>
@@ -909,12 +910,12 @@
           </div>
 
           <!-- Tools / Actions List -->
-          <div class="py-1.5 font-medium text-xs">
+          <div class="py-1.5 font-medium text-xs bg-slate-900">
             <!-- Central de Notificações -->
             <button
               id="btn-open-notifications"
               onclick="closeProfileDropdown(); openCentralNotificacoesModal();"
-              class="w-full flex items-center justify-between px-3.5 py-2.5 hover:bg-slate-800/80 transition text-left text-slate-200 group cursor-pointer"
+              class="w-full flex items-center justify-between px-3.5 py-2.5 hover:bg-slate-800 transition text-left text-slate-100 group cursor-pointer"
             >
               <span class="flex items-center gap-2.5">
                 <span class="text-base group-hover:scale-110 transition-transform">🔔</span>
@@ -927,7 +928,7 @@
             <button
               id="btn-open-user-mgmt"
               onclick="closeProfileDropdown(); openUserManagementModal();"
-              class="hidden w-full flex items-center justify-between px-3.5 py-2.5 hover:bg-slate-800/80 transition text-left text-slate-200 group cursor-pointer"
+              class="hidden w-full flex items-center justify-between px-3.5 py-2.5 hover:bg-slate-800 transition text-left text-slate-100 group cursor-pointer"
             >
               <span class="flex items-center gap-2.5">
                 <span class="text-base group-hover:scale-110 transition-transform">👥</span>
@@ -940,7 +941,7 @@
             <button
               id="btn-menu-cadastrar-catequista"
               onclick="closeProfileDropdown(); openCadastrarCatequistaModal();"
-              class="hidden w-full flex items-center gap-2.5 px-3.5 py-2.5 hover:bg-slate-800/80 transition text-left text-amber-300 group cursor-pointer"
+              class="hidden w-full flex items-center gap-2.5 px-3.5 py-2.5 hover:bg-slate-800 transition text-left text-amber-300 group cursor-pointer"
             >
               <span class="text-base group-hover:scale-110 transition-transform">➕</span>
               <span class="font-semibold text-white group-hover:text-amber-200">Cadastrar Catequista</span>
@@ -949,7 +950,7 @@
             <!-- Permissões RBAC -->
             <button
               onclick="closeProfileDropdown(); openRbacMatrixModal();"
-              class="w-full flex items-center gap-2.5 px-3.5 py-2.5 hover:bg-slate-800/80 transition text-left text-slate-200 group cursor-pointer"
+              class="w-full flex items-center gap-2.5 px-3.5 py-2.5 hover:bg-slate-800 transition text-left text-slate-100 group cursor-pointer"
             >
               <span class="text-base group-hover:scale-110 transition-transform">📊</span>
               <span class="font-semibold">Matriz de Permissões RBAC</span>
@@ -959,7 +960,7 @@
             <button
               id="btn-open-audit-logs"
               onclick="closeProfileDropdown(); openAuditTrailModal();"
-              class="hidden w-full flex items-center gap-2.5 px-3.5 py-2.5 hover:bg-slate-800/80 transition text-left text-slate-200 group cursor-pointer"
+              class="hidden w-full flex items-center gap-2.5 px-3.5 py-2.5 hover:bg-slate-800 transition text-left text-slate-100 group cursor-pointer"
             >
               <span class="text-base group-hover:scale-110 transition-transform">🛡️</span>
               <span class="font-semibold">Logs de Auditoria LGPD</span>
@@ -969,7 +970,7 @@
             <button
               id="btn-open-lgpd-titulares"
               onclick="closeProfileDropdown(); openLgpdTitularesModal();"
-              class="w-full flex items-center justify-between px-3.5 py-2.5 hover:bg-slate-800/80 transition text-left text-slate-200 group cursor-pointer"
+              class="w-full flex items-center justify-between px-3.5 py-2.5 hover:bg-slate-800 transition text-left text-slate-100 group cursor-pointer"
             >
               <span class="flex items-center gap-2.5">
                 <span class="text-base group-hover:scale-110 transition-transform">⚖️</span>
@@ -981,7 +982,7 @@
             <!-- Imprimir Tela Ativa -->
             <button
               onclick="closeProfileDropdown(); triggerSmartPrint();"
-              class="w-full flex items-center gap-2.5 px-3.5 py-2.5 hover:bg-slate-800/80 transition text-left text-slate-200 group cursor-pointer"
+              class="w-full flex items-center gap-2.5 px-3.5 py-2.5 hover:bg-slate-800 transition text-left text-slate-100 group cursor-pointer"
             >
               <svg class="w-4 h-4 text-[#d4a94f] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
               <span class="font-semibold">Imprimir Tela Ativa</span>
@@ -989,10 +990,10 @@
           </div>
 
           <!-- Sair / Logout -->
-          <div class="p-2 bg-slate-950/50">
+          <div class="p-2 bg-slate-950">
             <button
               onclick="closeProfileDropdown(); logoutSite();"
-              class="w-full flex items-center justify-center gap-2 px-3 py-2 bg-rose-950/60 hover:bg-rose-900/80 text-rose-200 border border-rose-800/70 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
+              class="w-full flex items-center justify-center gap-2 px-3 py-2 bg-rose-950 hover:bg-rose-900 text-rose-200 border border-rose-800 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
             >
               <span>🚪</span>
               <span>Encerrar Sessão com Segurança</span>
