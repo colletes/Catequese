@@ -900,6 +900,54 @@
       container.appendChild(div);
     },
 
+    // Retorna lista consolidada de usuários cadastrados e aprovados no sistema
+    getApprovedUsersList: function () {
+      const list = [];
+      const seen = new Set();
+
+      const add = (name, email, role = '') => {
+        if (!email) return;
+        const clean = email.trim().toLowerCase();
+        if (!clean || seen.has(clean)) return;
+        seen.add(clean);
+        list.push({
+          name: name || clean.split('@')[0],
+          email: clean,
+          role: role
+        });
+      };
+
+      // 1. Usuários essenciais / governança
+      add('Thiago Carvalho (Master Admin)', 'colletes@gmail.com', 'master_admin');
+      add('Lorena Moraes (Coordenação Geral)', 'lorenammoraes@gmail.com', 'coord_geral');
+      add('Andres Reyes (Vice-Coordenação)', 'andresprojetos@gmail.com', 'vice_coord_geral');
+      add('Secretária(o) Paroquial', 'secretaria@imaculadocoracaodf.com.br', 'secretaria');
+
+      // 2. Usuários autorizados pelo sistema RBAC (Firestore / Cache)
+      if (window.ICM_CONFIG && typeof window.ICM_CONFIG.getAuthorizedUsers === 'function') {
+        const authUsers = window.ICM_CONFIG.getAuthorizedUsers();
+        if (Array.isArray(authUsers)) {
+          authUsers.forEach(u => {
+            if (u.status === 'ativo' || !u.status) {
+              add(u.displayName || u.nome, u.email, u.role);
+            }
+          });
+        }
+      }
+
+      // 3. Base Oficial de Catequistas
+      if (window.CATEQUISTAS_OFICIAL && Array.isArray(window.CATEQUISTAS_OFICIAL)) {
+        window.CATEQUISTAS_OFICIAL.forEach(c => {
+          if (c.email && c.status !== 'afastado') {
+            add(`${c.nome} (${c.turma || 'Catequista'})`, c.email, 'catequista');
+          }
+        });
+      }
+
+      list.sort((a, b) => a.name.localeCompare(b.name));
+      return list;
+    },
+
     renderBoardPermissionsMatrix: function (board) {
       const container = document.getElementById('board-permissions-matrix-container');
       if (!container) return;
@@ -912,7 +960,7 @@
       // Lista de perfis do sistema
       const rolesList = [
         { id: 'catequista', label: 'Catequistas da Paróquia' },
-        { id: 'secretaria', label: 'Secretaria Paroquial (Sandra)' }
+        { id: 'secretaria', label: 'Secretária(o) / Secretaria Paroquial' }
       ];
 
       let html = `
@@ -949,13 +997,13 @@
           <!-- Permissões por Usuário Individual -->
           <div class="space-y-2">
             <div class="flex items-center justify-between">
-              <label class="font-bold text-slate-800 block text-xs">2. Usuários Individuais Específicos:</label>
+              <label class="font-bold text-slate-800 block text-xs">2. Usuários Individuais Cadastrados &amp; Aprovados:</label>
               <button 
                 type="button" 
                 onclick="window.KanbanEngine.addIndividualUserPermissionRow()" 
-                class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800"
+                class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
               >
-                ＋ Adicionar Usuário
+                <span>＋</span> <span>Selecionar Membro</span>
               </button>
             </div>
 
@@ -985,27 +1033,40 @@
       if (noMsg) noMsg.remove();
       if (!list) return;
 
+      const approvedUsers = this.getApprovedUsersList();
+      const cleanEmail = (email || '').trim().toLowerCase();
+
+      let optionsHtml = '<option value="">Selecione um membro cadastrado no sistema...</option>';
+      let foundInList = false;
+
+      approvedUsers.forEach(u => {
+        const isSelected = u.email === cleanEmail;
+        if (isSelected) foundInList = true;
+        optionsHtml += `<option value="${u.email}" ${isSelected ? 'selected' : ''}>${u.name} (${u.email})</option>`;
+      });
+
+      if (cleanEmail && !foundInList) {
+        optionsHtml += `<option value="${cleanEmail}" selected>${cleanEmail}</option>`;
+      }
+
       const div = document.createElement('div');
-      div.className = 'grid grid-cols-12 items-center gap-2 p-1.5 bg-slate-50 rounded-lg border border-slate-200 individual-user-perm-row text-xs';
+      div.className = 'grid grid-cols-12 items-center gap-2 p-2 bg-slate-50 rounded-xl border border-slate-200 individual-user-perm-row text-xs shadow-2xs';
       div.innerHTML = `
         <div class="col-span-6">
-          <input 
-            type="email" 
-            value="${email}" 
-            placeholder="email@exemplo.com" 
-            class="w-full text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 text-slate-800 user-perm-email"
-          />
+          <select class="w-full text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 text-slate-800 user-perm-email bg-white font-medium focus:ring-1 focus:ring-[#d4a94f] outline-none cursor-pointer">
+            ${optionsHtml}
+          </select>
         </div>
-        <label class="col-span-2 flex items-center justify-center gap-1 cursor-pointer text-[11px]">
-          <input type="checkbox" class="user-perm-view w-4 h-4 text-[#d4a94f] rounded" ${canView ? 'checked' : ''} />
-          <span class="text-slate-600">Ver</span>
+        <label class="col-span-2 flex items-center justify-center gap-1 cursor-pointer text-[11px] font-semibold text-slate-700">
+          <input type="checkbox" class="user-perm-view w-4 h-4 text-[#d4a94f] rounded cursor-pointer" ${canView ? 'checked' : ''} />
+          <span>Ver</span>
         </label>
-        <label class="col-span-2 flex items-center justify-center gap-1 cursor-pointer text-[11px]">
-          <input type="checkbox" class="user-perm-edit w-4 h-4 text-[#d4a94f] rounded" ${canEdit ? 'checked' : ''} />
-          <span class="text-slate-600">Editar</span>
+        <label class="col-span-2 flex items-center justify-center gap-1 cursor-pointer text-[11px] font-semibold text-slate-700">
+          <input type="checkbox" class="user-perm-edit w-4 h-4 text-[#d4a94f] rounded cursor-pointer" ${canEdit ? 'checked' : ''} />
+          <span>Editar</span>
         </label>
         <div class="col-span-2 flex justify-end">
-          <button type="button" onclick="this.closest('.individual-user-perm-row').remove()" class="text-rose-500 hover:text-rose-700 text-xs font-bold p-1">
+          <button type="button" onclick="this.closest('.individual-user-perm-row').remove()" class="text-rose-500 hover:text-rose-700 text-xs font-bold p-1 rounded hover:bg-rose-50" title="Remover permissão">
             ✕
           </button>
         </div>
@@ -1317,29 +1378,11 @@
       if (!sel) return;
 
       let html = '<option value="">(Não atribuído)</option>';
-
-      // Lista consolidada de catequistas e coordenação do sistema
-      const usersList = [];
-
-      // 1. Coordenação
-      usersList.push({ name: 'Thiago Carvalho (Master Admin)', email: 'colletes@gmail.com' });
-      usersList.push({ name: 'Lorena Moraes (Coordenação Geral)', email: 'lorenammoraes@gmail.com' });
-      usersList.push({ name: 'Andres Reyes (Vice-Coordenação)', email: 'andresprojetos@gmail.com' });
-      usersList.push({ name: 'Sandra (Secretaria Paroquial)', email: 'secretaria@imaculadocoracaodf.com.br' });
-
-      // 2. Base de catequistas cadastrados
-      if (window.CATEQUISTAS_OFICIAL && Array.isArray(window.CATEQUISTAS_OFICIAL)) {
-        window.CATEQUISTAS_OFICIAL.forEach(c => {
-          if (c.email && !usersList.some(u => u.email.toLowerCase() === c.email.toLowerCase())) {
-            usersList.push({ name: `${c.nome} (${c.turma || 'Catequista'})`, email: c.email });
-          }
-        });
-      }
-
-      usersList.sort((a, b) => a.name.localeCompare(b.name));
+      const usersList = this.getApprovedUsersList();
+      const cleanSelected = (selectedEmail || '').trim().toLowerCase();
 
       usersList.forEach(u => {
-        const isSelected = (selectedEmail && u.email.toLowerCase() === selectedEmail.toLowerCase()) ? 'selected' : '';
+        const isSelected = cleanSelected && u.email.toLowerCase() === cleanSelected ? 'selected' : '';
         html += `<option value="${u.email}" data-name="${u.name}" ${isSelected}>${u.name}</option>`;
       });
 

@@ -76,7 +76,7 @@ const SEED_AUTHORIZED_USERS = [
   },
   {
     email: 'secretaria@imaculadocoracaodf.com.br',
-    displayName: 'Sandra (Secretaria Paroquial)',
+    displayName: 'Secretária(o) Paroquial',
     role: ROLES.SECRETARIA,
     turmaId: 'todas',
     turmaNome: 'Todas as Turmas (Secretaria)',
