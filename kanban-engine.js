@@ -110,17 +110,52 @@
     currentActivityTab: 'all', // 'all' | 'comments' | 'history'
     activeTicketEditorId: null,
     isTicketFormDirty: false,
+    isUploadingAttachment: false,
     currentTicketAttachments: [],
+    subscribedNotifEmail: null,
+    subscribedTicketsBoardId: null,
     initialized: false,
 
     // Inicialização do módulo
     init: function () {
-      if (this.initialized) return;
-      this.initialized = true;
-      this.setupQuillEditor();
-      this.subscribeBoards();
-      this.subscribeNotifications();
-      this.setupEventListeners();
+      if (!this.initialized) {
+        this.initialized = true;
+        this.setupQuillEditor();
+        this.subscribeBoards();
+        this.subscribeNotifications();
+        this.setupEventListeners();
+      }
+      this.refreshSession();
+    },
+
+    // Reavalia permissões, assinatura de notificações e quadro ativo após login ou troca de aba
+    refreshSession: function () {
+      if (!this.unsubscribeBoards) {
+        this.subscribeBoards();
+      }
+      const user = this.getCurrentUser();
+      if (user.email && this.subscribedNotifEmail !== user.email.toLowerCase()) {
+        this.subscribeNotifications();
+      }
+      this.updateSidebarVisibility();
+      this.renderBoardSelector();
+
+      const userAccessibleBoards = this.boards.filter(b => this.canViewBoard(b));
+      if (userAccessibleBoards.length > 0) {
+        const hasValidCurrent = this.currentBoardId && userAccessibleBoards.some(b => b.id === this.currentBoardId);
+        if (!hasValidCurrent) {
+          this.switchBoard(userAccessibleBoards[0].id);
+        } else {
+          this.renderActiveBoardHeader();
+          if (this.subscribedTicketsBoardId !== this.currentBoardId) {
+            this.subscribeTickets(this.currentBoardId);
+          } else {
+            this.renderKanbanColumns();
+          }
+        }
+      } else if (this.boards.length > 0) {
+        this.renderEmptyBoardState();
+      }
     },
 
     // Retorna a instância do Firestore
@@ -187,6 +222,8 @@
         role = (window.ICM_CONFIG && window.ICM_CONFIG.ROLES && window.ICM_CONFIG.ROLES.COORD_GERAL) || 'coord_geral';
       } else if (cleanEmail === 'andresprojetos@gmail.com') {
         role = (window.ICM_CONFIG && window.ICM_CONFIG.ROLES && window.ICM_CONFIG.ROLES.VICE_COORD_GERAL) || 'vice_coord_geral';
+      } else if (cleanEmail === 'picmbrasiliapastorais@gmail.com' || cleanEmail === 'secretaria@imaculadocoracaodf.com.br' || cleanEmail.includes('secretaria')) {
+        role = (window.ICM_CONFIG && window.ICM_CONFIG.ROLES && window.ICM_CONFIG.ROLES.SECRETARIA) || 'secretaria';
       } else if (!role && cleanEmail && window.ICM_CONFIG && window.ICM_CONFIG.determineUserRole) {
         role = window.ICM_CONFIG.determineUserRole(cleanEmail);
       }
@@ -232,6 +269,9 @@
       const viewRoles = board.allowedViewRoles || [];
       const editRoles = board.allowedEditRoles || [];
       if (viewRoles.includes(user.role) || editRoles.includes(user.role)) return true;
+      if ((user.role === 'coord_etapa' || user.role === 'catequista') && (viewRoles.includes('catequista') || editRoles.includes('catequista'))) {
+        return true;
+      }
 
       // Permissão por e-mail de usuário individual
       const viewUsers = (board.allowedViewUsers || []).map(e => (e || '').toLowerCase().trim());
@@ -250,6 +290,12 @@
 
       const editRoles = board.allowedEditRoles || [];
       if (editRoles.includes(user.role)) return true;
+      if ((user.role === 'coord_etapa' || user.role === 'catequista') && editRoles.includes('catequista')) {
+        return true;
+      }
+      if (user.role === 'secretaria' && (editRoles.includes('secretaria') || (board.allowedViewRoles || []).includes('secretaria'))) {
+        return true;
+      }
 
       const editUsers = (board.allowedEditUsers || []).map(e => (e || '').toLowerCase().trim());
       if (editUsers.includes(user.email)) return true;
@@ -285,22 +331,27 @@
           loaded.push({ id: doc.id, ...doc.data() });
         });
 
-        // Ordena por data de criação / nome
-        loaded.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+        // Ordena por data de criação (mais antiga primeiro, mantendo a lista principal como padrão)
+        loaded.sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || ''));
         this.boards = loaded;
 
         // Atualiza visibilidade do menu e renderização
         this.updateSidebarVisibility();
         this.renderBoardSelector();
 
-        // Se nenhum quadro estiver selecionado, seleciona o primeiro acessível
+        // Se nenhum quadro válido estiver selecionado, seleciona o primeiro acessível
         const userAccessibleBoards = this.boards.filter(b => this.canViewBoard(b));
-        if (!this.currentBoardId && userAccessibleBoards.length > 0) {
+        const hasValidCurrent = this.currentBoardId && userAccessibleBoards.some(b => b.id === this.currentBoardId);
+
+        if (!hasValidCurrent && userAccessibleBoards.length > 0) {
           this.switchBoard(userAccessibleBoards[0].id);
-        } else if (this.currentBoardId && !this.boards.some(b => b.id === this.currentBoardId)) {
-          this.switchBoard(userAccessibleBoards[0] ? userAccessibleBoards[0].id : null);
+        } else if (!hasValidCurrent && userAccessibleBoards.length === 0) {
+          this.switchBoard(null);
         } else if (this.currentBoardId) {
           this.renderActiveBoardHeader();
+          if (this.subscribedTicketsBoardId !== this.currentBoardId) {
+            this.subscribeTickets(this.currentBoardId);
+          }
         }
       }, err => {
         console.warn('KanbanEngine: Erro ao sincronizar quadros:', err);
@@ -312,6 +363,7 @@
         this.unsubscribeTickets();
         this.unsubscribeTickets = null;
       }
+      this.subscribedTicketsBoardId = boardId || null;
 
       if (!boardId) {
         this.tickets = [];
@@ -330,8 +382,9 @@
             loaded.push({ id: doc.id, ...doc.data() });
           });
 
-          // Se o usuário estiver com o modal de edição de um ticket aberto e com alterações pendentes,
-          // não sobrescreve o formulário ativo para evitar perda de dados digitados
+          // Ordena tickets por data de criação (mais antigos primeiro ou conforme inseridos)
+          loaded.sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || ''));
+
           this.tickets = loaded;
           this.renderKanbanColumns();
         }, err => {
@@ -344,10 +397,12 @@
       const user = this.getCurrentUser();
       if (!db || !user.email) return;
 
+      const cleanEmail = user.email.toLowerCase();
       if (this.unsubscribeNotifications) this.unsubscribeNotifications();
+      this.subscribedNotifEmail = cleanEmail;
 
       this.unsubscribeNotifications = db.collection('kanban_notifications')
-        .where('recipientEmail', '==', user.email.toLowerCase())
+        .where('recipientEmail', '==', cleanEmail)
         .onSnapshot(snap => {
           const loaded = [];
           snap.forEach(doc => {
@@ -391,20 +446,16 @@
 
     onTabActivated: function () {
       this.init();
-      this.updateSidebarVisibility();
-      this.renderBoardSelector();
-      if (this.currentBoardId) {
-        this.renderActiveBoardHeader();
-        this.renderKanbanColumns();
-      }
+      this.refreshSession();
     },
 
     switchBoard: function (boardId) {
       this.currentBoardId = boardId;
       const sel = document.getElementById('sel-kanban-board');
-      if (sel && sel.value !== boardId) {
+      if (sel && sel.value !== (boardId || '')) {
         sel.value = boardId || '';
       }
+      this.renderBoardSelector();
       this.renderActiveBoardHeader();
       this.subscribeTickets(boardId);
     },
@@ -433,6 +484,10 @@
         return;
       }
 
+      if (!this.currentBoardId || !userAccessibleBoards.some(b => b.id === this.currentBoardId)) {
+        this.currentBoardId = userAccessibleBoards[0].id;
+      }
+
       sel.disabled = false;
       let html = '';
       userAccessibleBoards.forEach(b => {
@@ -440,6 +495,42 @@
         html += `<option value="${b.id}" ${isSelected}>📋 ${b.name || 'Lista sem nome'}</option>`;
       });
       sel.innerHTML = html;
+
+      // Renderiza abas rápidas de alternância de listas quando houver mais de 1 lista disponível
+      let pillsBar = document.getElementById('kanban-board-pills-bar');
+      const boardContainer = document.getElementById('kanban-board-container');
+      if (!pillsBar && boardContainer) {
+        pillsBar = document.createElement('div');
+        pillsBar.id = 'kanban-board-pills-bar';
+        pillsBar.className = 'flex flex-wrap items-center gap-2 pb-1';
+        boardContainer.insertBefore(pillsBar, boardContainer.firstChild);
+      }
+      if (pillsBar) {
+        if (userAccessibleBoards.length > 1) {
+          pillsBar.className = 'flex flex-wrap items-center gap-2 pb-1';
+          pillsBar.innerHTML = `<span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 mr-1">Listas disponíveis:</span>` +
+            userAccessibleBoards.map(b => {
+              const active = b.id === this.currentBoardId;
+              return `
+                <button
+                  type="button"
+                  onclick="window.KanbanEngine.switchBoard('${b.id}')"
+                  class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border ${
+                    active
+                      ? 'bg-slate-900 text-[#f3c969] border-slate-900 shadow-xs'
+                      : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
+                  }"
+                >
+                  <span>📋</span>
+                  <span>${b.name || 'Lista'}</span>
+                </button>
+              `;
+            }).join('');
+        } else {
+          pillsBar.className = 'hidden';
+          pillsBar.innerHTML = '';
+        }
+      }
     },
 
     renderActiveBoardHeader: function () {
@@ -921,6 +1012,7 @@
       add('Thiago Carvalho (Master Admin)', 'colletes@gmail.com', 'master_admin');
       add('Lorena Moraes (Coordenação Geral)', 'lorenammoraes@gmail.com', 'coord_geral');
       add('Andres Reyes (Vice-Coordenação)', 'andresprojetos@gmail.com', 'vice_coord_geral');
+      add('Felipe Secretaria (Secretaria Paroquial)', 'picmbrasiliapastorais@gmail.com', 'secretaria');
       add('Secretária(o) Paroquial', 'secretaria@imaculadocoracaodf.com.br', 'secretaria');
 
       // 2. Usuários autorizados pelo sistema RBAC (Firestore / Cache)
@@ -935,11 +1027,14 @@
         }
       }
 
-      // 3. Base Oficial de Catequistas
-      if (window.CATEQUISTAS_OFICIAL && Array.isArray(window.CATEQUISTAS_OFICIAL)) {
-        window.CATEQUISTAS_OFICIAL.forEach(c => {
+      // 3. Base Oficial de Catequistas 2026
+      const catSource = window.SEED_CATEQUISTAS_2026 || window.CATEQUISTAS_OFICIAL || [];
+      if (Array.isArray(catSource)) {
+        catSource.forEach(c => {
           if (c.email && c.status !== 'afastado') {
-            add(`${c.nome} (${c.turma || 'Catequista'})`, c.email, 'catequista');
+            const label = c.nomeCompleto || c.nome || c.email.split('@')[0];
+            const etapa = c.etapaPrincipal || c.turma || 'Catequista';
+            add(`${label} (${etapa})`, c.email, 'catequista');
           }
         });
       }
@@ -1435,8 +1530,52 @@
     },
 
     // ========================================================================
-    // ANEXOS COM FIREBASE STORAGE
+    // ANEXOS COM COMPRESSÃO INTELIGENTE E ARMAZENAMENTO EM NUVEM (FIRESTORE)
     // ========================================================================
+
+    readFileAsDataUrl: function (file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.onerror = () => reject(new Error('Falha ao ler o arquivo selecionado.'));
+        reader.readAsDataURL(file);
+      });
+    },
+
+    compressImageFile: function (file, maxDimension = 1600, quality = 0.82) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = ev => {
+          const img = new Image();
+          img.onload = () => {
+            let width = img.width;
+            let height = img.height;
+            if (width > maxDimension || height > maxDimension) {
+              if (width > height) {
+                height = Math.round((height * maxDimension) / width);
+                width = maxDimension;
+              } else {
+                width = Math.round((width * maxDimension) / height);
+                height = maxDimension;
+              }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+            resolve(compressedDataUrl);
+          };
+          img.onerror = () => reject(new Error('Não foi possível processar a imagem.'));
+          img.src = ev.target.result;
+        };
+        reader.onerror = () => reject(new Error('Erro ao ler imagem.'));
+        reader.readAsDataURL(file);
+      });
+    },
 
     handleAttachmentUpload: async function (fileInput) {
       const file = fileInput.files[0];
@@ -1450,45 +1589,146 @@
         return;
       }
 
-      const storage = this.getStorage();
-      if (!storage) {
-        alert('Serviço do Firebase Storage não está disponível no momento.');
-        return;
-      }
-
       const statusEl = document.getElementById('ticket-attachment-upload-status');
       if (statusEl) {
         statusEl.classList.remove('hidden');
-        statusEl.textContent = `Enviando arquivo: ${file.name}...`;
+        statusEl.textContent = `Processando e salvando anexo: ${file.name}...`;
       }
 
+      this.isUploadingAttachment = true;
+
       try {
-        const boardId = this.currentBoardId || 'geral';
-        const ticketId = document.getElementById('input-ticket-id').value || 'temp_' + Date.now();
-        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-        const storagePath = `kanban_attachments/${boardId}/${ticketId}/${Date.now()}_${safeName}`;
-        const fileRef = storage.ref(storagePath);
+        let dataUrl = '';
+        if (file.type && file.type.startsWith('image/')) {
+          try {
+            dataUrl = await this.compressImageFile(file, 1600, 0.82);
+          } catch (imgErr) {
+            dataUrl = await this.readFileAsDataUrl(file);
+          }
+        } else {
+          dataUrl = await this.readFileAsDataUrl(file);
+        }
 
-        const snap = await fileRef.put(file);
-        const downloadUrl = await snap.ref.getDownloadURL();
+        const attId = 'att_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+        const CHUNK_SIZE = 450000; // ~450KB por bloco para respeitar limite de 1MB do Firestore
 
-        this.currentTicketAttachments.push({
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          url: downloadUrl,
-          path: storagePath,
-          uploadedAt: new Date().toISOString()
-        });
+        // Se o arquivo codificado for pequeno (<= 220KB, como fotos comprimidas), armazena inline
+        // Se for maior (PDFs, planilhas, imagens grandes), grava em blocos na coleção kanban_activities
+        if (dataUrl.length <= 220000) {
+          this.currentTicketAttachments.push({
+            id: attId,
+            name: file.name,
+            size: file.size,
+            type: file.type || 'application/octet-stream',
+            url: dataUrl,
+            storageMode: 'inline',
+            uploadedAt: new Date().toISOString()
+          });
+        } else {
+          const db = this.getDb();
+          if (!db) throw new Error('Banco de dados indisponível para salvar o anexo.');
+
+          const totalChunks = Math.ceil(dataUrl.length / CHUNK_SIZE);
+          for (let i = 0; i < totalChunks; i++) {
+            const slice = dataUrl.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+            if (statusEl && totalChunks > 1) {
+              statusEl.textContent = `Salvando anexo (${Math.round(((i + 1) / totalChunks) * 100)}%): ${file.name}...`;
+            }
+            await db.collection('kanban_activities').doc(`${attId}_chunk_${i}`).set({
+              type: 'attachment_chunk',
+              attachmentId: attId,
+              chunkIndex: i,
+              totalChunks: totalChunks,
+              data: slice,
+              fileName: file.name,
+              mimeType: file.type || 'application/octet-stream',
+              createdAt: new Date().toISOString()
+            });
+          }
+
+          this.currentTicketAttachments.push({
+            id: attId,
+            name: file.name,
+            size: file.size,
+            type: file.type || 'application/octet-stream',
+            url: `firestore://attachment/${attId}`,
+            chunkCount: totalChunks,
+            storageMode: 'chunked',
+            uploadedAt: new Date().toISOString()
+          });
+        }
 
         this.renderTicketModalAttachments();
         this.isTicketFormDirty = true;
       } catch (err) {
         console.error('KanbanEngine: Erro no upload de anexo:', err);
-        alert('Erro ao enviar anexo: ' + err.message);
+        alert('Erro ao anexar arquivo: ' + err.message);
       } finally {
+        this.isUploadingAttachment = false;
         fileInput.value = '';
         if (statusEl) statusEl.classList.add('hidden');
+      }
+    },
+
+    dataUrlToBlob: function (dataUrl) {
+      const parts = dataUrl.split(',');
+      const mimeMatch = parts[0].match(/:(.*?);/);
+      const mime = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
+      const bstr = atob(parts[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      return new Blob([u8arr], { type: mime });
+    },
+
+    openAttachment: async function (idx, event) {
+      if (event) event.preventDefault();
+      const att = this.currentTicketAttachments[idx];
+      if (!att) return;
+
+      try {
+        if (att.url && (att.url.startsWith('http://') || att.url.startsWith('https://'))) {
+          window.open(att.url, '_blank', 'noopener,noreferrer');
+          return;
+        }
+
+        let dataUrl = att.url || '';
+        if (att.storageMode === 'chunked' || dataUrl.startsWith('firestore://attachment/')) {
+          const db = this.getDb();
+          if (!db) throw new Error('Firestore não disponível.');
+          const attId = att.id || dataUrl.replace('firestore://attachment/', '');
+          const totalChunks = att.chunkCount || 1;
+          const chunks = [];
+          for (let i = 0; i < totalChunks; i++) {
+            const docSnap = await db.collection('kanban_activities').doc(`${attId}_chunk_${i}`).get();
+            if (docSnap.exists) {
+              chunks.push(docSnap.data().data || '');
+            }
+          }
+          dataUrl = chunks.join('');
+        }
+
+        if (!dataUrl || !dataUrl.startsWith('data:')) {
+          alert('Não foi possível localizar o conteúdo deste anexo.');
+          return;
+        }
+
+        const blob = this.dataUrlToBlob(dataUrl);
+        const blobUrl = URL.createObjectURL(blob);
+        const win = window.open(blobUrl, '_blank');
+        if (!win) {
+          const a = document.createElement('a');
+          a.href = blobUrl;
+          a.download = att.name || 'anexo';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        }
+      } catch (err) {
+        console.error('KanbanEngine: Erro ao abrir anexo:', err);
+        alert('Erro ao abrir o anexo: ' + err.message);
       }
     },
 
@@ -1509,7 +1749,7 @@
 
       let html = '';
       this.currentTicketAttachments.forEach((att, idx) => {
-        const sizeFormatted = (att.size / 1024).toFixed(1) + ' KB';
+        const sizeFormatted = ((att.size || 0) / 1024).toFixed(1) + ' KB';
         let icon = '📄';
         if (att.type && att.type.includes('image')) icon = '🖼️';
         else if (att.type && att.type.includes('pdf')) icon = '📕';
@@ -1520,10 +1760,10 @@
             <div class="flex items-center gap-2 min-w-0">
               <span class="text-base">${icon}</span>
               <div class="min-w-0">
-                <a href="${att.url}" target="_blank" rel="noopener noreferrer" class="font-bold text-slate-800 hover:text-indigo-600 truncate block underline">
+                <a href="#" onclick="window.KanbanEngine.openAttachment(${idx}, event)" class="font-bold text-slate-800 hover:text-indigo-600 truncate block underline cursor-pointer">
                   ${att.name}
                 </a>
-                <span class="text-[10px] text-slate-500">${sizeFormatted}</span>
+                <span class="text-[10px] text-slate-500">${sizeFormatted} • Clique para visualizar/baixar</span>
               </div>
             </div>
             <button 
@@ -1549,6 +1789,11 @@
       const board = this.boards.find(b => b.id === this.currentBoardId);
       if (!board || !this.canEditBoard(board)) {
         alert('Permissão negada para editar tickets nesta lista.');
+        return;
+      }
+
+      if (this.isUploadingAttachment) {
+        alert('Aguarde alguns instantes até que o processamento do anexo seja concluído.');
         return;
       }
 
@@ -1633,24 +1878,28 @@
         // Gravação atômica com merge no Firestore
         await db.collection('kanban_tickets').doc(targetDocId).set(ticketPayload, { merge: true });
 
-        // Registra histórico de criação ou atualização
-        if (!ticketId) {
-          await this.logTicketActivity(targetDocId, 'history', 'criou este ticket.');
-        } else {
-          await this.logTicketActivity(targetDocId, 'history', 'atualizou os dados do ticket.');
-        }
-
-        // Dispara notificações para seguidores
-        const actionDesc = ticketId
-          ? `O ticket "${title}" foi atualizado por ${currentUser.displayName}.`
-          : `Novo ticket criado: "${title}" por ${currentUser.displayName}.`;
-
-        await this.notifyTicketFollowers(ticketPayload, {
-          action: actionDesc,
-          details: `Prioridade: ${priority} | Prazo: ${deadline || 'Sem prazo'} | Responsável: ${assigneeName || 'Não atribuído'}`
-        });
-
+        // Fecha o modal imediatamente após salvar o ticket com sucesso
         this.closeTicketEditorModal();
+
+        // Registra histórico e dispara notificações de forma isolada para nunca bloquear o salvamento
+        try {
+          if (!ticketId) {
+            await this.logTicketActivity(targetDocId, 'history', 'criou este ticket.');
+          } else {
+            await this.logTicketActivity(targetDocId, 'history', 'atualizou os dados do ticket.');
+          }
+
+          const actionDesc = ticketId
+            ? `O ticket "${title}" foi atualizado por ${currentUser.displayName}.`
+            : `Novo ticket criado: "${title}" por ${currentUser.displayName}.`;
+
+          await this.notifyTicketFollowers(ticketPayload, {
+            action: actionDesc,
+            details: `Prioridade: ${priority} | Prazo: ${deadline || 'Sem prazo'} | Responsável: ${assigneeName || 'Não atribuído'}`
+          });
+        } catch (postSaveErr) {
+          console.warn('KanbanEngine: Aviso ao processar atividades/notificações pós-salvamento:', postSaveErr);
+        }
       } catch (err) {
         console.error('KanbanEngine: Erro ao salvar ticket:', err);
         alert('Erro ao salvar ticket no Firestore: ' + err.message);
