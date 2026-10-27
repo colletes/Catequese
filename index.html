@@ -6530,6 +6530,69 @@
             <div class="w-10 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-600"></div>
           </label>
         </div>
+
+        <!-- SEÇÃO DE ATIVIDADES & COMENTÁRIOS ESTILO JIRA -->
+        <div id="ticket-activities-section" class="space-y-3 pt-3 border-t border-slate-200">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <h4 class="font-bold text-xs text-slate-800 font-heading flex items-center gap-1.5">
+              <span>💬 Atividades & Discussão</span>
+              <span id="badge-activities-count" class="px-2 py-0.5 rounded-full text-[10px] font-black bg-slate-100 text-slate-600 border border-slate-200">0</span>
+            </h4>
+            <!-- Tabs estilo Jira: Tudo, Comentários, Histórico -->
+            <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-[11px] font-bold">
+              <button 
+                type="button" 
+                id="btn-tab-act-all" 
+                onclick="window.KanbanEngine.switchActivityTab('all')" 
+                class="px-2.5 py-1 rounded-lg bg-white shadow-2xs text-slate-900 transition"
+              >
+                Tudo
+              </button>
+              <button 
+                type="button" 
+                id="btn-tab-act-comments" 
+                onclick="window.KanbanEngine.switchActivityTab('comments')" 
+                class="px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition"
+              >
+                Comentários
+              </button>
+              <button 
+                type="button" 
+                id="btn-tab-act-history" 
+                onclick="window.KanbanEngine.switchActivityTab('history')" 
+                class="px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition"
+              >
+                Histórico
+              </button>
+            </div>
+          </div>
+
+          <!-- Caixa de Adição de Novo Comentário -->
+          <div id="box-new-comment-container" class="space-y-2 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+            <textarea 
+              id="txt-new-ticket-comment" 
+              rows="2" 
+              placeholder="Escreva um comentário ou informe uma atualização (links serão clicáveis automaticamente)..." 
+              class="w-full text-xs p-2.5 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#d4a94f]/40 outline-none text-slate-800 resize-none font-sans"
+            ></textarea>
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <span class="text-[10px] text-slate-500">💡 Ao comentar, você passa a acompanhar este ticket automaticamente.</span>
+              <button 
+                type="button" 
+                id="btn-submit-comment"
+                onclick="window.KanbanEngine.submitCommentFromModal()" 
+                class="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition shadow-2xs"
+              >
+                Publicar Comentário
+              </button>
+            </div>
+          </div>
+
+          <!-- Feed de Atividades / Comentários -->
+          <div id="ticket-activities-feed" class="space-y-2.5 max-h-[260px] overflow-y-auto pr-1">
+            <!-- Renderizado dinamicamente via window.KanbanEngine.renderTicketActivities() -->
+          </div>
+        </div>
       </div>
 
       <!-- Rodapé do Modal com Ações e Permissões -->
