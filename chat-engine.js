@@ -325,16 +325,30 @@
     _listenSalas() {
       if (!this.db || !this.user) return;
 
-      this.unsubscribeSalas = this.db.collection('chat_salas')
-        .where('participantes', 'array-contains', this.user.uid)
-        .orderBy('updatedAt', 'desc')
-        .onSnapshot((snapshot) => {
-          this.salas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          this._updateTotalUnreadBadge();
-          this._renderHubContent();
-        }, (err) => {
-          console.warn('Erro ao escutar salas:', err);
-        });
+      const userEmail = (this.user.email || '').toLowerCase().trim();
+      const currentUid = this.user.uid;
+
+      // Escuta primariamente por participantesEmails
+      const query = userEmail
+        ? this.db.collection('chat_salas').where('participantesEmails', 'array-contains', userEmail)
+        : this.db.collection('chat_salas').where('participantes', 'array-contains', currentUid);
+
+      this.unsubscribeSalas = query.onSnapshot((snapshot) => {
+        this.salas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        this._updateTotalUnreadBadge();
+        this._renderHubContent();
+      }, (err) => {
+        console.warn('Erro ao escutar salas por email, tentando por UID:', err);
+        if (userEmail) {
+          this.db.collection('chat_salas')
+            .where('participantes', 'array-contains', currentUid)
+            .onSnapshot((snap) => {
+              this.salas = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+              this._updateTotalUnreadBadge();
+              this._renderHubContent();
+            }, console.warn);
+        }
+      });
     },
 
     _listenCustomLists() {
@@ -351,25 +365,59 @@
         });
     },
 
-    // Gera ID único determinístico para conversa 1-a-1
-    _getDirectSalaId(otherUid) {
+    // Gera ID único determinístico para conversa 1-a-1 usando emails ou UIDs
+    _getDirectSalaId(otherEmail, otherUid) {
+      const myEmail = (this.user.email || '').toLowerCase().trim();
+      const targetEmail = (otherEmail || '').toLowerCase().trim();
+
+      if (myEmail && targetEmail) {
+        const cleanA = myEmail.replace(/[^a-z0-9]/g, '_');
+        const cleanB = targetEmail.replace(/[^a-z0-9]/g, '_');
+        return cleanA < cleanB ? `direct_${cleanA}__${cleanB}` : `direct_${cleanB}__${cleanA}`;
+      }
+
       const currentUid = this.user.uid;
       return currentUid < otherUid ? `direct_${currentUid}_${otherUid}` : `direct_${otherUid}_${currentUid}`;
     },
 
     async openDirectChat(targetUser) {
-      if (!targetUser || !targetUser.uid || targetUser.uid === this.user.uid) {
+      if (!targetUser) return;
+      const targetEmail = (targetUser.email || '').toLowerCase().trim();
+      const currentEmail = (this.user.email || '').toLowerCase().trim();
+
+      // Evita conversar consigo mesmo
+      if (targetEmail && targetEmail === currentEmail) {
+        return;
+      }
+      if (targetUser.uid && targetUser.uid === this.user.uid) {
         return;
       }
 
-      const salaId = this._getDirectSalaId(targetUser.uid);
+      const salaId = this._getDirectSalaId(targetEmail, targetUser.uid);
       const salaRef = this.db.collection('chat_salas').doc(salaId);
 
       try {
-        const docSnap = await salaRef.get();
-        if (!docSnap.exists) {
-          const participantes = [this.user.uid, targetUser.uid];
-          const participantesEmails = [this.user.email, (targetUser.email || '').toLowerCase()];
+        let salaExists = false;
+        try {
+          const docSnap = await salaRef.get();
+          salaExists = docSnap.exists;
+        } catch (readErr) {
+          console.warn('Verificação de sala existente (tentando inicialização):', readErr);
+        }
+
+        if (!salaExists) {
+          const targetUid = targetUser.uid || `cat_email_${targetEmail.replace(/[^a-z0-9]/g, '_')}`;
+          const participantes = [this.user.uid];
+          if (targetUid && !participantes.includes(targetUid)) {
+            participantes.push(targetUid);
+          }
+
+          const participantesEmails = [];
+          if (currentEmail) participantesEmails.push(currentEmail);
+          if (targetEmail && !participantesEmails.includes(targetEmail)) {
+            participantesEmails.push(targetEmail);
+          }
+
           const participantesInfo = {
             [this.user.uid]: {
               displayName: this.user.displayName,
@@ -378,9 +426,9 @@
               role: this.user.role,
               funcao: this.user.funcao
             },
-            [targetUser.uid]: {
+            [targetUid]: {
               displayName: targetUser.displayName || targetUser.nomeCompleto || 'Catequista',
-              email: targetUser.email || '',
+              email: targetEmail,
               photoURL: this.getUserPhoto(targetUser),
               role: targetUser.role || 'catequista',
               funcao: targetUser.funcao || targetUser.funcaoPrincipal || 'Catequista'
@@ -399,16 +447,16 @@
             ultimaMensagem: null,
             unreadCount: {
               [this.user.uid]: 0,
-              [targetUser.uid]: 0
+              [targetUid]: 0
             }
-          });
+          }, { merge: true });
         }
 
         // Abre janela no Dock
         this.openRoomDock(salaId);
       } catch (err) {
-        console.error('Erro ao abrir conversa direta:', err);
-        alert('Não foi possível iniciar a conversa. Verifique as permissões.');
+        console.error('Erro ao abrir conversa direta no Firestore:', err);
+        alert(`Não foi possível iniciar a conversa: ${err.message || 'Verifique as permissões no Firestore Console.'}`);
       }
     },
 
@@ -1342,7 +1390,16 @@
 
     _getOtherParticipant(sala) {
       if (!sala || !sala.participantesInfo) return null;
-      const otherUid = (sala.participantes || []).find(uid => uid !== this.user.uid);
+      const currentEmail = (this.user.email || '').toLowerCase().trim();
+      const currentUid = this.user.uid;
+
+      for (const [key, info] of Object.entries(sala.participantesInfo)) {
+        if (key !== currentUid && (!info.email || info.email.toLowerCase().trim() !== currentEmail)) {
+          return { uid: key, ...info };
+        }
+      }
+
+      const otherUid = (sala.participantes || []).find(uid => uid !== currentUid);
       if (otherUid && sala.participantesInfo[otherUid]) {
         return { uid: otherUid, ...sala.participantesInfo[otherUid] };
       }

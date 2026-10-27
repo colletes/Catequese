@@ -63,15 +63,51 @@
     return (yiq >= 140) ? '#0f172a' : '#ffffff';
   }
 
+  // Formatação de data/hora relativa para comentários e histórico
+  function formatRelativeTime(isoString) {
+    if (!isoString) return '';
+    try {
+      const date = new Date(isoString);
+      const now = new Date();
+      const diffSec = Math.floor((now - date) / 1000);
+      if (diffSec < 60) return 'agora mesmo';
+      const diffMin = Math.floor(diffSec / 60);
+      if (diffMin < 60) return `há ${diffMin} min`;
+      const diffHour = Math.floor(diffMin / 60);
+      if (diffHour < 24) return `há ${diffHour} h`;
+      const diffDays = Math.floor(diffHour / 24);
+      if (diffDays < 7) return `há ${diffDays} d`;
+      return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    } catch (e) {
+      return '';
+    }
+  }
+
+  // Sanitização e detecção inteligente de URLs clicáveis em comentários
+  function formatCommentText(text) {
+    if (!text) return '';
+    let safe = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    safe = safe.replace(urlRegex, url => `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-800 underline font-medium break-all">${url}</a>`);
+    return safe.replace(/\n/g, '<br>');
+  }
+
   const KanbanEngine = {
     boards: [],
     currentBoardId: null,
     tickets: [],
     notifications: [],
+    ticketActivities: [],
     quillInstance: null,
     unsubscribeBoards: null,
     unsubscribeTickets: null,
     unsubscribeNotifications: null,
+    unsubscribeActivities: null,
+    currentActivityTab: 'all', // 'all' | 'comments' | 'history'
     activeTicketEditorId: null,
     isTicketFormDirty: false,
     currentTicketAttachments: [],
@@ -684,6 +720,13 @@
           updatedBy: user.email
         }, { merge: true });
 
+        // Registra evento no histórico do ticket
+        await this.logTicketActivity(ticketId, 'history', `moveu o status de "${oldCol.title}" para "${newCol.title}".`, {
+          field: 'status',
+          from: oldCol.title,
+          to: newCol.title
+        });
+
         // Notifica seguidores
         await this.notifyTicketFollowers(ticket, {
           action: `O ticket "${ticket.title}" foi movido de "${oldCol.title}" para "${newCol.title}".`,
@@ -1141,6 +1184,10 @@
       const btnDelete = document.getElementById('btn-delete-kanban-ticket');
       if (btnDelete) btnDelete.classList.add('hidden');
 
+      // Oculta seção de atividades (pois o ticket ainda não foi criado)
+      const actSec = document.getElementById('ticket-activities-section');
+      if (actSec) actSec.classList.add('hidden');
+
       const modal = document.getElementById('modal-kanban-ticket-editor');
       if (modal) modal.classList.remove('hidden');
     },
@@ -1182,6 +1229,14 @@
       // Anexos
       this.renderTicketModalAttachments();
 
+      // Atividades & Comentários (Estilo Jira)
+      const actSec = document.getElementById('ticket-activities-section');
+      if (actSec) actSec.classList.remove('hidden');
+      const txtComment = document.getElementById('txt-new-ticket-comment');
+      if (txtComment) txtComment.value = '';
+      this.switchActivityTab('all');
+      this.subscribeTicketActivities(ticket.id);
+
       // Seguidor
       const currentUser = this.getCurrentUser();
       const isFollowing = (ticket.followers || []).map(f => (f || '').toLowerCase()).includes(currentUser.email.toLowerCase());
@@ -1197,10 +1252,10 @@
         }
       }
 
-      // Se for apenas visualizador, desativa campos
-      const inputs = document.querySelectorAll('#modal-kanban-ticket-editor input, #modal-kanban-ticket-editor select');
+      // Se for apenas visualizador, desativa campos (mas permite comentar!)
+      const inputs = document.querySelectorAll('#modal-kanban-ticket-editor input:not(#check-ticket-follow), #modal-kanban-ticket-editor select');
       inputs.forEach(i => {
-        if (i.id !== 'check-ticket-follow') i.disabled = !canEdit;
+        i.disabled = !canEdit;
       });
       if (this.quillInstance) {
         this.quillInstance.enable(canEdit);
@@ -1215,6 +1270,11 @@
     closeTicketEditorModal: function () {
       this.activeTicketEditorId = null;
       this.isTicketFormDirty = false;
+      if (this.unsubscribeActivities) {
+        this.unsubscribeActivities();
+        this.unsubscribeActivities = null;
+      }
+      this.ticketActivities = [];
       const modal = document.getElementById('modal-kanban-ticket-editor');
       if (modal) modal.classList.add('hidden');
     },
@@ -1497,6 +1557,13 @@
         // Gravação atômica com merge no Firestore
         await db.collection('kanban_tickets').doc(targetDocId).set(ticketPayload, { merge: true });
 
+        // Registra histórico de criação ou atualização
+        if (!ticketId) {
+          await this.logTicketActivity(targetDocId, 'history', 'criou este ticket.');
+        } else {
+          await this.logTicketActivity(targetDocId, 'history', 'atualizou os dados do ticket.');
+        }
+
         // Dispara notificações para seguidores
         const actionDesc = ticketId
           ? `O ticket "${title}" foi atualizado por ${currentUser.displayName}.`
@@ -1534,6 +1601,13 @@
       try {
         const db = this.getDb();
         await db.collection('kanban_tickets').doc(ticketId).delete();
+
+        // Registra evento no histórico do ticket
+        await this.logTicketActivity(ticketId, 'history', `moveu o status de "${oldCol.title}" para "${newCol.title}".`, {
+          field: 'status',
+          from: oldCol.title,
+          to: newCol.title
+        });
 
         // Notifica seguidores sobre a exclusão
         const user = this.getCurrentUser();
@@ -1664,6 +1738,310 @@
       } catch (err) {
         console.warn('KanbanEngine: Envio de e-mail de background falhou (notificação salva no app):', err);
       }
+    },
+
+    // ========================================================================
+    // ATIVIDADES & COMENTÁRIOS DOS TICKETS (ESTILO JIRA)
+    // ========================================================================
+
+    subscribeTicketActivities: function (ticketId) {
+      if (this.unsubscribeActivities) {
+        this.unsubscribeActivities();
+        this.unsubscribeActivities = null;
+      }
+
+      if (!ticketId) {
+        this.ticketActivities = [];
+        this.renderTicketActivities();
+        return;
+      }
+
+      const db = this.getDb();
+      if (!db) return;
+
+      this.unsubscribeActivities = db.collection('kanban_activities')
+        .where('ticketId', '==', ticketId)
+        .onSnapshot(snap => {
+          const loaded = [];
+          snap.forEach(doc => {
+            loaded.push({ id: doc.id, ...doc.data() });
+          });
+          // Ordena do mais recente para o mais antigo (estilo Jira)
+          loaded.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+          this.ticketActivities = loaded;
+          this.renderTicketActivities();
+        }, err => {
+          console.warn('KanbanEngine: Erro ao sincronizar atividades do ticket:', err);
+        });
+    },
+
+    logTicketActivity: async function (ticketId, type, content, details = null) {
+      const db = this.getDb();
+      const user = this.getCurrentUser();
+      if (!db || !ticketId) return;
+
+      try {
+        await db.collection('kanban_activities').add({
+          ticketId: ticketId,
+          boardId: this.currentBoardId || null,
+          type: type, // 'comment' | 'history'
+          content: content,
+          details: details,
+          authorEmail: user.email,
+          authorName: user.displayName,
+          createdAt: new Date().toISOString()
+        });
+      } catch (err) {
+        console.warn('KanbanEngine: Erro ao registrar atividade:', err);
+      }
+    },
+
+    submitCommentFromModal: async function () {
+      const ticketId = document.getElementById('input-ticket-id').value.trim();
+      const txtComment = document.getElementById('txt-new-ticket-comment');
+      const text = txtComment ? txtComment.value.trim() : '';
+
+      if (!ticketId) {
+        alert('Salve o ticket antes de adicionar comentários.');
+        return;
+      }
+
+      if (!text) {
+        alert('Por favor, digite o seu comentário.');
+        return;
+      }
+
+      const ticket = this.tickets.find(t => t.id === ticketId);
+      if (!ticket) return;
+
+      const user = this.getCurrentUser();
+      const db = this.getDb();
+      if (!db) return;
+
+      const btnSubmit = document.getElementById('btn-submit-comment');
+      if (btnSubmit) {
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = 'Enviando...';
+      }
+
+      try {
+        // 1. Torna o autor seguidor automático se ainda não for
+        let followers = Array.isArray(ticket.followers) ? [...ticket.followers] : [];
+        if (user.email && !followers.map(f => f.toLowerCase()).includes(user.email.toLowerCase())) {
+          followers.push(user.email.toLowerCase());
+          ticket.followers = followers;
+          const chkFollow = document.getElementById('check-ticket-follow');
+          if (chkFollow) chkFollow.checked = true;
+          await db.collection('kanban_tickets').doc(ticketId).set({
+            followers: followers
+          }, { merge: true });
+        }
+
+        // 2. Grava comentário na coleção kanban_activities
+        await db.collection('kanban_activities').add({
+          ticketId: ticketId,
+          boardId: this.currentBoardId,
+          type: 'comment',
+          content: text,
+          authorEmail: user.email,
+          authorName: user.displayName,
+          createdAt: new Date().toISOString()
+        });
+
+        // 3. Notifica todos os demais seguidores
+        const preview = text.length > 80 ? text.substring(0, 80) + '...' : text;
+        await this.notifyTicketFollowers(ticket, {
+          action: `${user.displayName} comentou no ticket "${ticket.title}": "${preview}"`,
+          details: text
+        });
+
+        txtComment.value = '';
+      } catch (err) {
+        console.error('KanbanEngine: Erro ao publicar comentário:', err);
+        alert('Erro ao enviar comentário: ' + err.message);
+      } finally {
+        if (btnSubmit) {
+          btnSubmit.disabled = false;
+          btnSubmit.textContent = 'Publicar Comentário';
+        }
+      }
+    },
+
+    editCommentPrompt: async function (activityId, currentContent) {
+      const user = this.getCurrentUser();
+      const act = this.ticketActivities.find(a => a.id === activityId);
+      if (!act) return;
+
+      if (act.authorEmail.toLowerCase() !== user.email.toLowerCase() && !this.isMasterAdmin()) {
+        alert('Apenas o autor do comentário ou o Master Admin podem editá-lo.');
+        return;
+      }
+
+      const newContent = prompt('Editar comentário:', currentContent);
+      if (newContent === null) return;
+      const clean = newContent.trim();
+      if (!clean) {
+        alert('O comentário não pode ficar vazio.');
+        return;
+      }
+
+      try {
+        const db = this.getDb();
+        await db.collection('kanban_activities').doc(activityId).set({
+          content: clean,
+          updatedAt: new Date().toISOString(),
+          edited: true
+        }, { merge: true });
+      } catch (err) {
+        console.error('KanbanEngine: Erro ao editar comentário:', err);
+        alert('Erro ao editar comentário: ' + err.message);
+      }
+    },
+
+    deleteComment: async function (activityId) {
+      const user = this.getCurrentUser();
+      const act = this.ticketActivities.find(a => a.id === activityId);
+      if (!act) return;
+
+      if (act.authorEmail.toLowerCase() !== user.email.toLowerCase() && !this.isMasterAdmin()) {
+        alert('Apenas o autor do comentário ou o Master Admin podem excluí-lo.');
+        return;
+      }
+
+      if (!confirm('Deseja realmente excluir este comentário?')) return;
+
+      try {
+        const db = this.getDb();
+        await db.collection('kanban_activities').doc(activityId).delete();
+      } catch (err) {
+        console.error('KanbanEngine: Erro ao excluir comentário:', err);
+        alert('Erro ao excluir comentário: ' + err.message);
+      }
+    },
+
+    switchActivityTab: function (tabName) {
+      this.currentActivityTab = tabName;
+
+      const btnAll = document.getElementById('btn-tab-act-all');
+      const btnComments = document.getElementById('btn-tab-act-comments');
+      const btnHistory = document.getElementById('btn-tab-act-history');
+
+      const activeClass = 'px-2.5 py-1 rounded-lg bg-white shadow-2xs text-slate-900 transition font-bold';
+      const inactiveClass = 'px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition font-semibold';
+
+      if (btnAll) btnAll.className = tabName === 'all' ? activeClass : inactiveClass;
+      if (btnComments) btnComments.className = tabName === 'comments' ? activeClass : inactiveClass;
+      if (btnHistory) btnHistory.className = tabName === 'history' ? activeClass : inactiveClass;
+
+      this.renderTicketActivities();
+    },
+
+    renderTicketActivities: function () {
+      const container = document.getElementById('ticket-activities-feed');
+      const badgeCount = document.getElementById('badge-activities-count');
+      if (!container) return;
+
+      let items = this.ticketActivities || [];
+
+      if (badgeCount) {
+        badgeCount.textContent = items.length;
+      }
+
+      if (this.currentActivityTab === 'comments') {
+        items = items.filter(a => a.type === 'comment');
+      } else if (this.currentActivityTab === 'history') {
+        items = items.filter(a => a.type === 'history');
+      }
+
+      if (items.length === 0) {
+        const emptyMsg = this.currentActivityTab === 'comments'
+          ? 'Nenhum comentário publicado ainda. Seja o primeiro a comentar!'
+          : (this.currentActivityTab === 'history'
+            ? 'Nenhum evento registrado no histórico.'
+            : 'Nenhuma atividade registrada neste ticket ainda.');
+
+        container.innerHTML = `
+          <div class="p-6 text-center text-slate-400 text-xs bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+            ${emptyMsg}
+          </div>
+        `;
+        return;
+      }
+
+      const currentUser = this.getCurrentUser();
+      const isMasterAdmin = this.isMasterAdmin();
+
+      let html = '';
+      items.forEach(act => {
+        const timeAgo = formatRelativeTime(act.createdAt);
+        const isComment = act.type === 'comment';
+        const isAuthor = act.authorEmail && currentUser.email && act.authorEmail.toLowerCase() === currentUser.email.toLowerCase();
+        const canManageComment = isComment && (isAuthor || isMasterAdmin);
+
+        if (isComment) {
+          const initial = (act.authorName || 'U').charAt(0).toUpperCase();
+          const formattedContent = formatCommentText(act.content);
+          const editedTag = act.edited ? '<span class="text-[9px] text-slate-400 font-normal italic">(editado)</span>' : '';
+
+          html += `
+            <div class="p-3 bg-white border border-slate-200/90 rounded-2xl shadow-2xs space-y-2 text-xs">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="w-6 h-6 rounded-full bg-[#d4a94f]/20 border border-[#d4a94f]/50 flex items-center justify-center text-[11px] font-bold text-[#b88d36] flex-shrink-0">
+                    ${initial}
+                  </span>
+                  <div>
+                    <span class="font-bold text-slate-900">${act.authorName || act.authorEmail}</span>
+                    <span class="text-[10px] text-slate-400 ml-1">🕒 ${timeAgo}</span>
+                    ${editedTag}
+                  </div>
+                </div>
+
+                ${canManageComment ? `
+                  <div class="flex items-center gap-1.5 text-[11px]">
+                    ${isAuthor ? `
+                      <button 
+                        type="button" 
+                        onclick="window.KanbanEngine.editCommentPrompt('${act.id}', \`${(act.content || '').replace(/`/g, '\\`')}\`)" 
+                        class="text-slate-400 hover:text-indigo-600 transition p-1"
+                        title="Editar comentário"
+                      >
+                        ✏️
+                      </button>
+                    ` : ''}
+                    <button 
+                      type="button" 
+                      onclick="window.KanbanEngine.deleteComment('${act.id}')" 
+                      class="text-slate-400 hover:text-rose-600 transition p-1"
+                      title="Excluir comentário"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                ` : ''}
+              </div>
+
+              <div class="text-slate-700 text-xs pl-8 leading-relaxed font-sans">
+                ${formattedContent}
+              </div>
+            </div>
+          `;
+        } else {
+          // Evento de Histórico / Changelog
+          html += `
+            <div class="flex items-start gap-2.5 px-3 py-2 bg-slate-50/80 border border-slate-200/60 rounded-xl text-[11px] text-slate-600">
+              <span class="text-sm mt-0.5">🔄</span>
+              <div class="flex-1 min-w-0">
+                <span class="font-semibold text-slate-800">${act.authorName || act.authorEmail}</span>
+                <span class="text-slate-600"> ${act.content}</span>
+                <span class="text-[10px] text-slate-400 block pt-0.5">🕒 ${timeAgo}</span>
+              </div>
+            </div>
+          `;
+        }
+      });
+
+      container.innerHTML = html;
     },
 
     // ========================================================================

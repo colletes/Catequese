@@ -126,6 +126,20 @@ service cloud.firestore {
       allow create: if isAuthenticated();
     }
 
+    // Atividades e Comentários dos Tickets (Estilo Jira)
+    match /kanban_activities/{actId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && (
+        isMasterAdmin() ||
+        request.auth.token.email.lower() == resource.data.authorEmail.lower()
+      );
+      allow delete: if isAuthenticated() && (
+        isMasterAdmin() ||
+        request.auth.token.email.lower() == resource.data.authorEmail.lower()
+      );
+    }
+
     // ==============================================================
     // CHAT PASTORAL ASSÍNCRONO & PRESENÇA EM TEMPO REAL
     // ==============================================================
@@ -139,14 +153,19 @@ service cloud.firestore {
     match /chat_salas/{salaId} {
       allow read: if isAuthenticated() && (
         isCoordOrAdmin() ||
-        (resource.data.participantes != null && request.auth.uid in resource.data.participantes)
+        resource == null ||
+        (resource.data.participantes != null && request.auth.uid in resource.data.participantes) ||
+        (resource.data.participantesEmails != null && request.auth.token.email.lower() in resource.data.participantesEmails)
       );
       allow create: if isAuthenticated() && (
-        request.resource.data.participantes != null && request.auth.uid in request.resource.data.participantes
+        isCoordOrAdmin() ||
+        (request.resource.data.participantes != null && request.auth.uid in request.resource.data.participantes) ||
+        (request.resource.data.participantesEmails != null && request.auth.token.email.lower() in request.resource.data.participantesEmails)
       );
       allow update: if isAuthenticated() && (
         isCoordOrAdmin() ||
-        (resource.data.participantes != null && request.auth.uid in resource.data.participantes)
+        (resource.data.participantes != null && request.auth.uid in resource.data.participantes) ||
+        (resource.data.participantesEmails != null && request.auth.token.email.lower() in resource.data.participantesEmails)
       );
       allow delete: if isAuthenticated() && (
         isCoordOrAdmin() ||
@@ -156,16 +175,11 @@ service cloud.firestore {
       // Mensagens da Sala (com expurgo de 7 dias)
       match /mensagens/{msgId} {
         allow read: if isAuthenticated();
-        allow create: if isAuthenticated() && request.auth.uid == request.resource.data.remetenteId;
-        allow update: if isAuthenticated() && (
-          isCoordOrAdmin() ||
-          request.auth.uid == resource.data.remetenteId
-        );
-        allow delete: if isAuthenticated() && (
+        allow create: if isAuthenticated();
+        allow update, delete: if isAuthenticated() && (
           isCoordOrAdmin() ||
           request.auth.uid == resource.data.remetenteId ||
-          (get(/databases/$(database)/documents/chat_salas/$(salaId)).data.participantes != null &&
-           request.auth.uid in get(/databases/$(database)/documents/chat_salas/$(salaId)).data.participantes)
+          (request.auth.token.email != null && resource.data.remetenteEmail != null && request.auth.token.email.lower() == resource.data.remetenteEmail.lower())
         );
       }
     }
