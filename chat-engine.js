@@ -1,13 +1,13 @@
 // ==========================================================================
 // PASTORAL DA CATEQUESE — SANTUÁRIO IMACULADO CORAÇÃO DE MARIA
 // Motor de Chat Assíncrono com Presença em Tempo Real, Listas e Expurgo
-// Conformidade LGPD & Expurgo Automático de 7 Dias
+// Conformidade LGPD & Expurgo Automático de 30 Dias
 // ==========================================================================
 
 (function (window, document) {
   'use strict';
 
-  const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+  const PURGE_DAYS_MS = 30 * 24 * 60 * 60 * 1000; // 30 dias
   const HEARTBEAT_INTERVAL_MS = 45 * 1000; // 45 segundos
   const ONLINE_TIMEOUT_MS = 150 * 1000; // 2.5 minutos
 
@@ -634,9 +634,9 @@
         roomState.unsubscribe();
       }
 
-      const cutoffDate = new Date(Date.now() - SEVEN_DAYS_MS);
+      const cutoffDate = new Date(Date.now() - PURGE_DAYS_MS);
 
-      // Consulta apenas mensagens dos últimos 7 dias
+      // Consulta apenas mensagens dos últimos 30 dias
       const msgQuery = this.db.collection('chat_salas').doc(salaId)
         .collection('mensagens')
         .where('criadoEm', '>=', cutoffDate)
@@ -666,7 +666,7 @@
         console.warn(`Erro ao escutar mensagens da sala ${salaId}:`, err);
       });
 
-      // Executa rotina assíncrona de limpeza física das mensagens > 7 dias
+      // Executa rotina assíncrona de limpeza física das mensagens > 30 dias
       this._purgeExpiredMessages(salaId, cutoffDate);
     },
 
@@ -684,7 +684,7 @@
             batch.delete(doc.ref);
           });
           await batch.commit();
-          console.log(`🧹 Expurgo de 7 dias: ${expiredQuery.docs.length} mensagens antigas removidas da sala ${salaId}.`);
+          console.log(`🧹 Expurgo de 30 dias: ${expiredQuery.docs.length} mensagens antigas removidas da sala ${salaId}.`);
         }
       } catch (e) {
         // Ignora silenciosamente se usuário não tiver permissão de exclusão em massa
@@ -985,7 +985,7 @@
             <!-- AVISO DE EXPURGO NO RODAPÉ -->
             <div class="px-3 py-1.5 bg-slate-100 border-t border-slate-200 text-[10.5px] text-slate-500 text-center flex items-center justify-center gap-1">
               <span>🛡️</span>
-              <span>Mensagens expurgadas após <strong>7 dias</strong> (LGPD)</span>
+              <span>Mensagens expurgadas após <strong>30 dias</strong> (LGPD)</span>
             </div>
 
           </div>
@@ -1489,9 +1489,9 @@
           <!-- CORPO DA CONVERSA (MENSAGENS + INPUT) -->
           <div class="chat-dock-body flex-1 flex flex-col min-h-0 bg-slate-50">
             
-            <!-- AVISO DE EXPURGO DE 7 DIAS -->
+            <!-- AVISO DE EXPURGO DE 30 DIAS -->
             <div class="px-3 py-1 bg-amber-50/80 border-b border-amber-200/60 text-[10px] text-amber-800 text-center font-medium">
-              🕊️ Mensagens expurgadas após 7 dias
+              🕊️ Mensagens expurgadas após 30 dias
             </div>
 
             <!-- ÁREA DE MENSAGENS -->
@@ -1532,7 +1532,7 @@
       if (roomState.messages.length === 0) {
         container.innerHTML = `
           <div class="py-8 text-center text-slate-400 text-xs">
-            <span>✨</span> Nenhuma mensagem nos últimos 7 dias.<br>
+            <span>✨</span> Nenhuma mensagem nos últimos 30 dias.<br>
             <span class="text-[11px] text-slate-400">Envie a primeira mensagem para iniciar!</span>
           </div>
         `;
