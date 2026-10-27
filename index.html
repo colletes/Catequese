@@ -4507,7 +4507,10 @@
           <div class="flex items-center gap-2.5 flex-wrap">
             <button onclick="toggleSidebarMenu()" class="inline-flex items-center gap-2 bg-gradient-to-r from-[#d4a94f] to-[#b88d36] hover:from-[#facf75] hover:to-[#d4a94f] text-slate-950 font-black px-4 py-2 rounded-xl text-xs transition shadow-md font-heading active:scale-95">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-              <span>Abrir Menu Completo (7 Abas)</span>
+              <span>Menu Completo</span>
+            </button>
+            <button onclick="switchTab('tarefas')" id="hero-btn-tarefas" class="inline-flex items-center gap-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 px-4 py-2 rounded-xl text-xs font-bold transition">
+              <span>📋 Lista de Tarefas</span>
             </button>
             <button onclick="switchTab('guia')" class="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-xl text-xs font-semibold transition">
               <span>🌳 Ver Organograma</span>
@@ -4529,7 +4532,7 @@
             <p class="text-xs sm:text-sm text-slate-500">Acesse diretamente as áreas operacionais da catequese paroquial</p>
           </div>
           <span class="text-xs bg-slate-100 text-slate-700 font-bold px-3 py-1 rounded-full border border-slate-200 hidden sm:inline">
-            6 Módulos Principais
+            Módulos Principais
           </span>
         </div>
 
@@ -4706,6 +4709,31 @@
             </div>
             <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-700 group-hover:text-emerald-800">
               <span>Explorar Base de Conhecimento</span>
+              <span class="transform group-hover:translate-x-1.5 transition-transform">→</span>
+            </div>
+          </div>
+
+          <!-- Card 8: Lista de Tarefas (Kanban) -->
+          <div onclick="switchTab('tarefas')" id="campus-card-tarefas" class="group bg-white hover:bg-slate-50/80 p-6 rounded-3xl border-2 border-slate-200/90 hover:border-amber-400/80 shadow-sm hover:shadow-xl transition-all duration-200 cursor-pointer flex flex-col justify-between relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-28 h-28 bg-amber-400/5 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform"></div>
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 text-white flex items-center justify-center font-bold text-2xl shadow-md group-hover:scale-105 transition-transform">
+                  📋
+                </div>
+                <span class="bg-amber-100 text-amber-900 text-[10.5px] font-extrabold uppercase px-2.5 py-1 rounded-full border border-amber-300/60 font-heading">
+                  Gestão &amp; Projetos
+                </span>
+              </div>
+              <h4 class="text-xl font-bold font-heading text-slate-900 group-hover:text-amber-800 transition-colors mb-2">
+                Lista de Tarefas (Kanban)
+              </h4>
+              <p class="text-xs text-slate-600 leading-relaxed mb-4">
+                Quadros de atividades pastorais, tickets com prazos, prioridades, rich text, anexos, comentários estilo Jira e notificações em tempo real.
+              </p>
+            </div>
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-700 group-hover:text-amber-800">
+              <span>Acessar Lista de Tarefas</span>
               <span class="transform group-hover:translate-x-1.5 transition-transform">→</span>
             </div>
           </div>
@@ -7417,6 +7445,10 @@
             }
             if (window.ChatEngine && !window.ChatEngine.user) {
               window.ChatEngine.init(user);
+            }
+            if (window.KanbanEngine) {
+              window.KanbanEngine.init();
+              window.KanbanEngine.updateSidebarVisibility();
             }
           }
         });

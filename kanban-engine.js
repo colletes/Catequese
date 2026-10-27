@@ -147,15 +147,29 @@
       let displayName = null;
       let role = null;
 
-      if (window.ICM_CONFIG && window.ICM_CONFIG.getCurrentUser) {
-        const u = window.ICM_CONFIG.getCurrentUser();
-        if (u) {
-          email = u.email;
-          displayName = u.displayName || u.nome;
-          role = u.role;
-        }
+      // 1. window.appAuthState (Estado global da aplicação)
+      if (window.appAuthState && window.appAuthState.user) {
+        email = window.appAuthState.user.email;
+        displayName = window.appAuthState.user.displayName || window.appAuthState.user.nome;
+        role = window.appAuthState.role;
       }
 
+      // 2. localStorage / sessionStorage da sessão da Catequese
+      if (!email) {
+        try {
+          const raw = localStorage.getItem('catequese_active_session_v2') || sessionStorage.getItem('catequese_active_session_v2');
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && parsed.email) {
+              email = parsed.email;
+              displayName = parsed.displayName || parsed.nome;
+              role = parsed.role;
+            }
+          }
+        } catch (e) {}
+      }
+
+      // 3. Firebase Auth currentUser
       if (!email && typeof firebase !== 'undefined' && firebase.auth) {
         const faUser = firebase.auth().currentUser;
         if (faUser) {
@@ -164,13 +178,22 @@
         }
       }
 
-      if (email && !role && window.ICM_CONFIG && window.ICM_CONFIG.determineUserRole) {
-        role = window.ICM_CONFIG.determineUserRole(email);
+      const cleanEmail = email ? email.trim().toLowerCase() : '';
+
+      // Determinação direta infalível por email institucional oficial
+      if (cleanEmail === 'colletes@gmail.com') {
+        role = (window.ICM_CONFIG && window.ICM_CONFIG.ROLES && window.ICM_CONFIG.ROLES.MASTER_ADMIN) || 'master_admin';
+      } else if (cleanEmail === 'lorenammoraes@gmail.com') {
+        role = (window.ICM_CONFIG && window.ICM_CONFIG.ROLES && window.ICM_CONFIG.ROLES.COORD_GERAL) || 'coord_geral';
+      } else if (cleanEmail === 'andresprojetos@gmail.com') {
+        role = (window.ICM_CONFIG && window.ICM_CONFIG.ROLES && window.ICM_CONFIG.ROLES.VICE_COORD_GERAL) || 'vice_coord_geral';
+      } else if (!role && cleanEmail && window.ICM_CONFIG && window.ICM_CONFIG.determineUserRole) {
+        role = window.ICM_CONFIG.determineUserRole(cleanEmail);
       }
 
       return {
-        email: email ? email.trim().toLowerCase() : '',
-        displayName: displayName || (email ? email.split('@')[0] : 'Usuário'),
+        email: cleanEmail,
+        displayName: displayName || (cleanEmail ? cleanEmail.split('@')[0] : 'Usuário'),
         role: role || (window.ICM_CONFIG && window.ICM_CONFIG.ROLES ? window.ICM_CONFIG.ROLES.PENDENTE : 'pendente')
       };
     },
@@ -179,8 +202,9 @@
     isCoordOrAdmin: function () {
       const user = this.getCurrentUser();
       if (!user.email) return false;
-      if (window.ICM_CONFIG && window.ICM_CONFIG.isCoordOrAdmin) {
-        return window.ICM_CONFIG.isCoordOrAdmin(user.email);
+      const clean = user.email.toLowerCase().trim();
+      if (clean === 'colletes@gmail.com' || clean === 'lorenammoraes@gmail.com' || clean === 'andresprojetos@gmail.com') {
+        return true;
       }
       const roles = (window.ICM_CONFIG && window.ICM_CONFIG.ROLES) || {};
       return user.role === roles.MASTER_ADMIN ||
@@ -192,8 +216,8 @@
     isMasterAdmin: function () {
       const user = this.getCurrentUser();
       if (!user.email) return false;
-      const adminEmail = (window.ICM_CONFIG && window.ICM_CONFIG.MASTER_ADMIN_EMAIL) || 'colletes@gmail.com';
-      return user.email.toLowerCase() === adminEmail.toLowerCase() ||
+      const clean = user.email.toLowerCase().trim();
+      return clean === 'colletes@gmail.com' ||
              user.role === (window.ICM_CONFIG && window.ICM_CONFIG.ROLES && window.ICM_CONFIG.ROLES.MASTER_ADMIN);
     },
 
@@ -343,16 +367,25 @@
 
     updateSidebarVisibility: function () {
       const btnTarefas = document.getElementById('sidebar-tab-tarefas');
-      if (!btnTarefas) return;
-
-      const user = this.getCurrentUser();
+      const cardTarefas = document.getElementById('campus-card-tarefas');
+      const heroTarefas = document.getElementById('hero-btn-tarefas');
       const isManager = this.isCoordOrAdmin();
-      const hasAccessibleBoard = this.boards.some(b => this.canViewBoard(b));
+      const hasAccessibleBoard = Array.isArray(this.boards) && this.boards.length > 0 && this.boards.some(b => this.canViewBoard(b));
+      const shouldShow = isManager || hasAccessibleBoard;
 
-      if (isManager || hasAccessibleBoard) {
-        btnTarefas.classList.remove('hidden');
-      } else {
-        btnTarefas.classList.add('hidden');
+      if (btnTarefas) {
+        if (shouldShow) btnTarefas.classList.remove('hidden');
+        else btnTarefas.classList.add('hidden');
+      }
+
+      if (cardTarefas) {
+        if (shouldShow) cardTarefas.classList.remove('hidden');
+        else cardTarefas.classList.add('hidden');
+      }
+
+      if (heroTarefas) {
+        if (shouldShow) heroTarefas.classList.remove('hidden');
+        else heroTarefas.classList.add('hidden');
       }
     },
 
@@ -2205,5 +2238,20 @@
   };
 
   window.KanbanEngine = KanbanEngine;
+
+  // Inicialização antecipada de visibilidade e escuta de eventos
+  if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        KanbanEngine.init();
+        KanbanEngine.updateSidebarVisibility();
+      });
+    } else {
+      setTimeout(() => {
+        KanbanEngine.init();
+        KanbanEngine.updateSidebarVisibility();
+      }, 50);
+    }
+  }
 
 })(window);
