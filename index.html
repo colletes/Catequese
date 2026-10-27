@@ -52,7 +52,17 @@
   <script src="knowledge-base.js?v=20261019-v7"></script>
   <!-- Motor Universal de Filtros por Coluna (Estilo Excel/Sheets) -->
   <script src="column-filter-engine.js?v=20261019-v1"></script>
-  
+
+  <!-- Quill.js Rich Text Editor para Gestão de Tarefas (Kanban) -->
+  <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+  <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+  <!-- Motor de Lista de Tarefas (Kanban) e Governança RBAC -->
+  <script src="kanban-engine.js?v=20261027-v1"></script>
+
+  <!-- Chat Pastoral Assíncrono com Presença em Tempo Real, Listas e Expurgo de 7 Dias -->
+  <link rel="stylesheet" href="chat-engine.css?v=20261027-v1">
+  <script src="chat-engine.js?v=20261027-v1"></script>
+
   <!-- Tipografia Oficial do Santuário (Questrial, Nunito, Marcellus, Outfit, Roboto) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -772,6 +782,18 @@
         <div class="flex-1 min-w-0">
           <div class="text-xs font-bold text-slate-200 group-hover:text-emerald-300">Base de Conhecimento</div>
           <div class="text-[10px] text-slate-400 truncate">Wiki de ensino, diretrizes e mídias</div>
+        </div>
+      </button>
+
+      <!-- 9. Lista de Tarefas (Kanban) -->
+      <button onclick="switchTab('tarefas')" id="sidebar-tab-tarefas" class="sidebar-tab-btn hidden w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition group border border-transparent hover:bg-slate-900">
+        <span class="w-8 h-8 rounded-xl bg-amber-950 text-amber-400 border border-amber-500/30 flex items-center justify-center text-sm flex-shrink-0">📋</span>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-200 group-hover:text-amber-300">Lista de Tarefas</span>
+            <span id="badge-sidebar-tarefas-count" class="hidden text-[10px] font-black px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-300">0</span>
+          </div>
+          <div class="text-[10px] text-slate-400 truncate">Quadros, tickets e acompanhamento</div>
         </div>
       </button>
 
@@ -5010,6 +5032,129 @@
 
     </section>
 
+    <!-- ======================================================= -->
+    <!-- 9. LISTA DE TAREFAS & QUADROS KANBAN                   -->
+    <!-- Gestão Pastoral de Projetos, Metas e Acompanhamento     -->
+    <!-- ======================================================= -->
+    <section id="view-tarefas" class="tab-view hidden space-y-6">
+
+      <!-- HEADER DO KANBAN: Seleção de Quadro, Ações & Busca -->
+      <div class="bg-white rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-200/90 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        
+        <!-- Identificação do Quadro Ativo -->
+        <div class="space-y-1">
+          <div class="flex items-center gap-2.5">
+            <span class="w-9 h-9 rounded-2xl bg-amber-500/10 text-amber-600 border border-amber-400/30 flex items-center justify-center text-lg flex-shrink-0">
+              📋
+            </span>
+            <div>
+              <h2 id="kanban-board-title" class="text-xl sm:text-2xl font-bold font-heading text-slate-900 tracking-tight">
+                Lista de Tarefas
+              </h2>
+              <p id="kanban-board-description" class="text-xs text-slate-500">
+                Organização pastoral, prioridades e acompanhamento em equipe.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seletor de Quadros & Controles de Ação -->
+        <div class="flex flex-wrap items-center gap-2.5">
+          <!-- Dropdown de Quadros Acessíveis -->
+          <div class="min-w-[200px] flex-1 sm:flex-initial">
+            <select 
+              id="sel-kanban-board" 
+              onchange="window.KanbanEngine.switchBoard(this.value)"
+              class="w-full text-xs font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 border border-slate-300 rounded-xl px-3 py-2.5 shadow-2xs focus:ring-2 focus:ring-[#d4a94f]/40 outline-none transition cursor-pointer"
+            >
+              <option value="">Carregando listas...</option>
+            </select>
+          </div>
+
+          <!-- Botão Configurar Lista (Coordenação & Admin) -->
+          <button 
+            id="btn-edit-kanban-board" 
+            onclick="window.KanbanEngine.openEditBoardModal()" 
+            title="Configurar colunas e permissões desta lista"
+            class="hidden px-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold border border-slate-300 transition shadow-2xs flex items-center gap-1.5"
+          >
+            <span>⚙️</span> <span class="hidden sm:inline">Configurar</span>
+          </button>
+
+          <!-- Botão Excluir Lista (Coordenação & Admin) -->
+          <button 
+            id="btn-delete-kanban-board" 
+            onclick="window.KanbanEngine.deleteCurrentBoard()" 
+            title="Excluir esta lista de tarefas"
+            class="hidden px-3 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl text-xs font-bold border border-rose-200 transition shadow-2xs"
+          >
+            🗑️
+          </button>
+
+          <!-- Botão Nova Lista (Apenas Coordenação e Master Admin) -->
+          <button 
+            id="btn-new-kanban-board" 
+            onclick="window.KanbanEngine.openCreateBoardModal()" 
+            class="hidden px-4 py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5"
+          >
+            <span>＋</span> <span>Nova Lista</span>
+          </button>
+
+          <!-- Botão Novo Ticket (Usuários com Permissão de Edição) -->
+          <button 
+            id="btn-new-kanban-ticket" 
+            onclick="window.KanbanEngine.openCreateTicketModal()" 
+            class="hidden px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5"
+          >
+            <span>＋</span> <span>Novo Ticket</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- BARRA DE BUSCA E FILTROS RÁPIDOS -->
+      <div class="flex items-center gap-3">
+        <div class="relative flex-1 max-w-md">
+          <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs">🔍</span>
+          <input 
+            type="text" 
+            id="input-kanban-search" 
+            placeholder="Buscar tickets por título, responsável ou criador..." 
+            class="w-full pl-8 pr-3 py-2 text-xs bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#d4a94f]/40 outline-none text-slate-800 shadow-2xs"
+          />
+        </div>
+      </div>
+
+      <!-- ESTADO VAZIO: NENHUMA LISTA SELECIONADA OU DISPONÍVEL -->
+      <div id="kanban-empty-state" class="hidden bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-sm space-y-4 max-w-xl mx-auto">
+        <div class="w-16 h-16 rounded-3xl bg-amber-50 border border-amber-200/80 text-amber-600 text-3xl flex items-center justify-center mx-auto shadow-inner">
+          📋
+        </div>
+        <div class="space-y-1">
+          <h3 class="text-lg font-bold font-heading text-slate-800">Nenhuma Lista de Tarefas Ativa</h3>
+          <p class="text-xs text-slate-500 max-w-md mx-auto">
+            A coordenação ainda não criou listas de tarefas ou você ainda não possui permissão de acesso.
+          </p>
+        </div>
+        <div>
+          <button 
+            onclick="window.KanbanEngine.openCreateBoardModal()" 
+            class="px-5 py-2.5 bg-gradient-to-r from-[#d4a94f] to-[#b88d36] hover:from-[#facf75] hover:to-[#d4a94f] text-slate-950 font-bold rounded-xl text-xs shadow-md transition"
+          >
+            ＋ Criar Primeira Lista de Tarefas
+          </button>
+        </div>
+      </div>
+
+      <!-- CANVAS DO KANBAN COM TRILHA ROLÁVEL DE COLUNAS -->
+      <div id="kanban-board-container" class="space-y-4">
+        <div id="kanban-columns-track" class="flex gap-4 overflow-x-auto pb-6 pt-1 items-start min-h-[460px]">
+          <!-- Colunas e tickets renderizados dinamicamente via window.KanbanEngine.renderKanbanColumns() -->
+        </div>
+      </div>
+
+    </section>
+
   </main>
 
   <!-- OFFICIAL PARISH FOOTER -->
@@ -5246,6 +5391,10 @@
         <button id="btn-tab-notif-email" onclick="switchNotifSubTab('email')" class="px-4 py-2 rounded-t-xl text-xs font-bold transition text-slate-600 hover:text-slate-900">
           ✉️ Disparo de E-mail (Assistido com Cco)
         </button>
+        <button id="btn-tab-notif-tarefas" onclick="switchNotifSubTab('tarefas')" class="px-4 py-2 rounded-t-xl text-xs font-bold transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5">
+          <span>📋 Tarefas & Chamados</span>
+          <span id="badge-notif-tarefas-count" class="hidden bg-amber-500 text-slate-950 text-[10px] px-1.5 py-0.5 rounded-full font-black">0</span>
+        </button>
       </div>
 
       <!-- Alerta de Solicitações de Acesso Pendentes (Visível para Master Admin e Coordenação) -->
@@ -5419,6 +5568,27 @@
                 <span>🚀 Abrir no E-mail com Cco</span>
               </button>
             </div>
+          </div>
+        </div>
+
+        <!-- SUBTAB 4: TAREFAS & CHAMADOS DO KANBAN -->
+        <div id="subtab-notif-tarefas" class="hidden space-y-4">
+          <div class="flex items-center justify-between p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
+            <div>
+              <h4 class="font-bold text-slate-900 text-xs font-heading">Atualizações dos Tickets que Você Acompanha</h4>
+              <p class="text-[11px] text-slate-500">Notificações em tempo real sobre status, novos prazos e atribuições.</p>
+            </div>
+            <button 
+              onclick="window.KanbanEngine.markAllNotificationsAsRead()" 
+              class="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-200/80 transition"
+            >
+              ✓ Marcar todas como lidas
+            </button>
+          </div>
+
+          <!-- Lista de Notificações de Tarefas -->
+          <div id="subtab-notif-tarefas-list" class="space-y-2.5 max-h-[60vh] overflow-y-auto pr-1">
+            <!-- Renderizado dinamicamente via window.KanbanEngine.renderNotificationsList() -->
           </div>
         </div>
 
@@ -6083,6 +6253,322 @@
     </div>
   </div>
 
+  <!-- ======================================================= -->
+  <!-- MODAL: CRIAR / CONFIGURAR LISTA DE TAREFAS (KANBAN)     -->
+  <!-- Restrito: Coordenadora Geral, Vice e Master Admin       -->
+  <!-- ======================================================= -->
+  <div id="modal-kanban-board-editor" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden my-auto flex flex-col max-h-[92vh]">
+      
+      <!-- Header do Modal -->
+      <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 text-white p-5 border-b border-[#d4a94f]/50 flex items-center justify-between flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-lg flex-shrink-0">
+            📋
+          </div>
+          <div>
+            <h3 id="modal-kanban-board-editor-title" class="text-base sm:text-lg font-bold font-heading text-white">Configurar Lista de Tarefas</h3>
+            <p class="text-[11px] text-slate-300">Definição de colunas, metas e matriz de permissões de acesso</p>
+          </div>
+        </div>
+        <button onclick="window.KanbanEngine.closeBoardEditorModal()" class="text-slate-400 hover:text-white p-2 text-lg rounded-xl hover:bg-white/10 transition">
+          ✕
+        </button>
+      </div>
+
+      <!-- Corpo do Modal -->
+      <div class="p-5 sm:p-6 overflow-y-auto flex-1 space-y-5">
+        <input type="hidden" id="input-kanban-board-id" />
+
+        <!-- Nome e Descrição -->
+        <div class="space-y-3">
+          <div>
+            <label class="block font-bold text-xs text-slate-700 mb-1">Nome da Lista de Tarefas / Projeto <span class="text-rose-500">*</span>:</label>
+            <input 
+              type="text" 
+              id="input-kanban-board-name" 
+              placeholder="Ex.: Retiro da Crisma 2026, Preparação Páscoa, Secretaria..." 
+              class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#d4a94f]/40 outline-none text-slate-800"
+            />
+          </div>
+
+          <div>
+            <label class="block font-bold text-xs text-slate-700 mb-1">Descrição / Finalidade Pastoral:</label>
+            <textarea 
+              id="input-kanban-board-desc" 
+              rows="2" 
+              placeholder="Descreva o propósito desta lista de tarefas e quem participa..." 
+              class="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#d4a94f]/40 outline-none text-slate-800 resize-none"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Configuração de Colunas -->
+        <div class="space-y-2 pt-2 border-t border-slate-200">
+          <div class="flex items-center justify-between">
+            <div>
+              <h4 class="font-bold text-xs text-slate-800">Colunas do Kanban</h4>
+              <p class="text-[11px] text-slate-500">Defina o fluxo de trabalho (padrão: A fazer, Em progresso, Bloqueado, Concluído).</p>
+            </div>
+            <button 
+              type="button" 
+              onclick="window.KanbanEngine.addNewColumnToConfig()" 
+              class="px-2.5 py-1 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg transition"
+            >
+              ＋ Coluna
+            </button>
+          </div>
+
+          <div id="board-modal-columns-list" class="space-y-2">
+            <!-- Populado dinamicamente via window.KanbanEngine.renderBoardModalColumns() -->
+          </div>
+        </div>
+
+        <!-- Matriz de Permissões de Acesso -->
+        <div class="space-y-2 pt-2 border-t border-slate-200">
+          <div>
+            <h4 class="font-bold text-xs text-slate-800">Quem pode acessar esta lista?</h4>
+            <p class="text-[11px] text-slate-500">Defina quem visualiza e quem pode criar/editar tickets nesta lista de tarefas.</p>
+          </div>
+
+          <div id="board-permissions-matrix-container">
+            <!-- Populado dinamicamente via window.KanbanEngine.renderBoardPermissionsMatrix() -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Rodapé do Modal -->
+      <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-3 flex-shrink-0">
+        <button 
+          type="button" 
+          onclick="window.KanbanEngine.closeBoardEditorModal()" 
+          class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-xl hover:bg-slate-200 transition"
+        >
+          Cancelar
+        </button>
+        <button 
+          type="button" 
+          id="btn-save-kanban-board" 
+          onclick="window.KanbanEngine.saveBoardFromModal()" 
+          class="px-5 py-2 bg-gradient-to-r from-[#d4a94f] to-[#b88d36] hover:from-[#facf75] hover:to-[#d4a94f] text-slate-950 font-bold rounded-xl text-xs shadow-md transition"
+        >
+          Salvar Lista de Tarefas
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- MODAL: CRIAR / EDITAR / VISUALIZAR TICKET (KANBAN)      -->
+  <!-- Suporte a Rich Text (Quill), Anexos, Cores e Contraste -->
+  <!-- ======================================================= -->
+  <div id="modal-kanban-ticket-editor" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-3xl w-full shadow-2xl border border-slate-200 overflow-hidden my-auto flex flex-col max-h-[94vh]">
+      
+      <!-- Header do Modal -->
+      <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 text-white p-5 border-b border-[#d4a94f]/50 flex items-center justify-between flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-2xl bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-lg flex-shrink-0">
+            📌
+          </div>
+          <div>
+            <h3 id="modal-kanban-ticket-title" class="text-base sm:text-lg font-bold font-heading text-white">Ticket</h3>
+            <p class="text-[11px] text-slate-300">Detalhes, prazos, responsável e diretrizes de execução</p>
+          </div>
+        </div>
+        <button onclick="window.KanbanEngine.closeTicketEditorModal()" class="text-slate-400 hover:text-white p-2 text-lg rounded-xl hover:bg-white/10 transition">
+          ✕
+        </button>
+      </div>
+
+      <!-- Corpo do Modal -->
+      <div class="p-5 sm:p-6 overflow-y-auto flex-1 space-y-4">
+        <input type="hidden" id="input-ticket-id" />
+
+        <!-- Título do Ticket -->
+        <div>
+          <label class="block font-bold text-xs text-slate-700 mb-1">Título do Ticket / Atividade <span class="text-rose-500">*</span>:</label>
+          <input 
+            type="text" 
+            id="input-ticket-title" 
+            placeholder="Ex.: Providenciar folhetos da Missa de Abertura..." 
+            class="w-full text-xs font-bold px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#d4a94f]/40 outline-none text-slate-900"
+          />
+        </div>
+
+        <!-- Status, Prioridade e Deadline -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block font-bold text-xs text-slate-700 mb-1">Coluna / Status:</label>
+            <select 
+              id="select-ticket-status" 
+              class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white outline-none text-slate-800 cursor-pointer"
+            >
+              <!-- Populado dinamicamente -->
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-bold text-xs text-slate-700 mb-1">Prioridade:</label>
+            <select 
+              id="select-ticket-priority" 
+              class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white outline-none text-slate-800 cursor-pointer"
+            >
+              <option value="baixa">🟢 Baixa</option>
+              <option value="media" selected>🔵 Média</option>
+              <option value="alta">🟡 Alta</option>
+              <option value="urgente">🔴 Urgente</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-bold text-xs text-slate-700 mb-1">Prazo de Entrega (Deadline):</label>
+            <input 
+              type="date" 
+              id="input-ticket-deadline" 
+              class="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white outline-none text-slate-800 cursor-pointer"
+            />
+          </div>
+        </div>
+
+        <!-- Responsável e Seletor de Cores -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+          <div>
+            <label class="block font-bold text-xs text-slate-700 mb-1">Responsável (Assignee):</label>
+            <select 
+              id="select-ticket-assignee" 
+              class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white outline-none text-slate-800 cursor-pointer"
+            >
+              <!-- Populado dinamicamente com catequistas e coordenação -->
+            </select>
+          </div>
+
+          <!-- Cor do Ticket com Contraste Automático Dinâmico -->
+          <div>
+            <label class="block font-bold text-xs text-slate-700 mb-1">Cor do Cartão &amp; Contraste Dinâmico:</label>
+            <div class="space-y-2">
+              <div class="flex items-center gap-2">
+                <!-- Paleta de Cores Rápidas -->
+                <div id="ticket-color-palette" class="flex items-center gap-1.5 overflow-x-auto py-1">
+                  <!-- Injetado dinamicamente via window.KanbanEngine.initColorPickerUI() -->
+                </div>
+                <!-- Color Picker Customizado -->
+                <div class="flex items-center gap-1.5 flex-shrink-0 pl-1 border-l border-slate-200">
+                  <input 
+                    type="color" 
+                    id="input-ticket-color-picker" 
+                    value="#ffffff"
+                    onchange="window.KanbanEngine.setTicketColor(this.value)"
+                    title="Escolha uma cor personalizada"
+                    class="w-7 h-7 rounded-lg border border-slate-300 cursor-pointer p-0.5"
+                  />
+                  <input type="hidden" id="input-ticket-color" value="#ffffff" />
+                </div>
+              </div>
+
+              <!-- Caixa de Preview do Contraste Dinâmico -->
+              <div 
+                id="ticket-color-preview-box" 
+                class="p-2.5 rounded-xl border border-slate-200 text-xs font-semibold flex items-center justify-between transition-colors shadow-2xs"
+                style="background-color: #ffffff; color: #0f172a;"
+              >
+                <span>Exemplo visual do ticket</span>
+                <span class="preview-contrast-label text-[10px] font-bold uppercase tracking-wider">Contraste Automático: Texto Escuro</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Descrição Rich Text com Quill -->
+        <div class="space-y-1 pt-1">
+          <label class="block font-bold text-xs text-slate-700">Descrição &amp; Orientações (Edição Formatada):</label>
+          <div class="border border-slate-300 rounded-2xl overflow-hidden focus-within:ring-2 focus-within:ring-[#d4a94f]/40 transition">
+            <div id="ticket-quill-editor" class="min-h-[140px] text-xs"></div>
+          </div>
+        </div>
+
+        <!-- Seção de Anexos com Firebase Storage -->
+        <div class="space-y-2 pt-2 border-t border-slate-200">
+          <div class="flex items-center justify-between">
+            <div>
+              <h4 class="font-bold text-xs text-slate-800">Anexos do Ticket (Até 10MB)</h4>
+              <p class="text-[11px] text-slate-500">PDFs, imagens, modelos DOCX e planilhas vinculados à tarefa.</p>
+            </div>
+            <label class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-xl cursor-pointer transition flex items-center gap-1.5 shadow-2xs">
+              <span>📎</span> <span>Novo Anexo</span>
+              <input 
+                type="file" 
+                id="input-ticket-attachment" 
+                onchange="window.KanbanEngine.handleAttachmentUpload(this)" 
+                accept=".pdf,.png,.jpg,.jpeg,.docx,.xlsx,.xls"
+                class="hidden" 
+              />
+            </label>
+          </div>
+
+          <div id="ticket-attachment-upload-status" class="hidden text-xs text-indigo-600 font-semibold animate-pulse">
+            Enviando anexo para o Firebase Storage...
+          </div>
+
+          <div id="ticket-modal-attachments-list" class="space-y-1.5">
+            <!-- Populado dinamicamente -->
+          </div>
+        </div>
+
+        <!-- Opção de Seguir o Ticket -->
+        <div class="p-3 bg-amber-500/10 border border-amber-400/40 rounded-2xl flex items-center justify-between gap-3 text-xs">
+          <div class="flex items-center gap-2.5">
+            <span class="text-xl">🔔</span>
+            <div>
+              <span class="font-bold text-slate-900 block font-heading text-xs">Acompanhar este Ticket</span>
+              <span class="text-[11px] text-slate-600">Receba notificações no sino da Central e alertas por e-mail sobre alterações de status ou deadline.</span>
+            </div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+            <input type="checkbox" id="check-ticket-follow" checked class="sr-only peer" />
+            <div class="w-10 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-600"></div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Rodapé do Modal com Ações e Permissões -->
+      <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3 flex-shrink-0">
+        <!-- Botão Excluir Ticket (Apenas Criador e Master Admin) -->
+        <div>
+          <button 
+            type="button" 
+            id="btn-delete-kanban-ticket" 
+            onclick="window.KanbanEngine.deleteTicketFromModal()" 
+            class="hidden px-3.5 py-2 text-xs font-bold text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-xl transition border border-rose-200"
+          >
+            🗑️ Excluir Ticket
+          </button>
+        </div>
+
+        <!-- Botões Cancelar e Salvar -->
+        <div class="flex items-center gap-2.5">
+          <button 
+            type="button" 
+            onclick="window.KanbanEngine.closeTicketEditorModal()" 
+            class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-xl hover:bg-slate-200 transition"
+          >
+            Cancelar
+          </button>
+          <button 
+            type="button" 
+            id="btn-save-kanban-ticket" 
+            onclick="window.KanbanEngine.saveTicketFromModal()" 
+            class="px-5 py-2 bg-gradient-to-r from-slate-900 to-slate-950 hover:bg-slate-800 text-white font-bold rounded-xl text-xs shadow-md transition"
+          >
+            Salvar Ticket
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- SCRIPT: COMPLETE PARISH DATABASE -->
   <script>
     const roomsData = {
@@ -6319,7 +6805,8 @@
       'cadastro-geral': 'Cadastro Geral de Catequizandos',
       eventos: 'Eventos & Retiros',
       papeis: 'Papéis & Atribuições',
-      conhecimento: 'Base de Conhecimento'
+      conhecimento: 'Base de Conhecimento',
+      tarefas: 'Lista de Tarefas'
     };
 
     // TAB SWITCHING
@@ -6364,6 +6851,10 @@
         }
         if (typeof syncAllTurmasFromFirestore === 'function') {
           setTimeout(syncAllTurmasFromFirestore, 50);
+        }
+      } else if (tabId === 'tarefas') {
+        if (window.KanbanEngine && typeof window.KanbanEngine.onTabActivated === 'function') {
+          setTimeout(() => window.KanbanEngine.onTabActivated(), 30);
         }
       }
 
@@ -6861,6 +7352,9 @@
             if (window.WikiKB && typeof window.WikiKB.setupCloudSync === 'function') {
               window.WikiKB.setupCloudSync(true);
             }
+            if (window.ChatEngine && !window.ChatEngine.user) {
+              window.ChatEngine.init(user);
+            }
           }
         });
       }
@@ -7253,6 +7747,17 @@
         updateCadastrarCatequistaVisibility();
       }
 
+      // Inicializa e sincroniza visibilidade da aba Lista de Tarefas (Kanban)
+      if (window.KanbanEngine) {
+        window.KanbanEngine.init();
+        window.KanbanEngine.updateSidebarVisibility();
+      }
+
+      // Inicializa Chat Pastoral Assíncrono com Presença e Listas
+      if (window.ChatEngine && typeof window.ChatEngine.init === 'function') {
+        window.ChatEngine.init(userData);
+      }
+
       // Registra login na trilha de auditoria
       window.ICM_CONFIG.logAuditEvent('AUTH_LOGIN', 'sessão_ativa', {
         role: role,
@@ -7315,6 +7820,10 @@
         window.appAuthState.user = null;
         window.appAuthState.role = null;
         window.appAuthState.turnstileVerified = false;
+
+        if (window.ChatEngine && typeof window.ChatEngine.cleanup === 'function') {
+          window.ChatEngine.cleanup();
+        }
 
         if (typeof updateCadastrarCatequistaVisibility === 'function') {
           updateCadastrarCatequistaVisibility();
