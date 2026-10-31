@@ -4138,10 +4138,10 @@
                 </button>
               </div>
             </div>
-            <div class="space-y-1.5 flex-1 min-w-0">
+            <div class="space-y-2 flex-1 min-w-0">
               <div class="flex flex-wrap items-center gap-2">
-                <span id="modal-cat-status-badge" class="inline-block text-[10px] font-bold uppercase tracking-wider text-emerald-300 bg-emerald-950/80 border border-emerald-500/40 px-2.5 py-0.5 rounded-full font-heading">
-                  🟢 Ativo
+                <span id="modal-cat-status-badge" class="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-0.5 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-500/50 shadow-xs font-heading">
+                  <span>🟢</span> <span>Ativo</span>
                 </span>
                 <span id="modal-cat-funcao-badge" class="inline-block text-[10px] font-bold uppercase tracking-wider text-amber-300 bg-amber-950/80 border border-amber-500/40 px-2.5 py-0.5 rounded-full font-heading">
                   Catequista Titular
@@ -4153,9 +4153,12 @@
                   <span>✏️</span> <span>Modo de Edição</span>
                 </span>
               </div>
-              <h3 id="modal-cat-nome" class="text-xl sm:text-2xl font-black font-heading text-white truncate">
-                Nome do Catequista
-              </h3>
+              <div class="flex flex-wrap items-baseline gap-2">
+                <h3 id="modal-cat-nome" class="text-xl sm:text-2xl font-black font-heading text-white break-words">
+                  Nome do Catequista
+                </h3>
+                <span id="modal-cat-apelido-badge" class="hidden text-xs font-bold text-amber-300 bg-amber-950/80 border border-amber-500/40 px-2.5 py-0.5 rounded-full shrink-0 shadow-xs font-sans"></span>
+              </div>
               <p id="modal-cat-etapa-sub" class="text-xs text-slate-300">
                 Crisma Jovem • Santuário Imaculado Coração de Maria
               </p>
@@ -10965,7 +10968,27 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       return bestScore > 0 ? bestCat : null;
     }
 
-    function formatCatechistChips(nameString, stageName) {
+    function formatCatechistChips(nameString, stageName, explicitIds = []) {
+      const allCats = getCatequistasRegistrationData();
+
+      // 1. Se possuímos array de IDs explícitos, vincula DIRETAMENTE e IMUTAVELMENTE pelo ID
+      if (Array.isArray(explicitIds) && explicitIds.length > 0) {
+        return explicitIds.map(catId => {
+          const cat = allCats.find(c => c.id === catId);
+          if (cat) {
+            const displayName = getCatequistaDisplayName(cat) || cat.nomeCompleto;
+            return `<button onclick="openCatequistaModal('${cat.id}')" class="inline-flex items-center gap-1 font-semibold text-slate-900 hover:text-emerald-700 bg-slate-100 hover:bg-emerald-50 px-2 py-0.5 rounded-md text-xs border border-slate-200 transition mr-1 mb-1" title="Ver dados pessoais e WhatsApp de ${cat.nomeCompleto}"><span>👤</span><span>${displayName}</span><span class="text-emerald-600 text-[10px]">💬</span></button>`;
+          }
+          const fallbackCat = findCatequistaByName(catId, stageName);
+          if (fallbackCat) {
+            const displayName = getCatequistaDisplayName(fallbackCat) || fallbackCat.nomeCompleto;
+            return `<button onclick="openCatequistaModal('${fallbackCat.id}')" class="inline-flex items-center gap-1 font-semibold text-slate-900 hover:text-emerald-700 bg-slate-100 hover:bg-emerald-50 px-2 py-0.5 rounded-md text-xs border border-slate-200 transition mr-1 mb-1" title="Ver dados pessoais e WhatsApp de ${fallbackCat.nomeCompleto}"><span>👤</span><span>${displayName}</span><span class="text-emerald-600 text-[10px]">💬</span></button>`;
+          }
+          return `<span class="font-medium text-slate-800 mr-1">${catId}</span>`;
+        }).join(' ');
+      }
+
+      // 2. Fallback para registros legados sem IDs explícitos
       if (!nameString) return '—';
       const parts = nameString.split(/ e |, | e\/ou /).map(s => s.trim()).filter(Boolean);
       return parts.map(n => {
@@ -11597,12 +11620,17 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       }
 
       const nomeEl = document.getElementById('modal-cat-nome');
+      const apelidoBadgeEl = document.getElementById('modal-cat-apelido-badge');
       if (nomeEl) {
-        if (cat.apelido || cat.nomeConhecido) {
-          const apelido = cat.apelido || cat.nomeConhecido;
-          nomeEl.innerHTML = `${cat.nomeCompleto} <span class="text-xs font-semibold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full ml-1 font-sans">(${apelido})</span>`;
+        nomeEl.textContent = cat.nomeCompleto || 'Sem Nome';
+      }
+      if (apelidoBadgeEl) {
+        const apelido = (cat.apelido || cat.nomeConhecido || '').trim();
+        if (apelido && normCatString(apelido) !== normCatString(cat.nomeCompleto)) {
+          apelidoBadgeEl.textContent = `(${apelido})`;
+          apelidoBadgeEl.classList.remove('hidden');
         } else {
-          nomeEl.textContent = cat.nomeCompleto;
+          apelidoBadgeEl.classList.add('hidden');
         }
       }
 
@@ -11613,12 +11641,13 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       if (badgeStatusEl) {
         const cStatus = (cat.status === 'afastado' || cat.ativo === false) ? 'afastado' : 'ativo';
         if (cStatus === 'afastado') {
-          badgeStatusEl.innerHTML = `<span class="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-900 border border-amber-500/40">🟡 Afastado</span>`;
-          badgeStatusEl.classList.remove('hidden');
+          badgeStatusEl.className = 'inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-0.5 rounded-full bg-amber-950/80 text-amber-300 border border-amber-500/50 shadow-xs font-heading';
+          badgeStatusEl.innerHTML = '<span>🟡</span> <span>Afastado</span>';
         } else {
-          badgeStatusEl.innerHTML = `<span class="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-900 border border-emerald-500/40">🟢 Ativo</span>`;
-          badgeStatusEl.classList.remove('hidden');
+          badgeStatusEl.className = 'inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-0.5 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-500/50 shadow-xs font-heading';
+          badgeStatusEl.innerHTML = '<span>🟢</span> <span>Ativo</span>';
         }
+        badgeStatusEl.classList.remove('hidden');
       }
 
       const badgeFuncao = document.getElementById('modal-cat-funcao-badge');
@@ -13852,14 +13881,14 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         const turmasHtml = sortedTurmas.map(t => {
           let catechistLabel = t.catechists;
           if (t.semCatequista) {
-            catechistLabel = `<div class="text-[10.5px] text-amber-800 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 inline-block mb-1">⚠️ Auxiliares em formação</div><div class="text-[11px] text-slate-700 font-medium mt-0.5">${formatCatechistChips(t.catechists, stage.name)}</div>`;
+            catechistLabel = `<div class="text-[10.5px] text-amber-800 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 inline-block mb-1">⚠️ Auxiliares em formação</div><div class="text-[11px] text-slate-700 font-medium mt-0.5">${formatCatechistChips(t.catechists, stage.name, t.catechistIds)}</div>`;
           } else {
-            catechistLabel = `<div class="text-[11px] text-slate-700 font-medium flex items-center gap-1 flex-wrap"><span class="text-[10px] text-slate-400 uppercase font-bold">Cat:</span> ${formatCatechistChips(t.catechists, stage.name)}</div>`;
+            catechistLabel = `<div class="text-[11px] text-slate-700 font-medium flex items-center gap-1 flex-wrap"><span class="text-[10px] text-slate-400 uppercase font-bold">Cat:</span> ${formatCatechistChips(t.catechists, stage.name, t.catechistIds)}</div>`;
           }
 
           let auxHtml = '';
           if (t.auxiliares && t.auxiliares.length > 0 && !t.semCatequista) {
-            auxHtml = `<div class="text-[10px] text-slate-400 italic mt-0.5 flex items-center gap-1 flex-wrap"><span>Aux:</span> ${formatCatechistChips(t.auxiliares.join(', '), stage.name)}</div>`;
+            auxHtml = `<div class="text-[10px] text-slate-400 italic mt-0.5 flex items-center gap-1 flex-wrap"><span>Aux:</span> ${formatCatechistChips(t.auxiliares.join(', '), stage.name, t.auxiliarIds)}</div>`;
           }
 
           // KAN-04: Exibição dinâmica e permanente de "Ver Alunos" (incluindo turmas vazias e Eucaristia 2)
@@ -14125,11 +14154,11 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
         let catechistsHtml = '';
         if (r.semCatequista) {
-          catechistsHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-yellow-100 text-yellow-800 border border-yellow-300">⚠️ Auxiliares em formação</span><div class="text-xs font-semibold text-slate-800 mt-1">${formatCatechistChips(r.catechists, st.name)}</div>`;
+          catechistsHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-yellow-100 text-yellow-800 border border-yellow-300">⚠️ Auxiliares em formação</span><div class="text-xs font-semibold text-slate-800 mt-1">${formatCatechistChips(r.catechists, st.name, r.catechistIds)}</div>`;
         } else {
-          catechistsHtml = `<div>${formatCatechistChips(r.catechists, st.name)}</div>`;
+          catechistsHtml = `<div>${formatCatechistChips(r.catechists, st.name, r.catechistIds)}</div>`;
           if (r.auxiliares && r.auxiliares.length > 0) {
-            catechistsHtml += `<div class="text-[11px] text-slate-400 italic mt-1 flex items-center gap-1 flex-wrap"><span>Aux.:</span> ${formatCatechistChips(r.auxiliares.join(', '), st.name)}</div>`;
+            catechistsHtml += `<div class="text-[11px] text-slate-400 italic mt-1 flex items-center gap-1 flex-wrap"><span>Aux.:</span> ${formatCatechistChips(r.auxiliares.join(', '), st.name, r.auxiliarIds)}</div>`;
           }
         }
 
@@ -14304,7 +14333,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     // =============================================
     // MODAIS DE TURMA E COORDENAÇÃO (Planilha & Edição)
     // =============================================
-    // KAN-02: Gestão Dinâmica de Múltiplos Catequistas com Autocomplete & Dropdown
+    // KAN-02: Gestão Dinâmica de Múltiplos Catequistas com Autocomplete, Dropdown & Vínculo Direto por ID
     function getOfficialCatequistasList() {
       const cats = (typeof getCatequistasRegistrationData === 'function') ? getCatequistasRegistrationData() : [];
       const map = new Map();
@@ -14315,6 +14344,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         const key = fullName.toLowerCase();
         if (!map.has(key)) {
           map.set(key, {
+            id: c.id,
             displayName: shortName || fullName,
             fullName: fullName,
             stage: c.etapaPrincipal || c.etapa || ''
@@ -14347,7 +14377,43 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       datalist.innerHTML = options.join('');
     }
 
-    function addCatequistaRow(type, initialVal = '') {
+    function handleCatRowSelectChange(sel) {
+      if (!sel.value) return;
+      const opt = sel.options[sel.selectedIndex];
+      const catId = sel.value;
+      const catName = opt ? (opt.dataset.name || opt.textContent.split(' (')[0].trim()) : '';
+      const row = sel.closest('.cat-row-container');
+      if (row) {
+        row.dataset.catId = catId;
+        const idInp = row.querySelector('.cat-row-id-input');
+        if (idInp) idInp.value = catId;
+        const textInp = row.querySelector('.cat-row-input');
+        if (textInp) {
+          textInp.value = catName;
+          textInp.focus();
+        }
+      }
+      sel.value = '';
+    }
+
+    function handleCatRowTextInput(inp) {
+      const val = inp.value.trim();
+      const row = inp.closest('.cat-row-container');
+      if (!row) return;
+      const idInp = row.querySelector('.cat-row-id-input');
+      if (!val) {
+        row.dataset.catId = '';
+        if (idInp) idInp.value = '';
+        return;
+      }
+      const cat = findCatequistaByName(val);
+      if (cat) {
+        row.dataset.catId = cat.id;
+        if (idInp) idInp.value = cat.id;
+      }
+    }
+
+    function addCatequistaRow(type, initialVal = '', initialCatId = '') {
       updateCatequistasDatalist();
       const containerId = type === 'titular' ? 'container-catequistas-titulares' : 'container-catequistas-auxiliares';
       const container = document.getElementById(containerId);
@@ -14356,18 +14422,27 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       const rowId = 'cat-row-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4);
       const row = document.createElement('div');
       row.id = rowId;
-      row.className = 'flex items-center gap-2 p-1.5 bg-slate-50 border border-slate-200 rounded-xl transition';
+      row.className = 'cat-row-container flex items-center gap-2 p-1.5 bg-slate-50 border border-slate-200 rounded-xl transition';
+
+      let resolvedCatId = initialCatId;
+      if (!resolvedCatId && initialVal) {
+        const found = findCatequistaByName(initialVal);
+        if (found) resolvedCatId = found.id;
+      }
+
+      row.dataset.catId = resolvedCatId || '';
 
       const officialList = getOfficialCatequistasList();
       const optionsHtml = officialList.map(c => {
-        const isSel = (c.displayName.toLowerCase() === initialVal.trim().toLowerCase() || c.fullName.toLowerCase() === initialVal.trim().toLowerCase()) ? 'selected' : '';
-        return `<option value="${c.displayName.replace(/"/g, '&quot;')}" ${isSel}>${c.displayName}${c.stage ? ` (${c.stage})` : ''}</option>`;
+        const isSel = (c.id === resolvedCatId || c.displayName.toLowerCase() === initialVal.trim().toLowerCase() || c.fullName.toLowerCase() === initialVal.trim().toLowerCase()) ? 'selected' : '';
+        return `<option value="${c.id}" data-name="${c.displayName.replace(/"/g, '&quot;')}" ${isSel}>${c.displayName}${c.stage ? ` (${c.stage})` : ''}</option>`;
       }).join('');
 
       row.innerHTML = `
-        <div class="cat-row-container flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5">
-          <input type="text" list="datalist-catequistas-oficiais" value="${initialVal.replace(/"/g, '&quot;')}" placeholder="Digite o nome (autocomplete ativo)..." autocomplete="off" class="cat-row-input flex-1 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-800 bg-white outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400" />
-          <select onchange="if(this.value){ const inp = this.closest('.cat-row-container').querySelector('.cat-row-input'); if(inp){ inp.value = this.value; inp.focus(); } this.value = ''; }" class="cat-row-select border border-slate-200 rounded-lg px-2 py-1.5 text-[11px] font-medium text-slate-600 bg-white outline-none hover:border-slate-300 max-w-[190px]" title="Escolha direta da lista oficial">
+        <input type="hidden" class="cat-row-id-input" value="${resolvedCatId || ''}">
+        <div class="flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5">
+          <input type="text" list="datalist-catequistas-oficiais" value="${initialVal.replace(/"/g, '&quot;')}" placeholder="Digite o nome (autocomplete ativo)..." autocomplete="off" oninput="handleCatRowTextInput(this)" onblur="handleCatRowTextInput(this)" class="cat-row-input flex-1 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-800 bg-white outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400" />
+          <select onchange="handleCatRowSelectChange(this)" class="cat-row-select border border-slate-200 rounded-lg px-2 py-1.5 text-[11px] font-medium text-slate-600 bg-white outline-none hover:border-slate-300 max-w-[190px]" title="Escolha direta da lista oficial">
             <option value="">▼ Escolha Direta...</option>
             ${optionsHtml}
           </select>
@@ -14380,7 +14455,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       container.appendChild(row);
     }
 
-    function renderDynamicCatequistasInputs(titulares = [], auxiliares = []) {
+    function renderDynamicCatequistasInputs(titulares = [], auxiliares = [], titularIds = [], auxiliarIds = []) {
       updateCatequistasDatalist();
       const containerTit = document.getElementById('container-catequistas-titulares');
       const containerAux = document.getElementById('container-catequistas-auxiliares');
@@ -14388,27 +14463,45 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       if (containerAux) containerAux.innerHTML = '';
 
       if (Array.isArray(titulares) && titulares.length > 0) {
-        titulares.forEach(name => addCatequistaRow('titular', name));
+        titulares.forEach((name, idx) => {
+          const cid = (Array.isArray(titularIds) && titularIds[idx]) ? titularIds[idx] : '';
+          addCatequistaRow('titular', name, cid);
+        });
       } else {
-        addCatequistaRow('titular', '');
+        addCatequistaRow('titular', '', '');
       }
 
       if (Array.isArray(auxiliares) && auxiliares.length > 0) {
-        auxiliares.forEach(name => addCatequistaRow('auxiliar', name));
+        auxiliares.forEach((name, idx) => {
+          const cid = (Array.isArray(auxiliarIds) && auxiliarIds[idx]) ? auxiliarIds[idx] : '';
+          addCatequistaRow('auxiliar', name, cid);
+        });
       }
     }
 
     function collectCatequistasFromRows(type) {
       const containerId = type === 'titular' ? 'container-catequistas-titulares' : 'container-catequistas-auxiliares';
       const container = document.getElementById(containerId);
-      if (!container) return [];
-      const inputs = container.querySelectorAll('.cat-row-input');
+      if (!container) return { names: [], ids: [] };
+      const rows = container.querySelectorAll('.cat-row-container');
       const names = [];
-      inputs.forEach(inp => {
-        const val = inp.value.trim();
-        if (val && !names.includes(val)) names.push(val);
+      const ids = [];
+      rows.forEach(r => {
+        const inp = r.querySelector('.cat-row-input');
+        const idInp = r.querySelector('.cat-row-id-input');
+        const val = inp ? inp.value.trim() : '';
+        const cid = (idInp && idInp.value) ? idInp.value : (r.dataset.catId || '');
+        if (val) {
+          names.push(val);
+          let resolvedId = cid;
+          if (!resolvedId) {
+            const match = findCatequistaByName(val);
+            if (match) resolvedId = match.id;
+          }
+          if (resolvedId && !ids.includes(resolvedId)) ids.push(resolvedId);
+        }
       });
-      return names;
+      return { names, ids };
     }
 
     // =========================================================================
@@ -14544,10 +14637,12 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         updatedBy: foundTurma.updatedBy || null
       };
 
-      // Renderiza linhas dinâmicas de catequistas (KAN-02)
+      // Renderiza linhas dinâmicas de catequistas (KAN-02 & vínculo direto por ID)
       const titulares = splitCatechistString(foundTurma.catechists);
+      const titularIds = Array.isArray(foundTurma.catechistIds) ? foundTurma.catechistIds : [];
       const auxiliares = Array.isArray(foundTurma.auxiliares) ? foundTurma.auxiliares : [];
-      renderDynamicCatequistasInputs(titulares, auxiliares);
+      const auxiliarIds = Array.isArray(foundTurma.auxiliarIds) ? foundTurma.auxiliarIds : [];
+      renderDynamicCatequistasInputs(titulares, auxiliares, titularIds, auxiliarIds);
 
       document.getElementById('modal-turma-form').classList.remove('hidden');
     }
@@ -14567,9 +14662,13 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       const room = document.getElementById('turma-form-room').value.trim();
       const hall = document.getElementById('turma-form-hall').value.trim();
 
-      // Coleta catequistas das linhas dinâmicas (KAN-02)
-      const titulares = collectCatequistasFromRows('titular');
-      const auxiliares = collectCatequistasFromRows('auxiliar');
+      // Coleta catequistas das linhas dinâmicas com IDs imutáveis
+      const titData = collectCatequistasFromRows('titular');
+      const auxData = collectCatequistasFromRows('auxiliar');
+      const titulares = titData.names;
+      const catechistIds = titData.ids;
+      const auxiliares = auxData.names;
+      const auxiliarIds = auxData.ids;
       const semCatequista = document.getElementById('turma-form-semcatequista').checked || titulares.length === 0;
       const catechists = semCatequista ? (titulares.length > 0 ? joinCatechistArray(titulares) : 'A definir') : joinCatechistArray(titulares);
 
@@ -14639,7 +14738,9 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           turma: turmaName,
           dayTime,
           catechists,
+          catechistIds,
           auxiliares,
+          auxiliarIds,
           semCatequista,
           room,
           hall,
@@ -14655,7 +14756,9 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           turma: turmaName,
           dayTime,
           catechists,
+          catechistIds,
           auxiliares,
+          auxiliarIds,
           semCatequista,
           room,
           hall,
