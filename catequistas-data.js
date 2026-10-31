@@ -3073,7 +3073,7 @@ window.SEED_CATEQUISTAS_2026 = [
   },
   {
     "id": "cat-2027-alexandre-simas",
-    "row": 98,
+    "row": 100,
     "nomeCompleto": "Alexandre Simas de Oliveira Júnior",
     "apelido": "Alexandre",
     "nomeConhecido": "Alexandre",
@@ -3107,7 +3107,7 @@ window.SEED_CATEQUISTAS_2026 = [
   },
   {
     "id": "cat-2027-anna-julia-freires",
-    "row": 99,
+    "row": 101,
     "nomeCompleto": "Anna Júlia Freires",
     "apelido": "Anna Júlia",
     "nomeConhecido": "Anna Júlia",

@@ -10487,11 +10487,22 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
               }
             });
 
+            // Higienização de integridade: desfaz contaminação de nomeConhecido em Aldaléia (cat-2026-96)
+            parsed.forEach(p => {
+              if (p.id === 'cat-2026-96') {
+                if (p.nomeConhecido === 'Anna Júlia' || p.nomeConhecido === 'Anna Julia') {
+                  delete p.nomeConhecido;
+                  p.apelido = 'Alda';
+                  changed = true;
+                }
+              }
+            });
+
             // Sincroniza e mescla fotos 3x4 e funções acumuladas do dataset oficial SEM sobrescrever edições do usuário
             if (Array.isArray(seedSource)) {
               seedSource.forEach(seedCat => {
                 if (deletedIds.has(seedCat.id) || seedCat.deleted) return;
-                const found = parsed.find(p => p.id === seedCat.id || (p.row && p.row === seedCat.row) || (p.nomeCompleto && normCatString(p.nomeCompleto) === normCatString(seedCat.nomeCompleto)));
+                const found = parsed.find(p => p.id === seedCat.id || (p.nomeCompleto && normCatString(p.nomeCompleto) === normCatString(seedCat.nomeCompleto)));
                 if (found) {
                   // Se o registro local já foi editado pelo usuário (tem updatedAt), não sobrescreva dados do seed para preservar alterações
                   if (found.updatedAt) return;
@@ -10871,22 +10882,23 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       return str.toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
     }
 
-    // Busca inteligente de catequista por nome/apelido e etapa opcional
+    // Busca inteligente de catequista por nome/apelido e etapa opcional (KAN-02 & correlação estrita)
     function findCatequistaByName(queryName, stageHint) {
       if (!queryName) return null;
       const clean = normCatString(queryName);
+      if (!clean) return null;
       const list = getCatequistasRegistrationData();
 
-      // 0. Match direto em Apelido ou Nome Conhecido
-      const aliasMatch = list.find(c => {
-        if (c.apelido && normCatString(c.apelido) === clean) return true;
-        if (c.nomeConhecido && normCatString(c.nomeConhecido) === clean) return true;
-        return false;
-      });
-      if (aliasMatch) return aliasMatch;
+      // 1. Exact match no ID ou nome completo exato
+      let exact = list.find(c => c.id === queryName || normCatString(c.nomeCompleto) === clean);
+      if (exact) return exact;
 
-      // Atalhos específicos de apelidos / nomes colóquios conhecidos
-      if (clean.includes('rilda') || clean.includes('maria rilda')) {
+      // 2. Exact match no Apelido ou Nome Conhecido
+      exact = list.find(c => (c.apelido && normCatString(c.apelido) === clean) || (c.nomeConhecido && normCatString(c.nomeConhecido) === clean));
+      if (exact) return exact;
+
+      // Atalhos específicos de nomes colóquios conhecidos
+      if (clean === 'rilda' || clean.includes('maria rilda')) {
         const rilda = list.find(c => c.id === 'cat-2026-87' || normCatString(c.nomeCompleto).includes('maria rodrigues'));
         if (rilda) return rilda;
       }
@@ -10895,48 +10907,62 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         if (camila) return camila;
       }
 
-      // 1. Exact match no nome completo ou ID
-      let found = list.find(c => c.id === queryName || normCatString(c.nomeCompleto) === clean);
-      if (found) return found;
+      // 3. Sistema de Pontuação (Scoring) para desambiguação estrita (evita que substring match como 'Silene' caia em 'Rosilene')
+      const qWords = clean.split(/\s+/).filter(Boolean);
+      const stageClean = stageHint ? normCatString(stageHint) : '';
 
-      // 2. Busca por palavras
-      const queryWords = clean.split(/\s+/).filter(w => w.length > 2);
-      if (queryWords.length === 0) {
-        const shortMatch = list.filter(c => {
-          const cWords = normCatString(c.nomeCompleto).split(/\s+/);
-          return cWords.includes(clean);
-        });
-        if (shortMatch.length === 1) return shortMatch[0];
-        if (shortMatch.length > 1 && stageHint) {
-          const stageClean = normCatString(stageHint);
-          const stageMatch = shortMatch.find(c => {
-            return normCatString(c.etapaPrincipal).includes(stageClean) || 
-                   (c.turmas && c.turmas.some(t => normCatString(t.stage).includes(stageClean)));
-          });
-          if (stageMatch) return stageMatch;
+      let bestCat = null;
+      let bestScore = -1;
+
+      list.forEach(c => {
+        const fullName = normCatString(c.nomeCompleto || '');
+        const apelido = normCatString(c.apelido || '');
+        const conhecido = normCatString(c.nomeConhecido || '');
+        const cWords = fullName.split(/\s+/).filter(Boolean);
+        const catStage = normCatString(c.etapaPrincipal || '');
+
+        let score = 0;
+
+        // Primeiro nome exatamente igual à busca completa
+        if (cWords[0] === clean || apelido === clean || conhecido === clean) {
+          score += 500;
+        } else if (cWords.includes(clean)) {
+          // Qualquer palavra do nome completo exatamente igual à busca
+          score += 400;
+        } else {
+          // Todas as palavras da busca batem com início de palavras do catequista
+          const allWordsMatch = qWords.every(qw => cWords.some(cw => cw.startsWith(qw)) || apelido.startsWith(qw));
+          if (allWordsMatch) {
+            score += 300;
+          } else {
+            // Correspondência parcial por prefixo de palavras
+            const matchingWords = qWords.filter(qw => cWords.some(cw => cw.startsWith(qw)));
+            score += matchingWords.length * 50;
+          }
         }
-        return shortMatch[0] || null;
-      }
 
-      // Candidatos cujas palavras da busca batem com o nome completo
-      const candidates = list.filter(c => {
-        const cClean = normCatString(c.nomeCompleto);
-        const cWords = cClean.split(/\s+/);
-        return queryWords.every(qw => cClean.includes(qw) || cWords.some(cw => cw.startsWith(qw)));
+        // Bônus de Etapa para desempate
+        if (stageClean && score > 0) {
+          if (catStage.includes(stageClean) || stageClean.includes(catStage)) {
+            score += 150;
+          }
+          if (Array.isArray(c.turmas) && c.turmas.some(t => normCatString(t.stage || '').includes(stageClean))) {
+            score += 100;
+          }
+        }
+
+        // Substring interna em alguma palavra (ex: 'silene' em 'rosilene') - pontuação mínima de fallback
+        if (score === 0 && cWords.some(w => w.includes(clean))) {
+          score = 10;
+        }
+
+        if (score > bestScore) {
+          bestScore = score;
+          bestCat = c;
+        }
       });
 
-      if (candidates.length === 1) return candidates[0];
-
-      if (candidates.length > 1 && stageHint) {
-        const stageClean = normCatString(stageHint);
-        const stageMatch = candidates.find(c => {
-          return normCatString(c.etapaPrincipal).includes(stageClean) || 
-                 (c.turmas && c.turmas.some(t => normCatString(t.stage).includes(stageClean)));
-        });
-        if (stageMatch) return stageMatch;
-      }
-
-      return candidates[0] || null;
+      return bestScore > 0 ? bestCat : null;
     }
 
     function formatCatechistChips(nameString, stageName) {
@@ -14283,13 +14309,14 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       const cats = (typeof getCatequistasRegistrationData === 'function') ? getCatequistasRegistrationData() : [];
       const map = new Map();
       cats.forEach(c => {
-        const nome = (c.apelido || c.nomeCompleto || c.nome || '').trim();
-        if (!nome) return;
-        const key = nome.toLowerCase();
+        const shortName = (c.apelido && c.apelido.trim()) || (c.nomeConhecido && c.nomeConhecido.trim()) || (c.nomeCompleto || '').trim().split(/\s+/).slice(0, 2).join(' ');
+        const fullName = (c.nomeCompleto || shortName).trim();
+        if (!shortName && !fullName) return;
+        const key = fullName.toLowerCase();
         if (!map.has(key)) {
           map.set(key, {
-            displayName: nome,
-            fullName: c.nomeCompleto || nome,
+            displayName: shortName || fullName,
+            fullName: fullName,
             stage: c.etapaPrincipal || c.etapa || ''
           });
         }
@@ -14297,7 +14324,31 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       return Array.from(map.values()).sort((a, b) => a.displayName.localeCompare(b.displayName, 'pt-BR'));
     }
 
+    function updateCatequistasDatalist() {
+      let datalist = document.getElementById('datalist-catequistas-oficiais');
+      if (!datalist) {
+        datalist = document.createElement('datalist');
+        datalist.id = 'datalist-catequistas-oficiais';
+        document.body.appendChild(datalist);
+      }
+      const list = getOfficialCatequistasList();
+      const options = [];
+      const seen = new Set();
+      list.forEach(c => {
+        if (c.displayName && !seen.has(c.displayName.toLowerCase())) {
+          seen.add(c.displayName.toLowerCase());
+          options.push(`<option value="${c.displayName.replace(/"/g, '&quot;')}">${c.fullName}${c.stage ? ' • ' + c.stage : ''}</option>`);
+        }
+        if (c.fullName && !seen.has(c.fullName.toLowerCase())) {
+          seen.add(c.fullName.toLowerCase());
+          options.push(`<option value="${c.fullName.replace(/"/g, '&quot;')}">${c.stage ? c.stage : ''}</option>`);
+        }
+      });
+      datalist.innerHTML = options.join('');
+    }
+
     function addCatequistaRow(type, initialVal = '') {
+      updateCatequistasDatalist();
       const containerId = type === 'titular' ? 'container-catequistas-titulares' : 'container-catequistas-auxiliares';
       const container = document.getElementById(containerId);
       if (!container) return;
@@ -14309,14 +14360,14 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
       const officialList = getOfficialCatequistasList();
       const optionsHtml = officialList.map(c => {
-        const isSel = (c.displayName.toLowerCase() === initialVal.trim().toLowerCase()) ? 'selected' : '';
+        const isSel = (c.displayName.toLowerCase() === initialVal.trim().toLowerCase() || c.fullName.toLowerCase() === initialVal.trim().toLowerCase()) ? 'selected' : '';
         return `<option value="${c.displayName.replace(/"/g, '&quot;')}" ${isSel}>${c.displayName}${c.stage ? ` (${c.stage})` : ''}</option>`;
       }).join('');
 
       row.innerHTML = `
-        <div class="flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5">
-          <input type="text" value="${initialVal.replace(/"/g, '&quot;')}" placeholder="Digite o nome..." class="cat-row-input flex-1 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-800 bg-white outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400" />
-          <select onchange="if(this.value){ const inp = this.previousElementSibling; inp.value = this.value; this.value = ''; }" class="cat-row-select border border-slate-200 rounded-lg px-2 py-1.5 text-[11px] font-medium text-slate-600 bg-white outline-none hover:border-slate-300 max-w-[190px]" title="Escolha direta da lista oficial">
+        <div class="cat-row-container flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5">
+          <input type="text" list="datalist-catequistas-oficiais" value="${initialVal.replace(/"/g, '&quot;')}" placeholder="Digite o nome (autocomplete ativo)..." autocomplete="off" class="cat-row-input flex-1 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-800 bg-white outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400" />
+          <select onchange="if(this.value){ const inp = this.closest('.cat-row-container').querySelector('.cat-row-input'); if(inp){ inp.value = this.value; inp.focus(); } this.value = ''; }" class="cat-row-select border border-slate-200 rounded-lg px-2 py-1.5 text-[11px] font-medium text-slate-600 bg-white outline-none hover:border-slate-300 max-w-[190px]" title="Escolha direta da lista oficial">
             <option value="">▼ Escolha Direta...</option>
             ${optionsHtml}
           </select>
@@ -14330,6 +14381,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     }
 
     function renderDynamicCatequistasInputs(titulares = [], auxiliares = []) {
+      updateCatequistasDatalist();
       const containerTit = document.getElementById('container-catequistas-titulares');
       const containerAux = document.getElementById('container-catequistas-auxiliares');
       if (containerTit) containerTit.innerHTML = '';
