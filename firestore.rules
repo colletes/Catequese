@@ -73,15 +73,37 @@ service cloud.firestore {
     }
 
     // Gestão de Usuários Autorizados e Solicitações Pendentes (RBAC & LGPD)
-    match /authorized_users/{userEmail} {
+    match /authorized_users/{docId} {
       allow read: if isAuthenticated();
-      allow write: if isCoordOrAdmin();
+      allow create, delete: if isCoordOrAdmin();
+      allow update: if isCoordOrAdmin() || (
+        isAuthenticated() &&
+        (
+          request.auth.token.email.lower() == resource.data.email.lower() ||
+          request.auth.token.email.lower() == docId.lower()
+        ) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lgpdAccepted', 'lgpdAcceptedAt', 'termosAceitos', 'termosData', 'termosVersao'])
+      );
     }
 
-    match /pending_users/{userEmail} {
-      allow read: if isCoordOrAdmin() || (isAuthenticated() && request.auth.token.email.lower() == userEmail.lower());
-      allow create: if isAuthenticated();
-      allow update, delete: if isCoordOrAdmin();
+    match /pending_users/{docId} {
+      allow read: if isCoordOrAdmin() || (
+        isAuthenticated() && (
+          (resource != null && request.auth.token.email.lower() == resource.data.email.lower()) ||
+          request.auth.token.email.lower() == docId.lower()
+        )
+      );
+      allow create: if isCoordOrAdmin() || (
+        request.resource.data.email is string &&
+        request.resource.data.status == 'pendente'
+      );
+      allow update: if isCoordOrAdmin() || (
+        isAuthenticated() && request.auth.token.email.lower() == request.resource.data.email.lower()
+      ) || (
+        request.resource.data.email is string &&
+        request.resource.data.status == 'pendente'
+      );
+      allow delete: if isCoordOrAdmin();
     }
 
     // Lista de Chamadas e Frequência das Turmas (Sincronização em Nuvem)

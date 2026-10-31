@@ -6420,29 +6420,39 @@
       </div>
 
       <!-- Navigation Tabs -->
-      <div class="bg-slate-100 px-5 pt-3 border-b border-slate-200 flex items-center gap-2 overflow-x-auto flex-shrink-0">
+      <div class="bg-slate-100 px-5 pt-3 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2 overflow-x-auto flex-shrink-0">
+        <div class="flex items-center gap-2">
+          <button
+            id="btn-tab-usermgmt-pendentes"
+            onclick="switchUserMgmtTab('pendentes')"
+            class="px-4 py-2 rounded-t-xl text-xs font-bold transition border-b-2 border-[#d4a94f] bg-white text-slate-900 shadow-xs flex items-center gap-1.5"
+          >
+            <span>⏳ Solicitações Pendentes</span>
+            <span id="badge-usermgmt-pendentes-count" class="bg-amber-500 text-slate-950 text-[10px] px-1.5 py-0.2 rounded-full font-black">0</span>
+          </button>
+          <button
+            id="btn-tab-usermgmt-autorizados"
+            onclick="switchUserMgmtTab('autorizados')"
+            class="px-4 py-2 rounded-t-xl text-xs font-bold transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5"
+          >
+            <span>👥 Usuários Autorizados</span>
+            <span id="badge-usermgmt-autorizados-count" class="bg-slate-200 text-slate-700 text-[10px] px-1.5 py-0.2 rounded-full font-bold">2</span>
+          </button>
+          <button
+            id="btn-tab-usermgmt-novo"
+            onclick="switchUserMgmtTab('novo')"
+            class="px-4 py-2 rounded-t-xl text-xs font-bold transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5"
+          >
+            <span>➕ Pré-autorizar Catequista</span>
+          </button>
+        </div>
         <button
-          id="btn-tab-usermgmt-pendentes"
-          onclick="switchUserMgmtTab('pendentes')"
-          class="px-4 py-2 rounded-t-xl text-xs font-bold transition border-b-2 border-[#d4a94f] bg-white text-slate-900 shadow-xs flex items-center gap-1.5"
+          id="btn-usermgmt-refresh"
+          onclick="manualRefreshUserManagement()"
+          class="mb-2 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-300 rounded-xl text-[11px] font-bold text-slate-700 flex items-center gap-1.5 shadow-xs transition active:scale-95"
+          title="Recarregar solicitações pendentes e usuários do Firestore"
         >
-          <span>⏳ Solicitações Pendentes</span>
-          <span id="badge-usermgmt-pendentes-count" class="bg-amber-500 text-slate-950 text-[10px] px-1.5 py-0.2 rounded-full font-black">0</span>
-        </button>
-        <button
-          id="btn-tab-usermgmt-autorizados"
-          onclick="switchUserMgmtTab('autorizados')"
-          class="px-4 py-2 rounded-t-xl text-xs font-bold transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5"
-        >
-          <span>👥 Usuários Autorizados</span>
-          <span id="badge-usermgmt-autorizados-count" class="bg-slate-200 text-slate-700 text-[10px] px-1.5 py-0.2 rounded-full font-bold">2</span>
-        </button>
-        <button
-          id="btn-tab-usermgmt-novo"
-          onclick="switchUserMgmtTab('novo')"
-          class="px-4 py-2 rounded-t-xl text-xs font-bold transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5"
-        >
-          <span>➕ Pré-autorizar Catequista</span>
+          <span>🔄</span> <span>Recarregar Nuvem</span>
         </button>
       </div>
 
@@ -7728,6 +7738,13 @@
         firebaseAuth.onAuthStateChanged((user) => {
           if (user) {
             console.log('🔥 Sessão Firebase Auth ativa:', user.email);
+            // Sincroniza e ouve usuários agora que o token do Firebase está autenticado
+            if (window.ICM_CONFIG && typeof window.ICM_CONFIG.syncUsersFromFirestore === 'function') {
+              window.ICM_CONFIG.syncUsersFromFirestore();
+            }
+            if (window.ICM_CONFIG && typeof window.ICM_CONFIG.listenUsersFromFirestore === 'function') {
+              window.ICM_CONFIG.listenUsersFromFirestore();
+            }
             if (typeof syncCatequistasFromFirestore === 'function') {
               syncCatequistasFromFirestore();
             }
@@ -7816,9 +7833,17 @@
       window.appAuthState.user = userData;
       window.appAuthState.role = role;
 
-      // Verifica se aceitou termos de uso e política de privacidade
+      // Verifica se aceitou termos de uso e política de privacidade (local ou nuvem)
       const consentKey = CONSENT_PREFIX + userData.email.toLowerCase();
-      const hasAccepted = localStorage.getItem(consentKey) === 'true';
+      let hasAccepted = localStorage.getItem(consentKey) === 'true';
+
+      if (!hasAccepted && window.ICM_CONFIG && typeof window.ICM_CONFIG.getAuthorizedUsers === 'function') {
+        const authUser = window.ICM_CONFIG.getAuthorizedUsers().find(u => u.email && u.email.trim().toLowerCase() === userData.email.toLowerCase());
+        if (authUser && (authUser.lgpdAccepted || authUser.termosAceitos)) {
+          hasAccepted = true;
+          localStorage.setItem(consentKey, 'true');
+        }
+      }
 
       if (!hasAccepted) {
         openTermosModal(userData);
@@ -7955,7 +7980,12 @@
       // Se for um novo catequista (role PENDENTE), salva na fila de solicitações e bloqueia
       if (role === window.ICM_CONFIG.ROLES.PENDENTE) {
         if (window.ICM_CONFIG && typeof window.ICM_CONFIG.recordPendingAccessRequest === 'function') {
-          await window.ICM_CONFIG.recordPendingAccessRequest(userData);
+          try {
+            await window.ICM_CONFIG.recordPendingAccessRequest(userData);
+          } catch (reqErr) {
+            console.error('Erro ao registrar solicitação de acesso:', reqErr);
+            logAuthDiagnostic('⚠️ Erro ao registrar solicitação na nuvem: ' + (reqErr.message || reqErr), true);
+          }
         }
         showAuthFeedback('⏳ <strong>Conta em Análise:</strong> O seu acesso foi registrado com sucesso! Por exigência de conformidade com a LGPD e proteção de menores, novos catequistas devem ser previamente vinculados à sua turma por Thiago Carvalho (Master Admin) ou Lorena Moraes (Coordenação Geral). Assim que liberado, basta entrar novamente.', 'warning');
         return;
@@ -7968,9 +7998,17 @@
       window.appAuthState.user = userData;
       window.appAuthState.role = role;
 
-      // Verifica aceite dos Termos de Uso e Política de Privacidade
+      // Verifica aceite dos Termos de Uso e Política de Privacidade (local ou nuvem)
       const consentKey = CONSENT_PREFIX + userData.email.toLowerCase();
-      const hasAccepted = localStorage.getItem(consentKey) === 'true';
+      let hasAccepted = localStorage.getItem(consentKey) === 'true';
+
+      if (!hasAccepted && window.ICM_CONFIG && typeof window.ICM_CONFIG.getAuthorizedUsers === 'function') {
+        const authUser = window.ICM_CONFIG.getAuthorizedUsers().find(u => u.email && u.email.trim().toLowerCase() === userData.email.toLowerCase());
+        if (authUser && (authUser.lgpdAccepted || authUser.termosAceitos)) {
+          hasAccepted = true;
+          localStorage.setItem(consentKey, 'true');
+        }
+      }
 
       if (!hasAccepted) {
         openTermosModal(userData);
@@ -8020,17 +8058,45 @@
       const consentKey = CONSENT_PREFIX + user.email.toLowerCase();
       localStorage.setItem(consentKey, 'true');
 
+      const nowIso = new Date().toISOString();
+
       // Grava no Firestore se disponível
       if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
+        const clean = user.email.trim().toLowerCase();
+        const sanitizedDocId = clean.replace(/[^a-zA-Z0-9]/g, '_');
+
+        // 1. Grava no perfil do usuário
         window.firebaseDb.collection('usuarios').doc(user.uid).set({
           email: user.email,
           displayName: user.displayName,
           role: window.appAuthState.role,
           termosAceitos: true,
           termosVersao: '1.0',
-          termosData: new Date().toISOString(),
+          termosData: nowIso,
           userAgent: navigator.userAgent
         }, { merge: true }).catch(console.warn);
+
+        // 2. Grava em authorized_users para que os coordenadores/Master Admin vejam o status "Aceito" em tempo real
+        window.firebaseDb.collection('authorized_users').doc(sanitizedDocId).set({
+          lgpdAccepted: true,
+          lgpdAcceptedAt: nowIso,
+          termosAceitos: true,
+          termosData: nowIso,
+          termosVersao: '1.0'
+        }, { merge: true }).catch(err => console.warn('Sync LGPD em authorized_users:', err));
+
+        // 3. Atualiza cache local
+        if (window.ICM_CONFIG && typeof window.ICM_CONFIG.getAuthorizedUsers === 'function') {
+          const authUsers = window.ICM_CONFIG.getAuthorizedUsers();
+          const found = authUsers.find(u => u.email && u.email.trim().toLowerCase() === clean);
+          if (found) {
+            found.lgpdAccepted = true;
+            found.lgpdAcceptedAt = nowIso;
+            found.termosAceitos = true;
+            found.termosData = nowIso;
+            window.ICM_CONFIG.saveAuthorizedUsers(authUsers);
+          }
+        }
       }
 
       // Log de Auditoria LGPD
@@ -9177,7 +9243,7 @@
     // =======================================================
     let currentUsermgmtTab = 'pendentes';
 
-    function openUserManagementModal() {
+    async function openUserManagementModal() {
       const role = window.appAuthState ? window.appAuthState.role : null;
       if (role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL && role !== window.ICM_CONFIG.ROLES.VICE_COORD_GERAL) {
         alert('Acesso restrito ao Master Admin, à Coordenação Geral e à Vice-Coordenação.');
@@ -9188,6 +9254,38 @@
         modal.classList.remove('hidden');
         populatePreAuthTurmasSelect();
         renderUserManagementModal();
+        // Sincroniza em tempo real com o Firestore para trazer as solicitações pendentes mais recentes
+        if (window.ICM_CONFIG && typeof window.ICM_CONFIG.syncUsersFromFirestore === 'function') {
+          try {
+            await window.ICM_CONFIG.syncUsersFromFirestore();
+            renderUserManagementModal();
+          } catch (e) {
+            console.warn('Erro ao sincronizar com Firestore na abertura do modal:', e);
+          }
+        }
+      }
+    }
+
+    async function manualRefreshUserManagement() {
+      const btn = document.getElementById('btn-usermgmt-refresh');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>⏳</span> <span>Sincronizando...</span>';
+      }
+      try {
+        if (window.ICM_CONFIG && typeof window.ICM_CONFIG.syncUsersFromFirestore === 'function') {
+          await window.ICM_CONFIG.syncUsersFromFirestore();
+        }
+        renderUserManagementModal();
+        showUsermgmtFeedback('Solicitações e usuários atualizados diretamente da nuvem!', 'info');
+      } catch (err) {
+        console.error('Erro na sincronização manual:', err);
+        showUsermgmtFeedback('Falha ao sincronizar com nuvem: ' + err.message, 'error');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>🔄</span> <span>Recarregar Nuvem</span>';
+        }
       }
     }
 
@@ -9475,11 +9573,14 @@
           roleBadge = `<span class="bg-purple-100 text-purple-900 font-bold text-[10px] px-2 py-0.5 rounded-full uppercase">📋 Coord. Etapa</span>`;
         }
 
-        // LGPD Consent check
+        // LGPD Consent check (persiste em nuvem em authorized_users e usuarios)
         const consentKey = CONSENT_PREFIX + u.email.toLowerCase();
-        const hasConsent = localStorage.getItem(consentKey) === 'true';
+        const hasConsent = Boolean(u.lgpdAccepted || u.termosAceitos || localStorage.getItem(consentKey) === 'true');
+        const acceptedDateStr = (u.lgpdAcceptedAt || u.termosData)
+          ? new Date(u.lgpdAcceptedAt || u.termosData).toLocaleDateString('pt-BR')
+          : '';
         const consentBadge = hasConsent
-          ? `<span class="inline-flex items-center gap-1 text-emerald-700 font-bold text-[10.5px]"><span>✅</span> <span>Aceito</span></span>`
+          ? `<span class="inline-flex items-center gap-1 text-emerald-700 font-bold text-[10.5px]" title="${acceptedDateStr ? 'Aceito em ' + acceptedDateStr : 'Termos LGPD Aceitos'}"><span>✅</span> <span>Aceito</span></span>`
           : `<span class="inline-flex items-center gap-1 text-amber-700 font-medium text-[10.5px]"><span>⏳</span> <span>No 1º login</span></span>`;
 
         const initials = (u.displayName || u.email).substring(0, 2).toUpperCase();

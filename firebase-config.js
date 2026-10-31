@@ -49,6 +49,8 @@ const SEED_AUTHORIZED_USERS = [
     turmaNome: 'Todas as Turmas (Acesso Total)',
     etapa: 'Todas',
     status: 'ativo',
+    lgpdAccepted: true,
+    termosAceitos: true,
     createdAt: '2026-01-01T00:00:00.000Z',
     approvedBy: 'Sistema Oficial'
   },
@@ -60,6 +62,8 @@ const SEED_AUTHORIZED_USERS = [
     turmaNome: 'Todas as Turmas (Coordenação)',
     etapa: 'Todas',
     status: 'ativo',
+    lgpdAccepted: true,
+    termosAceitos: true,
     createdAt: '2026-01-01T00:00:00.000Z',
     approvedBy: 'Sistema Oficial'
   },
@@ -71,6 +75,8 @@ const SEED_AUTHORIZED_USERS = [
     turmaNome: 'Todas as Turmas (Vice-Coordenação Geral)',
     etapa: 'Todas',
     status: 'ativo',
+    lgpdAccepted: true,
+    termosAceitos: true,
     createdAt: '2026-01-01T00:00:00.000Z',
     approvedBy: 'Sistema Oficial'
   },
@@ -82,6 +88,8 @@ const SEED_AUTHORIZED_USERS = [
     turmaNome: 'Secretaria Paroquial',
     etapa: 'Secretaria',
     status: 'ativo',
+    lgpdAccepted: true,
+    termosAceitos: true,
     createdAt: '2026-01-01T00:00:00.000Z',
     approvedBy: 'Sistema Oficial'
   },
@@ -93,6 +101,8 @@ const SEED_AUTHORIZED_USERS = [
     turmaNome: 'Secretaria Paroquial',
     etapa: 'Secretaria',
     status: 'ativo',
+    lgpdAccepted: true,
+    termosAceitos: true,
     createdAt: '2026-01-01T00:00:00.000Z',
     approvedBy: 'Sistema Oficial'
   },
@@ -104,6 +114,8 @@ const SEED_AUTHORIZED_USERS = [
     turmaNome: 'Catequese ICM (Todas as Turmas)',
     etapa: 'Geral',
     status: 'ativo',
+    lgpdAccepted: true,
+    termosAceitos: true,
     createdAt: '2026-01-01T00:00:00.000Z',
     approvedBy: 'Thiago Carvalho (Master Admin)'
   }
@@ -241,7 +253,8 @@ async function recordPendingAccessRequest(userData) {
   try {
     if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
       const sanitizedDocId = clean.replace(/[^a-zA-Z0-9]/g, '_');
-      await window.firebaseDb.collection('pending_users').doc(sanitizedDocId).set(pendingEntry);
+      await window.firebaseDb.collection('pending_users').doc(sanitizedDocId).set(pendingEntry, { merge: true });
+      console.log('✅ Solicitação de acesso registrada no Firestore pending_users:', clean);
     }
   } catch (e) {
     console.warn('Sync pending_users Firestore:', e);
@@ -416,6 +429,9 @@ async function revokeUserAccess(email, revokerName) {
 // ==========================================================================
 // ☁️ SINCRONIZAÇÃO EM NUVEM DE USUÁRIOS (FIRESTORE CLOUD SYNC)
 // ==========================================================================
+let unsubscribeAuthUsersListener = null;
+let unsubscribePendingUsersListener = null;
+
 async function syncUsersFromFirestore() {
   if (!window.firebaseDb || typeof window.firebaseDb.collection !== 'function') return;
   try {
@@ -437,17 +453,47 @@ async function syncUsersFromFirestore() {
           changedAuth = true;
         }
       });
+
+      // Busca na coleção 'usuarios' para resgatar aceites de LGPD já gravados anteriormente
+      try {
+        const usuariosSnap = await window.firebaseDb.collection('usuarios').where('termosAceitos', '==', true).get();
+        if (usuariosSnap && !usuariosSnap.empty) {
+          usuariosSnap.forEach(uDoc => {
+            const uData = uDoc.data();
+            if (uData && uData.email) {
+              const clean = uData.email.trim().toLowerCase();
+              const found = currentAuth.find(u => u.email && u.email.trim().toLowerCase() === clean);
+              if (found && !found.lgpdAccepted) {
+                found.lgpdAccepted = true;
+                found.lgpdAcceptedAt = uData.termosData || new Date().toISOString();
+                found.termosAceitos = true;
+                changedAuth = true;
+                // Salva de volta em authorized_users se o admin tiver permissão
+                const sanitizedDocId = clean.replace(/[^a-zA-Z0-9]/g, '_');
+                window.firebaseDb.collection('authorized_users').doc(sanitizedDocId).set({
+                  lgpdAccepted: true,
+                  lgpdAcceptedAt: found.lgpdAcceptedAt,
+                  termosAceitos: true
+                }, { merge: true }).catch(() => {});
+              }
+            }
+          });
+        }
+      } catch (eUsers) {
+        console.warn('Sync LGPD usuarios:', eUsers);
+      }
+
       if (changedAuth) {
         saveAuthorizedUsers(currentAuth);
       }
     }
 
-    // 2. Sincroniza solicitações pendentes da nuvem
+    // 2. Sincroniza solicitações pendentes da nuvem com merge construtivo
     const pendSnap = await window.firebaseDb.collection('pending_users').get();
+    const currentAuth = getAuthorizedUsers();
+    const cloudPendList = [];
+    
     if (pendSnap && !pendSnap.empty) {
-      const currentPend = getPendingUsers();
-      const currentAuth = getAuthorizedUsers();
-      let changedPend = false;
       pendSnap.forEach(doc => {
         const data = doc.data();
         if (data && data.email && data.status === 'pendente') {
@@ -455,24 +501,38 @@ async function syncUsersFromFirestore() {
           // Não adiciona se já foi aprovado
           const isAlreadyApproved = currentAuth.some(u => u.email && u.email.trim().toLowerCase() === clean && u.status === 'ativo');
           if (!isAlreadyApproved) {
-            const idx = currentPend.findIndex(p => p.email && p.email.trim().toLowerCase() === clean);
-            if (idx >= 0) {
-              currentPend[idx] = { ...currentPend[idx], ...data };
-            } else {
-              currentPend.unshift(data);
-            }
-            changedPend = true;
+            cloudPendList.push(data);
           }
         }
       });
-      if (changedPend) {
-        savePendingUsers(currentPend);
-      }
     }
 
-    // Atualiza badges na interface se disponível
+    // Mescla construtivamente com solicitações locais recentes que possam estar pendentes de sync
+    const mergedPend = [...cloudPendList];
+    const currentPend = getPendingUsers();
+    currentPend.forEach(localItem => {
+      if (localItem && localItem.email) {
+        const clean = localItem.email.trim().toLowerCase();
+        const inCloud = mergedPend.some(c => c.email && c.email.trim().toLowerCase() === clean);
+        const inAuth = currentAuth.some(u => u.email && u.email.trim().toLowerCase() === clean && u.status === 'ativo');
+        if (!inCloud && !inAuth) {
+          // Preserva itens locais recentes criados há menos de 10 minutos
+          const reqTime = localItem.requestedAt ? new Date(localItem.requestedAt).getTime() : 0;
+          if (Date.now() - reqTime < 10 * 60 * 1000) {
+            mergedPend.unshift(localItem);
+          }
+        }
+      }
+    });
+
+    savePendingUsers(mergedPend);
+
+    // Atualiza badges e alertas na interface
     if (typeof window.updateUserMgmtBadges === 'function') {
       window.updateUserMgmtBadges();
+    }
+    if (typeof window.renderPainelPendencias === 'function') {
+      window.renderPainelPendencias();
     }
   } catch (e) {
     console.warn('Falha na sincronização de usuários via Firestore:', e);
@@ -483,9 +543,19 @@ async function syncUsersFromFirestore() {
 function listenUsersFromFirestore() {
   if (!window.firebaseDb || typeof window.firebaseDb.collection !== 'function') return;
   try {
+    // Desinscreve listeners anteriores para evitar duplicações
+    if (typeof unsubscribeAuthUsersListener === 'function') {
+      try { unsubscribeAuthUsersListener(); } catch (_) {}
+      unsubscribeAuthUsersListener = null;
+    }
+    if (typeof unsubscribePendingUsersListener === 'function') {
+      try { unsubscribePendingUsersListener(); } catch (_) {}
+      unsubscribePendingUsersListener = null;
+    }
+
     // Listener de usuários autorizados
-    window.firebaseDb.collection('authorized_users').onSnapshot(snapshot => {
-      if (!snapshot || snapshot.empty) return;
+    unsubscribeAuthUsersListener = window.firebaseDb.collection('authorized_users').onSnapshot(snapshot => {
+      if (!snapshot) return;
       const currentAuth = getAuthorizedUsers();
       let changed = false;
       snapshot.forEach(doc => {
@@ -506,13 +576,21 @@ function listenUsersFromFirestore() {
         if (typeof window.updateUserMgmtBadges === 'function') {
           window.updateUserMgmtBadges();
         }
+        if (typeof window.renderPainelPendencias === 'function') {
+          window.renderPainelPendencias();
+        }
+        // Se o modal estiver aberto, atualiza a listagem
+        const modal = document.getElementById('modal-user-management');
+        if (modal && !modal.classList.contains('hidden') && typeof window.renderUserManagementModal === 'function') {
+          window.renderUserManagementModal();
+        }
       }
     }, err => {
       console.warn('onSnapshot authorized_users:', err);
     });
 
     // Listener de solicitações pendentes
-    window.firebaseDb.collection('pending_users').onSnapshot(snapshot => {
+    unsubscribePendingUsersListener = window.firebaseDb.collection('pending_users').onSnapshot(snapshot => {
       if (!snapshot) return;
       const currentPend = [];
       const currentAuth = getAuthorizedUsers();
@@ -529,6 +607,14 @@ function listenUsersFromFirestore() {
       savePendingUsers(currentPend);
       if (typeof window.updateUserMgmtBadges === 'function') {
         window.updateUserMgmtBadges();
+      }
+      if (typeof window.renderPainelPendencias === 'function') {
+        window.renderPainelPendencias();
+      }
+      // Se o modal de gestão de usuários estiver visível, atualiza na hora
+      const modal = document.getElementById('modal-user-management');
+      if (modal && !modal.classList.contains('hidden') && typeof window.renderUserManagementModal === 'function') {
+        window.renderUserManagementModal();
       }
     }, err => {
       console.warn('onSnapshot pending_users:', err);
