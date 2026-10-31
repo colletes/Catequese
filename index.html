@@ -2859,6 +2859,10 @@
           </button>
         </div>
         <div id="cadastro-subtab-quick-actions" class="flex items-center gap-2 flex-wrap">
+          <!-- Botão de Transposição Eucarística (KAN-12) -->
+          <button type="button" id="btn-transpor-eucaristia" onclick="openTransposicaoEucaristiaModal()" class="inline-flex items-center gap-1.5 bg-gradient-to-r from-emerald-700 to-teal-800 hover:from-emerald-600 hover:to-teal-700 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold transition shadow-xs" title="Transpor turmas e catequizandos de Eucaristia I (2026) para Eucaristia II (2027)">
+            <span>🔄</span> <span>Transpor Eucaristia I ➔ II</span>
+          </button>
           <button type="button" id="btn-print-selected-alunos" onclick="imprimirFichasAlunosSelecionados()" class="inline-flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-[#d4a94f] border border-[#d4a94f]/50 px-3.5 py-1.5 rounded-xl text-xs font-bold transition shadow-xs" title="Imprimir fichas em PDF dos catequizandos selecionados">
             <span>🖨️</span> <span>Imprimir Fichas (<span id="count-selected-alunos">0</span>)</span>
           </button>
@@ -3914,6 +3918,93 @@
     </div>
 
     <!-- ========================================== -->
+    <!-- MODAL: TRANSPOSIÇÃO EUCARÍSTICA (KAN-12)    -->
+    <!-- ========================================== -->
+    <div id="modal-transposicao-eucaristia" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+      <div class="bg-white w-full max-w-4xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-4 flex flex-col max-h-[92vh]">
+        
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-emerald-950 via-teal-900 to-slate-900 text-white p-5 sm:p-6 flex items-center justify-between border-b border-emerald-500/30 flex-shrink-0">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl">🔄</span>
+            <div>
+              <h3 class="text-lg sm:text-xl font-bold font-heading text-white flex items-center gap-2">
+                <span>Transposição Eucarística: Eucaristia I (2026) ➔ Eucaristia II (2027)</span>
+              </h3>
+              <p class="text-xs text-emerald-200 mt-0.5">Progressão automática das turmas e catequizandos com histórico completo</p>
+            </div>
+          </div>
+          <button type="button" onclick="closeTransposicaoEucaristiaModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
+        </div>
+
+        <!-- Conteúdo do Modal -->
+        <div class="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1 text-slate-800 text-xs">
+          
+          <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-950 space-y-1.5">
+            <div class="font-bold font-heading text-sm flex items-center gap-2">
+              <span>📜</span> <span>Diretriz Pedagógica da Pastoral da Catequese</span>
+            </div>
+            <p class="leading-relaxed">
+              As turmas de <strong>Eucaristia I</strong> de 2026 avançam naturalmente para <strong>Eucaristia II</strong> em 2027. Todos os catequizandos inscritos em cada turma (Turmas 01 a 11) são transpostos para a turma correspondente no ano seguinte, mantendo integralmente todas as suas informações cadastrais (CPF, contatos, filiação, endereços e registros de frequência).
+            </p>
+            <p class="text-[11px] text-emerald-800 font-semibold">
+              🔒 <strong>Garantia de Integridade:</strong> A transposição utiliza merge construtivo. Nenhuma turma de destino é apagada e catequizandos já existentes em Eucaristia II são preservados.
+            </p>
+          </div>
+
+          <!-- Tabela de Mapeamento das Turmas -->
+          <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-slate-900 text-white border-b border-emerald-500">
+                  <th class="py-2.5 px-3">Turma Origem (Eucaristia I • 2026)</th>
+                  <th class="py-2.5 px-3 text-center">Catequizandos Origem</th>
+                  <th class="py-2.5 px-3">Turma Destino (Eucaristia II • 2027)</th>
+                  <th class="py-2.5 px-3 text-center">Catequizandos Atuais</th>
+                  <th class="py-2.5 px-3 text-center">Status / Ação</th>
+                </tr>
+              </thead>
+              <tbody id="transposicao-modal-table-body" class="divide-y divide-slate-100">
+                <!-- Populado dinamicamente -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Resumo de Quantitativos -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-2xl text-center">
+              <div class="text-[10px] uppercase font-bold text-slate-500">Total de Turmas Mapeadas</div>
+              <div id="transposicao-kpi-turmas" class="text-xl font-black text-slate-900 font-heading">11 turmas</div>
+            </div>
+            <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl text-center">
+              <div class="text-[10px] uppercase font-bold text-emerald-800">Alunos a Transpor / Mesclar</div>
+              <div id="transposicao-kpi-alunos-origem" class="text-xl font-black text-emerald-700 font-heading">0 alunos</div>
+            </div>
+            <div class="p-3 bg-teal-50 border border-teal-200 rounded-2xl text-center">
+              <div class="text-[10px] uppercase font-bold text-teal-800">Alunos Já em Eucaristia II</div>
+              <div id="transposicao-kpi-alunos-destino" class="text-xl font-black text-teal-700 font-heading">0 alunos</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="bg-slate-50 p-4 sm:p-5 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 flex-shrink-0">
+          <span class="text-[11px] text-slate-500">Apenas Master Admin e Coordenação Geral podem executar a transposição.</span>
+          <div class="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+            <button type="button" onclick="closeTransposicaoEucaristiaModal()" class="px-4 py-2 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold transition">
+              Cancelar
+            </button>
+            <button type="button" onclick="executarTransposicaoEucaristia()" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-md transition">
+              <span>🚀</span> <span>Executar Transposição para Eucaristia II</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ========================================== -->
     <!-- MODAL: ADICIONAR / EDITAR TURMA            -->
     <!-- ========================================== -->
     <div id="modal-turma-form" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
@@ -4962,10 +5053,22 @@
       <div id="form-add-evento" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-5 space-y-3">
         <h3 class="font-bold text-amber-900 font-heading">➕ Adicionar Novo Evento</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <input id="ev-nome" type="text" placeholder="Nome do evento (ex: Retiro Eucaristia I)" class="border border-amber-300 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-400" />
+          <input id="ev-nome" type="text" placeholder="Nome do evento ou sacramento (ex: Celebração da Crisma, Batismo)" class="border border-amber-300 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-400" />
           <input id="ev-data" type="date" class="border border-amber-300 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-400" />
-          <input id="ev-hora" type="text" placeholder="Horário (ex: 19h30) — opcional" class="border border-amber-300 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-400" />
-          <input id="ev-turmas" type="text" placeholder="Turmas (ex: T1, T2, T5 e T6)" class="border border-amber-300 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-400" />
+          <input id="ev-hora" type="text" placeholder="Horário (ex: 19h30 ou 10h00) — opcional" class="border border-amber-300 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-400" />
+          <input id="ev-turmas" type="text" placeholder="Turmas / Etapas vinculadas (ex: Crisma Adultos T1 a T4, Eucaristia II...)" class="border border-amber-300 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-400" />
+          
+          <!-- Seletor de Recepção de Sacramentos no Santuário (KAN-13) -->
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-bold text-amber-950 uppercase tracking-wider mb-1">Recepção de Sacramento no Santuário ou Evento Pastoral:</label>
+            <select id="ev-sacramento" class="w-full border border-amber-300 rounded-xl px-3 py-2 text-xs sm:text-sm bg-white font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-400">
+              <option value="">⛪ Evento Geral da Catequese / Retiro Pastoral</option>
+              <option value="batismo">💧 Recepção do Sacramento: Batismo</option>
+              <option value="eucaristia">🍞🍷 Recepção do Sacramento: Primeira Eucaristia</option>
+              <option value="crisma">🕊️ Recepção do Sacramento: Crisma (Confirmação)</option>
+              <option value="matrimonio">💍 Recepção do Sacramento: Matrimônio</option>
+            </select>
+          </div>
         </div>
         <div class="flex items-center gap-3">
           <label class="flex items-center gap-2 text-sm text-amber-800 cursor-pointer">
@@ -4976,6 +5079,16 @@
             Salvar Evento
           </button>
         </div>
+      </div>
+
+      <!-- Filtros do Calendário e Recepção de Sacramentos (KAN-13) -->
+      <div class="max-w-2xl mx-auto w-full flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+        <button type="button" onclick="setEventosFilter('all')" id="btn-ev-filter-all" class="px-3 py-1.5 rounded-xl font-bold bg-slate-900 text-white shadow-2xs whitespace-nowrap">📅 Todos os Eventos</button>
+        <button type="button" onclick="setEventosFilter('sacramentos')" id="btn-ev-filter-sacramentos" class="px-3 py-1.5 rounded-xl font-medium text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 whitespace-nowrap">⛪ Todos os Sacramentos</button>
+        <button type="button" onclick="setEventosFilter('batismo')" id="btn-ev-filter-batismo" class="px-3 py-1.5 rounded-xl font-medium text-sky-800 bg-sky-50 border border-sky-200 hover:bg-sky-100 whitespace-nowrap">💧 Batismo</button>
+        <button type="button" onclick="setEventosFilter('eucaristia')" id="btn-ev-filter-eucaristia" class="px-3 py-1.5 rounded-xl font-medium text-emerald-800 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 whitespace-nowrap">🍞🍷 Eucaristia</button>
+        <button type="button" onclick="setEventosFilter('crisma')" id="btn-ev-filter-crisma" class="px-3 py-1.5 rounded-xl font-medium text-amber-800 bg-amber-50 border border-amber-200 hover:bg-amber-100 whitespace-nowrap">🕊️ Crisma</button>
+        <button type="button" onclick="setEventosFilter('matrimonio')" id="btn-ev-filter-matrimonio" class="px-3 py-1.5 rounded-xl font-medium text-purple-800 bg-purple-50 border border-purple-200 hover:bg-purple-100 whitespace-nowrap">💍 Matrimônio</button>
       </div>
 
       <!-- Timeline de Eventos -->
@@ -9959,13 +10072,20 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       }
     ];
 
-    // Dados iniciais padrão (Cronograma da Catequese 2026/2027)
+    // Dados iniciais padrão com Recepção de Sacramentos (Cronograma da Catequese 2026/2027 • KAN-13)
     const SEED_EVENTOS = [
-      { id: 'seed-1', nome: 'Retiro Eucaristia I', data: '2026-09-12', hora: 'Manhã e Tarde', turmas: 'Turmas 01, 02, 05 e 06', externo: false },
-      { id: 'seed-2', nome: 'Retiro Eucaristia I', data: '2026-09-13', hora: 'Manhã e Tarde', turmas: 'Turmas 03, 04, 07 e 08', externo: false },
-      { id: 'seed-3', nome: 'Retiro Crisma Jovem',  data: '2026-10-24', hora: 'Dia Todo',       turmas: 'Todas as Turmas de Crisma Jovem', externo: true },
-      { id: 'seed-4', nome: 'Crisma dos Adultos (Celebração do Sacramento)', data: '2026-11-05', hora: '19:30', turmas: 'Todas as Turmas de Crisma Adultos', externo: false },
-      ...LORENA_EVENTOS_LITURGICOS
+      { id: 'seed-sacr-batismo', nome: 'Recepção do Sacramento do Batismo no Santuário', data: '2026-08-23', hora: '11:00', turmas: 'Catequizandos e Famílias', externo: false, sacramento: 'batismo' },
+      { id: 'seed-1', nome: 'Retiro Eucaristia I', data: '2026-09-12', hora: 'Manhã e Tarde', turmas: 'Turmas 01, 02, 05 e 06', externo: false, sacramento: '' },
+      { id: 'seed-2', nome: 'Retiro Eucaristia I', data: '2026-09-13', hora: 'Manhã e Tarde', turmas: 'Turmas 03, 04, 07 e 08', externo: false, sacramento: '' },
+      { id: 'seed-3', nome: 'Retiro Crisma Jovem',  data: '2026-10-24', hora: 'Dia Todo',       turmas: 'Todas as Turmas de Crisma Jovem', externo: true, sacramento: '' },
+      { id: 'seed-sacr-crisma-jovem', nome: 'Recepção do Sacramento da Crisma (Jovens)', data: '2026-11-21', hora: '19:00', turmas: 'Todas as Turmas de Crisma Jovem', externo: false, sacramento: 'crisma' },
+      { id: 'seed-sacr-eucaristia', nome: 'Recepção do Sacramento da 1ª Eucaristia no Santuário', data: '2026-11-28', hora: '10:00', turmas: 'Todas as Turmas de Eucaristia II', externo: false, sacramento: 'eucaristia' },
+      { id: 'seed-4', nome: 'Crisma dos Adultos (Recepção do Sacramento)', data: '2026-12-03', hora: '19:30', turmas: 'Todas as Turmas de Crisma Adultos (T1 a T8)', externo: false, sacramento: 'crisma' },
+      { id: 'seed-sacr-matrimonio', nome: 'Recepção do Sacramento do Matrimônio Comunitário', data: '2026-12-12', hora: '19:00', turmas: 'Casais e Catequizandos do Santuário', externo: false, sacramento: 'matrimonio' },
+      ...LORENA_EVENTOS_LITURGICOS.map(ev => ({
+        ...ev,
+        sacramento: ev.nome.toLowerCase().includes('sacramento') ? (ev.nome.toLowerCase().includes('crisma') ? 'crisma' : 'eucaristia') : ''
+      }))
     ];
 
     function _dataFmt(dataISO) {
@@ -10029,9 +10149,36 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       renderEventosTimeline();
     }
 
+    let currentEventosFilter = 'all'; // 'all' | 'sacramentos' | 'batismo' | 'eucaristia' | 'crisma' | 'matrimonio'
+
+    function setEventosFilter(filter) {
+      currentEventosFilter = filter;
+      const filters = ['all', 'sacramentos', 'batismo', 'eucaristia', 'crisma', 'matrimonio'];
+      filters.forEach(f => {
+        const btn = document.getElementById(`btn-ev-filter-${f}`);
+        if (!btn) return;
+        if (f === filter) {
+          btn.className = 'px-3 py-1.5 rounded-xl font-bold bg-slate-900 text-white shadow-2xs whitespace-nowrap';
+        } else {
+          btn.className = 'px-3 py-1.5 rounded-xl font-medium text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 whitespace-nowrap';
+        }
+      });
+      renderEventosTimeline();
+    }
+
     function renderEventosTimeline() {
       const container = document.getElementById('eventos-timeline');
       if (!container) return;
+
+      // Atualiza visibilidade do botão de editar conforme permissão (Master Admin, Coord Geral, Vice Coord, Secretaria)
+      const btnEdit = document.getElementById('btn-edit-mode');
+      if (btnEdit) {
+        if (canManageEvents()) {
+          btnEdit.classList.remove('hidden');
+        } else {
+          btnEdit.classList.add('hidden');
+        }
+      }
 
       const eventos = getEventosData();
 
@@ -10040,7 +10187,19 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         return;
       }
 
-      const sorted = [...eventos].sort((a, b) => (a.data || '').localeCompare(b.data || ''));
+      let filtered = [...eventos];
+      if (currentEventosFilter === 'sacramentos') {
+        filtered = filtered.filter(ev => !!ev.sacramento || (ev.nome && /sacramento|batismo|eucaristia|crisma|matrim[ôo]nio/i.test(ev.nome)));
+      } else if (currentEventosFilter !== 'all') {
+        filtered = filtered.filter(ev => ev.sacramento === currentEventosFilter || (ev.nome && ev.nome.toLowerCase().includes(currentEventosFilter)));
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<p class="text-slate-400 text-sm text-center py-8">Nenhum evento ou sacramento encontrado para o filtro selecionado.</p>';
+        return;
+      }
+
+      const sorted = filtered.sort((a, b) => (a.data || '').localeCompare(b.data || ''));
 
       container.innerHTML = sorted.map(ev => {
         const dataFmt = _dataFmt(ev.data);
@@ -10049,21 +10208,39 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         const ano = partes.length === 3 ? partes[2] : String(new Date().getFullYear());
         const diaSem = _diaSemana(ev.data);
 
+        // Badges Sacramentais Específicos (KAN-13)
+        let sacramentoBadge = '';
+        const sacrType = (ev.sacramento || '').toLowerCase();
+        const nomeLower = (ev.nome || '').toLowerCase();
+
+        if (sacrType === 'batismo' || nomeLower.includes('batismo')) {
+          sacramentoBadge = '<span class="text-[10px] font-black uppercase bg-sky-100 text-sky-900 px-2.5 py-0.5 rounded-full border border-sky-300 shadow-2xs flex items-center gap-1"><span>💧</span> <span>Sacramento: Batismo</span></span>';
+        } else if (sacrType === 'eucaristia' || nomeLower.includes('eucaristia')) {
+          sacramentoBadge = '<span class="text-[10px] font-black uppercase bg-emerald-100 text-emerald-950 px-2.5 py-0.5 rounded-full border border-emerald-300 shadow-2xs flex items-center gap-1"><span>🍞🍷</span> <span>Sacramento: 1ª Eucaristia</span></span>';
+        } else if (sacrType === 'crisma' || nomeLower.includes('crisma')) {
+          sacramentoBadge = '<span class="text-[10px] font-black uppercase bg-amber-100 text-amber-950 px-2.5 py-0.5 rounded-full border border-amber-300 shadow-2xs flex items-center gap-1"><span>🕊️</span> <span>Sacramento: Crisma</span></span>';
+        } else if (sacrType === 'matrimonio' || nomeLower.includes('matrim')) {
+          sacramentoBadge = '<span class="text-[10px] font-black uppercase bg-purple-100 text-purple-950 px-2.5 py-0.5 rounded-full border border-purple-300 shadow-2xs flex items-center gap-1"><span>💍</span> <span>Sacramento: Matrimônio</span></span>';
+        }
+
+        const isSacramento = !!sacramentoBadge;
+
         return `
           <div class="flex gap-4 items-start" data-evento-id="${ev.id}">
             <div class="flex flex-col items-center">
-              <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#d4a94f] to-[#b88d36] text-white flex flex-col items-center justify-center shadow-md shrink-0 border border-amber-300">
+              <div class="w-12 h-12 rounded-2xl ${isSacramento ? 'bg-gradient-to-br from-amber-600 via-amber-500 to-[#d4a94f] ring-2 ring-amber-300' : 'bg-gradient-to-br from-slate-800 to-slate-900'} text-white flex flex-col items-center justify-center shadow-md shrink-0 border border-amber-300/40">
                 <span class="text-[11px] font-black leading-none">${diaMes}</span>
                 <span class="text-[9px] leading-none opacity-90 mt-0.5">${ano}</span>
               </div>
-              <div class="w-0.5 bg-amber-200 flex-1 mt-2 min-h-[30px]"></div>
+              <div class="w-0.5 ${isSacramento ? 'bg-amber-300' : 'bg-slate-200'} flex-1 mt-2 min-h-[30px]"></div>
             </div>
-            <div class="bg-white rounded-2xl border border-slate-200 p-4 flex-1 shadow-sm mb-4 hover:border-amber-300 transition">
+            <div class="bg-white rounded-2xl border ${isSacramento ? 'border-amber-300 shadow-sm bg-gradient-to-r from-amber-50/20 via-white to-white' : 'border-slate-200'} p-4 flex-1 shadow-xs mb-4 hover:border-amber-400 transition">
               <div class="flex items-start justify-between gap-2">
                 <div>
                   <div class="flex items-center gap-2 flex-wrap mb-1">
                     <h3 class="font-bold text-slate-900 font-heading text-base">${ev.nome}</h3>
-                    ${ev.externo ? '<span class="text-[10px] font-extrabold uppercase bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-300">🌍 Externo</span>' : '<span class="text-[10px] font-extrabold uppercase bg-amber-50 text-amber-900 px-2 py-0.5 rounded-full border border-amber-200">⛪ Santuário</span>'}
+                    ${sacramentoBadge}
+                    ${ev.externo ? '<span class="text-[10px] font-extrabold uppercase bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-300">🌍 Externo</span>' : '<span class="text-[10px] font-extrabold uppercase bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full border border-slate-200">⛪ Santuário</span>'}
                   </div>
                   <p class="text-xs text-slate-600 font-medium">
                     📅 <strong>${diaSem}</strong>, ${dataFmt} ${ev.hora ? ' • ⏰ ' + ev.hora : ''}
@@ -10091,8 +10268,10 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       const isMaster = role === roles.MASTER_ADMIN || role === 'master_admin' || (window.ICM_CONFIG && email === (window.ICM_CONFIG.MASTER_ADMIN_EMAIL || '').toLowerCase());
       const isCoordGeral = role === roles.COORD_GERAL || role === 'coord_geral' || (window.ICM_CONFIG && email === (window.ICM_CONFIG.COORD_GERAL_EMAIL || '').toLowerCase());
       const isViceCoord = role === roles.VICE_COORD_GERAL || role === 'vice_coord_geral' || role === 'vice_coordenador' || (window.appAuthState.turmaNome && window.appAuthState.turmaNome.toLowerCase().includes('vice'));
+      // KAN-13: Permissão de gestão concedida também à Secretaria Pastoral
+      const isSecretaria = role === roles.SECRETARIA || role === 'secretaria' || (window.appAuthState.funcao && window.appAuthState.funcao.toLowerCase().includes('secretar'));
 
-      return isMaster || isCoordGeral || isViceCoord;
+      return isMaster || isCoordGeral || isViceCoord || isSecretaria;
     }
 
     function removerEvento(id) {
@@ -10137,7 +10316,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
     function adicionarEvento() {
       if (!canManageEvents()) {
-        alert('⚠️ Operação não permitida: Apenas o Master Admin, a Coordenação Geral e o Vice-Coordenador têm permissão para adicionar eventos.');
+        alert('⚠️ Operação não permitida: Apenas o Master Admin, a Coordenação Geral, o Vice-Coordenador e a Secretaria têm permissão para gerenciar eventos e sacramentos.');
         return;
       }
 
@@ -10146,12 +10325,14 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       const horaInput = document.getElementById('ev-hora');
       const turmasInput = document.getElementById('ev-turmas');
       const externoInput = document.getElementById('ev-externo');
+      const sacramentoInput = document.getElementById('ev-sacramento');
 
       const nome = (nomeInput ? nomeInput.value : '').trim();
       const data = (dataInput ? dataInput.value : '').trim();
       const hora = (horaInput ? horaInput.value : '').trim();
       const turmas = (turmasInput ? turmasInput.value : '').trim();
       const externo = externoInput ? externoInput.checked : false;
+      const sacramento = (sacramentoInput ? sacramentoInput.value : '').trim();
 
       if (!nome || !data) {
         alert('Por favor, informe pelo menos o Nome do Evento e a Data.');
@@ -10164,7 +10345,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         data,
         hora,
         turmas,
-        externo
+        externo,
+        sacramento
       };
 
       const eventos = getEventosData();
@@ -28400,3 +28582,166 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
 </body>
 </html>
+
+    // =========================================================================
+    // FASE 3: TRANSPOSIÇÃO EUCARÍSTICA: EUCARISTIA I (2026) ➔ EUCARISTIA II (2027) (KAN-12)
+    // =========================================================================
+
+    const TURMAS_EUCARISTIA_MAP = [
+      { t: "Turma 01", catOrigem: "Polyana", catDestino: "Polyana e Ane" },
+      { t: "Turma 02", catOrigem: "Shirley e Tatyane", catDestino: "Shirley e Tatyane" },
+      { t: "Turma 03", catOrigem: "Joseline e Silene", catDestino: "Josy e Silene" },
+      { t: "Turma 04", catOrigem: "Brenda e Joyce", catDestino: "Brenda e Joyce" },
+      { t: "Turma 05", catOrigem: "Valdir", catDestino: "Valdir" },
+      { t: "Turma 06", catOrigem: "Andréia e Fernanda", catDestino: "Andréia" },
+      { t: "Turma 07", catOrigem: "Maria Rodrigues, Nádia e Marina", catDestino: "Maria Rilda e Marina Neiva" },
+      { t: "Turma 08", catOrigem: "Elza e Lara", catDestino: "Elza" },
+      { t: "Turma 09", catOrigem: "Danusa e Gllenda", catDestino: "Danusa e Gllenda" },
+      { t: "Turma 10", catOrigem: "Lanuzia e Mara Rúbia", catDestino: "Mara e Lanuzia" },
+      { t: "Turma 11", catOrigem: "Maria Dulcineide e Elisa", catDestino: "Elisa e Maria Dulcineide" }
+    ];
+
+    function openTransposicaoEucaristiaModal() {
+      const modal = document.getElementById('modal-transposicao-eucaristia');
+      const tbody = document.getElementById('transposicao-modal-table-body');
+      const kpiTurmas = document.getElementById('transposicao-kpi-turmas');
+      const kpiOrigem = document.getElementById('transposicao-kpi-alunos-origem');
+      const kpiDestino = document.getElementById('transposicao-kpi-alunos-destino');
+
+      const db = getAlunosDatabase();
+      let totalAlunosOrigem = 0;
+      let totalAlunosDestino = 0;
+
+      if (tbody) {
+        tbody.innerHTML = TURMAS_EUCARISTIA_MAP.map((mapItem, idx) => {
+          const keyOrigem = getTurmaKey('Eucaristia I', mapItem.t);
+          const keyDestino = getTurmaKey('Eucaristia II', mapItem.t);
+
+          const alunosOrigem = (db[keyOrigem] || []).filter(isAlunoAtivo);
+          const alunosDestino = (db[keyDestino] || []).filter(isAlunoAtivo);
+
+          totalAlunosOrigem += alunosOrigem.length;
+          totalAlunosDestino += alunosDestino.length;
+
+          let statusBadge = '<span class="text-slate-400 font-medium">Sem alunos</span>';
+          if (alunosOrigem.length > 0) {
+            statusBadge = `<span class="inline-flex items-center text-[10px] font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-full">Pronto para transpor (${alunosOrigem.length})</span>`;
+          } else if (alunosDestino.length > 0) {
+            statusBadge = `<span class="inline-flex items-center text-[10px] font-bold text-teal-800 bg-teal-100 border border-teal-300 px-2 py-0.5 rounded-full">Alunos já alocados (${alunosDestino.length})</span>`;
+          }
+
+          return `
+            <tr class="hover:bg-slate-50 transition">
+              <td class="py-2.5 px-3">
+                <div class="font-bold text-slate-900">${mapItem.t}</div>
+                <div class="text-[10.5px] text-slate-500">Catequistas: ${mapItem.catOrigem}</div>
+              </td>
+              <td class="py-2.5 px-3 text-center font-bold text-emerald-700 text-sm">
+                ${alunosOrigem.length}
+              </td>
+              <td class="py-2.5 px-3">
+                <div class="font-bold text-slate-900">${mapItem.t}</div>
+                <div class="text-[10.5px] text-teal-700">Catequistas: ${mapItem.catDestino}</div>
+              </td>
+              <td class="py-2.5 px-3 text-center font-bold text-teal-700 text-sm">
+                ${alunosDestino.length}
+              </td>
+              <td class="py-2.5 px-3 text-center">
+                ${statusBadge}
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      if (kpiTurmas) kpiTurmas.textContent = `${TURMAS_EUCARISTIA_MAP.length} turmas`;
+      if (kpiOrigem) kpiOrigem.textContent = `${totalAlunosOrigem} alunos`;
+      if (kpiDestino) kpiDestino.textContent = `${totalAlunosDestino} alunos`;
+
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeTransposicaoEucaristiaModal() {
+      const modal = document.getElementById('modal-transposicao-eucaristia');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function executarTransposicaoEucaristia() {
+      const role = window.appAuthState ? window.appAuthState.role : '';
+      const email = window.appAuthState ? (window.appAuthState.email || '').toLowerCase() : '';
+      const roles = (window.ICM_CONFIG && window.ICM_CONFIG.ROLES) ? window.ICM_CONFIG.ROLES : {};
+
+      const canTranspor = role === roles.MASTER_ADMIN || role === 'master_admin' || role === roles.COORD_GERAL || role === 'coord_geral' || email === 'colletes@gmail.com' || email === 'lorenammoraes@gmail.com';
+      if (!canTranspor) {
+        alert('⚠️ Operação não permitida: Apenas o Master Admin e a Coordenação Geral podem executar a transposição eucarística de turmas.');
+        return;
+      }
+
+      if (!confirm('Deseja realmente executar a transposição de todas as turmas de Eucaristia I (2026) para Eucaristia II (2027)?\n\nOs catequizandos serão vinculados a Eucaristia II mantendo todo o histórico cadastral e de fichas.')) {
+        return;
+      }
+
+      const db = getAlunosDatabase();
+      let totalTranspostos = 0;
+      let totalTurmasAfetadas = 0;
+
+      TURMAS_EUCARISTIA_MAP.forEach(item => {
+        const keyOrigem = getTurmaKey('Eucaristia I', item.t);
+        const keyDestino = getTurmaKey('Eucaristia II', item.t);
+
+        const alunosOrigem = db[keyOrigem] || [];
+        if (alunosOrigem.length === 0) return;
+
+        if (!db[keyDestino]) db[keyDestino] = [];
+
+        alunosOrigem.forEach(alunoOrigem => {
+          // Verifica se o aluno já existe na turma destino (por id ou cpf ou nome)
+          const cleanCpfOrigem = (alunoOrigem.cpf || '').replace(/\D/g, '');
+          const existingIdx = db[keyDestino].findIndex(a => {
+            if (a.id && alunoOrigem.id && a.id === alunoOrigem.id) return true;
+            const cleanCpfDestino = (a.cpf || '').replace(/\D/g, '');
+            if (cleanCpfOrigem && cleanCpfDestino && cleanCpfOrigem === cleanCpfDestino) return true;
+            return (a.nome || '').trim().toLowerCase() === (alunoOrigem.nome || '').trim().toLowerCase();
+          });
+
+          const transpostoAluno = {
+            ...alunoOrigem,
+            etapa: 'Eucaristia II',
+            turma: item.t,
+            transpostoDe: 'Eucaristia I (2026)',
+            dataTransposicao: new Date().toISOString(),
+            observacoes: alunoOrigem.observacoes ? `${alunoOrigem.observacoes} • Transposto de Eucaristia I 2026` : 'Transposto de Eucaristia I 2026'
+          };
+
+          if (existingIdx >= 0) {
+            // Mescla construtiva preservando dados
+            db[keyDestino][existingIdx] = {
+              ...db[keyDestino][existingIdx],
+              ...transpostoAluno
+            };
+          } else {
+            db[keyDestino].push(transpostoAluno);
+            totalTranspostos++;
+          }
+        });
+
+        totalTurmasAfetadas++;
+      });
+
+      saveAlunosDatabase(db);
+      if (typeof syncAllTurmasToFirestore === 'function') {
+        syncAllTurmasToFirestore(db);
+      }
+
+      closeTransposicaoEucaristiaModal();
+      renderAlunosTable();
+      if (typeof renderCadastroGeralTable === 'function') renderCadastroGeralTable();
+
+      window.ICM_CONFIG.logAuditEvent('TRANSPOSICAO_EUCARISTIA_I_PARA_II', 'Eucaristia I -> Eucaristia II', {
+        turmasAfetadas: totalTurmasAfetadas,
+        totalAlunosTranspostos: totalTranspostos,
+        executadoPor: email
+      });
+
+      alert(`🎉 Transposição concluída com sucesso!\n\n${totalTranspostos} catequizandos transpostos/mesclados para Eucaristia II (2027) em ${totalTurmasAfetadas} turma(s). Todas as informações e fichas foram integralmente preservadas.`);
+    }
