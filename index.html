@@ -2970,8 +2970,16 @@
                 </select>
               </div>
 
+              <!-- Alternador de Encontro Extracurricular (KAN-09) -->
+              <div class="pt-4">
+                <button type="button" id="btn-toggle-extracurricular" onclick="toggleCurrentDateExtracurricular()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition shadow-2xs bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200" title="Alternar se este encontro é Regular ou Extracurricular (faltas em encontros extracurriculares não contam para o limite de 3 faltas)">
+                  <span id="badge-icon-extracurricular">📅</span>
+                  <span id="badge-lbl-extracurricular">Regular</span>
+                </button>
+              </div>
+
               <div class="flex items-center gap-1.5 pt-4">
-                <button type="button" onclick="promptAddChamadaDate()" class="inline-flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 font-bold px-3 py-2 rounded-xl text-xs transition" title="Adicionar nova data de encontro ao calendário da turma">
+                <button type="button" onclick="openAddChamadaDateModal()" class="inline-flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 font-bold px-3 py-2 rounded-xl text-xs transition" title="Adicionar nova data de encontro ao calendário da turma (Regular ou Extracurricular)">
                   <span>➕</span> <span>Nova Data</span>
                 </button>
                 <button type="button" onclick="deleteSelectedChamadaDate()" class="inline-flex items-center gap-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-semibold px-2.5 py-2 rounded-xl text-xs transition" title="Excluir data de encontro selecionada">
@@ -3220,8 +3228,8 @@
             <div class="text-[10px] uppercase font-bold text-purple-300">1ª Eucaristia</div>
             <div id="kpi-cg-eucaristia" class="text-xl font-black text-purple-400 font-heading">0</div>
           </div>
-          <div class="bg-rose-950/40 border border-rose-500/30 p-3 rounded-2xl text-center">
-            <div class="text-[10px] uppercase font-bold text-rose-300">Impedidos</div>
+          <div class="bg-rose-950/40 border border-rose-500/30 p-3 rounded-2xl text-center cursor-pointer hover:bg-rose-900/60 transition group" onclick="toggleImpedidosFilterCadastroGeral()" title="Clique para filtrar apenas catequizandos que não crismam por impedimento canônico">
+            <div class="text-[10px] uppercase font-bold text-rose-300 group-hover:text-rose-200">Não Crismam (Impedidos)</div>
             <div id="kpi-cg-impedidos" class="text-xl font-black text-rose-400 font-heading">0</div>
           </div>
         </div>
@@ -3261,6 +3269,7 @@
               <option value="all">Todos os Status</option>
               <option value="ativo" selected>🟢 Apenas Ativos</option>
               <option value="inativo_desistente">🔴 Apenas Desistentes</option>
+              <option value="impedido">⚠️ Apenas Impedidos Canônicos (Não Crismam)</option>
             </select>
           </div>
 
@@ -3447,13 +3456,17 @@
               </select>
             </div>
 
-            <!-- Impedido(a)? -->
+            <!-- Impedido(a) de Crismar? (KAN-11) -->
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Impedido(a)?</label>
-              <select id="aluno-impedido" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none">
-                <option value="">(Não informado / Não)</option>
-                <option value="Não">Não</option>
-                <option value="Sim">Sim</option>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Não Crisma por Impedimento? (Canônico)</label>
+              <select id="aluno-impedido" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none font-medium">
+                <option value="Não">Não (Apto ao Sacramento)</option>
+                <option value="Sim - Matrimônio Irregular">Sim - Matrimônio Irregular / Sem Matrimônio Religioso</option>
+                <option value="Sim - Falta Batismo">Sim - Falta Batismo / Batismo Pendente</option>
+                <option value="Sim - Segunda União">Sim - Segunda União / Divórcio sem Nulidade</option>
+                <option value="Sim - Falta 1ª Eucaristia">Sim - Falta 1ª Eucaristia</option>
+                <option value="Sim - Outro Impedimento Canônico">Sim - Outro Impedimento Canônico</option>
+                <option value="Sim">Sim (Outro Impedimento)</option>
               </select>
             </div>
 
@@ -3753,6 +3766,149 @@
             </button>
           </div>
         </div>
+
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL: DETALHAMENTO DE FALTAS DO ALUNO (KAN-08) -->
+    <!-- ========================================== -->
+    <div id="modal-detalhes-faltas" class="hidden fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+      <div class="bg-white w-full max-w-3xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-4 flex flex-col max-h-[92vh]">
+        
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-5 sm:p-6 flex items-center justify-between border-b border-indigo-500/30 flex-shrink-0">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl">📋</span>
+            <div>
+              <h3 class="text-lg sm:text-xl font-bold font-heading text-white flex items-center gap-2">
+                <span>Histórico de Frequência e Detalhamento de Faltas</span>
+              </h3>
+              <p id="faltas-modal-aluno-subtitle" class="text-xs text-indigo-200 mt-0.5">Catequizando • Turma</p>
+            </div>
+          </div>
+          <button type="button" onclick="closeFaltasModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
+        </div>
+
+        <!-- Conteúdo do Modal -->
+        <div class="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1 text-slate-800">
+          
+          <!-- Banner de Alerta Urgente de 2 Faltas Consecutivas (KAN-10) -->
+          <div id="faltas-modal-consecutive-alert" class="hidden p-3.5 rounded-2xl bg-rose-100 border-2 border-rose-400 flex items-start gap-3">
+            <span class="text-2xl leading-none">🚨</span>
+            <div class="flex-1 text-xs">
+              <div class="font-black text-rose-950 uppercase tracking-wide">Alerta Urgente de 2 Faltas Consecutivas Detectado!</div>
+              <p class="text-rose-900 mt-0.5" id="faltas-modal-consecutive-desc">Este catequizando faltou em dois encontros seguidos. É necessária atenção pastoral prioritária e contato da coordenação para acolhimento e prevenção de evasão.</p>
+              <div class="mt-2.5 flex flex-wrap gap-2">
+                <button type="button" onclick="triggerManualConsecutiveAlert()" class="px-3.5 py-1.5 bg-rose-700 hover:bg-rose-800 text-white font-bold rounded-xl text-xs shadow-xs transition flex items-center gap-1.5">
+                  <span>✉️</span> <span>Reenviar Notificação (Chat + E-mail para Coordenação)</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cards de Resumo Estatístico -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-2xl text-center">
+              <div class="text-[10px] uppercase font-bold text-slate-500">Total Encontros</div>
+              <div id="faltas-modal-total-encontros" class="text-xl font-black text-slate-900 font-heading">0</div>
+            </div>
+            <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl text-center">
+              <div class="text-[10px] uppercase font-bold text-emerald-800">Presenças (P)</div>
+              <div id="faltas-modal-total-presencas" class="text-xl font-black text-emerald-700 font-heading">0</div>
+            </div>
+            <div class="p-3 bg-rose-50 border border-rose-200 rounded-2xl text-center">
+              <div class="text-[10px] uppercase font-bold text-rose-800">Faltas no Limite</div>
+              <div id="faltas-modal-total-faltas-limite" class="text-xl font-black text-rose-700 font-heading">0 / 3</div>
+            </div>
+            <div class="p-3 bg-amber-50 border border-amber-200 rounded-2xl text-center">
+              <div class="text-[10px] uppercase font-bold text-amber-800">Extracurriculares</div>
+              <div id="faltas-modal-total-extra" class="text-xl font-black text-amber-800 font-heading">0</div>
+            </div>
+          </div>
+
+          <!-- Filtros de Visualização -->
+          <div class="flex items-center justify-between pt-2">
+            <div class="inline-flex p-1 bg-slate-100 rounded-2xl border border-slate-200 text-xs">
+              <button type="button" id="btn-faltas-filter-all" onclick="setFaltasModalFilter('all')" class="px-3 py-1.5 rounded-xl font-bold bg-white text-indigo-950 shadow-2xs">Todos os Encontros</button>
+              <button type="button" id="btn-faltas-filter-only" onclick="setFaltasModalFilter('faltas')" class="px-3 py-1.5 rounded-xl font-medium text-slate-600 hover:text-slate-900">Apenas Faltas / Justificativas</button>
+            </div>
+            <div id="faltas-modal-status-badge"></div>
+          </div>
+
+          <!-- Tabela de Ocorrências -->
+          <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-slate-900 text-white border-b border-indigo-500">
+                  <th class="py-2.5 px-3 text-center">#</th>
+                  <th class="py-2.5 px-3">Data do Encontro</th>
+                  <th class="py-2.5 px-3">Tipo de Encontro</th>
+                  <th class="py-2.5 px-3 text-center">Status</th>
+                  <th class="py-2.5 px-3">Justificativa / Observação</th>
+                  <th class="py-2.5 px-3 text-center">Computa no Limite?</th>
+                </tr>
+              </thead>
+              <tbody id="faltas-modal-table-body" class="divide-y divide-slate-100">
+                <!-- Populado dinamicamente -->
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="bg-slate-50 p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-2 flex-shrink-0">
+          <span class="text-[11px] text-slate-500">💡 Faltas em encontros extracurriculares não contam para o limite semestral de 3 faltas.</span>
+          <button type="button" onclick="closeFaltasModal()" class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs shadow transition">Fechar</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL: NOVA DATA DE ENCONTRO (KAN-09)      -->
+    <!-- ========================================== -->
+    <div id="modal-nova-data-chamada" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+      <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-8">
+        
+        <div class="bg-gradient-to-r from-indigo-900 to-slate-950 text-white p-5 sm:p-6 flex items-center justify-between border-b border-indigo-500/30">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">📅</span>
+            <div>
+              <h3 class="text-base sm:text-lg font-bold font-heading">Adicionar Data de Encontro</h3>
+              <p id="nova-data-modal-turma-sub" class="text-xs text-indigo-200">Turma Selecionada</p>
+            </div>
+          </div>
+          <button type="button" onclick="closeAddChamadaDateModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
+        </div>
+
+        <form id="form-nova-data-chamada" onsubmit="handleSaveNovaDataChamada(event)" class="p-5 sm:p-6 space-y-4 text-xs text-slate-800">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1">Data do Encontro *</label>
+            <input type="date" id="input-nova-data-valor" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none font-medium text-slate-800" />
+          </div>
+
+          <div class="p-3 bg-amber-50/80 rounded-2xl border border-amber-200 space-y-2">
+            <label class="flex items-start gap-2.5 cursor-pointer">
+              <input type="checkbox" id="chk-nova-data-extracurricular" class="mt-0.5 rounded text-amber-600 focus:ring-amber-500 w-4 h-4" />
+              <div class="space-y-0.5">
+                <span class="font-bold text-amber-950 text-xs block">🌟 Encontro Extracurricular</span>
+                <span class="text-[11px] text-amber-800 leading-snug block">Marque esta opção se este encontro for um Retiro, Formação, Missa de Entrega, Vigília ou similar. <strong>As faltas neste encontro NÃO serão computadas para o limite regulamentar de 3 faltas.</strong></span>
+              </div>
+            </label>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1">Nome / Descrição do Encontro (Opcional)</label>
+            <input type="text" id="input-nova-data-nome" placeholder="Ex: Retiro de Crisma, Missa de Acolhida, Formação dos Pais..." class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none" />
+          </div>
+
+          <div class="pt-3 border-t border-slate-200 flex items-center justify-end gap-2">
+            <button type="button" onclick="closeAddChamadaDateModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">Cancelar</button>
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl text-xs font-bold shadow transition">Adicionar Encontro</button>
+          </div>
+        </form>
 
       </div>
     </div>
@@ -24083,12 +24239,14 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         // Estado Civil
         const estCivilHtml = a.estadoCivil ? `<span class="text-xs text-slate-700 leading-tight block max-w-[150px]" title="${a.estadoCivil.replace(/"/g, '&quot;')}">${a.estadoCivil}</span>` : '<span class="text-slate-300">—</span>';
 
-        // Formata Impedido(a) Badge
-        const impStr = (a.impedido || '').trim().toLowerCase();
+        // Formata Impedido(a) Badge (KAN-11)
+        const impStr = (a.impedido || '').trim();
+        const impLower = impStr.toLowerCase();
         let impedidoBadge = '<span class="text-slate-300">—</span>';
-        if (impStr === 'sim' || impStr.startsWith('sim')) {
-          impedidoBadge = '<span class="inline-flex items-center text-[10px] font-bold text-rose-800 bg-rose-100 px-2 py-0.5 rounded-full" title="Catequizando com impedimento">⚠️ Sim</span>';
-        } else if (impStr === 'não' || impStr === 'nao') {
+        if (impLower.startsWith('sim')) {
+          const cleanDesc = impStr.replace(/^Sim\s*[-–:]?\s*/i, '').trim();
+          impedidoBadge = `<span class="inline-flex items-center text-[10px] font-bold text-rose-800 bg-rose-100 border border-rose-300 px-2 py-0.5 rounded-full" title="Não crisma por impedimento canônico: ${a.justificativa || impStr}">⚠️ Não Crisma${cleanDesc ? ' (' + cleanDesc + ')' : ''}</span>`;
+        } else if (impLower === 'não' || impLower === 'nao') {
           impedidoBadge = '<span class="inline-flex items-center text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">Não</span>';
         } else if (a.justificativa && a.justificativa.trim()) {
           impedidoBadge = '<span class="inline-flex items-center text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full" title="Possui justificativa">Pendente</span>';
@@ -24833,6 +24991,10 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         if (stageVal !== 'all' && a.stage !== stageVal) return false;
         if (statusVal === 'ativo' && !a.isAtivo) return false;
         if (statusVal === 'inativo_desistente' && a.isAtivo) return false;
+        if (statusVal === 'impedido') {
+          const imp = (a.impedido || '').toLowerCase().trim();
+          if (!imp.startsWith('sim')) return false;
+        }
 
         if (q) {
           const fullStr = `${a.nome} ${a.cpf} ${a.contato} ${a.email} ${a.stage} ${a.turma} ${a.endereco} ${a.observacoes} ${a.nomeResponsavel}`.toLowerCase();
@@ -24931,9 +25093,13 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           ? `<span class="text-emerald-700 font-bold text-xs">Sim</span>`
           : ((a.primeiraEucaristia || '').toLowerCase().includes('não') ? `<span class="text-rose-700 font-bold text-xs">Não</span>` : `<span class="text-slate-400 text-xs">—</span>`);
 
-        const impedidoBadge = (a.impedido || '').toLowerCase().includes('sim')
-          ? `<span class="text-rose-700 font-bold text-xs" title="${a.justificativa || 'Impedimento informado'}">⚠️ Sim</span>`
-          : `<span class="text-slate-400 text-xs">Não</span>`;
+        const impStrCG = (a.impedido || '').trim();
+        const impLowerCG = impStrCG.toLowerCase();
+        let impedidoBadge = '<span class="text-slate-400 text-xs">Não</span>';
+        if (impLowerCG.startsWith('sim')) {
+          const cleanDesc = impStrCG.replace(/^Sim\s*[-–:]?\s*/i, '').trim();
+          impedidoBadge = `<span class="inline-flex items-center text-[10px] font-bold text-rose-800 bg-rose-100 border border-rose-300 px-2 py-0.5 rounded-full" title="Não crisma por impedimento canônico: ${a.justificativa || impStrCG}">⚠️ Não Crisma${cleanDesc ? ' (' + cleanDesc + ')' : ''}</span>`;
+        }
 
         return `
           <tr class="hover:bg-amber-50/40 transition group">
@@ -25195,6 +25361,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           turma: turma,
           dates: (val && val.dates) || [],
           records: (val && val.records) || {},
+          dateMeta: (val && (val.dateMeta || val.meta)) || {},
           customizedDates: !!(val && val.customizedDates),
           updatedAt: new Date().toISOString()
         }, { merge: true }).catch(e => console.warn('Sync Firestore chamadas error:', key, e));
@@ -25237,9 +25404,14 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
                 if (!(cloudRecords[date] && id in cloudRecords[date])) localHasExtra = true;
               });
             });
+            const cloudDateMeta = cloudData.dateMeta || cloudData.meta || {};
+            const localDateMeta = (db[key] && (db[key].dateMeta || db[key].meta)) || {};
+            const mergedDateMeta = Object.assign({}, localDateMeta, cloudDateMeta);
+
             db[key] = {
               dates: cloudDates,
               records: mergedRecords,
+              dateMeta: mergedDateMeta,
               customizedDates: true
             };
             localStorage.setItem(STORAGE_KEY_CHAMADAS, JSON.stringify(db));
@@ -25281,10 +25453,12 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         db[key] = {
           dates: generateDefaultTurmaDates(etapa, turma),
           records: {},
+          dateMeta: {},
           customizedDates: false
         };
         saveChamadasDatabase(db);
       } else {
+        if (!db[key].dateMeta) db[key].dateMeta = db[key].meta || {};
         if (!Array.isArray(db[key].dates) || db[key].dates.length === 0) {
           db[key].dates = generateDefaultTurmaDates(etapa, turma);
           if (!db[key].records) db[key].records = {};
@@ -25493,13 +25667,16 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         }
       });
 
-      // Cálculo de alertas gerais de faltas na turma (Limite = 3; Alerta Crítico > 3)
+      // Cálculo de alertas gerais de faltas na turma (Limite = 3; Alerta Crítico > 3; KAN-09 Encontros Extracurriculares)
       let alunosEmAlertaCritico = 0;
       let alunosNoLimite = 0;
+      const dateMeta = dataTurma.dateMeta || dataTurma.meta || {};
 
       alunos.forEach(a => {
         let totalFaltasAluno = 0;
         dataTurma.dates.forEach(d => {
+          const isExtra = !!(dateMeta[d] && (dateMeta[d].isExtracurricular || dateMeta[d].extracurricular));
+          if (isExtra) return; // Encontro extracurricular NÃO computa no limite de 3 faltas
           const r = dataTurma.records && dataTurma.records[d] && dataTurma.records[d][a.id];
           if (r && (r.status === 'F' || r.status === 'J')) {
             totalFaltasAluno++;
@@ -25511,6 +25688,25 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           alunosNoLimite++;
         }
       });
+
+      // Atualiza estado do botão/badge de Extracurricular da data selecionada (KAN-09)
+      const currDateSel = currentChamadaSelectedDate;
+      const btnToggleExtra = document.getElementById('btn-toggle-extracurricular');
+      const badgeIconExtra = document.getElementById('badge-icon-extracurricular');
+      const badgeLblExtra = document.getElementById('badge-lbl-extracurricular');
+      if (btnToggleExtra && badgeIconExtra && badgeLblExtra) {
+        const isCurrentDateExtra = !!(currDateSel && dateMeta[currDateSel] && (dateMeta[currDateSel].isExtracurricular || dateMeta[currDateSel].extracurricular));
+        const extraNome = (currDateSel && dateMeta[currDateSel] && dateMeta[currDateSel].nome) || '';
+        if (isCurrentDateExtra) {
+          btnToggleExtra.className = 'inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black border transition shadow-xs bg-amber-500 text-slate-950 border-amber-600 hover:bg-amber-400';
+          badgeIconExtra.textContent = '🌟';
+          badgeLblExtra.textContent = extraNome ? `Extra (${extraNome})` : 'Extracurricular (Sem Limite)';
+        } else {
+          btnToggleExtra.className = 'inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition shadow-2xs bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200';
+          badgeIconExtra.textContent = '📅';
+          badgeLblExtra.textContent = 'Regular';
+        }
+      }
 
       // Atualiza DOM
       const kpiAlunos = document.getElementById('kpi-chamada-total-alunos');
@@ -25622,22 +25818,33 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         const status = rec.status || '';
         const just = rec.justificativa || '';
 
-        // Calcula total histórico de faltas do catequizando
+        // Calcula total histórico de faltas do catequizando (KAN-08 & KAN-09)
         let totalFaltas = 0;
         let totalPresencas = 0;
         let totalJustificadas = 0;
+        let totalFaltasExtra = 0;
+        const dateMeta = dataTurma.dateMeta || dataTurma.meta || {};
 
         (dataTurma.dates || []).forEach(d => {
+          const isExtra = !!(dateMeta[d] && (dateMeta[d].isExtracurricular || dateMeta[d].extracurricular));
           const r = dataTurma.records && dataTurma.records[d] && dataTurma.records[d][a.id];
           if (r) {
             if (r.status === 'P') totalPresencas++;
-            else if (r.status === 'F') totalFaltas++;
-            else if (r.status === 'J') {
-              totalFaltas++; // Conforme regra aprovada: ausência justificada conta como falta normalmente
-              totalJustificadas++;
+            else if (r.status === 'F') {
+              if (isExtra) totalFaltasExtra++;
+              else totalFaltas++;
+            } else if (r.status === 'J') {
+              if (isExtra) totalFaltasExtra++;
+              else {
+                totalFaltas++;
+                totalJustificadas++;
+              }
             }
           }
         });
+
+        // Verificação de 2 faltas consecutivas (KAN-10)
+        const consecutiveInfo = checkConsecutiveAbsences(currentAlunosEtapa, currentAlunosTurma, a.id);
 
         // Peso pastoral: Alerta (>3) = 3, Limite (3) = 2, Regular (<3) = 1
         const situacaoPeso = totalFaltas > 3 ? 3 : (totalFaltas === 3 ? 2 : 1);
@@ -25653,6 +25860,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           totalFaltas,
           totalPresencas,
           totalJustificadas,
+          totalFaltasExtra,
+          consecutiveInfo,
           situacaoPeso
         };
       });
@@ -25754,12 +25963,18 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             <td class="py-2.5 px-4">
               <input type="text" value="${just.replace(/"/g, '&quot;')}" onchange="saveAlunoJustificativa('${a.id}', this.value)" placeholder="${status === 'J' ? 'Motivo da ausência justificada...' : 'Observação sobre a presença/falta...'}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none transition">
             </td>
-            <td class="py-2.5 px-4 text-center">
-              <span class="font-heading font-black text-sm ${totalFaltas > 3 ? 'text-rose-700 font-extrabold' : totalFaltas === 3 ? 'text-amber-700' : 'text-slate-700'}">${totalFaltas}</span>
-              <span class="text-[10px] text-slate-400"> faltas</span>
-              ${totalJustificadas > 0 ? `<div class="text-[10px] text-amber-700 font-medium">(${totalJustificadas} just.)</div>` : ''}
+            <!-- Contador de Faltas Clicável com Modal (KAN-08 & KAN-09) -->
+            <td class="py-2.5 px-4 text-center cursor-pointer hover:bg-slate-100 transition rounded-xl" onclick="openFaltasModal('${a.id}')" title="Clique para ver o histórico detalhado de todas as faltas deste catequizando">
+              <div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 transition shadow-2xs">
+                <span class="font-heading font-black text-sm ${totalFaltas > 3 ? 'text-rose-700 font-extrabold' : totalFaltas === 3 ? 'text-amber-700' : 'text-slate-700'}">${totalFaltas}</span>
+                <span class="text-[10px] text-slate-500 font-semibold">faltas</span>
+                ${totalJustificadas > 0 ? `<span class="text-[10px] text-amber-700 font-bold">(${totalJustificadas} j.)</span>` : ''}
+                ${item.totalFaltasExtra > 0 ? `<span class="text-[10px] text-indigo-700 font-bold" title="${item.totalFaltasExtra} falta(s) em encontro(s) extracurricular(es) não computadas no limite">(+${item.totalFaltasExtra} extra)</span>` : ''}
+                <span class="text-xs text-indigo-500 ml-0.5">🔍</span>
+              </div>
             </td>
             <td class="py-2.5 px-4 text-center">
+              ${item.consecutiveInfo && item.consecutiveInfo.hasConsecutive ? `<div class="mb-1"><span class="inline-flex items-center gap-1 text-[10px] font-black text-rose-900 bg-rose-200 border border-rose-400 px-2 py-0.5 rounded-full animate-pulse shadow-2xs"><span>🚨</span> <span>2 Faltas Consecutivas!</span></span></div>` : ''}
               ${situacaoBadge}
             </td>
           </tr>
@@ -25795,17 +26010,19 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           </th>
       `;
 
+      const dateMetaMap = dataTurma.dateMeta || dataTurma.meta || {};
       dates.forEach(dStr => {
         const parts = dStr.split('-');
         const shortFmt = `${parts[2]}/${parts[1]}`;
         const isCurrent = dStr === currentChamadaSelectedDate;
+        const isExtraDate = !!(dateMetaMap[dStr] && (dateMetaMap[dStr].isExtracurricular || dateMetaMap[dStr].extracurricular));
         theadHtml += `
-          <th class="py-2 px-1 font-heading text-center text-xs min-w-[58px] group relative ${isCurrent ? 'bg-indigo-800 text-amber-300 font-black' : ''}" title="${_dataFmt(dStr)} (${_diaSemana(dStr)})">
+          <th class="py-2 px-1 font-heading text-center text-xs min-w-[62px] group relative ${isCurrent ? 'bg-indigo-800 text-amber-300 font-black' : ''} ${isExtraDate ? 'bg-amber-950/60' : ''}" title="${_dataFmt(dStr)} (${_diaSemana(dStr)})${isExtraDate ? ' — Encontro Extracurricular (Não conta no limite de faltas)' : ''}">
             <div class="flex items-center justify-center gap-1">
               <span>${shortFmt}</span>
               <button type="button" onclick="deleteChamadaDate('${dStr}')" class="opacity-50 hover:opacity-100 hover:bg-rose-600 text-white rounded px-1 py-0.5 text-[9px] transition leading-none font-sans" title="Excluir encontro de ${shortFmt}">✕</button>
             </div>
-            <div class="text-[9px] font-normal text-slate-400">${_diaSemana(dStr).slice(0, 3)}</div>
+            <div class="text-[9px] font-normal ${isExtraDate ? 'text-amber-300 font-black' : 'text-slate-400'}">${isExtraDate ? '🌟 Extra' : _diaSemana(dStr).slice(0, 3)}</div>
           </th>
         `;
       });
@@ -25838,12 +26055,18 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         let just = 0;
         let falt = 0;
 
+        const dateMeta = dataTurma.dateMeta || dataTurma.meta || {};
         dates.forEach(dStr => {
+          const isExtra = !!(dateMeta[dStr] && (dateMeta[dStr].isExtracurricular || dateMeta[dStr].extracurricular));
           const rec = dataTurma.records && dataTurma.records[dStr] && dataTurma.records[dStr][a.id];
           const st = rec ? rec.status : '';
           if (st === 'P') pres++;
-          else if (st === 'J') { just++; falt++; }
-          else if (st === 'F') falt++;
+          else if (st === 'J') {
+            just++;
+            if (!isExtra) falt++;
+          } else if (st === 'F') {
+            if (!isExtra) falt++;
+          }
         });
 
         const totalRegistros = pres + falt;
@@ -25935,7 +26158,12 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           sitHtml = `<span class="inline-flex items-center text-[10px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">🟢 Regular</span>`;
         }
 
-        return `
+            const consecutiveInfo = checkConsecutiveAbsences(currentAlunosEtapa, currentAlunosTurma, a.id);
+            let finalSitHtml = sitHtml;
+            if (consecutiveInfo.hasConsecutive) {
+              finalSitHtml = `<div class="space-y-0.5"><span class="inline-flex items-center text-[9.5px] font-black text-rose-900 bg-rose-200 border border-rose-400 px-2 py-0.5 rounded-full animate-pulse shadow-2xs">🚨 2 Consecutivas!</span><div>${sitHtml}</div></div>`;
+            }
+            return `
           <tr class="hover:bg-slate-50/80 transition ${falt > 3 ? 'bg-rose-50/40' : ''}">
             <td class="py-2 px-3 text-center font-bold text-slate-400 text-xs col-freeze-idx">${idx + 1}</td>
             <td class="py-2 px-3.5 col-freeze-name">
@@ -25944,9 +26172,9 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             ${cellsHtml}
             <td class="py-2 px-2 text-center font-bold text-emerald-700 bg-emerald-50/40 text-xs">${pres}</td>
             <td class="py-2 px-2 text-center font-bold text-amber-700 bg-amber-50/40 text-xs">${just}</td>
-            <td class="py-2 px-2 text-center font-black ${falt > 3 ? 'text-rose-700 font-extrabold' : 'text-rose-600'} bg-rose-50/40 text-xs">${falt}</td>
+            <td class="py-2 px-2 text-center font-black ${falt > 3 ? 'text-rose-700 font-extrabold' : 'text-rose-600'} bg-rose-50/40 text-xs cursor-pointer hover:bg-rose-100 transition rounded" onclick="openFaltasModal('${a.id}')" title="Clique para ver o histórico detalhado de faltas deste catequizando">${falt} 🔍</td>
             <td class="py-2 px-2 text-center font-black text-xs ${taxaPresenca < 75 ? 'text-rose-700' : 'text-slate-800'}">${taxaPresenca}%</td>
-            <td class="py-2 px-3 text-center">${sitHtml}</td>
+            <td class="py-2 px-3 text-center">${finalSitHtml}</td>
           </tr>
         `;
       }).join('');
@@ -25990,6 +26218,11 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         date: currentChamadaSelectedDate,
         status: nextStatus
       });
+
+      // Avaliação de 2 Faltas Consecutivas e Notificação Urgente (KAN-10)
+      if (nextStatus === 'F' || nextStatus === 'J') {
+        evaluateAndTriggerConsecutiveAbsenceAlert(alunoId);
+      }
     }
 
     // Alterna status ciclicamente ao clicar na célula da matriz: '' -> 'P' -> 'J' -> 'F' -> ''
@@ -26014,6 +26247,11 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       saveChamadasDatabase(db);
       updateChamadaKPIs();
       renderChamadaMatrizTable();
+
+      // Avaliação de 2 Faltas Consecutivas e Notificação Urgente (KAN-10)
+      if (next === 'F' || next === 'J') {
+        evaluateAndTriggerConsecutiveAbsenceAlert(alunoId);
+      }
     }
 
     // Salva justificativa digitada
@@ -26168,6 +26406,496 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       window.ICM_CONFIG.logAuditEvent('DELETE_CHAMADA_DATE', `${currentAlunosEtapa} - ${currentAlunosTurma}`, {
         date: targetDate
       });
+    }
+
+    // =========================================================================
+    // FASE 2: GESTÃO DE FALTAS, EXTRACURRICULARES E ALERTAS URGENTES (KAN-08 A KAN-11)
+    // =========================================================================
+
+    let currentFaltasModalAlunoId = null;
+    let currentFaltasModalFilter = 'all'; // 'all' | 'faltas'
+    window._dispatchedConsecutiveAlerts = window._dispatchedConsecutiveAlerts || {};
+
+    // KAN-09: Abre modal para adicionar data com opção de Extracurricular
+    function openAddChamadaDateModal() {
+      const modal = document.getElementById('modal-nova-data-chamada');
+      const sub = document.getElementById('nova-data-modal-turma-sub');
+      const inputVal = document.getElementById('input-nova-data-valor');
+      const chkExtra = document.getElementById('chk-nova-data-extracurricular');
+      const inputNome = document.getElementById('input-nova-data-nome');
+
+      if (sub) sub.textContent = `${currentAlunosTurma} • ${currentAlunosEtapa}`;
+      if (inputVal) inputVal.value = new Date().toISOString().split('T')[0];
+      if (chkExtra) chkExtra.checked = false;
+      if (inputNome) inputNome.value = '';
+
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeAddChamadaDateModal() {
+      const modal = document.getElementById('modal-nova-data-chamada');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function handleSaveNovaDataChamada(event) {
+      if (event && event.preventDefault) event.preventDefault();
+      const inputVal = document.getElementById('input-nova-data-valor');
+      const chkExtra = document.getElementById('chk-nova-data-extracurricular');
+      const inputNome = document.getElementById('input-nova-data-nome');
+
+      if (!inputVal || !inputVal.value) {
+        alert('Por favor, informe a data do encontro.');
+        return;
+      }
+
+      const isoDate = inputVal.value.trim();
+      const isExtra = !!(chkExtra && chkExtra.checked);
+      const customNome = (inputNome ? inputNome.value : '').trim();
+
+      const db = getChamadasDatabase();
+      const key = getTurmaKey(currentAlunosEtapa, currentAlunosTurma);
+      if (!db[key]) db[key] = { dates: [], records: {}, dateMeta: {} };
+      if (!Array.isArray(db[key].dates)) db[key].dates = [];
+      if (!db[key].dateMeta) db[key].dateMeta = {};
+
+      if (!db[key].dates.includes(isoDate)) {
+        db[key].dates.push(isoDate);
+        db[key].dates.sort();
+      }
+
+      db[key].dateMeta[isoDate] = {
+        isExtracurricular: isExtra,
+        nome: customNome,
+        updatedAt: new Date().toISOString()
+      };
+      db[key].customizedDates = true;
+
+      saveChamadasDatabase(db);
+      currentChamadaSelectedDate = isoDate;
+      closeAddChamadaDateModal();
+      renderChamadaSection();
+
+      window.ICM_CONFIG.logAuditEvent('ADD_CHAMADA_DATE', `${currentAlunosEtapa} - ${currentAlunosTurma}`, {
+        date: isoDate,
+        isExtracurricular: isExtra,
+        nome: customNome
+      });
+    }
+
+    // KAN-09: Alterna status de extracurricular da data atualmente selecionada
+    function toggleCurrentDateExtracurricular() {
+      if (!currentChamadaSelectedDate) {
+        alert('Nenhuma data de aula selecionada.');
+        return;
+      }
+
+      const db = getChamadasDatabase();
+      const key = getTurmaKey(currentAlunosEtapa, currentAlunosTurma);
+      if (!db[key]) return;
+      if (!db[key].dateMeta) db[key].dateMeta = {};
+
+      const curMeta = db[key].dateMeta[currentChamadaSelectedDate] || {};
+      const nextExtra = !curMeta.isExtracurricular;
+
+      db[key].dateMeta[currentChamadaSelectedDate] = {
+        ...curMeta,
+        isExtracurricular: nextExtra,
+        updatedAt: new Date().toISOString()
+      };
+      db[key].customizedDates = true;
+
+      saveChamadasDatabase(db);
+      updateChamadaKPIs();
+      if (currentChamadaSubMode === 'matriz') {
+        renderChamadaMatrizTable();
+      } else {
+        renderChamadaDiaTable();
+      }
+
+      window.ICM_CONFIG.logAuditEvent('TOGGLE_EXTRACURRICULAR_DATE', `${currentAlunosEtapa} - ${currentAlunosTurma}`, {
+        date: currentChamadaSelectedDate,
+        isExtracurricular: nextExtra
+      });
+    }
+
+    // KAN-10: Detector de 2 faltas consecutivas em encontros regulares
+    function checkConsecutiveAbsences(etapa, turma, alunoId) {
+      const dataTurma = getTurmaChamadasData(etapa, turma);
+      const dateMeta = dataTurma.dateMeta || dataTurma.meta || {};
+
+      // Apenas datas regulares (não-extracurriculares) contam para as faltas consecutivas
+      const regularDates = (dataTurma.dates || []).filter(d => {
+        return !(dateMeta[d] && (dateMeta[d].isExtracurricular || dateMeta[d].extracurricular));
+      }).sort();
+
+      const studentRecords = [];
+      regularDates.forEach(d => {
+        const rec = dataTurma.records && dataTurma.records[d] && dataTurma.records[d][alunoId];
+        if (rec && (rec.status === 'P' || rec.status === 'F' || rec.status === 'J')) {
+          studentRecords.push({ date: d, status: rec.status, justificativa: rec.justificativa || '' });
+        }
+      });
+
+      if (studentRecords.length < 2) {
+        return { hasConsecutive: false, dates: [], dateLabels: [] };
+      }
+
+      const last1 = studentRecords[studentRecords.length - 1];
+      const last2 = studentRecords[studentRecords.length - 2];
+
+      const isAbsence = s => s === 'F' || s === 'J';
+      if (isAbsence(last1.status) && isAbsence(last2.status)) {
+        return {
+          hasConsecutive: true,
+          dates: [last2.date, last1.date],
+          dateLabels: [_dataFmt(last2.date), _dataFmt(last1.date)],
+          records: [last2, last1]
+        };
+      }
+
+      return { hasConsecutive: false, dates: [], dateLabels: [] };
+    }
+
+    // KAN-10: Avaliação e disparo de notificação urgente
+    async function evaluateAndTriggerConsecutiveAbsenceAlert(alunoId) {
+      const consecutiveInfo = checkConsecutiveAbsences(currentAlunosEtapa, currentAlunosTurma, alunoId);
+      if (!consecutiveInfo.hasConsecutive) return;
+
+      const alunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma);
+      const aluno = alunos.find(a => a.id === alunoId);
+      if (!aluno) return;
+
+      const alertKey = `${currentAlunosEtapa}__${currentAlunosTurma}__${alunoId}__${consecutiveInfo.dates.join('_')}`;
+      if (window._dispatchedConsecutiveAlerts[alertKey]) return; // Evita disparos duplicados na mesma sessão
+      window._dispatchedConsecutiveAlerts[alertKey] = true;
+
+      // Calcula total acumulado
+      const dataTurma = getTurmaChamadasData(currentAlunosEtapa, currentAlunosTurma);
+      const dateMeta = dataTurma.dateMeta || dataTurma.meta || {};
+      let totalFaltas = 0;
+      (dataTurma.dates || []).forEach(d => {
+        if (dateMeta[d] && (dateMeta[d].isExtracurricular || dateMeta[d].extracurricular)) return;
+        const r = dataTurma.records && dataTurma.records[d] && dataTurma.records[d][alunoId];
+        if (r && (r.status === 'F' || r.status === 'J')) totalFaltas++;
+      });
+
+      await dispatchConsecutiveAbsenceChatAlert(currentAlunosEtapa, currentAlunosTurma, aluno, consecutiveInfo.dateLabels, totalFaltas);
+      await dispatchConsecutiveAbsenceEmailAlert(currentAlunosEtapa, currentAlunosTurma, aluno, consecutiveInfo.dateLabels, totalFaltas);
+    }
+
+    // KAN-10: Disparo no Chat Pastoral
+    async function dispatchConsecutiveAbsenceChatAlert(etapa, turma, aluno, dateLabels, totalFaltas) {
+      if (!window.firebaseDb || typeof window.firebaseDb.collection !== 'function') return;
+
+      const salaId = 'sala_alertas_pastorais_frequencia';
+      const salaRef = window.firebaseDb.collection('chat_salas').doc(salaId);
+
+      const msgTexto = `🚨 ALERTA URGENTE DE FREQUÊNCIA: O catequizando *${aluno.nome}* da turma *${turma}* (${etapa}) registrou 2 faltas consecutivas nos encontros de ${dateLabels.join(' e ')}. Situação curricular: ${totalFaltas} falta(s) no semestre. Recomenda-se acolhimento pastoral imediato. Contato: ${aluno.contato || 'Não informado'}.`;
+
+      try {
+        const docSnap = await salaRef.get();
+        if (!docSnap.exists) {
+          await salaRef.set({
+            tipo: 'grupo',
+            nome: '🚨 Alertas Pastorais e Frequência',
+            participantes: ['admin_master', 'coord_geral', 'vice_coord_geral'],
+            participantesEmails: ['colletes@gmail.com', 'lorenammoraes@gmail.com', 'andresprojetos@gmail.com'],
+            participantesInfo: {
+              'admin_master': { displayName: 'Thiago (Master Admin)', email: 'colletes@gmail.com', role: 'master_admin' },
+              'coord_geral': { displayName: 'Lorena (Coordenação Geral)', email: 'lorenammoraes@gmail.com', role: 'coord_geral' },
+              'vice_coord_geral': { displayName: 'Andrés (Vice-Coordenação)', email: 'andresprojetos@gmail.com', role: 'vice_coord_geral' }
+            },
+            criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            ultimaMensagem: {
+              texto: msgTexto.substring(0, 60) + '...',
+              autorNome: 'Sistema de Frequência',
+              timestamp: new Date().toISOString()
+            }
+          });
+        }
+
+        await salaRef.collection('mensagens').add({
+          salaId: salaId,
+          remetenteId: 'sistema_frequencia',
+          remetenteNome: '🚨 Alerta Pastoral',
+          remetenteEmail: 'catequese@imaculadocoracaodf.com.br',
+          remetenteRole: 'master_admin',
+          texto: msgTexto,
+          criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        await salaRef.update({
+          ultimaMensagem: {
+            texto: msgTexto.substring(0, 60) + '...',
+            autorNome: 'Alerta Pastoral',
+            timestamp: new Date().toISOString()
+          },
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      } catch (err) {
+        console.warn('Erro ao registrar alerta no chat pastoral:', err);
+      }
+    }
+
+    // KAN-10: Disparo por E-mail para Coordenação Geral (Lorena e Andrés), Master Admin (Thiago) e Coord. de Etapa
+    async function dispatchConsecutiveAbsenceEmailAlert(etapa, turma, aluno, dateLabels, totalFaltas) {
+      const coordGeralEmail = 'lorenammoraes@gmail.com';
+      const viceCoordEmail = 'andresprojetos@gmail.com';
+      const masterAdminEmail = 'colletes@gmail.com';
+
+      let coordEtapaEmail = '';
+      try {
+        const catDb = (typeof getCatequistasDatabase === 'function') ? getCatequistasDatabase() : [];
+        const coordEtapa = catDb.find(c => (c.etapa === etapa || (c.funcoesExtras && c.funcoesExtras.includes(etapa))) && (c.funcaoPrincipal || '').toLowerCase().includes('coord'));
+        if (coordEtapa && coordEtapa.email) coordEtapaEmail = coordEtapa.email;
+      } catch (e) {}
+
+      const recipients = [coordGeralEmail, viceCoordEmail, masterAdminEmail];
+      if (coordEtapaEmail && !recipients.includes(coordEtapaEmail)) recipients.push(coordEtapaEmail);
+
+      // Notificações no sino do Kanban/Central de Notificações
+      if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
+        recipients.forEach(email => {
+          window.firebaseDb.collection('kanban_notifications').add({
+            destinatarioEmail: email.toLowerCase(),
+            tipo: 'alerta_duas_faltas',
+            titulo: `🚨 2 Faltas Consecutivas: ${aluno.nome}`,
+            mensagem: `Catequizando da turma ${turma} (${etapa}) registrou 2 faltas consecutivas (${dateLabels.join(' e ')}). Total: ${totalFaltas} falta(s).`,
+            alunoId: aluno.id,
+            etapa: etapa,
+            turma: turma,
+            lida: false,
+            criadaEm: firebase.firestore.FieldValue.serverTimestamp()
+          }).catch(console.warn);
+        });
+      }
+
+      window.ICM_CONFIG.logAuditEvent('ALERTA_2_FALTAS_CONSECUTIVAS', `${etapa} - ${turma}`, {
+        alunoId: aluno.id,
+        alunoNome: aluno.nome,
+        datas: dateLabels,
+        destinatarios: recipients
+      });
+    }
+
+    // KAN-08: Modal de Detalhamento de Faltas
+    function openFaltasModal(alunoId) {
+      currentFaltasModalAlunoId = alunoId;
+      currentFaltasModalFilter = 'all';
+
+      const alunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma);
+      const aluno = alunos.find(a => a.id === alunoId);
+      if (!aluno) return;
+
+      const sub = document.getElementById('faltas-modal-aluno-subtitle');
+      if (sub) {
+        sub.textContent = `${aluno.nome} • ${currentAlunosTurma} (${currentAlunosEtapa})${aluno.contato ? ' • 📞 ' + aluno.contato : ''}`;
+      }
+
+      renderFaltasModalContent();
+
+      const modal = document.getElementById('modal-detalhes-faltas');
+      if (modal) modal.classList.remove('hidden');
+
+      window.ICM_CONFIG.logAuditEvent('VIEW_DETALHES_FALTAS', `${currentAlunosEtapa} - ${currentAlunosTurma}`, {
+        alunoId: aluno.id,
+        alunoNome: aluno.nome
+      });
+    }
+
+    function closeFaltasModal() {
+      const modal = document.getElementById('modal-detalhes-faltas');
+      if (modal) modal.classList.add('hidden');
+      currentFaltasModalAlunoId = null;
+    }
+
+    function setFaltasModalFilter(mode) {
+      currentFaltasModalFilter = mode;
+      const btnAll = document.getElementById('btn-faltas-filter-all');
+      const btnOnly = document.getElementById('btn-faltas-filter-only');
+
+      if (mode === 'faltas') {
+        if (btnAll) btnAll.className = 'px-3 py-1.5 rounded-xl font-medium text-slate-600 hover:text-slate-900';
+        if (btnOnly) btnOnly.className = 'px-3 py-1.5 rounded-xl font-bold bg-white text-indigo-950 shadow-2xs';
+      } else {
+        if (btnAll) btnAll.className = 'px-3 py-1.5 rounded-xl font-bold bg-white text-indigo-950 shadow-2xs';
+        if (btnOnly) btnOnly.className = 'px-3 py-1.5 rounded-xl font-medium text-slate-600 hover:text-slate-900';
+      }
+
+      renderFaltasModalContent();
+    }
+
+    function renderFaltasModalContent() {
+      if (!currentFaltasModalAlunoId) return;
+
+      const alunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma);
+      const aluno = alunos.find(a => a.id === currentFaltasModalAlunoId);
+      if (!aluno) return;
+
+      const dataTurma = getTurmaChamadasData(currentAlunosEtapa, currentAlunosTurma);
+      const dates = dataTurma.dates || [];
+      const dateMeta = dataTurma.dateMeta || dataTurma.meta || {};
+
+      let totalPres = 0;
+      let totalFaltasLimite = 0;
+      let totalJustificadas = 0;
+      let totalExtraFaltas = 0;
+
+      const rows = [];
+      dates.forEach(dStr => {
+        const isExtra = !!(dateMeta[dStr] && (dateMeta[dStr].isExtracurricular || dateMeta[dStr].extracurricular));
+        const extraNome = (dateMeta[dStr] && dateMeta[dStr].nome) || '';
+        const rec = dataTurma.records && dataTurma.records[dStr] && dataTurma.records[dStr][aluno.id];
+        const status = rec ? rec.status : '';
+        const just = (rec && rec.justificativa) || '';
+
+        if (status === 'P') {
+          totalPres++;
+        } else if (status === 'F') {
+          if (isExtra) totalExtraFaltas++;
+          else totalFaltasLimite++;
+        } else if (status === 'J') {
+          if (isExtra) totalExtraFaltas++;
+          else {
+            totalFaltasLimite++;
+            totalJustificadas++;
+          }
+        }
+
+        rows.push({
+          date: dStr,
+          isExtra,
+          extraNome,
+          status,
+          justificativa: just
+        });
+      });
+
+      // Atualiza KPIs do modal
+      const elEncontros = document.getElementById('faltas-modal-total-encontros');
+      const elPres = document.getElementById('faltas-modal-total-presencas');
+      const elFaltas = document.getElementById('faltas-modal-total-faltas-limite');
+      const elExtra = document.getElementById('faltas-modal-total-extra');
+      const elBadge = document.getElementById('faltas-modal-status-badge');
+      const elConsecutiveBanner = document.getElementById('faltas-modal-consecutive-alert');
+      const elConsecutiveDesc = document.getElementById('faltas-modal-consecutive-desc');
+
+      if (elEncontros) elEncontros.textContent = dates.length;
+      if (elPres) elPres.textContent = totalPres;
+      if (elFaltas) {
+        elFaltas.textContent = `${totalFaltasLimite} / 3`;
+        elFaltas.className = `text-xl font-black font-heading ${totalFaltasLimite > 3 ? 'text-rose-700' : totalFaltasLimite === 3 ? 'text-amber-700' : 'text-slate-800'}`;
+      }
+      if (elExtra) elExtra.textContent = totalExtraFaltas;
+
+      // Alerta de 2 Faltas Consecutivas
+      const consecutiveInfo = checkConsecutiveAbsences(currentAlunosEtapa, currentAlunosTurma, aluno.id);
+      if (consecutiveInfo.hasConsecutive) {
+        if (elConsecutiveBanner) elConsecutiveBanner.classList.remove('hidden');
+        if (elConsecutiveDesc) {
+          elConsecutiveDesc.textContent = `Este catequizando faltou em dois encontros seguidos (${consecutiveInfo.dateLabels.join(' e ')}). É necessária atenção pastoral prioritária e contato da coordenação para acolhimento e prevenção de evasão.`;
+        }
+      } else {
+        if (elConsecutiveBanner) elConsecutiveBanner.classList.add('hidden');
+      }
+
+      // Badge de Situação Pastoral
+      if (elBadge) {
+        if (totalFaltasLimite > 3) {
+          elBadge.innerHTML = `<span class="inline-flex items-center gap-1 text-xs font-black text-rose-800 bg-rose-100 border border-rose-300 px-3 py-1 rounded-full animate-pulse">🚨 Alerta Crítico (&gt;3 Faltas)</span>`;
+        } else if (totalFaltasLimite === 3) {
+          elBadge.innerHTML = `<span class="inline-flex items-center gap-1 text-xs font-bold text-amber-800 bg-amber-100 border border-amber-300 px-3 py-1 rounded-full">⚠️ Limite Atingido (3 Faltas)</span>`;
+        } else {
+          elBadge.innerHTML = `<span class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">🟢 Regular (${totalFaltasLimite}/3)</span>`;
+        }
+      }
+
+      // Renderiza Tabela de Ocorrências
+      const tbody = document.getElementById('faltas-modal-table-body');
+      if (!tbody) return;
+
+      const filteredRows = rows.filter(r => {
+        if (currentFaltasModalFilter === 'faltas') {
+          return r.status === 'F' || r.status === 'J';
+        }
+        return true;
+      });
+
+      if (filteredRows.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-8 text-center text-slate-400">
+              ${currentFaltasModalFilter === 'faltas' ? '🎉 Parabéns! Este catequizando não possui nenhuma falta registrada.' : 'Nenhum encontro cadastrado nesta turma.'}
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filteredRows.map((r, idx) => {
+        const isConsecutiveDate = consecutiveInfo.hasConsecutive && consecutiveInfo.dates.includes(r.date);
+        
+        let statusBadge = '<span class="text-slate-300 font-bold">—</span>';
+        if (r.status === 'P') {
+          statusBadge = '<span class="inline-flex items-center text-[10px] font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-full">✓ Presença (P)</span>';
+        } else if (r.status === 'J') {
+          statusBadge = '<span class="inline-flex items-center text-[10px] font-bold text-amber-800 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-full">ℹ️ Justificada (J)</span>';
+        } else if (r.status === 'F') {
+          statusBadge = '<span class="inline-flex items-center text-[10px] font-bold text-rose-800 bg-rose-100 border border-rose-300 px-2 py-0.5 rounded-full">✕ Falta (F)</span>';
+        }
+
+        const tipoBadge = r.isExtra 
+          ? `<span class="inline-flex items-center gap-1 text-[10px] font-extrabold text-amber-900 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-full"><span>🌟 Extracurricular</span>${r.extraNome ? ` <span>(${r.extraNome})</span>` : ''}</span>`
+          : `<span class="inline-flex items-center text-[10px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">Regular</span>`;
+
+        const computaBadge = r.isExtra
+          ? `<span class="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full">Não (Extra)</span>`
+          : (r.status === 'F' || r.status === 'J' ? `<span class="text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full">Sim (Limite)</span>` : `<span class="text-slate-400 text-xs">—</span>`);
+
+        return `
+          <tr class="hover:bg-slate-50 transition ${isConsecutiveDate ? 'bg-rose-50/70 border-l-4 border-l-rose-500' : ''}">
+            <td class="py-2.5 px-3 text-center text-slate-400 font-bold">${idx + 1}</td>
+            <td class="py-2.5 px-3 font-medium text-slate-900">
+              <div>${_dataFmt(r.date)} <span class="text-slate-400 text-[11px]">(${_diaSemana(r.date)})</span></div>
+              ${isConsecutiveDate ? `<div class="text-[9.5px] font-black text-rose-700 mt-0.5">🚨 Ausência Consecutiva</div>` : ''}
+            </td>
+            <td class="py-2.5 px-3">${tipoBadge}</td>
+            <td class="py-2.5 px-3 text-center">${statusBadge}</td>
+            <td class="py-2.5 px-3 text-slate-700">${r.justificativa ? r.justificativa : '<span class="text-slate-300">—</span>'}</td>
+            <td class="py-2.5 px-3 text-center">${computaBadge}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function triggerManualConsecutiveAlert() {
+      if (!currentFaltasModalAlunoId) return;
+      const alunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma);
+      const aluno = alunos.find(a => a.id === currentFaltasModalAlunoId);
+      if (!aluno) return;
+
+      const consecutiveInfo = checkConsecutiveAbsences(currentAlunosEtapa, currentAlunosTurma, aluno.id);
+      if (!consecutiveInfo.hasConsecutive) {
+        alert('Este catequizando não possui 2 faltas consecutivas registradas.');
+        return;
+      }
+
+      dispatchConsecutiveAbsenceChatAlert(currentAlunosEtapa, currentAlunosTurma, aluno, consecutiveInfo.dateLabels, 2);
+      dispatchConsecutiveAbsenceEmailAlert(currentAlunosEtapa, currentAlunosTurma, aluno, consecutiveInfo.dateLabels, 2);
+      alert(`✅ Notificação de faltas consecutivas reenviada para o Chat da Coordenação e registrada para Lorena (Coord. Geral), Andrés (Vice-Coord.) e Thiago (Master Admin).`);
+    }
+
+    // KAN-11: Filtro rápido de Impedidos Canônicos no Cadastro Geral
+    function toggleImpedidosFilterCadastroGeral() {
+      const selStatus = document.getElementById('sel-filter-cg-status');
+      if (!selStatus) return;
+      if (selStatus.value === 'impedido') {
+        selStatus.value = 'all';
+      } else {
+        selStatus.value = 'impedido';
+      }
+      renderCadastroGeralTable();
     }
 
     function deleteSelectedChamadaDate() {
