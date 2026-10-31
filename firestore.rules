@@ -19,6 +19,15 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.token.email.lower() == 'andresprojetos@gmail.com';
     }
 
+    // KAN-13: Identificação oficial dos e-mails da Secretaria Paroquial
+    function isSecretaria() {
+      return isAuthenticated() && (
+        request.auth.token.email.lower() == 'secretaria@imaculadocoracaodf.com.br' ||
+        request.auth.token.email.lower() == 'picmbrasiliapastorais@gmail.com' ||
+        request.auth.token.email.lower() == 'picmbrasilia@gmail.com'
+      );
+    }
+
     function isCoordOrAdmin() {
       return isMasterAdmin() || isCoordGeral() || isViceCoordGeral();
     }
@@ -51,10 +60,10 @@ service cloud.firestore {
       allow write: if isCoordOrAdmin();
     }
 
-    // Eventos, Retiros e Cronograma Pastoral
+    // Eventos, Retiros e Cronograma Pastoral (Recepção de Sacramentos • KAN-13)
     match /eventos/{eventoId} {
       allow read: if isAuthenticated();
-      allow write: if isCoordOrAdmin();
+      allow write: if isCoordOrAdmin() || isSecretaria();
     }
 
     // Organogramas Oficiais
@@ -87,10 +96,10 @@ service cloud.firestore {
       allow write: if isAuthenticated();
     }
 
-    // Configurações Gerais e Cronograma de Eventos
+    // Configurações Gerais e Cronograma de Eventos / Sacramentos (KAN-13)
     match /configuracoes/{docId} {
       allow read: if isAuthenticated();
-      allow write: if isCoordOrAdmin();
+      allow write: if isCoordOrAdmin() || isSecretaria();
     }
 
     // Cadastro Oficial e Fotos de Catequistas (LGPD — Acesso Restrito e Auditado)
