@@ -3405,7 +3405,7 @@
             <!-- CPF -->
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">CPF</label>
-              <input type="text" id="aluno-cpf" placeholder="Ex: 000.000.000-00" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none" />
+              <input type="text" id="aluno-cpf" oninput="this.value = maskCPF(this.value)" onblur="if(this.value) this.value = formatCPF(this.value)" placeholder="Ex: 000.000.000-00" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none font-mono" />
             </div>
 
             <!-- Data de Nascimento -->
@@ -3493,7 +3493,7 @@
                 </div>
                 <div>
                   <label class="block text-[10.5px] font-bold text-slate-700 uppercase tracking-wider mb-1">CPF do Responsável</label>
-                  <input type="text" id="aluno-resp-cpf" placeholder="Ex: 000.000.000-00" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-xs bg-white focus:ring-2 focus:ring-amber-400 outline-none" />
+                  <input type="text" id="aluno-resp-cpf" oninput="this.value = maskCPF(this.value)" onblur="if(this.value) this.value = formatCPF(this.value)" placeholder="Ex: 000.000.000-00" class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-xs bg-white focus:ring-2 focus:ring-amber-400 outline-none font-mono" />
                 </div>
               </div>
             </div>
@@ -4047,14 +4047,32 @@
             <input type="text" id="turma-form-daytime" required placeholder="Ex: Sábado: 08:30 às 10:00 ou Segunda: 20:00 às 21:30" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs sm:text-sm font-semibold text-slate-800 outline-none focus:border-[#d4a94f]">
           </div>
 
-          <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Catequistas *</label>
-            <input type="text" id="turma-form-catechists" required placeholder="Ex: Patrícia e Eliane" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs sm:text-sm font-semibold text-slate-800 outline-none focus:border-[#d4a94f]">
+          <!-- CATEQUISTAS TITULARES DINÂMICOS (KAN-02) -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Catequistas Titulares *</label>
+              <button type="button" onclick="addCatequistaRow('titular')" class="text-[11px] font-bold text-indigo-700 hover:text-indigo-900 flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-lg border border-indigo-200 transition">
+                <span>➕</span> <span>Adicionar Catequista</span>
+              </button>
+            </div>
+            <div id="container-catequistas-titulares" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+              <!-- Renderizado dinamicamente via renderDynamicCatequistasInputs() -->
+            </div>
+            <input type="hidden" id="turma-form-catechists" value="">
           </div>
 
-          <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Auxiliares em formação (opcional)</label>
-            <input type="text" id="turma-form-auxiliares" placeholder="Ex: Ane, Mariana (separar por vírgula)" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs sm:text-sm font-semibold text-slate-800 outline-none focus:border-[#d4a94f]">
+          <!-- AUXILIARES EM FORMAÇÃO DINÂMICOS (KAN-02) -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Auxiliares em formação (opcional)</label>
+              <button type="button" onclick="addCatequistaRow('auxiliar')" class="text-[11px] font-bold text-slate-700 hover:text-slate-900 flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-lg border border-slate-300 transition">
+                <span>➕</span> <span>Adicionar Auxiliar</span>
+              </button>
+            </div>
+            <div id="container-catequistas-auxiliares" class="space-y-2 max-h-36 overflow-y-auto pr-1">
+              <!-- Renderizado dinamicamente via renderDynamicCatequistasInputs() -->
+            </div>
+            <input type="hidden" id="turma-form-auxiliares" value="">
             <label class="flex items-center gap-2 mt-1.5 text-xs text-slate-600 cursor-pointer">
               <input type="checkbox" id="turma-form-semcatequista" class="rounded text-amber-500 focus:ring-0">
               <span>Marcar como "Apenas auxiliares em formação (sem catequista titular)"</span>
@@ -12950,11 +12968,11 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             turmas: [
               { id: 't-euc2-1', turma: 'Turma 01', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Bruna Martins Vilarinho Neto e Ana Luiza Yung', auxiliares: [], semCatequista: false, room: 'Sala São Mateus (Sala 11 - Salão Par.)', hall: 'Salão Paroquial' },
               { id: 't-euc2-2', turma: 'Turma 02', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Eliane Bonasser e Carla', auxiliares: [], semCatequista: false, room: 'Sala Carlo Acutis (Sala 08 - Centro Cat.)', hall: 'Centro Catequético' },
-              { id: 't-euc2-3', turma: 'Turma 03', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Marilian e Maria Luísa', auxiliares: ['Ana Julia'], semCatequista: false, room: 'Sala São Lucas (Sala 13 - Salão Par.)', hall: 'Salão Paroquial' },
+              { id: 't-euc2-3', turma: 'Turma 03', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Marilian, Maria Luísa e Anna Júlia', auxiliares: [], semCatequista: false, room: 'Sala São Lucas (Sala 13 - Salão Par.)', hall: 'Salão Paroquial' },
               { id: 't-euc2-4', turma: 'Turma 04', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Maria Laura e Suelene', auxiliares: ['Matheus'], semCatequista: false, room: 'Sala São Marcos (Sala 12 - Salão Par.)', hall: 'Salão Paroquial' },
               { id: 't-euc2-9', turma: 'Turma 09', dayTime: 'Sábado: 10:00 às 11:30', catechists: 'Carlos', auxiliares: [], semCatequista: false, room: 'Capela Nossa Senhora das Graças', hall: 'Capela Externa' },
               { id: 't-euc2-5', turma: 'Turma 05', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Bruna Martins Vilarinho Neto, José Henrique e Heitor', auxiliares: [], semCatequista: false, room: 'Sala São Mateus (Sala 11 - Salão Par.)', hall: 'Salão Paroquial' },
-              { id: 't-euc2-6', turma: 'Turma 06', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Solange e Núbia', auxiliares: ['Gabriella'], semCatequista: false, room: 'Sala São Marcos (Sala 12 - Salão Par.)', hall: 'Salão Paroquial' },
+              { id: 't-euc2-6', turma: 'Turma 06', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Solange, Núbia e Gabriella', auxiliares: [], semCatequista: false, room: 'Sala São Marcos (Sala 12 - Salão Par.)', hall: 'Salão Paroquial' },
               { id: 't-euc2-7', turma: 'Turma 07', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Priscila Ayres e Camila', auxiliares: ['Ana Luiza Yung'], semCatequista: false, room: 'Sala São Lucas (Sala 13 - Salão Par.)', hall: 'Salão Paroquial' },
               { id: 't-euc2-8', turma: 'Turma 08', dayTime: 'Quarta: 16:00 às 17:30', catechists: 'Eliane Pinheiro e Carlos', auxiliares: [], semCatequista: false, room: 'Sala Santa Jacinta (Sala 05 - Centro Cat.)', hall: 'Centro Catequético' }
             ]
@@ -13004,10 +13022,10 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
               { id: 't-ca-2', turma: 'Turma 02', dayTime: 'Sábado: 10:15 às 12:00', catechists: 'Fábio, Marcelo, Otávio, Patrícia Gomes e Ronaldo', auxiliares: [], semCatequista: false, room: 'Auditório (Centro Catequético)', hall: 'Centro Catequético' },
               { id: 't-ca-3', turma: 'Turma 03', dayTime: 'Segunda: 20:00 às 22:00', catechists: 'Lorena e Natanai', auxiliares: [], semCatequista: false, room: 'Auditório (Centro Catequético)', hall: 'Centro Catequético', alunosBadge: 31 },
               { id: 't-ca-4', turma: 'Turma 04', dayTime: 'Segunda: 20:00 às 22:00', catechists: 'Lourival e Thiago Malaquias', auxiliares: [], semCatequista: false, room: 'Sala São Marcos (Sala 12 - Salão Par.)', hall: 'Salão Paroquial', alunosBadge: 19 },
-              { id: 't-ca-5', turma: 'Turma 05', dayTime: 'Sacramento: 03/12/2026 – 19:30', catechists: 'Daniel e Alexandre', auxiliares: [], semCatequista: false, room: 'Sala São Rafael (Sala 07 - Centro Cat.)', hall: 'Centro Catequético' },
-              { id: 't-ca-6', turma: 'Turma 06', dayTime: 'Sacramento: 03/12/2026 – 19:30', catechists: 'Guilherme e Hermes', auxiliares: [], semCatequista: false, room: 'Sala São Francisco Marto (Sala 03 - Centro Cat.)', hall: 'Centro Catequético' },
-              { id: 't-ca-7', turma: 'Turma 07', dayTime: 'Sacramento: 03/12/2026 – 19:30', catechists: 'Thiago e Thais', auxiliares: [], semCatequista: false, room: 'Sala São Miguel (Sala 06 - Centro Cat.)', hall: 'Centro Catequético', alunosBadge: 17 },
-              { id: 't-ca-8', turma: 'Turma 08', dayTime: 'Sacramento: 03/12/2026 – 19:30', catechists: 'Victor e Juliana', auxiliares: [], semCatequista: false, room: 'Sala Santa Jacinta (Sala 05 - Centro Cat.)', hall: 'Centro Catequético' }
+              { id: 't-ca-5', turma: 'Turma 05', dayTime: 'Quinta: 19:30 às 21:30 (Sacramento: 03/12/2026)', catechists: 'Daniel e Alexandre', auxiliares: [], semCatequista: false, room: 'Sala São Rafael (Sala 07 - Centro Cat.)', hall: 'Centro Catequético' },
+              { id: 't-ca-6', turma: 'Turma 06', dayTime: 'Quinta: 19:30 às 21:30 (Sacramento: 03/12/2026)', catechists: 'Guilherme e Hermes', auxiliares: [], semCatequista: false, room: 'Sala São Francisco Marto (Sala 03 - Centro Cat.)', hall: 'Centro Catequético' },
+              { id: 't-ca-7', turma: 'Turma 07', dayTime: 'Quinta: 19:30 às 21:30 (Sacramento: 03/12/2026)', catechists: 'Thiago e Thais', auxiliares: [], semCatequista: false, room: 'Sala São Miguel (Sala 06 - Centro Cat.)', hall: 'Centro Catequético', alunosBadge: 17 },
+              { id: 't-ca-8', turma: 'Turma 08', dayTime: 'Quinta: 19:30 às 21:30 (Sacramento: 03/12/2026)', catechists: 'Victor e Juliana', auxiliares: [], semCatequista: false, room: 'Sala Santa Jacinta (Sala 05 - Centro Cat.)', hall: 'Centro Catequético' }
             ]
           }
         ]
@@ -13587,6 +13605,33 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
                 if (cjStage.coord === 'Tiago' || cjStage.coord === 'Tiago Milfont') cjStage.coord = '';
                 if (cjStage.vice === 'Piante' || cjStage.vice === 'Vinícius Piante') cjStage.vice = '';
               }
+
+              // Higienização KAN-06: Eucaristia 2 (T3 com Anna Júlia e T6 com Gabriella como Titulares)
+              const euc2Stage = parsed['org-2026'].stages.find(s => s.id === 'euc2');
+              if (euc2Stage && Array.isArray(euc2Stage.turmas)) {
+                const t3 = euc2Stage.turmas.find(t => t.id === 't-euc2-3' || t.turma === 'Turma 03');
+                if (t3 && !t3.catechists.includes('Anna Júlia') && !t3.catechists.includes('Ana Julia')) {
+                  t3.catechists = 'Marilian, Maria Luísa e Anna Júlia';
+                  t3.auxiliares = (t3.auxiliares || []).filter(a => !a.toLowerCase().includes('julia'));
+                }
+                const t6 = euc2Stage.turmas.find(t => t.id === 't-euc2-6' || t.turma === 'Turma 06');
+                if (t6 && !t6.catechists.includes('Gabriella')) {
+                  t6.catechists = 'Solange, Núbia e Gabriella';
+                  t6.auxiliares = (t6.auxiliares || []).filter(a => !a.toLowerCase().includes('gabriella'));
+                }
+              }
+
+              // Higienização KAN-07: Horários de Adultos T5-T8 (19:30 às 21:30)
+              const caStage = parsed['org-2026'].stages.find(s => s.id === 'ca');
+              if (caStage && Array.isArray(caStage.turmas)) {
+                caStage.turmas.forEach(t => {
+                  if (['t-ca-5', 't-ca-6', 't-ca-7', 't-ca-8'].includes(t.id) || ['Turma 05', 'Turma 06', 'Turma 07', 'Turma 08'].includes(t.turma)) {
+                    if (t.dayTime && (!t.dayTime.includes('21:30') || t.dayTime.includes('Sacramento: 03/12/2026 – 19:30'))) {
+                      t.dayTime = 'Quinta: 19:30 às 21:30 (Sacramento: 03/12/2026)';
+                    }
+                  }
+                });
+              }
             }
             return parsed;
           }
@@ -13601,6 +13646,10 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     function saveOrganogramasData(data) {
       try {
         localStorage.setItem(STORAGE_KEY_ORGANOGRAMAS, JSON.stringify(data));
+        const activeId = getActiveOrganogramaId();
+        if (data && data[activeId] && typeof syncOrganogramaToFirestore === 'function') {
+          syncOrganogramaToFirestore(activeId, data[activeId]);
+        }
       } catch (e) {
         console.error('Erro ao salvar organogramas:', e);
       }
@@ -13621,6 +13670,9 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       if (!data[id]) return;
       localStorage.setItem(STORAGE_KEY_ACTIVE_ORG_ID, id);
       renderOrganogramaAll();
+      if (typeof subscribeOrganogramaRealtime === 'function') {
+        subscribeOrganogramaRealtime(id);
+      }
     }
 
     function getActiveOrganograma() {
@@ -13766,7 +13818,12 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       treeContent.innerHTML = (org.stages || []).map((stage, sIdx) => {
         const colors = colorMap[stage.colorTheme] || colorMap.sky;
 
-        const turmasHtml = (stage.turmas || []).map(t => {
+        // KAN-03: Ordenação alfabética natural (A-Z) das turmas de cima para baixo
+        const sortedTurmas = (stage.turmas || []).slice().sort((a, b) => {
+          return (a.turma || '').localeCompare(b.turma || '', 'pt-BR', { numeric: true, sensitivity: 'base' });
+        });
+
+        const turmasHtml = sortedTurmas.map(t => {
           let catechistLabel = t.catechists;
           if (t.semCatequista) {
             catechistLabel = `<div class="text-[10.5px] text-amber-800 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 inline-block mb-1">⚠️ Auxiliares em formação</div><div class="text-[11px] text-slate-700 font-medium mt-0.5">${formatCatechistChips(t.catechists, stage.name)}</div>`;
@@ -13779,14 +13836,24 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             auxHtml = `<div class="text-[10px] text-slate-400 italic mt-0.5 flex items-center gap-1 flex-wrap"><span>Aux:</span> ${formatCatechistChips(t.auxiliares.join(', '), stage.name)}</div>`;
           }
 
-          let alunosBtn = '';
-          if (t.alunosBadge) {
-            alunosBtn = `
-              <button onclick="openTurmaAlunos('${stage.name}', '${t.turma}')" class="mt-2 w-full flex items-center justify-center gap-1.5 text-[10.5px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 py-1 rounded-lg transition" title="Ver lista de catequizandos">
-                <span>👥</span> <span>Ver Alunos (${t.alunosBadge})</span>
-              </button>
-            `;
-          }
+          // KAN-04: Exibição dinâmica e permanente de "Ver Alunos" (incluindo turmas vazias e Eucaristia 2)
+          let count = 0;
+          try {
+            const db = (typeof getAlunosDatabase === 'function') ? getAlunosDatabase() : {};
+            const key = `${stage.name}__${t.turma}`;
+            if (db && Array.isArray(db[key])) {
+              count = db[key].filter(a => typeof isAlunoAtivo === 'function' ? isAlunoAtivo(a) : !a.desistente).length;
+            }
+          } catch (e) {}
+          const badgeNum = (count > 0) ? count : (t.alunosBadge || 0);
+          const badgeClass = badgeNum > 0 
+            ? 'text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border-indigo-200' 
+            : 'text-slate-600 bg-slate-50 hover:bg-slate-100 border-slate-200';
+          const alunosBtn = `
+            <button onclick="openTurmaAlunos('${stage.name.replace(/'/g, "\\'")}', '${t.turma.replace(/'/g, "\\'")}')" class="mt-2 w-full flex items-center justify-center gap-1.5 text-[10.5px] font-bold ${badgeClass} border py-1 rounded-lg transition" title="Ver lista de catequizandos da ${t.turma}">
+              <span>👥</span> <span>Ver Alunos (${badgeNum})</span>
+            </button>
+          `;
 
           return `
             <div class="relative bg-white border ${colors.cardBorder} rounded-xl p-2.5 shadow-2xs transition org-editable group/card" data-stage-id="${stage.id}" data-turma-id="${t.id}">
@@ -14211,9 +14278,153 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     // =============================================
     // MODAIS DE TURMA E COORDENAÇÃO (Planilha & Edição)
     // =============================================
+    // KAN-02: Gestão Dinâmica de Múltiplos Catequistas com Autocomplete & Dropdown
+    function getOfficialCatequistasList() {
+      const cats = (typeof getCatequistasRegistrationData === 'function') ? getCatequistasRegistrationData() : [];
+      const map = new Map();
+      cats.forEach(c => {
+        const nome = (c.apelido || c.nomeCompleto || c.nome || '').trim();
+        if (!nome) return;
+        const key = nome.toLowerCase();
+        if (!map.has(key)) {
+          map.set(key, {
+            displayName: nome,
+            fullName: c.nomeCompleto || nome,
+            stage: c.etapaPrincipal || c.etapa || ''
+          });
+        }
+      });
+      return Array.from(map.values()).sort((a, b) => a.displayName.localeCompare(b.displayName, 'pt-BR'));
+    }
+
+    function addCatequistaRow(type, initialVal = '') {
+      const containerId = type === 'titular' ? 'container-catequistas-titulares' : 'container-catequistas-auxiliares';
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      const rowId = 'cat-row-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4);
+      const row = document.createElement('div');
+      row.id = rowId;
+      row.className = 'flex items-center gap-2 p-1.5 bg-slate-50 border border-slate-200 rounded-xl transition';
+
+      const officialList = getOfficialCatequistasList();
+      const optionsHtml = officialList.map(c => {
+        const isSel = (c.displayName.toLowerCase() === initialVal.trim().toLowerCase()) ? 'selected' : '';
+        return `<option value="${c.displayName.replace(/"/g, '&quot;')}" ${isSel}>${c.displayName}${c.stage ? ` (${c.stage})` : ''}</option>`;
+      }).join('');
+
+      row.innerHTML = `
+        <div class="flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5">
+          <input type="text" value="${initialVal.replace(/"/g, '&quot;')}" placeholder="Digite o nome..." class="cat-row-input flex-1 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-800 bg-white outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400" />
+          <select onchange="if(this.value){ const inp = this.previousElementSibling; inp.value = this.value; this.value = ''; }" class="cat-row-select border border-slate-200 rounded-lg px-2 py-1.5 text-[11px] font-medium text-slate-600 bg-white outline-none hover:border-slate-300 max-w-[190px]" title="Escolha direta da lista oficial">
+            <option value="">▼ Escolha Direta...</option>
+            ${optionsHtml}
+          </select>
+        </div>
+        <button type="button" onclick="this.closest('#${rowId}').remove()" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Remover catequista">
+          🗑️
+        </button>
+      `;
+
+      container.appendChild(row);
+    }
+
+    function renderDynamicCatequistasInputs(titulares = [], auxiliares = []) {
+      const containerTit = document.getElementById('container-catequistas-titulares');
+      const containerAux = document.getElementById('container-catequistas-auxiliares');
+      if (containerTit) containerTit.innerHTML = '';
+      if (containerAux) containerAux.innerHTML = '';
+
+      if (Array.isArray(titulares) && titulares.length > 0) {
+        titulares.forEach(name => addCatequistaRow('titular', name));
+      } else {
+        addCatequistaRow('titular', '');
+      }
+
+      if (Array.isArray(auxiliares) && auxiliares.length > 0) {
+        auxiliares.forEach(name => addCatequistaRow('auxiliar', name));
+      }
+    }
+
+    function collectCatequistasFromRows(type) {
+      const containerId = type === 'titular' ? 'container-catequistas-titulares' : 'container-catequistas-auxiliares';
+      const container = document.getElementById(containerId);
+      if (!container) return [];
+      const inputs = container.querySelectorAll('.cat-row-input');
+      const names = [];
+      inputs.forEach(inp => {
+        const val = inp.value.trim();
+        if (val && !names.includes(val)) names.push(val);
+      });
+      return names;
+    }
+
+    // =========================================================================
+    // KAN-01: Sincronização em Tempo Real com Firestore & Concorrência
+    // =========================================================================
+    let _unsubscribeOrgRealtime = null;
+
+    function syncOrganogramaToFirestore(orgId, orgData) {
+      if (!window.firebaseDb || typeof window.firebaseDb.collection !== 'function') return;
+      if (!orgData) return;
+      window.firebaseDb.collection('organograma').doc(orgId).set({
+        ...orgData,
+        updatedAt: new Date().toISOString()
+      }, { merge: true }).then(() => {
+        console.log(`Organograma ${orgId} sincronizado no Firestore com sucesso.`);
+      }).catch(err => {
+        console.warn(`Erro ao sincronizar organograma ${orgId} no Firestore:`, err);
+      });
+    }
+
+    function subscribeOrganogramaRealtime(orgId) {
+      if (!window.firebaseDb || typeof window.firebaseDb.collection !== 'function') return;
+      if (_unsubscribeOrgRealtime) {
+        _unsubscribeOrgRealtime();
+        _unsubscribeOrgRealtime = null;
+      }
+      _unsubscribeOrgRealtime = window.firebaseDb.collection('organograma').doc(orgId).onSnapshot(doc => {
+        if (!doc.exists) return;
+        const cloudOrg = doc.data();
+        if (!cloudOrg || !Array.isArray(cloudOrg.stages)) return;
+
+        const localData = getOrganogramasData();
+        const localOrg = localData[orgId];
+        if (localOrg && Array.isArray(localOrg.stages)) {
+          let hasChanges = false;
+          cloudOrg.stages.forEach(cloudSt => {
+            const localSt = localOrg.stages.find(s => s.id === cloudSt.id || s.name === cloudSt.name);
+            if (localSt && Array.isArray(cloudSt.turmas)) {
+              cloudSt.turmas.forEach(cloudT => {
+                const localT = (localSt.turmas || []).find(t => t.id === cloudT.id);
+                if (localT) {
+                  const cloudTTime = cloudT.updatedAt ? new Date(cloudT.updatedAt).getTime() : 0;
+                  const localTTime = localT.updatedAt ? new Date(localT.updatedAt).getTime() : 0;
+                  if (cloudTTime > localTTime) {
+                    Object.assign(localT, cloudT);
+                    hasChanges = true;
+                  }
+                } else {
+                  localSt.turmas.push(cloudT);
+                  hasChanges = true;
+                }
+              });
+              if (cloudSt.coord !== localSt.coord) { localSt.coord = cloudSt.coord; hasChanges = true; }
+              if (cloudSt.vice !== localSt.vice) { localSt.vice = cloudSt.vice; hasChanges = true; }
+            }
+          });
+          if (hasChanges) {
+            localStorage.setItem(STORAGE_KEY_ORGANOGRAMAS, JSON.stringify(localData));
+            renderOrganogramaAll();
+          }
+        }
+      }, err => console.warn('Realtime organograma listener error:', err));
+    }
+
     function openAddTurmaModal(stageName) {
       const role = window.appAuthState ? window.appAuthState.role : null;
-      if (role && role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL && role !== window.ICM_CONFIG.ROLES.VICE_COORD_GERAL) {
+      const ROLES = (window.ICM_CONFIG && window.ICM_CONFIG.ROLES) || {};
+      if (role && role !== ROLES.MASTER_ADMIN && role !== ROLES.COORD_GERAL && role !== ROLES.VICE_COORD_GERAL) {
         alert('⚠️ Operação não permitida: O gerenciamento de turmas do organograma é restrito à Coordenação e ao Master Admin.');
         return;
       }
@@ -14230,19 +14441,21 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
       document.getElementById('turma-form-turma').value = '';
       document.getElementById('turma-form-daytime').value = 'Sábado: 08:30 às 10:00';
-      document.getElementById('turma-form-catechists').value = '';
-      document.getElementById('turma-form-auxiliares').value = '';
       document.getElementById('turma-form-semcatequista').checked = false;
       document.getElementById('turma-form-room').value = '';
       document.getElementById('turma-form-hall').value = 'Centro Catequético';
+
+      window._editingTurmaSnapshot = null;
+      renderDynamicCatequistasInputs([], []);
 
       document.getElementById('modal-turma-form').classList.remove('hidden');
     }
 
     function openEditTurmaModal(turmaId) {
       const role = window.appAuthState ? window.appAuthState.role : null;
-      if (role && role !== window.ICM_CONFIG.ROLES.MASTER_ADMIN && role !== window.ICM_CONFIG.ROLES.COORD_GERAL) {
-        alert('⚠️ Operação não permitida: A edição de turmas do organograma é restrita à Coordenação Geral e ao Master Admin.');
+      const ROLES = (window.ICM_CONFIG && window.ICM_CONFIG.ROLES) || {};
+      if (role && role !== ROLES.MASTER_ADMIN && role !== ROLES.COORD_GERAL && role !== ROLES.VICE_COORD_GERAL) {
+        alert('⚠️ Operação não permitida: A edição de turmas do organograma é restrita à Coordenação Geral, Vice-Coordenação e Master Admin.');
         return;
       }
 
@@ -14267,33 +14480,46 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       document.getElementById('turma-form-etapa').value = foundStage.name;
       document.getElementById('turma-form-turma').value = foundTurma.turma;
       document.getElementById('turma-form-daytime').value = foundTurma.dayTime;
-      document.getElementById('turma-form-catechists').value = foundTurma.catechists;
-      document.getElementById('turma-form-auxiliares').value = (foundTurma.auxiliares || []).join(', ');
       document.getElementById('turma-form-semcatequista').checked = !!foundTurma.semCatequista;
       document.getElementById('turma-form-room').value = foundTurma.room;
       document.getElementById('turma-form-hall').value = foundTurma.hall;
+
+      // Salva snapshot para detecção de concorrência simultânea (KAN-01)
+      window._editingTurmaSnapshot = {
+        turmaId: foundTurma.id,
+        stageName: foundStage.name,
+        updatedAt: foundTurma.updatedAt || null,
+        updatedBy: foundTurma.updatedBy || null
+      };
+
+      // Renderiza linhas dinâmicas de catequistas (KAN-02)
+      const titulares = splitCatechistString(foundTurma.catechists);
+      const auxiliares = Array.isArray(foundTurma.auxiliares) ? foundTurma.auxiliares : [];
+      renderDynamicCatequistasInputs(titulares, auxiliares);
 
       document.getElementById('modal-turma-form').classList.remove('hidden');
     }
 
     function closeTurmaModal() {
       document.getElementById('modal-turma-form').classList.add('hidden');
+      window._editingTurmaSnapshot = null;
     }
 
-    function handleSaveTurmaModal(event) {
+    async function handleSaveTurmaModal(event) {
       if (event) event.preventDefault();
 
       const turmaId = document.getElementById('turma-form-id').value;
       const etapaName = document.getElementById('turma-form-etapa').value;
       const turmaName = document.getElementById('turma-form-turma').value.trim();
       const dayTime = document.getElementById('turma-form-daytime').value.trim();
-      const catechists = document.getElementById('turma-form-catechists').value.trim();
-      const auxRaw = document.getElementById('turma-form-auxiliares').value.trim();
-      const semCatequista = document.getElementById('turma-form-semcatequista').checked;
       const room = document.getElementById('turma-form-room').value.trim();
       const hall = document.getElementById('turma-form-hall').value.trim();
 
-      const auxiliares = auxRaw ? auxRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+      // Coleta catequistas das linhas dinâmicas (KAN-02)
+      const titulares = collectCatequistasFromRows('titular');
+      const auxiliares = collectCatequistasFromRows('auxiliar');
+      const semCatequista = document.getElementById('turma-form-semcatequista').checked || titulares.length === 0;
+      const catechists = semCatequista ? (titulares.length > 0 ? joinCatechistArray(titulares) : 'A definir') : joinCatechistArray(titulares);
 
       const data = getOrganogramasData();
       const activeId = getActiveOrganogramaId();
@@ -14305,6 +14531,50 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         alert('Etapa não encontrada.');
         return;
       }
+
+      // Detecção de Concorrência e Conflito (KAN-01)
+      if (turmaId && window.firebaseDb && window._editingTurmaSnapshot && window._editingTurmaSnapshot.updatedAt) {
+        try {
+          const docSnap = await window.firebaseDb.collection('organograma').doc(activeId).get();
+          if (docSnap.exists) {
+            const cloudOrg = docSnap.data();
+            let cloudTurma = null;
+            (cloudOrg.stages || []).forEach(st => {
+              (st.turmas || []).forEach(t => {
+                if (t.id === turmaId) cloudTurma = t;
+              });
+            });
+            if (cloudTurma && cloudTurma.updatedAt) {
+              const cloudTime = new Date(cloudTurma.updatedAt).getTime();
+              const snapTime = new Date(window._editingTurmaSnapshot.updatedAt).getTime();
+              const myEmail = (window.appAuthState && window.appAuthState.user && window.appAuthState.user.email) ? window.appAuthState.user.email.toLowerCase() : '';
+              const cloudUser = (cloudTurma.updatedBy || '').toLowerCase();
+
+              if (cloudTime > snapTime && cloudUser && cloudUser !== myEmail) {
+                const proceed = confirm(
+                  `⚠️ CONFLITO DE EDIÇÃO SIMULTÂNEA DETECTADO!
+
+` +
+                  `Esta turma foi alterada recentemente por "${cloudTurma.updatedBy}" às ${new Date(cloudTurma.updatedAt).toLocaleTimeString('pt-BR')}.
+
+` +
+                  `Deseja SOBRESCREVER com as suas alterações atuais? Clique em [OK] para manter as suas ou [Cancelar] para recarregar a versão mais recente da nuvem.`
+                );
+                if (!proceed) {
+                  subscribeOrganogramaRealtime(activeId);
+                  closeTurmaModal();
+                  return;
+                }
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('Erro ao checar concorrência:', e);
+        }
+      }
+
+      const nowIso = new Date().toISOString();
+      const authorEmail = (window.appAuthState && window.appAuthState.user && window.appAuthState.user.email) ? window.appAuthState.user.email : 'admin';
 
       if (turmaId) {
         // Edit existing: Remove from wherever it was and insert into target stage
@@ -14320,7 +14590,9 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           auxiliares,
           semCatequista,
           room,
-          hall
+          hall,
+          updatedAt: nowIso,
+          updatedBy: authorEmail
         });
       } else {
         // Create new
@@ -14334,13 +14606,18 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           auxiliares,
           semCatequista,
           room,
-          hall
+          hall,
+          updatedAt: nowIso,
+          updatedBy: authorEmail
         });
       }
 
       saveOrganogramasData(data);
       closeTurmaModal();
       renderOrganogramaAll();
+
+      // Sincroniza em nuvem no Firestore (KAN-01)
+      syncOrganogramaToFirestore(activeId, org);
 
       // Sincroniza fichas dos catequistas com os nomes vinculados a esta turma
       if (typeof syncOrganogramaTurmaToCatequistas === 'function') {
@@ -23402,6 +23679,28 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     let currentAlunosEtapa = 'Crisma Adultos';
     let currentAlunosTurma = 'Turma 03';
 
+    // =========================================================================
+    // UTILITÁRIOS DE CPF (PRESERVAÇÃO DO ZERO INICIAL & MÁSCARA - KAN-05)
+    // =========================================================================
+    function formatCPF(val) {
+      if (!val) return '';
+      const str = String(val).trim();
+      const digits = str.replace(/\D/g, '');
+      if (!digits) return '';
+      // Garante 11 dígitos com preenchimento de zeros à esquerda se suprimido anteriormente
+      const padded = digits.length < 11 ? digits.padStart(11, '0') : digits.slice(0, 11);
+      return padded.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
+    }
+
+    function maskCPF(val) {
+      if (!val) return '';
+      let digits = String(val).replace(/\D/g, '').slice(0, 11);
+      if (digits.length <= 3) return digits;
+      if (digits.length <= 6) return digits.replace(/^(\d{3})(\d+)/, '$1.$2');
+      if (digits.length <= 9) return digits.replace(/^(\d{3})(\d{3})(\d+)/, '$1.$2.$3');
+      return digits.replace(/^(\d{3})(\d{3})(\d{3})(\d+)/, '$1.$2.$3-$4');
+    }
+
     // Estado de Ordenação para Cadastro e Chamada (Padrão: Alfabético asc por Nome)
     let alunosSortColumn = 'nome';
     let alunosSortDirection = 'asc';
@@ -23666,10 +23965,19 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       const selTurma = document.getElementById('sel-turma-alunos');
       if (!selTurma) return;
 
-      const turmasDaEtapa = masterScheduleList.filter(item => item.stage === selectedEtapa);
+      let turmasDaEtapa = masterScheduleList.filter(item => item.stage === selectedEtapa);
+
+      // KAN-04: Garante que a turma preferida (ex: Turma 04 do Lourival) esteja na lista mesmo se a etapa estiver sem turmas carregadas
+      if (preferredTurma && !turmasDaEtapa.some(t => t.turma === preferredTurma)) {
+        turmasDaEtapa.push({
+          stage: selectedEtapa,
+          turma: preferredTurma,
+          catechists: 'Catequistas da Turma'
+        });
+      }
 
       selTurma.innerHTML = turmasDaEtapa.map(item => {
-        return `<option value="${item.turma}">${item.turma} (${item.catechists})</option>`;
+        return `<option value="${item.turma}">${item.turma} (${item.catechists || 'Catequistas'})</option>`;
       }).join('');
 
       if (preferredTurma && turmasDaEtapa.some(t => t.turma === preferredTurma)) {
@@ -23678,7 +23986,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         selTurma.value = turmasDaEtapa[0].turma;
       }
 
-      currentAlunosTurma = selTurma.value;
+      currentAlunosTurma = selTurma.value || preferredTurma || 'Turma 01';
       updateTurmaInfoBanner();
       renderAlunosTable();
       if (typeof syncTurmaAlunosFromFirestore === 'function') {
@@ -24413,7 +24721,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           : '<span class="text-slate-300">—</span>';
 
         // CPF
-        const cpfHtml = a.cpf ? `<span class="font-mono text-[11px] text-slate-600">${a.cpf}</span>` : '<span class="text-slate-300">—</span>';
+        const cpfHtml = a.cpf ? `<span class="font-mono text-[11px] text-slate-600">${formatCPF(a.cpf)}</span>` : '<span class="text-slate-300">—</span>';
 
         // Data Nasc
         const dataNascHtml = a.dataNascimento ? `<span class="text-xs text-slate-700">${a.dataNascimento}</span>` : '<span class="text-slate-300">—</span>';
@@ -24779,7 +25087,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       const alunoObj = {
         id: isEdit ? idField.value : 'aluno-' + Date.now(),
         nome: (document.getElementById('aluno-nome').value || '').trim(),
-        cpf: (document.getElementById('aluno-cpf').value || '').trim(),
+        cpf: formatCPF((document.getElementById('aluno-cpf').value || '').trim()),
         dataNascimento: (document.getElementById('aluno-nasc').value || '').trim(),
         contato: (document.getElementById('aluno-contato').value || '').trim(),
         email: (document.getElementById('aluno-email').value || '').trim(),
@@ -24791,7 +25099,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         justificativa: (document.getElementById('aluno-justificativa').value || '').trim(),
         observacoes: (document.getElementById('aluno-obs').value || '').trim(),
         nomeResponsavel: (document.getElementById('aluno-resp-nome') ? document.getElementById('aluno-resp-nome').value : '').trim(),
-        cpfResponsavel: (document.getElementById('aluno-resp-cpf') ? document.getElementById('aluno-resp-cpf').value : '').trim(),
+        cpfResponsavel: formatCPF((document.getElementById('aluno-resp-cpf') ? document.getElementById('aluno-resp-cpf').value : '').trim()),
         status: rawStatus,
         desistente: isDesistente,
         dataDesistencia: isDesistente ? (rawDataDesistencia || new Date().toLocaleDateString('pt-BR')) : '',
@@ -25289,7 +25597,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             <td class="py-2.5 px-3 col-freeze-name">
               <div class="font-bold text-slate-900 text-xs sm:text-sm hover:text-amber-700 cursor-pointer transition truncate max-w-[220px]" onclick="openAlunoModalFromGeral('${a.stage}', '${a.turma}', '${a.id}')" title="Clique para editar ficha">${a.nome}</div>
               <div class="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1.5 flex-wrap">
-                ${a.cpf ? `<span>CPF: ${a.cpf}</span>` : ''}
+                ${a.cpf ? `<span>CPF: ${formatCPF(a.cpf)}</span>` : ''}
                 ${!a.isAtivo && a.dataDesistencia ? `<span class="text-rose-600 font-bold">Desistência: ${a.dataDesistencia}</span>` : ''}
               </div>
             </td>
@@ -28460,7 +28768,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         parsedAlunos.push({
           id: 'up-' + Date.now() + '-' + r,
           nome: nome,
-          cpf: getVal(colMap.cpf),
+          cpf: formatCPF(getVal(colMap.cpf)),
           dataNascimento: getVal(colMap.dataNasc),
           contato: getVal(colMap.contato),
           email: getVal(colMap.email),
@@ -28547,6 +28855,9 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         saveEventosData(getEventosData());
       }
       renderOrganogramaAll();
+      if (typeof subscribeOrganogramaRealtime === 'function' && typeof getActiveOrganogramaId === 'function') {
+        subscribeOrganogramaRealtime(getActiveOrganogramaId());
+      }
       renderRoomCards();
       if (typeof renderDynamicSvgRooms === 'function') {
         renderDynamicSvgRooms();
