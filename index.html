@@ -7953,7 +7953,7 @@
 
       // Validação de senha pastoral
       if (pass.length >= 6) {
-        const defaultName = email === 'colletes@gmail.com' ? 'Thiago Carvalho' : (email === 'lorenammoraes@gmail.com' ? 'Lorena Moraes' : (email.includes('larissa') || email.includes('picmbrasilia') ? 'Larissa (PICM)' : email.split('@')[0]));
+        const defaultName = email === 'colletes@gmail.com' ? 'Thiago Carvalho' : (email === 'lorenammoraes@gmail.com' ? 'Lorena Moraes' : (email === 'michelmaiso@gmail.com' ? 'Michel Maisonnave' : (email.includes('larissa') || email.includes('picmbrasilia') ? 'Larissa (PICM)' : email.split('@')[0])));
         const userData = {
           uid: 'user-' + btoa(email).replace(/=/g, ''),
           email: email,

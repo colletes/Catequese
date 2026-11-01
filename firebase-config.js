@@ -118,6 +118,19 @@ const SEED_AUTHORIZED_USERS = [
     termosAceitos: true,
     createdAt: '2026-01-01T00:00:00.000Z',
     approvedBy: 'Thiago Carvalho (Master Admin)'
+  },
+  {
+    email: 'michelmaiso@gmail.com',
+    displayName: 'Michel Maisonnave (Secretaria Paroquial)',
+    role: ROLES.SECRETARIA,
+    turmaId: 'todas',
+    turmaNome: 'Secretaria Paroquial',
+    etapa: 'Secretaria',
+    status: 'ativo',
+    lgpdAccepted: true,
+    termosAceitos: true,
+    createdAt: '2026-01-01T00:00:00.000Z',
+    approvedBy: 'Sistema Oficial'
   }
 ];
 
@@ -144,11 +157,21 @@ function getAuthorizedUsers() {
     if (!list.some(u => u.email && u.email.toLowerCase() === 'picmbrasiliapastorais@gmail.com')) {
       list.push(SEED_AUTHORIZED_USERS[4]);
     }
+    if (!list.some(u => u.email && u.email.toLowerCase() === 'michelmaiso@gmail.com')) {
+      list.push(SEED_AUTHORIZED_USERS[6]);
+    }
     // Garante que os usuários da Secretaria estejam com o perfil correto
     list.forEach(u => {
       if (u.email) {
         const clean = u.email.toLowerCase().trim();
-        if (clean === 'picmbrasiliapastorais@gmail.com' || clean.includes('secretaria') || clean.includes('sandra') || clean.includes('felipe')) {
+        if (clean === 'michelmaiso@gmail.com') {
+          u.role = ROLES.SECRETARIA;
+          u.turmaNome = 'Secretaria Paroquial';
+          u.status = 'ativo';
+          if (!u.displayName || !u.displayName.includes('Michel')) {
+            u.displayName = 'Michel Maisonnave (Secretaria Paroquial)';
+          }
+        } else if (clean === 'picmbrasiliapastorais@gmail.com' || clean.includes('secretaria') || clean.includes('sandra') || clean.includes('felipe')) {
           u.role = ROLES.SECRETARIA;
           u.turmaNome = 'Secretaria Paroquial';
           if (!u.displayName || u.displayName.includes('Sandra')) {
@@ -197,7 +220,7 @@ function determineUserRole(email) {
   if (clean === MASTER_ADMIN_EMAIL.toLowerCase()) return ROLES.MASTER_ADMIN;
   if (clean === COORD_GERAL_EMAIL.toLowerCase()) return ROLES.COORD_GERAL;
   if (clean === VICE_COORD_GERAL_EMAIL.toLowerCase()) return ROLES.VICE_COORD_GERAL;
-  if (clean === 'picmbrasiliapastorais@gmail.com' || clean.includes('secretaria') || clean.includes('sandra') || clean.includes('felipe')) return ROLES.SECRETARIA;
+  if (clean === 'picmbrasiliapastorais@gmail.com' || clean === 'michelmaiso@gmail.com' || clean.includes('secretaria') || clean.includes('sandra') || clean.includes('felipe')) return ROLES.SECRETARIA;
 
   const users = getAuthorizedUsers();
   const found = users.find(u => u.email && u.email.trim().toLowerCase() === clean && u.status === 'ativo');
@@ -210,6 +233,7 @@ function determineUserRole(email) {
 function getUserProfile(email) {
   if (!email) return null;
   const clean = email.trim().toLowerCase();
+  if (clean === 'michelmaiso@gmail.com') return SEED_AUTHORIZED_USERS[6];
   if (clean === 'picmbrasiliapastorais@gmail.com') return SEED_AUTHORIZED_USERS[4];
   const users = getAuthorizedUsers();
   const found = users.find(u => u.email && u.email.trim().toLowerCase() === clean);

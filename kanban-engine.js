@@ -222,7 +222,7 @@
         role = (window.ICM_CONFIG && window.ICM_CONFIG.ROLES && window.ICM_CONFIG.ROLES.COORD_GERAL) || 'coord_geral';
       } else if (cleanEmail === 'andresprojetos@gmail.com') {
         role = (window.ICM_CONFIG && window.ICM_CONFIG.ROLES && window.ICM_CONFIG.ROLES.VICE_COORD_GERAL) || 'vice_coord_geral';
-      } else if (cleanEmail === 'picmbrasiliapastorais@gmail.com' || cleanEmail === 'secretaria@imaculadocoracaodf.com.br' || cleanEmail.includes('secretaria')) {
+      } else if (cleanEmail === 'picmbrasiliapastorais@gmail.com' || cleanEmail === 'secretaria@imaculadocoracaodf.com.br' || cleanEmail === 'michelmaiso@gmail.com' || cleanEmail.includes('secretaria')) {
         role = (window.ICM_CONFIG && window.ICM_CONFIG.ROLES && window.ICM_CONFIG.ROLES.SECRETARIA) || 'secretaria';
       } else if (!role && cleanEmail && window.ICM_CONFIG && window.ICM_CONFIG.determineUserRole) {
         role = window.ICM_CONFIG.determineUserRole(cleanEmail);
@@ -1013,6 +1013,7 @@
       add('Lorena Moraes (Coordenação Geral)', 'lorenammoraes@gmail.com', 'coord_geral');
       add('Andres Reyes (Vice-Coordenação)', 'andresprojetos@gmail.com', 'vice_coord_geral');
       add('Felipe Secretaria (Secretaria Paroquial)', 'picmbrasiliapastorais@gmail.com', 'secretaria');
+      add('Michel Maisonnave (Secretaria Paroquial)', 'michelmaiso@gmail.com', 'secretaria');
       add('Secretária(o) Paroquial', 'secretaria@imaculadocoracaodf.com.br', 'secretaria');
 
       // 2. Usuários autorizados pelo sistema RBAC (Firestore / Cache)

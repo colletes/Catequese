@@ -24,7 +24,8 @@ service cloud.firestore {
       return isAuthenticated() && (
         request.auth.token.email.lower() == 'secretaria@imaculadocoracaodf.com.br' ||
         request.auth.token.email.lower() == 'picmbrasiliapastorais@gmail.com' ||
-        request.auth.token.email.lower() == 'picmbrasilia@gmail.com'
+        request.auth.token.email.lower() == 'picmbrasilia@gmail.com' ||
+        request.auth.token.email.lower() == 'michelmaiso@gmail.com'
       );
     }
 
