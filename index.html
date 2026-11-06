@@ -3441,7 +3441,7 @@
             <!-- Batizado -->
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">É Batizado na Igreja Católica?</label>
-              <select id="aluno-batizado" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none">
+              <select id="aluno-batizado" onchange="updateSacramentoDateUI('batizado')" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none">
                 <option value="">(Não informado)</option>
                 <option value="Sim, na Igreja Católica">Sim, na Igreja Católica</option>
                 <option value="Sim">Sim</option>
@@ -3450,15 +3450,89 @@
               </select>
             </div>
 
+            <!-- Data Batismo -->
+            <div id="wrap-aluno-batizado-data">
+              <label class="flex items-center gap-2 text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                <span id="lbl-aluno-batizado-data">Data prevista</span>
+                <span id="badge-aluno-batizado-data" class="text-[9px] font-black px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">PREVISTO</span>
+              </label>
+              <div class="relative flex gap-1">
+                <input type="text" id="aluno-batizado-data" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" oninput="maskDataBR(this)" class="flex-1 border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none">
+                <button type="button" onclick="openSacramentoCalendar('batizado')" title="Abrir calendário" class="px-3 rounded-xl border border-slate-300 bg-white hover:bg-slate-100">📅</button>
+                <input type="date" id="aluno-batizado-data-picker" tabindex="-1" onchange="pickSacramentoDate('batizado', this.value)" class="absolute right-0 bottom-0 w-0 h-0 opacity-0 pointer-events-none">
+              </div>
+            </div>
+
+
             <!-- Primeira Eucaristia -->
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Tem 1ª Eucaristia?</label>
-              <select id="aluno-eucaristia" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none">
+              <select id="aluno-eucaristia" onchange="updateSacramentoDateUI('eucaristia')" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none">
                 <option value="">(Não informado)</option>
                 <option value="Sim">Sim</option>
                 <option value="Não">Não</option>
               </select>
             </div>
+
+            <!-- Data 1ª Eucaristia -->
+            <div id="wrap-aluno-eucaristia-data">
+              <label class="flex items-center gap-2 text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                <span id="lbl-aluno-eucaristia-data">Data prevista</span>
+                <span id="badge-aluno-eucaristia-data" class="text-[9px] font-black px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">PREVISTO</span>
+              </label>
+              <div class="relative flex gap-1">
+                <input type="text" id="aluno-eucaristia-data" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" oninput="maskDataBR(this)" class="flex-1 border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none">
+                <button type="button" onclick="openSacramentoCalendar('eucaristia')" title="Abrir calendário" class="px-3 rounded-xl border border-slate-300 bg-white hover:bg-slate-100">📅</button>
+                <input type="date" id="aluno-eucaristia-data-picker" tabindex="-1" onchange="pickSacramentoDate('eucaristia', this.value)" class="absolute right-0 bottom-0 w-0 h-0 opacity-0 pointer-events-none">
+              </div>
+            </div>
+
+            <!-- Tem Crisma? -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Tem Crisma?</label>
+              <select id="aluno-crisma" onchange="updateSacramentoDateUI('crisma')" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none">
+                <option value="">(Não informado)</option>
+                <option value="Sim">Sim</option>
+                <option value="Não">Não</option>
+              </select>
+            </div>
+
+            <!-- Data Crisma -->
+            <div id="wrap-aluno-crisma-data">
+              <label class="flex items-center gap-2 text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                <span id="lbl-aluno-crisma-data">Data prevista</span>
+                <span id="badge-aluno-crisma-data" class="text-[9px] font-black px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">PREVISTO</span>
+              </label>
+              <div class="relative flex gap-1">
+                <input type="text" id="aluno-crisma-data" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" oninput="maskDataBR(this)" class="flex-1 border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none">
+                <button type="button" onclick="openSacramentoCalendar('crisma')" title="Abrir calendário" class="px-3 rounded-xl border border-slate-300 bg-white hover:bg-slate-100">📅</button>
+                <input type="date" id="aluno-crisma-data-picker" tabindex="-1" onchange="pickSacramentoDate('crisma', this.value)" class="absolute right-0 bottom-0 w-0 h-0 opacity-0 pointer-events-none">
+              </div>
+            </div>
+
+            <!-- Tem Matrimônio? -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Tem Matrimônio?</label>
+              <select id="aluno-matrimonio" onchange="updateSacramentoDateUI('matrimonio')" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none">
+                <option value="">(Não informado)</option>
+                <option value="Sim">Sim</option>
+                <option value="Não">Não</option>
+              </select>
+            </div>
+
+            <!-- Data Matrimônio -->
+            <div id="wrap-aluno-matrimonio-data">
+              <label class="flex items-center gap-2 text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                <span id="lbl-aluno-matrimonio-data">Data prevista</span>
+                <span id="badge-aluno-matrimonio-data" class="text-[9px] font-black px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">PREVISTO</span>
+              </label>
+              <div class="relative flex gap-1">
+                <input type="text" id="aluno-matrimonio-data" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" oninput="maskDataBR(this)" class="flex-1 border border-slate-300 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none">
+                <button type="button" onclick="openSacramentoCalendar('matrimonio')" title="Abrir calendário" class="px-3 rounded-xl border border-slate-300 bg-white hover:bg-slate-100">📅</button>
+                <input type="date" id="aluno-matrimonio-data-picker" tabindex="-1" onchange="pickSacramentoDate('matrimonio', this.value)" class="absolute right-0 bottom-0 w-0 h-0 opacity-0 pointer-events-none">
+              </div>
+            </div>
+
 
             <!-- Impedido(a) de Crismar? (KAN-11) -->
             <div>
@@ -4044,7 +4118,14 @@
 
           <div>
             <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Dia e Horário *</label>
-            <input type="text" id="turma-form-daytime" required placeholder="Ex: Sábado: 08:30 às 10:00 ou Segunda: 20:00 às 21:30" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs sm:text-sm font-semibold text-slate-800 outline-none focus:border-[#d4a94f]">
+            <input type="hidden" id="turma-form-daytime" value="">
+            <div class="grid grid-cols-3 gap-2">
+              <select id="turma-form-dia" onchange="syncTurmaDayTime()" class="border border-slate-300 rounded-xl px-3 py-2 text-xs sm:text-sm font-semibold text-slate-800 outline-none focus:border-[#d4a94f]">
+                <option value="">Dia...</option><option>Domingo</option><option>Segunda</option><option>Terça</option><option>Quarta</option><option>Quinta</option><option>Sexta</option><option>Sábado</option>
+              </select>
+              <div><label class="block text-[10px] font-bold text-slate-500 uppercase">Início</label><input type="time" id="turma-form-inicio" oninput="syncTurmaDayTime()" class="w-full border border-slate-300 rounded-xl px-2 py-1.5 text-xs sm:text-sm font-semibold outline-none focus:border-[#d4a94f]"></div>
+              <div><label class="block text-[10px] font-bold text-slate-500 uppercase">Fim</label><input type="time" id="turma-form-fim" oninput="syncTurmaDayTime()" class="w-full border border-slate-300 rounded-xl px-2 py-1.5 text-xs sm:text-sm font-semibold outline-none focus:border-[#d4a94f]"></div>
+            </div>
           </div>
 
           <!-- CATEQUISTAS TITULARES DINÂMICOS (KAN-02) -->
@@ -5082,7 +5163,7 @@
           <!-- Seletor de Recepção de Sacramentos no Santuário (KAN-13) -->
           <div class="sm:col-span-2">
             <label class="block text-xs font-bold text-amber-950 uppercase tracking-wider mb-1">Recepção de Sacramento no Santuário ou Evento Pastoral:</label>
-            <select id="ev-sacramento" class="w-full border border-amber-300 rounded-xl px-3 py-2 text-xs sm:text-sm bg-white font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-400">
+            <select id="ev-sacramento" onchange="renderEvTurmasChecklist()" class="w-full border border-amber-300 rounded-xl px-3 py-2 text-xs sm:text-sm bg-white font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-400">
               <option value="">⛪ Evento Geral da Catequese / Retiro Pastoral</option>
               <option value="batismo">💧 Recepção do Sacramento: Batismo</option>
               <option value="eucaristia">🍞🍷 Recepção do Sacramento: Primeira Eucaristia</option>
@@ -5090,13 +5171,20 @@
               <option value="matrimonio">💍 Recepção do Sacramento: Matrimônio</option>
             </select>
           </div>
+          <input type="hidden" id="ev-edit-id" value="">
+          <div id="ev-turmas-sacramento-wrap" class="sm:col-span-2 hidden">
+            <label class="block text-xs font-bold text-amber-950 uppercase tracking-wider mb-1">Turmas que receberão o sacramento neste dia:</label>
+            <p class="text-[11px] text-amber-800 mb-2">Ao salvar, a data do evento é gravada como <strong>data prevista</strong> dos catequizandos dessas turmas que ainda não receberam o sacramento e estão com a data vazia.</p>
+            <div id="ev-turmas-checklist" class="max-h-56 overflow-y-auto bg-white border border-amber-300 rounded-xl p-3 space-y-2 text-xs"></div>
+          </div>
         </div>
         <div class="flex items-center gap-3">
           <label class="flex items-center gap-2 text-sm text-amber-800 cursor-pointer">
             <input id="ev-externo" type="checkbox" class="rounded" />
             🌍 Evento Externo
           </label>
-          <button onclick="adicionarEvento()" class="ml-auto bg-[#d4a94f] hover:bg-amber-600 text-white font-bold text-sm px-5 py-2 rounded-xl transition shadow">
+          <button id="btn-ev-cancelar-edicao" type="button" onclick="cancelarEdicaoEvento()" class="hidden text-sm font-bold text-slate-600 border border-slate-300 px-4 py-2 rounded-xl bg-white">Cancelar</button>
+          <button id="btn-ev-salvar" onclick="adicionarEvento()" class="ml-auto bg-[#d4a94f] hover:bg-amber-600 text-white font-bold text-sm px-5 py-2 rounded-xl transition shadow">
             Salvar Evento
           </button>
         </div>
@@ -7079,7 +7167,7 @@
         desc: 'Auditório da Catequese com porta interna e saída externa.',
         schedules: [
           { stage: 'Crisma Adultos', turma: 'Turma 01', day: 'Sábado', time: '08:30 às 10:15', catechists: 'Letícia, Eduardo, Cauã e Danilo', period: 'sab-manha' },
-          { stage: 'Crisma Adultos', turma: 'Turma 02', day: 'Sábado', time: '10:15 às 12:00', catechists: 'Fábio, Marcelo, Otávio, Patrícia Gomes e Ronaldo', period: 'sab-manha' },
+          { stage: 'Crisma Adultos', turma: 'Turma 02', day: 'Sábado', time: '10:30 às 12:00', catechists: 'Fábio, Marcelo, Otávio, Patrícia Gomes e Ronaldo', period: 'sab-manha' },
           { stage: 'Crisma Adultos', turma: 'Turma 03', day: 'Segunda-feira', time: '20:00 às 22:00', catechists: 'Lorena e Natanai', period: 'seg-noite' }
         ]
       },
@@ -10370,6 +10458,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
                   ${ev.turmas ? `<p class="text-xs text-slate-500 mt-1">👥 <strong>Turmas:</strong> ${ev.turmas}</p>` : ''}
                 </div>
                 ${editModeActive ? `
+                  <button onclick="editarEvento('${ev.id}')" class="text-xs text-indigo-700 hover:text-indigo-900 font-bold shrink-0 border border-indigo-200 hover:bg-indigo-50 px-2.5 py-1 rounded-xl transition shadow-xs">✏️ Editar</button>
                   <button onclick="removerEvento('${ev.id}')" class="text-xs text-rose-600 hover:text-rose-800 font-bold shrink-0 border border-rose-200 hover:bg-rose-50 px-2.5 py-1 rounded-xl transition flex items-center gap-1 shadow-xs">
                     <span>🗑</span> <span>Excluir</span>
                   </button>
@@ -10436,6 +10525,84 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       renderEventosTimeline();
     }
 
+    // ===== Turmas que recebem o sacramento no evento =====
+    const SACRAMENTO_CAMPOS = {
+      batismo: { status: 'batizado', data: 'batismoData' },
+      eucaristia: { status: 'primeiraEucaristia', data: 'primeiraEucaristiaData' },
+      crisma: { status: 'crisma', data: 'crismaData' },
+      matrimonio: { status: 'matrimonio', data: 'matrimonioData' }
+    };
+    function renderEvTurmasChecklist(selecionadas) {
+      const wrap = document.getElementById('ev-turmas-sacramento-wrap');
+      const box = document.getElementById('ev-turmas-checklist');
+      const sac = (document.getElementById('ev-sacramento') || {}).value;
+      if (!wrap || !box) return;
+      if (!sac) { wrap.classList.add('hidden'); return; }
+      wrap.classList.remove('hidden');
+      const sel = new Set(Array.isArray(selecionadas) ? selecionadas : getEvTurmasSelecionadas());
+      if (!masterScheduleList.length && typeof syncMasterScheduleList === 'function') syncMasterScheduleList();
+      const byStage = {};
+      masterScheduleList.forEach(t => { (byStage[t.stage] = byStage[t.stage] || []).push(t.turma); });
+      box.innerHTML = Object.keys(byStage).map(st => `
+        <div><div class="font-bold text-slate-800">${st}</div>
+        <div class="flex flex-wrap gap-x-4 gap-y-1 mt-1">${[...new Set(byStage[st])].sort().map(tn => {
+          const key = getTurmaKey(st, tn);
+          return `<label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" class="ev-turma-chk" value="${key}" ${sel.has(key) ? 'checked' : ''}> ${tn}</label>`;
+        }).join('')}</div></div>`).join('');
+    }
+    function getEvTurmasSelecionadas() {
+      return Array.from(document.querySelectorAll('.ev-turma-chk:checked')).map(c => c.value);
+    }
+    function aplicarDataSacramentoNasTurmas(sacramento, dataIso, turmasIds) {
+      const campos = SACRAMENTO_CAMPOS[sacramento];
+      if (!campos || !turmasIds.length || !dataIso) return 0;
+      const [y, m, d] = dataIso.split('-');
+      const dataBR = `${d}/${m}/${y}`;
+      const db = getAlunosDatabase();
+      let total = 0;
+      turmasIds.forEach(key => {
+        const alunos = db[key];
+        if (!Array.isArray(alunos)) return;
+        let mudou = false;
+        alunos.forEach(a => {
+          const recebeu = String(a[campos.status] || '').toLowerCase().startsWith('sim');
+          if (!recebeu && !(a[campos.data] || '').trim()) { a[campos.data] = dataBR; mudou = true; total++; }
+        });
+        if (mudou && window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
+          const [etapa, turma] = key.split('__');
+          window.firebaseDb.collection('turma_alunos').doc(key).set({ etapa, turma, alunos, updatedAt: new Date().toISOString() }, { merge: true })
+            .catch(err => console.warn('Sync Firestore turma_alunos (evento):', key, err));
+        }
+      });
+      try { localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(db)); } catch (e) {}
+      return total;
+    }
+    function editarEvento(id) {
+      if (!editModeActive || !canManageEvents()) return;
+      const ev = getEventosData().find(e => e.id === id);
+      if (!ev) return;
+      document.getElementById('ev-edit-id').value = id;
+      document.getElementById('ev-nome').value = ev.nome || '';
+      document.getElementById('ev-data').value = ev.data || '';
+      document.getElementById('ev-hora').value = ev.hora || '';
+      document.getElementById('ev-turmas').value = ev.turmas || '';
+      document.getElementById('ev-externo').checked = !!ev.externo;
+      document.getElementById('ev-sacramento').value = ev.sacramento || '';
+      renderEvTurmasChecklist(ev.turmasIds || []);
+      document.getElementById('btn-ev-salvar').textContent = 'Atualizar Evento';
+      document.getElementById('btn-ev-cancelar-edicao').classList.remove('hidden');
+      document.getElementById('form-add-evento').scrollIntoView({ behavior: 'smooth' });
+    }
+    function cancelarEdicaoEvento() {
+      const ids = ['ev-edit-id', 'ev-nome', 'ev-data', 'ev-hora', 'ev-turmas'];
+      ids.forEach(i => { const el = document.getElementById(i); if (el) el.value = ''; });
+      const ext = document.getElementById('ev-externo'); if (ext) ext.checked = false;
+      const sac = document.getElementById('ev-sacramento'); if (sac) sac.value = '';
+      renderEvTurmasChecklist([]);
+      const b = document.getElementById('btn-ev-salvar'); if (b) b.textContent = 'Salvar Evento';
+      const c = document.getElementById('btn-ev-cancelar-edicao'); if (c) c.classList.add('hidden');
+    }
+
     function adicionarEvento() {
       if (!canManageEvents()) {
         alert('⚠️ Operação não permitida: Apenas o Master Admin, a Coordenação Geral, o Vice-Coordenador e a Secretaria têm permissão para gerenciar eventos e sacramentos.');
@@ -10461,19 +10628,20 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         return;
       }
 
-      const novoEvento = {
-        id: 'ev-' + Date.now(),
-        nome,
-        data,
-        hora,
-        turmas,
-        externo,
-        sacramento
-      };
-
+      const turmasIds = getEvTurmasSelecionadas();
+      const turmasTxt = turmas || turmasIds.map(k => k.split('__').reverse().join(' • ')).join(', ');
+      const editId = (document.getElementById('ev-edit-id') || {}).value || '';
       const eventos = getEventosData();
-      eventos.push(novoEvento);
+      if (editId) {
+        const ev = eventos.find(e => e.id === editId);
+        if (ev) Object.assign(ev, { nome, data, hora, turmas: turmasTxt, externo, sacramento, turmasIds });
+      } else {
+        eventos.push({ id: 'ev-' + Date.now(), nome, data, hora, turmas: turmasTxt, externo, sacramento, turmasIds });
+      }
       saveEventosData(eventos);
+      const preenchidos = aplicarDataSacramentoNasTurmas(sacramento, data, turmasIds);
+      if (turmasIds.length) alert(`✅ Evento salvo. Data prevista aplicada a ${preenchidos} catequizando(s) com campo vazio.`);
+      cancelarEdicaoEvento();
 
       // Limpar campos
       if (nomeInput) nomeInput.value = '';
@@ -10566,6 +10734,20 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
                 p.ativo = true;
               }
             });
+
+            // Migração única (planilha 'Cadastro Catequese 2026'): aplica dados atualizados autorizados pelo usuário
+            if (!localStorage.getItem('catequese_mig_planilha2026_v1') && Array.isArray(seedSource)) {
+              const MIG_CAMPOS = {"cat-2027-mariana-garcia": ["dataNascimento", "telefone", "telefoneRaw", "email", "profissao", "endereco", "estadoCivil", "paroquia"], "cat-2027-kellibe-torres": ["dataNascimento", "telefone", "telefoneRaw", "email", "profissao", "endereco", "estadoCivil", "paroquia"], "cat-2027-anna-julia-freires": ["dataNascimento", "telefone", "telefoneRaw", "email", "profissao", "endereco", "estadoCivil", "paroquia"], "cat-2027-alexandre-simas": ["dataNascimento", "telefone", "telefoneRaw", "email", "profissao", "endereco", "estadoCivil", "paroquia"], "cat-2026-71": ["endereco"]};
+              Object.entries(MIG_CAMPOS).forEach(([cid, campos]) => {
+                const p = parsed.find(x => x.id === cid);
+                const sd = seedSource.find(x => x.id === cid);
+                if (!p || !sd) return;
+                campos.forEach(k => { p[k] = sd[k]; });
+                p.updatedAt = new Date().toISOString();
+                changed = true;
+              });
+              try { localStorage.setItem('catequese_mig_planilha2026_v1', '1'); } catch (e) {}
+            }
 
             // Higienização de coordenação de etapa 2026 para Piante e Tiago Milfont
             parsed.forEach(p => {
@@ -13175,13 +13357,13 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             colorTheme: 'indigo',
             turmas: [
               { id: 't-ca-1', turma: 'Turma 01', dayTime: 'Sábado: 08:30 às 10:15', catechists: 'Letícia, Eduardo, Cauã e Danilo', auxiliares: [], semCatequista: false, room: 'Auditório (Centro Catequético)', hall: 'Centro Catequético' },
-              { id: 't-ca-2', turma: 'Turma 02', dayTime: 'Sábado: 10:15 às 12:00', catechists: 'Fábio, Marcelo, Otávio, Patrícia Gomes e Ronaldo', auxiliares: [], semCatequista: false, room: 'Auditório (Centro Catequético)', hall: 'Centro Catequético' },
+              { id: 't-ca-2', turma: 'Turma 02', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Fábio, Marcelo, Otávio, Patrícia Gomes e Ronaldo', auxiliares: [], semCatequista: false, room: 'Auditório (Centro Catequético)', hall: 'Centro Catequético' },
               { id: 't-ca-3', turma: 'Turma 03', dayTime: 'Segunda: 20:00 às 22:00', catechists: 'Lorena e Natanai', auxiliares: [], semCatequista: false, room: 'Auditório (Centro Catequético)', hall: 'Centro Catequético', alunosBadge: 31 },
               { id: 't-ca-4', turma: 'Turma 04', dayTime: 'Segunda: 20:00 às 22:00', catechists: 'Lourival e Thiago Malaquias', auxiliares: [], semCatequista: false, room: 'Sala São Marcos (Sala 12 - Salão Par.)', hall: 'Salão Paroquial', alunosBadge: 19 },
-              { id: 't-ca-5', turma: 'Turma 05', dayTime: 'Quinta: 19:30 às 21:30 (Sacramento: 03/12/2026)', catechists: 'Daniel e Alexandre', auxiliares: [], semCatequista: false, room: 'Sala São Rafael (Sala 07 - Centro Cat.)', hall: 'Centro Catequético' },
-              { id: 't-ca-6', turma: 'Turma 06', dayTime: 'Quinta: 19:30 às 21:30 (Sacramento: 03/12/2026)', catechists: 'Guilherme e Hermes', auxiliares: [], semCatequista: false, room: 'Sala São Francisco Marto (Sala 03 - Centro Cat.)', hall: 'Centro Catequético' },
-              { id: 't-ca-7', turma: 'Turma 07', dayTime: 'Quinta: 19:30 às 21:30 (Sacramento: 03/12/2026)', catechists: 'Thiago e Thais', auxiliares: [], semCatequista: false, room: 'Sala São Miguel (Sala 06 - Centro Cat.)', hall: 'Centro Catequético', alunosBadge: 17 },
-              { id: 't-ca-8', turma: 'Turma 08', dayTime: 'Quinta: 19:30 às 21:30 (Sacramento: 03/12/2026)', catechists: 'Victor e Juliana', auxiliares: [], semCatequista: false, room: 'Sala Santa Jacinta (Sala 05 - Centro Cat.)', hall: 'Centro Catequético' }
+              { id: 't-ca-5', turma: 'Turma 05', dayTime: 'Quinta: 19:30 às 22:00 (Sacramento: 03/12/2026)', catechists: 'Daniel e Alexandre', auxiliares: [], semCatequista: false, room: 'Sala São Rafael (Sala 07 - Centro Cat.)', hall: 'Centro Catequético' },
+              { id: 't-ca-6', turma: 'Turma 06', dayTime: 'Quinta: 19:30 às 22:00 (Sacramento: 03/12/2026)', catechists: 'Guilherme e Hermes', auxiliares: [], semCatequista: false, room: 'Sala São Francisco Marto (Sala 03 - Centro Cat.)', hall: 'Centro Catequético' },
+              { id: 't-ca-7', turma: 'Turma 07', dayTime: 'Quinta: 19:30 às 22:00 (Sacramento: 03/12/2026)', catechists: 'Thiago e Thais', auxiliares: [], semCatequista: false, room: 'Sala São Miguel (Sala 06 - Centro Cat.)', hall: 'Centro Catequético', alunosBadge: 17 },
+              { id: 't-ca-8', turma: 'Turma 08', dayTime: 'Quinta: 19:30 às 22:00 (Sacramento: 03/12/2026)', catechists: 'Victor e Juliana', auxiliares: [], semCatequista: false, room: 'Sala Santa Jacinta (Sala 05 - Centro Cat.)', hall: 'Centro Catequético' }
             ]
           }
         ]
@@ -13609,7 +13791,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
                         {
                                 "id": "t-ca-2",
                                 "turma": "Turma 02",
-                                "dayTime": "Sábado: 10:15 às 12:00",
+                                "dayTime": "Sábado: 10:30 às 12:00",
                                 "catechists": "Marcelo, Patrícia Gomes, Fabio e Ronaldo",
                                 "coordenadorTurma": "Patrícia Gomes",
                                 "auxiliares": [],
@@ -13777,13 +13959,16 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
                 }
               }
 
-              // Higienização KAN-07: Horários de Adultos T5-T8 (19:30 às 21:30)
+              // Higienização KAN-07: Horários de Adultos T5-T8 (19:30 às 22:00)
               const caStage = parsed['org-2026'].stages.find(s => s.id === 'ca');
               if (caStage && Array.isArray(caStage.turmas)) {
                 caStage.turmas.forEach(t => {
+                  if (t.id === 't-ca-2' || t.turma === 'Turma 02') {
+                    if (t.dayTime && t.dayTime.includes('10:15 às')) t.dayTime = 'Sábado: 10:30 às 12:00';
+                  }
                   if (['t-ca-5', 't-ca-6', 't-ca-7', 't-ca-8'].includes(t.id) || ['Turma 05', 'Turma 06', 'Turma 07', 'Turma 08'].includes(t.turma)) {
-                    if (t.dayTime && (!t.dayTime.includes('21:30') || t.dayTime.includes('Sacramento: 03/12/2026 – 19:30'))) {
-                      t.dayTime = 'Quinta: 19:30 às 21:30 (Sacramento: 03/12/2026)';
+                    if (t.dayTime && (!t.dayTime.includes('22:00') || t.dayTime.includes('Sacramento: 03/12/2026 – 19:30'))) {
+                      t.dayTime = 'Quinta: 19:30 às 22:00 (Sacramento: 03/12/2026)';
                     }
                   }
                 });
@@ -14686,7 +14871,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       }
 
       document.getElementById('turma-form-turma').value = '';
-      document.getElementById('turma-form-daytime').value = 'Sábado: 08:30 às 10:00';
+      setTurmaDayTimeFields('Sábado: 08:30 às 10:00');
       document.getElementById('turma-form-semcatequista').checked = false;
       document.getElementById('turma-form-room').value = '';
       document.getElementById('turma-form-hall').value = 'Centro Catequético';
@@ -14725,7 +14910,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       document.getElementById('turma-form-id').value = foundTurma.id;
       document.getElementById('turma-form-etapa').value = foundStage.name;
       document.getElementById('turma-form-turma').value = foundTurma.turma;
-      document.getElementById('turma-form-daytime').value = foundTurma.dayTime;
+      setTurmaDayTimeFields(foundTurma.dayTime);
       document.getElementById('turma-form-semcatequista').checked = !!foundTurma.semCatequista;
       document.getElementById('turma-form-room').value = foundTurma.room;
       document.getElementById('turma-form-hall').value = foundTurma.hall;
@@ -14753,13 +14938,42 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       window._editingTurmaSnapshot = null;
     }
 
+    window._turmaDayTimeSuffix = '';
+    function setTurmaDayTimeFields(str) {
+      const hid = document.getElementById('turma-form-daytime');
+      hid.value = str || '';
+      const m = /^\s*([^:]+?):\s*(\d{1,2}:\d{2})\s*às\s*(\d{1,2}:\d{2})(.*)$/.exec(str || '');
+      const pad = t => t ? t.padStart(5, '0') : '';
+      const dia = document.getElementById('turma-form-dia');
+      if (m) {
+        const d = m[1].trim().replace(/-feira$/i, '');
+        dia.value = Array.from(dia.options).some(o => o.value === d) ? d : '';
+        document.getElementById('turma-form-inicio').value = pad(m[2]);
+        document.getElementById('turma-form-fim').value = pad(m[3]);
+        window._turmaDayTimeSuffix = m[4] || '';
+      } else {
+        dia.value = '';
+        document.getElementById('turma-form-inicio').value = '';
+        document.getElementById('turma-form-fim').value = '';
+        window._turmaDayTimeSuffix = '';
+      }
+    }
+    function syncTurmaDayTime() {
+      const d = document.getElementById('turma-form-dia').value;
+      const i = document.getElementById('turma-form-inicio').value;
+      const f = document.getElementById('turma-form-fim').value;
+      if (d && i && f) document.getElementById('turma-form-daytime').value = `${d}: ${i} às ${f}${window._turmaDayTimeSuffix || ''}`;
+    }
+
     async function handleSaveTurmaModal(event) {
       if (event) event.preventDefault();
 
       const turmaId = document.getElementById('turma-form-id').value;
       const etapaName = document.getElementById('turma-form-etapa').value;
       const turmaName = document.getElementById('turma-form-turma').value.trim();
+      syncTurmaDayTime();
       const dayTime = document.getElementById('turma-form-daytime').value.trim();
+      if (!dayTime) { alert('⚠️ Informe o dia da semana e os horários de início e fim.'); return; }
       const room = document.getElementById('turma-form-room').value.trim();
       const hall = document.getElementById('turma-form-hall').value.trim();
 
@@ -24082,6 +24296,40 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       return { changed, count };
     }
 
+    // Migração: Crismandos Sábado 10h30 (CSV) -> Crisma Adultos / Turma 02 (merge construtivo, sem apagar dados)
+    const CRISMANDOS_T2_NOMES = ["Adriana De Cássia Dos Reis Luz Da Silva", "Adson Azevedo Costa", "Alberth Da Costa Benevides", "Alice Lima Ferreira", "Brenda Shelida Medeiros Oliveira Souza", "Bruna Maciel Da Silva De Freitas", "Daniela Morgane Castro Silva", "Emanuel Oliveira Da Paixão", "João Lucas Simões Cintra", "João Marcelo Nogueira Dantas de Figueiredo", "José Gabriel Braga de Souza", "Juliana Barros Vianna De Oliveira", "Jussara Soares De Oliveira", "Karen Luiza Amorim Cruz", "Karine Silva Biliu", "Louise Helena Gomes Rocha", "Luana Paula Santos Cardoso Ferreira", "Lucas Freitas De Siqueira", "Luiz Antônio Werneck Tavares", "Marcela Meireles Cardoso Haidar", "Marcela Nogueira Dantas de Figueiredo", "Maria Eduarda Loureiro Soares", "Maria Manuela Vieira De Sousa Nepomuceno", "Maria Meireles Cardoso Haidar", "Marianna Souza Fagundes Tonhá Alves", "Murilo Borges Do Nascimento", "Natália De Souza Torres", "Nayara Alves Da Conceição", "Pablo Castro Cavalcanti", "Paulo Maiano Cardoso Silva", "Rani Fernandes Dos Reis Luz", "Rodrigo Augusto De Faria", "Waleska Oliveira De Freitas"];
+    function migrarCrismandosT2(db) {
+      const KEY = 'Crisma Adultos__Turma 02';
+      const norm = x => String(x || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+      const alvo = db[KEY] = Array.isArray(db[KEY]) ? db[KEY] : [];
+      const jaNaT2 = new Set(alvo.map(a => norm(a.nome)));
+      const tocadas = new Set();
+      CRISMANDOS_T2_NOMES.forEach((nome, i) => {
+        const n = norm(nome);
+        if (jaNaT2.has(n)) return;
+        let movido = null;
+        ['Crisma Adultos__Turma 04', 'Crisma Adultos__Turma 07'].forEach(k => {
+          if (!Array.isArray(db[k])) return;
+          const idx = db[k].findIndex(a => norm(a.nome) === n);
+          if (idx >= 0) { movido = db[k].splice(idx, 1)[0]; tocadas.add(k); }
+        });
+        alvo.push(movido || {
+          id: 'ca2-' + (i + 1), nome, cpf: '', dataNascimento: '', contato: '', email: '', endereco: '', estadoCivil: '',
+          batizado: '', primeiraEucaristia: '', observacoes: 'Importado do CSV Crismandos Sábado 10h30',
+          statusAprovacao: 'aprovado', aprovadoPor: 'Importação CSV (Coordenação)', aprovadoEm: new Date().toISOString()
+        });
+        jaNaT2.add(n);
+        tocadas.add(KEY);
+      });
+      if (tocadas.size && window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
+        tocadas.forEach(k => {
+          const [etapa, turma] = k.split('__');
+          window.firebaseDb.collection('turma_alunos').doc(k).set({ etapa, turma, alunos: db[k], updatedAt: new Date().toISOString() }, { merge: true })
+            .catch(err => console.warn('Sync Firestore migração T2:', k, err));
+        });
+      }
+    }
+
     function getAlunosDatabase() {
       // 1. Inicia sempre com o SEED_ALUNOS_DATABASE completo (todas as etapas e turmas paroquiais)
       const db = JSON.parse(JSON.stringify(SEED_ALUNOS_DATABASE || {}));
@@ -24108,6 +24356,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         console.error('Erro ao ler banco de catequizandos do localStorage:', e);
       }
 
+      migrarCrismandosT2(db);
       aprovarAlunosLorenaDirect(db);
 
       // 3. Atualiza o storage local para garantir integridade permanente e autocura
@@ -25124,6 +25373,41 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       }
     }
 
+    // ===== Datas de sacramentos (recebido x previsto) =====
+    function maskDataBR(el) {
+      const d = el.value.replace(/\D/g, '').slice(0, 8);
+      let o = d;
+      if (d.length > 4) o = d.slice(0, 2) + '/' + d.slice(2, 4) + '/' + d.slice(4);
+      else if (d.length > 2) o = d.slice(0, 2) + '/' + d.slice(2);
+      el.value = o;
+    }
+    function isSacramentoRecebido(k) {
+      const v = (document.getElementById('aluno-' + k).value || '').toLowerCase();
+      return v.startsWith('sim');
+    }
+    function updateSacramentoDateUI(k) {
+      const rec = isSacramentoRecebido(k);
+      const lbl = document.getElementById('lbl-aluno-' + k + '-data');
+      const badge = document.getElementById('badge-aluno-' + k + '-data');
+      if (!lbl || !badge) return;
+      lbl.textContent = rec ? 'Data em que recebeu' : 'Data prevista';
+      badge.textContent = rec ? 'RECEBIDO' : 'PREVISTO';
+      badge.className = 'text-[9px] font-black px-2 py-0.5 rounded-full border ' + (rec ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-amber-100 text-amber-800 border-amber-300');
+      document.getElementById('aluno-' + k + '-data').className = 'flex-1 border rounded-xl px-3 py-2 text-sm focus:bg-white focus:ring-2 outline-none ' + (rec ? 'border-emerald-300 bg-emerald-50 focus:ring-emerald-400' : 'border-amber-300 bg-amber-50 focus:ring-amber-400');
+    }
+    function updateAllSacramentoDateUI() { ['batizado', 'eucaristia', 'crisma', 'matrimonio'].forEach(updateSacramentoDateUI); }
+    function openSacramentoCalendar(k) {
+      const pk = document.getElementById('aluno-' + k + '-data-picker');
+      const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(document.getElementById('aluno-' + k + '-data').value);
+      pk.value = m ? `${m[3]}-${m[2]}-${m[1]}` : '';
+      if (pk.showPicker) pk.showPicker(); else pk.focus();
+    }
+    function pickSacramentoDate(k, iso) {
+      if (!iso) return;
+      const [y, m, d] = iso.split('-');
+      document.getElementById('aluno-' + k + '-data').value = `${d}/${m}/${y}`;
+    }
+
     function openAlunoModal(alunoData = null) {
       const modal = document.getElementById('modal-aluno');
       const title = document.getElementById('modal-aluno-title');
@@ -25147,6 +25431,13 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         document.getElementById('aluno-estado-civil').value = alunoData.estadoCivil || '';
         document.getElementById('aluno-batizado').value = alunoData.batizado || '';
         document.getElementById('aluno-eucaristia').value = alunoData.primeiraEucaristia || '';
+        document.getElementById('aluno-crisma').value = alunoData.crisma || '';
+        document.getElementById('aluno-matrimonio').value = alunoData.matrimonio || '';
+        document.getElementById('aluno-batizado-data').value = alunoData.batismoData || '';
+        document.getElementById('aluno-eucaristia-data').value = alunoData.primeiraEucaristiaData || '';
+        document.getElementById('aluno-crisma-data').value = alunoData.crismaData || '';
+        document.getElementById('aluno-matrimonio-data').value = alunoData.matrimonioData || '';
+        updateAllSacramentoDateUI();
         document.getElementById('aluno-impedido').value = alunoData.impedido || '';
         document.getElementById('aluno-justificativa').value = alunoData.justificativa || '';
         document.getElementById('aluno-obs').value = alunoData.observacoes || '';
@@ -25162,6 +25453,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         if (title) title.textContent = 'Cadastrar Novo Catequizando';
         if (sub) sub.textContent = `${currentAlunosTurma} • ${currentAlunosEtapa}`;
         form.reset();
+        updateAllSacramentoDateUI();
         document.getElementById('aluno-id').value = '';
         if (document.getElementById('aluno-status')) document.getElementById('aluno-status').value = 'ativo';
         if (document.getElementById('aluno-data-desistencia')) document.getElementById('aluno-data-desistencia').value = '';
@@ -25351,6 +25643,12 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         estadoCivil: (document.getElementById('aluno-estado-civil').value || '').trim(),
         batizado: document.getElementById('aluno-batizado').value || '',
         primeiraEucaristia: document.getElementById('aluno-eucaristia').value || '',
+        crisma: document.getElementById('aluno-crisma').value || '',
+        matrimonio: document.getElementById('aluno-matrimonio').value || '',
+        batismoData: (document.getElementById('aluno-batizado-data').value || '').trim(),
+        primeiraEucaristiaData: (document.getElementById('aluno-eucaristia-data').value || '').trim(),
+        crismaData: (document.getElementById('aluno-crisma-data').value || '').trim(),
+        matrimonioData: (document.getElementById('aluno-matrimonio-data').value || '').trim(),
         impedido: document.getElementById('aluno-impedido').value || '',
         justificativa: (document.getElementById('aluno-justificativa').value || '').trim(),
         observacoes: (document.getElementById('aluno-obs').value || '').trim(),
