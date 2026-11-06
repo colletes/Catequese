@@ -2936,6 +2936,10 @@
                       <span id="filter-btn-aluno-eucaristia" onclick="event.stopPropagation()"></span>
                     </div>
                   </th>
+                  <th class="py-3 px-2.5 font-heading text-center min-w-[95px]" title="Dt. Batismo">Dt. Batismo</th>
+                  <th class="py-3 px-2.5 font-heading text-center min-w-[95px]" title="Dt. 1ª Euc.">Dt. 1ª Euc.</th>
+                  <th class="py-3 px-2.5 font-heading text-center min-w-[95px]" title="Crisma">Crisma</th>
+                  <th class="py-3 px-2.5 font-heading text-center min-w-[95px]" title="Matrimônio">Matrimônio</th>
                   <th id="th-aluno-impedido" onclick="setAlunosSort('impedido')" class="py-3 px-2.5 font-heading text-center min-w-[95px] cursor-pointer hover:bg-slate-800 transition" title="Ordenar por Impedimento">
                     <div class="flex items-center justify-center gap-1">
                       <span>Impedido?</span><span class="sort-icon text-[10px] text-slate-400"> ↕</span>
@@ -3348,6 +3352,10 @@
                     <span id="filter-btn-cg-eucaristia" onclick="event.stopPropagation()"></span>
                   </div>
                 </th>
+                  <th class="py-3 px-2.5 font-heading text-center min-w-[95px]" title="Dt. Batismo">Dt. Batismo</th>
+                  <th class="py-3 px-2.5 font-heading text-center min-w-[95px]" title="Dt. 1ª Euc.">Dt. 1ª Euc.</th>
+                  <th class="py-3 px-2.5 font-heading text-center min-w-[95px]" title="Crisma">Crisma</th>
+                  <th class="py-3 px-2.5 font-heading text-center min-w-[95px]" title="Matrimônio">Matrimônio</th>
                 <th class="py-3 px-2.5 font-heading text-center min-w-[95px] cursor-pointer hover:bg-slate-800 transition" id="th-cg-impedido" onclick="setCadastroGeralSort('impedidoLabel')" title="Ordenar por Impedimento">
                   <div class="flex items-center justify-center gap-1">
                     <span>Impedido</span><span class="sort-icon-cg text-[10px] text-slate-400"> ↕</span>
@@ -25170,7 +25178,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       if (filtered.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="13" class="py-12 text-center text-slate-400">
+            <td colspan="17" class="py-12 text-center text-slate-400">
               <div class="text-3xl mb-2">📂</div>
               <p class="font-semibold text-slate-600">Nenhum catequizando encontrado nesta turma.</p>
               <p class="text-xs text-slate-400 mt-1">Clique em "➕ Adicionar Aluno" ou "📤 Upload Planilha" acima para cadastrar catequizandos.</p>
@@ -25294,6 +25302,10 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             <td class="py-2.5 px-3">${estCivilHtml}</td>
             <td class="py-2.5 px-2.5 text-center">${batizadoBadge}</td>
             <td class="py-2.5 px-2.5 text-center">${eucaristiaBadge}</td>
+            <td class="py-2.5 px-2.5 text-center">${celulaDataSacramento(a, 'batismo')}</td>
+            <td class="py-2.5 px-2.5 text-center">${celulaDataSacramento(a, 'eucaristia')}</td>
+            <td class="py-2.5 px-2.5 text-center">${celulaDataSacramento(a, 'crisma')}</td>
+            <td class="py-2.5 px-2.5 text-center">${celulaDataSacramento(a, 'matrimonio')}</td>
             <td class="py-2.5 px-2.5 text-center">${impedidoBadge}</td>
             <td class="py-2.5 px-3">${justHtml}</td>
             <td class="py-2.5 px-2.5 text-center no-print">
@@ -25410,6 +25422,20 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       document.getElementById('aluno-' + k + '-data').value = `${d}/${m}/${y}`;
     }
 
+    function celulaDataSacramento(a, k) {
+      const c = ({
+        batismo: { status: 'batizado', data: 'batismoData' }, eucaristia: { status: 'primeiraEucaristia', data: 'primeiraEucaristiaData' },
+        crisma: { status: 'crisma', data: 'crismaData' }, matrimonio: { status: 'matrimonio', data: 'matrimonioData' } })[k];
+      const st = String(a[c.status] || '');
+      const dt = String(a[c.data] || '').trim();
+      const rec = st.toLowerCase().startsWith('sim');
+      const comStatus = (k === 'crisma' || k === 'matrimonio');
+      const stHtml = comStatus ? (rec ? '<div class="text-[10px] font-bold text-emerald-700">Sim</div>' : (st.toLowerCase().startsWith('n') ? '<div class="text-[10px] font-bold text-rose-700">Não</div>' : '')) : '';
+      if (!dt) return stHtml || '<span class="text-slate-300">—</span>';
+      return stHtml + (rec
+        ? `<span class="inline-block text-[10px] font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-1.5 py-0.5 rounded-full" title="Data em que recebeu">${dt}</span>`
+        : `<span class="inline-block text-[10px] font-bold text-amber-800 bg-amber-100 border border-amber-300 px-1.5 py-0.5 rounded-full" title="Data prevista">${dt} • prev.</span>`);
+    }
     function openAlunoModal(alunoData = null) {
       const modal = document.getElementById('modal-aluno');
       const title = document.getElementById('modal-aluno-title');
@@ -25935,7 +25961,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       if (!canAccess) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="11" class="py-12 text-center text-slate-500">
+            <td colspan="15" class="py-12 text-center text-slate-500">
               <div class="text-3xl mb-2">🔒</div>
               <p class="font-bold text-slate-700">Acesso Restrito à Coordenação Geral e Master Admin</p>
               <p class="text-xs text-slate-400 mt-1 max-w-md mx-auto">Em conformidade com a LGPD e as normas pastorais, o Cadastro Geral consolidado de todas as etapas é de acesso exclusivo da Coordenação Geral.</p>
@@ -26097,7 +26123,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       if (filtered.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="11" class="py-12 text-center text-slate-400">
+            <td colspan="15" class="py-12 text-center text-slate-400">
               <div class="text-3xl mb-2">🔍</div>
               <p class="font-semibold text-slate-600">Nenhum catequizando encontrado com os filtros aplicados.</p>
               <button onclick="clearAllCadastroGeralFilters()" class="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-300 px-3 py-1.5 rounded-xl transition">
@@ -26178,6 +26204,10 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             <td class="py-2.5 px-2.5 text-center">
               ${eucaristiaBadge}
             </td>
+            <td class="py-2.5 px-2.5 text-center">${celulaDataSacramento(a, 'batismo')}</td>
+            <td class="py-2.5 px-2.5 text-center">${celulaDataSacramento(a, 'eucaristia')}</td>
+            <td class="py-2.5 px-2.5 text-center">${celulaDataSacramento(a, 'crisma')}</td>
+            <td class="py-2.5 px-2.5 text-center">${celulaDataSacramento(a, 'matrimonio')}</td>
             <td class="py-2.5 px-2.5 text-center">
               ${impedidoBadge}
             </td>
