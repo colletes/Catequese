@@ -24304,6 +24304,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       const alvo = db[KEY] = Array.isArray(db[KEY]) ? db[KEY] : [];
       const jaNaT2 = new Set(alvo.map(a => norm(a.nome)));
       const tocadas = new Set();
+      // Limpeza: remove a observação automática 'Importado do CSV' já gravada em registros anteriores
+      alvo.forEach(a => { if (a.observacoes === 'Importado do CSV Crismandos Sábado 10h30') { a.observacoes = ''; tocadas.add(KEY); } });
       CRISMANDOS_T2_NOMES.forEach((nome, i) => {
         const n = norm(nome);
         if (jaNaT2.has(n)) return;
@@ -24315,7 +24317,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         });
         alvo.push(movido || {
           id: 'ca2-' + (i + 1), nome, cpf: '', dataNascimento: '', contato: '', email: '', endereco: '', estadoCivil: '',
-          batizado: '', primeiraEucaristia: '', observacoes: 'Importado do CSV Crismandos Sábado 10h30',
+          batizado: '', primeiraEucaristia: '', observacoes: '',
           statusAprovacao: 'aprovado', aprovadoPor: 'Importação CSV (Coordenação)', aprovadoEm: new Date().toISOString()
         });
         jaNaT2.add(n);
