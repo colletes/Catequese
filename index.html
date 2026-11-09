@@ -215,11 +215,12 @@
       body.print-mode-landscape,
       body.printing-organograma-tree,
       body.printing-organograma-table,
-      body.printing-chamada {
+      body.printing-chamada,
+      body.printing-fichas.print-mode-landscape {
         page: landscape-print;
       }
       body.print-mode-portrait,
-      body.printing-fichas {
+      body.printing-fichas:not(.print-mode-landscape) {
         page: portrait-print;
       }
 
@@ -295,6 +296,40 @@
         page-break-after: auto !important;
         break-after: auto !important;
         padding-bottom: 0 !important;
+      }
+      body.printing-fichas .report-print-sheet {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
+      }
+      body.printing-fichas .report-page-break {
+        page-break-after: always !important;
+        break-after: page !important;
+      }
+      body.printing-fichas .report-page-break:last-child {
+        page-break-after: auto !important;
+        break-after: auto !important;
+      }
+      body.printing-fichas .report-avoid-break {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      body.printing-fichas table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        page-break-inside: auto !important;
+      }
+      body.printing-fichas tr {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      body.printing-fichas thead {
+        display: table-header-group !important;
+      }
+      body.printing-fichas tfoot {
+        display: table-footer-group !important;
       }
 
       /* ======================================================== */
@@ -755,6 +790,18 @@
         <div class="flex-1 min-w-0">
           <div class="text-xs font-bold text-slate-200 group-hover:text-amber-300">Cadastro Geral</div>
           <div class="text-[10px] text-slate-400 truncate">Todas as turmas e alunos (Coord.)</div>
+        </div>
+      </button>
+
+      <!-- 5.2 Central de Relatórios & PDFs (Exclusivo Master Admin, Coordenação Geral e Vice) -->
+      <button onclick="switchTab('relatorios')" id="sidebar-tab-relatorios" class="sidebar-tab-btn hidden w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition group border border-transparent hover:bg-slate-900">
+        <span class="w-8 h-8 rounded-xl bg-amber-950 text-[#d4a94f] border border-amber-500/40 flex items-center justify-center text-sm flex-shrink-0">🖨️</span>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-200 group-hover:text-amber-300">Central de Relatórios</span>
+            <span class="text-[9px] font-black uppercase px-1.5 py-0.2 rounded-full bg-amber-500/20 text-[#d4a94f]">PDF</span>
+          </div>
+          <div class="text-[10px] text-slate-400 truncate">Turmas, Catequistas, Salas e Alunos</div>
         </div>
       </button>
 
@@ -1616,10 +1663,15 @@
 
       <!-- Quick Room Grid Cards -->
       <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-        <h3 class="text-lg font-bold font-heading text-slate-900 mb-4 flex items-center gap-2">
-          <span class="w-2 h-4 bg-[#d4a94f] rounded-full"></span>
-          Resumo das Salas do Centro Catequético
-        </h3>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+          <h3 class="text-lg font-bold font-heading text-slate-900 flex items-center gap-2">
+            <span class="w-2 h-4 bg-[#d4a94f] rounded-full"></span>
+            Resumo das Salas do Centro Catequético
+          </h3>
+          <button onclick="openCentralRelatoriosTab('salas')" class="btn-shortcut-central-relatorios hidden inline-flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-[#d4a94f] border border-amber-500/40 font-bold px-3.5 py-1.5 rounded-xl text-xs shadow-xs transition">
+            <span>🖨️</span> <span>Emitir Relatório de Salas (PDF)</span>
+          </button>
+        </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4" id="catequetico-cards-grid">
           <!-- Populated by JS -->
         </div>
@@ -1965,10 +2017,15 @@
 
           <!-- Evangelists Badge Box -->
           <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-5 rounded-3xl border border-amber-500/30">
-            <h4 class="text-sm font-bold text-[#d4a94f] uppercase tracking-wider mb-2 flex items-center gap-2">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-              As Salas dos Quatro Evangelistas
-            </h4>
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <h4 class="text-sm font-bold text-[#d4a94f] uppercase tracking-wider flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                As Salas dos Quatro Evangelistas
+              </h4>
+              <button onclick="openCentralRelatoriosTab('salas')" class="btn-shortcut-central-relatorios hidden inline-flex items-center gap-1 bg-amber-500/20 hover:bg-amber-500/30 text-[#d4a94f] border border-amber-500/40 font-bold px-2.5 py-1 rounded-lg text-[11px] transition">
+                <span>🖨️</span> <span>Relatório PDF</span>
+              </button>
+            </div>
             <p class="text-xs text-slate-300 mb-3">Salas principais da Eucaristia II e Crisma no Salão Paroquial:</p>
             <div class="grid grid-cols-2 gap-2 text-xs">
               <div class="bg-white/5 p-2 rounded-xl border border-white/10">
@@ -2052,6 +2109,9 @@
 
         <!-- Toolbar de Ações (Contextual) -->
         <div id="organograma-actions-toolbar" class="flex items-center gap-2 flex-wrap">
+          <button onclick="openCentralRelatoriosTab('turmas')" class="btn-shortcut-central-relatorios hidden inline-flex items-center gap-1.5 bg-amber-950 hover:bg-amber-900 text-[#d4a94f] border border-amber-500/50 font-bold px-3.5 py-2 rounded-xl text-xs shadow-xs transition">
+            <span>🖨️ Relatório Modular de Turmas</span>
+          </button>
           <button id="btn-export-img" onclick="exportOrganogramaImage()" class="inline-flex items-center gap-1.5 bg-[#d4a94f] hover:bg-[#e6c27a] text-slate-950 font-bold px-3.5 py-2 rounded-xl text-xs shadow-md transition transform active:scale-95">
             <span>📸 Baixar Imagem (PNG)</span>
           </button>
@@ -2283,6 +2343,9 @@
               <button id="btn-print-cats" onclick="imprimirFichasCatequistasSelecionados()" class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-[#d4a94f] border border-[#d4a94f]/50 font-bold px-4 py-2 rounded-xl text-xs shadow-md transition transform active:scale-95 font-heading" title="Imprimir fichas oficiais em PDF (com Brasão do Santuário)">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                 <span>Imprimir Fichas (<span id="count-selected-cats">0</span>)</span>
+              </button>
+              <button onclick="openCentralRelatoriosTab('catequistas')" class="btn-shortcut-central-relatorios hidden inline-flex items-center gap-1.5 bg-amber-950 hover:bg-amber-900 text-[#d4a94f] border border-amber-500/50 font-bold px-4 py-2 rounded-xl text-xs shadow-md transition font-heading">
+                <span>🖨️ Relatórios Avançados</span>
               </button>
             </div>
           </div>
@@ -3205,6 +3268,9 @@
             </p>
           </div>
           <div class="flex flex-wrap items-center gap-2 self-start sm:self-center">
+            <button onclick="openCentralRelatoriosTab('catequizandos')" class="btn-shortcut-central-relatorios hidden inline-flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-[#d4a94f] border border-amber-500/50 font-bold px-4 py-2 rounded-xl text-xs sm:text-sm transition shadow">
+              <span>🖨️</span> <span>Emitir Relatórios &amp; PDFs</span>
+            </button>
             <button onclick="exportCadastroGeralCSV()" class="inline-flex items-center gap-1.5 bg-[#d4a94f] hover:bg-amber-600 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs sm:text-sm transition shadow" title="Exportar toda a base consolidada para planilha CSV/Excel">
               <span>📥</span> <span>Exportar Base Completa</span>
             </button>
@@ -5570,6 +5636,644 @@
 
     </section>
 
+    <!-- ======================================================= -->
+    <!-- 10. CENTRAL DE RELATÓRIOS & EMISSÃO DE PDFs OFICIAIS     -->
+    <!-- Exclusivo: Master Admin, Coordenador Geral e Vice Geral  -->
+    <!-- ======================================================= -->
+    <section id="view-relatorios" class="tab-view hidden space-y-6">
+
+      <!-- Banner Principal e Seletor de Módulos -->
+      <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-amber-950 text-white p-6 sm:p-8 rounded-3xl border-2 border-[#d4a94f]/60 shadow-xl relative overflow-hidden">
+        <div class="absolute -top-20 -right-20 w-56 h-56 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
+          <div>
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#d4a94f] animate-pulse"></span>
+              <span class="text-xs font-bold uppercase tracking-wider text-[#d4a94f] font-heading">Governança Pastoral • Documentos Oficiais A4</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-black font-heading text-white flex items-center gap-2.5">
+              <span>🖨️</span> <span>Central de Emissão de Relatórios &amp; PDFs</span>
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-3xl">
+              Geração modular de relatórios oficiais e fichas cadastrais com o Brasão do Santuário Imaculado Coração de Maria. Pré-visualize na tela e imprima ou salve em PDF de alta definição.
+            </p>
+          </div>
+
+          <!-- Controles Globais de Orientação e Impressão -->
+          <div class="flex flex-wrap items-center gap-2.5 self-start lg:self-center">
+            <div class="inline-flex items-center bg-slate-900/90 border border-slate-700 p-1 rounded-xl text-xs">
+              <button type="button" id="btn-rel-orient-portrait" onclick="setRelatorioOrientation('portrait')" class="px-3 py-1.5 rounded-lg font-bold bg-[#d4a94f] text-slate-950 transition flex items-center gap-1">
+                <span>📄</span> <span>Retrato A4</span>
+              </button>
+              <button type="button" id="btn-rel-orient-landscape" onclick="setRelatorioOrientation('landscape')" class="px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white transition flex items-center gap-1">
+                <span>🖼️</span> <span>Paisagem A4</span>
+              </button>
+            </div>
+
+            <button type="button" onclick="executePrintCurrentRelatorio()" class="inline-flex items-center gap-2 bg-gradient-to-r from-[#d4a94f] to-[#b88d36] hover:from-[#facf75] hover:to-[#d4a94f] text-slate-950 font-black px-5 py-2.5 rounded-xl text-xs sm:text-sm shadow-lg transition transform active:scale-95 font-heading cursor-pointer">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+              <span>Imprimir / Salvar em PDF</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Abas dos 4 Tipos de Relatório -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 mt-6 pt-5 border-t border-slate-800/90 relative z-10">
+          <button type="button" id="tab-btn-rel-turmas" onclick="switchRelatorioModule('turmas')" class="rel-mod-tab-btn flex items-center gap-3 p-3.5 rounded-2xl border-2 border-[#d4a94f] bg-amber-950/60 text-left transition cursor-pointer">
+            <span class="w-10 h-10 rounded-xl bg-[#d4a94f] text-slate-950 flex items-center justify-center text-lg font-black shrink-0">🏫</span>
+            <div class="min-w-0">
+              <div class="text-xs sm:text-sm font-black font-heading text-white truncate">1. Relatório de Turmas</div>
+              <div class="text-[11px] text-amber-200/90 truncate">Modular: Sala, Horário, Catequistas e Alunos</div>
+            </div>
+          </button>
+
+          <button type="button" id="tab-btn-rel-catequistas" onclick="switchRelatorioModule('catequistas')" class="rel-mod-tab-btn flex items-center gap-3 p-3.5 rounded-2xl border border-white/15 bg-white/5 hover:bg-white/10 text-left transition cursor-pointer">
+            <span class="w-10 h-10 rounded-xl bg-slate-800 text-amber-300 border border-amber-500/30 flex items-center justify-center text-lg font-black shrink-0">👥</span>
+            <div class="min-w-0">
+              <div class="text-xs sm:text-sm font-black font-heading text-white truncate">2. Catequistas</div>
+              <div class="text-[11px] text-slate-400 truncate">Individual, Turma, Etapa ou Geral + Ficha</div>
+            </div>
+          </button>
+
+          <button type="button" id="tab-btn-rel-salas" onclick="switchRelatorioModule('salas')" class="rel-mod-tab-btn flex items-center gap-3 p-3.5 rounded-2xl border border-white/15 bg-white/5 hover:bg-white/10 text-left transition cursor-pointer">
+            <span class="w-10 h-10 rounded-xl bg-slate-800 text-amber-300 border border-amber-500/30 flex items-center justify-center text-lg font-black shrink-0">🏢</span>
+            <div class="min-w-0">
+              <div class="text-xs sm:text-sm font-black font-heading text-white truncate">3. Salas &amp; Ocupação</div>
+              <div class="text-[11px] text-slate-400 truncate">Horários ocupados, vagos e placas de porta</div>
+            </div>
+          </button>
+
+          <button type="button" id="tab-btn-rel-catequizandos" onclick="switchRelatorioModule('catequizandos')" class="rel-mod-tab-btn flex items-center gap-3 p-3.5 rounded-2xl border border-white/15 bg-white/5 hover:bg-white/10 text-left transition cursor-pointer">
+            <span class="w-10 h-10 rounded-xl bg-slate-800 text-amber-300 border border-amber-500/30 flex items-center justify-center text-lg font-black shrink-0">📋</span>
+            <div class="min-w-0">
+              <div class="text-xs sm:text-sm font-black font-heading text-white truncate">4. Catequizandos</div>
+              <div class="text-[11px] text-slate-400 truncate">Turma, Impedidos, Faltas e Documentação</div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- PAINEL 1: CONFIGURAÇÃO DO RELATÓRIO MODULAR DE TURMAS             -->
+      <!-- ================================================================= -->
+      <div id="rel-panel-turmas" class="rel-config-panel bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-slate-200">
+          <div>
+            <h3 class="text-lg font-bold font-heading text-slate-900 flex items-center gap-2">
+              <span class="text-amber-600">🏫</span> <span>Configuração do Relatório Modular de Turmas</span>
+            </h3>
+            <p class="text-xs text-slate-500">Selecione as turmas desejadas (todas, por etapa ou individuais) e marque quais blocos de informação devem constar no relatório.</p>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <label class="text-xs font-bold text-slate-700">Modo de Diagramação:</label>
+            <select id="rel-turmas-layout-mode" onchange="renderRelatorioPreview()" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 outline-none focus:ring-2 focus:ring-amber-400">
+              <option value="blocos">📑 Blocos por Turma (Ficha da Turma + Alunos)</option>
+              <option value="tabela">📊 Resumo em Tabela Consolidada</option>
+            </select>
+            <label id="wrap-rel-turmas-pagebreak" class="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-2 rounded-xl text-xs font-bold text-amber-950 cursor-pointer">
+              <input type="checkbox" id="rel-turmas-pagebreak" onchange="renderRelatorioPreview()" class="rounded text-amber-600 focus:ring-amber-500">
+              <span>1 Turma por Página A4</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Coluna Esquerda: Seleção de Turmas -->
+          <div class="lg:col-span-5 space-y-3">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-black uppercase tracking-wider text-slate-700 font-heading">1. Seleção de Turmas</label>
+              <div class="inline-flex rounded-xl bg-slate-100 p-0.5 border border-slate-200 text-[11px]">
+                <button type="button" id="btn-rel-turmas-scope-geral" onclick="setRelTurmasScope('geral')" class="px-2.5 py-1 rounded-lg font-bold bg-white text-slate-900 shadow-2xs">Geral (Todas)</button>
+                <button type="button" id="btn-rel-turmas-scope-etapas" onclick="setRelTurmasScope('etapas')" class="px-2.5 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900">Por Etapa</button>
+                <button type="button" id="btn-rel-turmas-scope-individual" onclick="setRelTurmasScope('individual')" class="px-2.5 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900">Individual / Múltipla</button>
+              </div>
+            </div>
+
+            <!-- Box Geral -->
+            <div id="rel-turmas-scope-box-geral" class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-700 space-y-1">
+              <div class="font-bold text-slate-900 flex items-center gap-1.5"><span>✅</span> <span>Todas as Turmas do Organograma Ativo</span></div>
+              <p class="text-slate-500">Inclui todas as etapas e turmas cadastradas no ano pastoral selecionado.</p>
+            </div>
+
+            <!-- Box Por Etapas -->
+            <div id="rel-turmas-scope-box-etapas" class="hidden p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-slate-800">Marque as Etapas desejadas:</span>
+                <div class="space-x-2">
+                  <button type="button" onclick="toggleAllRelTurmasEtapas(true)" class="text-amber-700 hover:underline font-bold">Todas</button>
+                  <button type="button" onclick="toggleAllRelTurmasEtapas(false)" class="text-slate-500 hover:underline">Nenhuma</button>
+                </div>
+              </div>
+              <div id="rel-turmas-etapas-checklist" class="grid grid-cols-2 gap-2 text-xs">
+                <!-- Populado via JS -->
+              </div>
+            </div>
+
+            <!-- Box Seleção Individual/Múltipla de Turmas -->
+            <div id="rel-turmas-scope-box-individual" class="hidden p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+              <div class="flex items-center justify-between gap-2">
+                <input type="text" id="rel-turmas-search-input" oninput="renderRelTurmasIndividualChecklist()" placeholder="Filtrar turma, etapa ou catequista..." class="flex-1 bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs outline-none focus:border-amber-500">
+                <button type="button" onclick="toggleAllRelTurmasIndividuais(true)" class="text-[11px] font-bold text-amber-700 hover:underline shrink-0">Marcar Visíveis</button>
+                <button type="button" onclick="toggleAllRelTurmasIndividuais(false)" class="text-[11px] font-medium text-slate-500 hover:underline shrink-0">Limpar</button>
+              </div>
+              <div id="rel-turmas-individual-checklist" class="max-h-52 overflow-y-auto space-y-2 pr-1 text-xs divide-y divide-slate-200/70">
+                <!-- Populado via JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Coluna Direita: Módulos de Dados Adicionáveis -->
+          <div class="lg:col-span-7 space-y-4">
+            <label class="text-xs font-black uppercase tracking-wider text-slate-700 font-heading block">2. Módulos de Dados do Relatório (Adicionáveis ou Não)</label>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs">
+              <label class="flex items-center gap-2 p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-amber-50/40 cursor-pointer font-bold text-slate-800">
+                <input type="checkbox" id="rel-turma-mod-nome" checked onchange="renderRelatorioPreview()" class="rounded text-amber-600 focus:ring-amber-500 w-4 h-4">
+                <span>🏷️ Nome &amp; Etapa da Turma</span>
+              </label>
+              <label class="flex items-center gap-2 p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-amber-50/40 cursor-pointer font-bold text-slate-800">
+                <input type="checkbox" id="rel-turma-mod-sala" checked onchange="renderRelatorioPreview()" class="rounded text-amber-600 focus:ring-amber-500 w-4 h-4">
+                <span>🚪 Sala Oficial &amp; Prédio</span>
+              </label>
+              <label class="flex items-center gap-2 p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-amber-50/40 cursor-pointer font-bold text-slate-800">
+                <input type="checkbox" id="rel-turma-mod-horario" checked onchange="renderRelatorioPreview()" class="rounded text-amber-600 focus:ring-amber-500 w-4 h-4">
+                <span>⏰ Dia &amp; Horário</span>
+              </label>
+              <label class="flex items-center gap-2 p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-amber-50/40 cursor-pointer font-bold text-slate-800">
+                <input type="checkbox" id="rel-turma-mod-catequistas" checked onchange="renderRelatorioPreview()" class="rounded text-amber-600 focus:ring-amber-500 w-4 h-4">
+                <span>👥 Catequistas &amp; Auxiliares</span>
+              </label>
+              <label class="flex items-center gap-2 p-3 rounded-xl border-2 border-indigo-200 bg-indigo-50/50 hover:bg-indigo-50 cursor-pointer font-bold text-indigo-950 sm:col-span-2">
+                <input type="checkbox" id="rel-turma-mod-alunos" checked onchange="onToggleRelTurmaModAlunos(); renderRelatorioPreview();" class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4">
+                <span>📋 Catequizandos da Turma (Lista Nominal / Contagem)</span>
+              </label>
+            </div>
+
+            <!-- Sub-módulos dos Catequizandos (quando o módulo Catequizandos está marcado) -->
+            <div id="rel-turma-submods-alunos-box" class="p-4 rounded-2xl bg-indigo-50/40 border border-indigo-200/80 space-y-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-indigo-950">Campos adicionais na lista de Catequizandos de cada turma:</span>
+                <label class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-700 cursor-pointer">
+                  <input type="checkbox" id="rel-turma-sub-inativos" onchange="renderRelatorioPreview()" class="rounded text-indigo-600">
+                  <span>Incluir desistentes</span>
+                </label>
+              </div>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                <label class="flex items-center gap-1.5 bg-white p-2 rounded-lg border border-indigo-100 cursor-pointer">
+                  <input type="checkbox" id="rel-turma-sub-contato" checked onchange="renderRelatorioPreview()" class="rounded text-indigo-600">
+                  <span>📞 Telefone/WhatsApp</span>
+                </label>
+                <label class="flex items-center gap-1.5 bg-white p-2 rounded-lg border border-indigo-100 cursor-pointer">
+                  <input type="checkbox" id="rel-turma-sub-nasc" onchange="renderRelatorioPreview()" class="rounded text-indigo-600">
+                  <span>🎂 Data Nasc. / Idade</span>
+                </label>
+                <label class="flex items-center gap-1.5 bg-white p-2 rounded-lg border border-indigo-100 cursor-pointer">
+                  <input type="checkbox" id="rel-turma-sub-sacramentos" onchange="renderRelatorioPreview()" class="rounded text-indigo-600">
+                  <span>✝️ Batismo / Eucaristia</span>
+                </label>
+                <label class="flex items-center gap-1.5 bg-white p-2 rounded-lg border border-indigo-100 cursor-pointer">
+                  <input type="checkbox" id="rel-turma-sub-faltas" onchange="renderRelatorioPreview()" class="rounded text-indigo-600">
+                  <span>📊 Faltas / Frequência</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- PAINEL 2: CONFIGURAÇÃO DO RELATÓRIO DE CATEQUISTAS                -->
+      <!-- ================================================================= -->
+      <div id="rel-panel-catequistas" class="rel-config-panel hidden bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-slate-200">
+          <div>
+            <h3 class="text-lg font-bold font-heading text-slate-900 flex items-center gap-2">
+              <span class="text-amber-600">👥</span> <span>Relatório &amp; Fichas Pessoais de Catequistas</span>
+            </h3>
+            <p class="text-xs text-slate-500">Filtre individualmente, por turma, por etapa ou geral. Emita as Fichas Cadastrais Oficiais (1 por página A4) ou Relatório Consolidado em Tabela.</p>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <label class="text-xs font-bold text-slate-700">Formato do PDF:</label>
+            <select id="rel-cats-format-mode" onchange="onChangeRelCatsFormatMode(); renderRelatorioPreview();" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 outline-none focus:ring-2 focus:ring-amber-400">
+              <option value="fichas">🪪 Fichas Cadastrais Completas (1 página A4 por Catequista com Foto 3x4)</option>
+              <option value="tabela">📊 Relatório Consolidado em Tabela (Dados Pessoais &amp; Turmas)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Escopo de Seleção de Catequistas -->
+          <div class="lg:col-span-6 space-y-3">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <label class="text-xs font-black uppercase tracking-wider text-slate-700 font-heading">1. Escopo de Seleção</label>
+              <div class="inline-flex rounded-xl bg-slate-100 p-0.5 border border-slate-200 text-[11px]">
+                <button type="button" id="btn-rel-cats-scope-geral" onclick="setRelCatsScope('geral')" class="px-2.5 py-1 rounded-lg font-bold bg-white text-slate-900 shadow-2xs">Geral</button>
+                <button type="button" id="btn-rel-cats-scope-etapa" onclick="setRelCatsScope('etapa')" class="px-2.5 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900">Por Etapa</button>
+                <button type="button" id="btn-rel-cats-scope-turma" onclick="setRelCatsScope('turma')" class="px-2.5 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900">Por Turma</button>
+                <button type="button" id="btn-rel-cats-scope-individual" onclick="setRelCatsScope('individual')" class="px-2.5 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900">Individual / Nominal</button>
+              </div>
+            </div>
+
+            <!-- Filtro de Status Funcional -->
+            <div class="flex items-center gap-3 bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200 text-xs">
+              <span class="font-bold text-slate-700">Status Funcional:</span>
+              <select id="rel-cats-status-filter" onchange="renderRelCatsDynamicLists(); renderRelatorioPreview();" class="bg-white border border-slate-300 rounded-lg px-2.5 py-1 font-bold text-slate-800 outline-none">
+                <option value="ativo" selected>🟢 Apenas Catequistas Ativos</option>
+                <option value="all">Todos (Ativos + Afastados)</option>
+                <option value="afastado">🟡 Apenas Afastados</option>
+              </select>
+            </div>
+
+            <!-- Sub-box Geral -->
+            <div id="rel-cats-scope-box-geral" class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-600">
+              Seleciona todos os catequistas da paróquia que atendem ao filtro de status funcional acima.
+            </div>
+
+            <!-- Sub-box Etapa -->
+            <div id="rel-cats-scope-box-etapa" class="hidden p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-slate-800">Selecione a(s) Etapa(s):</span>
+                <div class="space-x-2">
+                  <button type="button" onclick="toggleAllRelCatsEtapas(true)" class="text-amber-700 font-bold hover:underline">Todas</button>
+                  <button type="button" onclick="toggleAllRelCatsEtapas(false)" class="text-slate-500 hover:underline">Limpar</button>
+                </div>
+              </div>
+              <div id="rel-cats-etapas-checklist" class="grid grid-cols-2 gap-2 text-xs"></div>
+            </div>
+
+            <!-- Sub-box Turma -->
+            <div id="rel-cats-scope-box-turma" class="hidden p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="flex items-center justify-between gap-2 text-xs">
+                <span class="font-bold text-slate-800">Selecione a(s) Turma(s):</span>
+                <div class="space-x-2">
+                  <button type="button" onclick="toggleAllRelCatsTurmas(true)" class="text-amber-700 font-bold hover:underline">Todas</button>
+                  <button type="button" onclick="toggleAllRelCatsTurmas(false)" class="text-slate-500 hover:underline">Limpar</button>
+                </div>
+              </div>
+              <div id="rel-cats-turmas-checklist" class="max-h-48 overflow-y-auto space-y-1.5 pr-1 text-xs"></div>
+            </div>
+
+            <!-- Sub-box Individual -->
+            <div id="rel-cats-scope-box-individual" class="hidden p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="flex items-center gap-2">
+                <input type="text" id="rel-cats-search-input" oninput="renderRelCatsIndividualChecklist()" placeholder="Buscar catequista por nome, turma ou telefone..." class="flex-1 bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs outline-none focus:border-amber-500">
+                <button type="button" onclick="toggleAllRelCatsIndividuais(true)" class="text-[11px] font-bold text-amber-700 hover:underline">Marcar Visíveis</button>
+                <button type="button" onclick="toggleAllRelCatsIndividuais(false)" class="text-[11px] text-slate-500 hover:underline">Limpar</button>
+              </div>
+              <div id="rel-cats-individual-checklist" class="max-h-52 overflow-y-auto space-y-1 pr-1 text-xs divide-y divide-slate-200/60"></div>
+            </div>
+          </div>
+
+          <!-- Dados Pessoais da Ficha a exibir -->
+          <div class="lg:col-span-6 space-y-3">
+            <label class="text-xs font-black uppercase tracking-wider text-slate-700 font-heading block">2. Dados Pessoais da Ficha do Catequista</label>
+            <div id="rel-cats-fichas-info-note" class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 text-xs text-amber-950 space-y-1">
+              <div class="font-bold">🪪 Modo Fichas Cadastrais Oficiais Ativo</div>
+              <p>Cada catequista selecionado será gerado em <strong>1 folha A4 oficial</strong> contendo Foto 3x4, Nome Completo/Apelido, Funções, Data de Nascimento e Idade, Estado Civil, Profissão, Paróquia de Origem, WhatsApp, E-mail, Endereço Residencial e a Tabela de Turmas atribuídas.</p>
+            </div>
+
+            <div id="rel-cats-tabela-cols-box" class="hidden p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+              <div class="text-xs font-bold text-slate-800">Colunas de Dados Pessoais na Tabela Consolidada:</div>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                <label class="flex items-center gap-1.5 bg-white p-2 rounded-lg border border-slate-200 cursor-pointer">
+                  <input type="checkbox" id="rel-cat-col-foto" checked onchange="renderRelatorioPreview()" class="rounded text-amber-600">
+                  <span>📷 Foto 3x4</span>
+                </label>
+                <label class="flex items-center gap-1.5 bg-white p-2 rounded-lg border border-slate-200 cursor-pointer">
+                  <input type="checkbox" id="rel-cat-col-turmas" checked onchange="renderRelatorioPreview()" class="rounded text-amber-600">
+                  <span>🏫 Etapa &amp; Turma(s)</span>
+                </label>
+                <label class="flex items-center gap-1.5 bg-white p-2 rounded-lg border border-slate-200 cursor-pointer">
+                  <input type="checkbox" id="rel-cat-col-telefone" checked onchange="renderRelatorioPreview()" class="rounded text-amber-600">
+                  <span>📞 Telefone/WhatsApp</span>
+                </label>
+                <label class="flex items-center gap-1.5 bg-white p-2 rounded-lg border border-slate-200 cursor-pointer">
+                  <input type="checkbox" id="rel-cat-col-email" checked onchange="renderRelatorioPreview()" class="rounded text-amber-600">
+                  <span>✉️ E-mail</span>
+                </label>
+                <label class="flex items-center gap-1.5 bg-white p-2 rounded-lg border border-slate-200 cursor-pointer">
+                  <input type="checkbox" id="rel-cat-col-nasc" checked onchange="renderRelatorioPreview()" class="rounded text-amber-600">
+                  <span>🎂 Data Nasc. / Idade</span>
+                </label>
+                <label class="flex items-center gap-1.5 bg-white p-2 rounded-lg border border-slate-200 cursor-pointer">
+                  <input type="checkbox" id="rel-cat-col-civil" onchange="renderRelatorioPreview()" class="rounded text-amber-600">
+                  <span>💍 Estado Civil</span>
+                </label>
+                <label class="flex items-center gap-1.5 bg-white p-2 rounded-lg border border-slate-200 cursor-pointer">
+                  <input type="checkbox" id="rel-cat-col-profissao" onchange="renderRelatorioPreview()" class="rounded text-amber-600">
+                  <span>💼 Profissão</span>
+                </label>
+                <label class="flex items-center gap-1.5 bg-white p-2 rounded-lg border border-slate-200 cursor-pointer">
+                  <input type="checkbox" id="rel-cat-col-endereco" checked onchange="renderRelatorioPreview()" class="rounded text-amber-600">
+                  <span>🏠 Endereço</span>
+                </label>
+                <label class="flex items-center gap-1.5 bg-white p-2 rounded-lg border border-slate-200 cursor-pointer">
+                  <input type="checkbox" id="rel-cat-col-paroquia" onchange="renderRelatorioPreview()" class="rounded text-amber-600">
+                  <span>⛪ Paróquia Habitual</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- PAINEL 3: CONFIGURAÇÃO DO RELATÓRIO DE SALAS & OCUPAÇÃO           -->
+      <!-- ================================================================= -->
+      <div id="rel-panel-salas" class="rel-config-panel hidden bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-slate-200">
+          <div>
+            <h3 class="text-lg font-bold font-heading text-slate-900 flex items-center gap-2">
+              <span class="text-amber-600">🏢</span> <span>Relatório de Salas, Horários Ocupados &amp; Turmas/Catequistas</span>
+            </h3>
+            <p class="text-xs text-slate-500">Selecione uma ou múltiplas salas para visualizar horários ocupados, turmas, catequistas responsáveis, número de alunos e horários livres.</p>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <label class="text-xs font-bold text-slate-700">Modo de Impressão:</label>
+            <select id="rel-salas-layout-mode" onchange="renderRelatorioPreview()" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 outline-none focus:ring-2 focus:ring-amber-400">
+              <option value="geral">📋 Relatório Geral de Ocupação (Várias salas por página)</option>
+              <option value="porta">🚪 Placa / Grade de Porta de Sala (1 Sala por Página A4)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Seleção Individual / Múltipla de Salas -->
+          <div class="lg:col-span-7 space-y-3">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <label class="text-xs font-black uppercase tracking-wider text-slate-700 font-heading">1. Seleção de Salas (Individual ou Múltipla)</label>
+              <div class="flex items-center gap-1.5 flex-wrap text-[11px]">
+                <button type="button" onclick="selectRelSalasPreset('aulas')" class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-950 font-bold hover:bg-amber-200 transition">Salas de Aula (16)</button>
+                <button type="button" onclick="selectRelSalasPreset('catequetico')" class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition">Centro Catequético</button>
+                <button type="button" onclick="selectRelSalasPreset('paroquial')" class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition">Salão Paroquial</button>
+                <button type="button" onclick="selectRelSalasPreset('all')" class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition">Todas</button>
+                <button type="button" onclick="selectRelSalasPreset('none')" class="px-2 py-1 rounded-lg text-rose-700 font-semibold hover:underline">Limpar</button>
+              </div>
+            </div>
+            <div id="rel-salas-checklist-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-50 rounded-2xl border border-slate-200 text-xs">
+              <!-- Populado via JS -->
+            </div>
+          </div>
+
+          <!-- Opções do Relatório de Salas -->
+          <div class="lg:col-span-5 space-y-3">
+            <label class="text-xs font-black uppercase tracking-wider text-slate-700 font-heading block">2. Informações Exibidas em Cada Sala</label>
+            <div class="space-y-2 text-xs">
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer font-semibold text-slate-800">
+                <input type="checkbox" id="rel-salas-opt-qtd-alunos" checked onchange="renderRelatorioPreview()" class="rounded text-amber-600 w-4 h-4">
+                <span>👨‍🎓 Exibir quantidade de catequizandos ativos por turma</span>
+              </label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer font-semibold text-slate-800">
+                <input type="checkbox" id="rel-salas-opt-auxiliares" checked onchange="renderRelatorioPreview()" class="rounded text-amber-600 w-4 h-4">
+                <span>🤝 Incluir catequistas auxiliares em formação</span>
+              </label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer font-semibold text-slate-800">
+                <input type="checkbox" id="rel-salas-opt-livres" checked onchange="renderRelatorioPreview()" class="rounded text-amber-600 w-4 h-4">
+                <span>🟢 Exibir também os turnos livres / vagos da sala</span>
+              </label>
+              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer font-semibold text-slate-800">
+                <input type="checkbox" id="rel-salas-opt-local" checked onchange="renderRelatorioPreview()" class="rounded text-amber-600 w-4 h-4">
+                <span>📍 Exibir ala, localização e referência da sala</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- PAINEL 4: CONFIGURAÇÃO DO RELATÓRIO DE CATEQUIZANDOS              -->
+      <!-- ================================================================= -->
+      <div id="rel-panel-catequizandos" class="rel-config-panel hidden bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-slate-200">
+          <div>
+            <h3 class="text-lg font-bold font-heading text-slate-900 flex items-center gap-2">
+              <span class="text-amber-600">📋</span> <span>Relatório de Catequizandos &amp; Situações Especiais</span>
+            </h3>
+            <p class="text-xs text-slate-500">Emissão por Seleção Individual, Turma, Etapa, Impedidos Canônicos, Reprovados por Faltas ou Documentação Incompleta.</p>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <label class="text-xs font-bold text-slate-700">Formato de Saída:</label>
+            <select id="rel-alunos-format-mode" onchange="onChangeRelAlunosFormatMode(); renderRelatorioPreview();" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 outline-none focus:ring-2 focus:ring-amber-400">
+              <option value="tabela">📊 Relatório em Tabela Consolidada (Colunas Adaptativas)</option>
+              <option value="fichas">🪪 Fichas Cadastrais Oficiais (1 página A4 por Catequizando)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Seletor do Recorte / Categoria de Catequizandos -->
+        <div class="space-y-2">
+          <label class="text-xs font-black uppercase tracking-wider text-slate-700 font-heading block">1. Escolha o Recorte do Relatório de Catequizandos</label>
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 text-xs">
+            <button type="button" id="btn-rel-alunos-cat-turma_etapa" onclick="setRelAlunosCategory('turma_etapa')" class="rel-alunos-cat-btn p-3 rounded-2xl border-2 border-indigo-600 bg-indigo-50/70 text-indigo-950 font-bold text-left transition cursor-pointer">
+              <div class="text-base mb-0.5">🏫</div>
+              <div class="font-black">Por Turma / Etapa / Geral</div>
+              <div class="text-[10px] text-indigo-700 font-normal">Listagem por etapa ou turma</div>
+            </button>
+
+            <button type="button" id="btn-rel-alunos-cat-individual" onclick="setRelAlunosCategory('individual')" class="rel-alunos-cat-btn p-3 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 font-bold text-left transition cursor-pointer">
+              <div class="text-base mb-0.5">👤</div>
+              <div class="font-black">Seleção Individual</div>
+              <div class="text-[10px] text-slate-500 font-normal">Escolha nominal de alunos</div>
+            </button>
+
+            <button type="button" id="btn-rel-alunos-cat-impedidos" onclick="setRelAlunosCategory('impedidos')" class="rel-alunos-cat-btn p-3 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-rose-50/50 text-slate-800 font-bold text-left transition cursor-pointer">
+              <div class="text-base mb-0.5">⚠️</div>
+              <div class="font-black">Impedidos Canônicos</div>
+              <div class="text-[10px] text-slate-500 font-normal">Não crismam / Impedimento</div>
+            </button>
+
+            <button type="button" id="btn-rel-alunos-cat-faltas" onclick="setRelAlunosCategory('faltas')" class="rel-alunos-cat-btn p-3 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-rose-50/50 text-slate-800 font-bold text-left transition cursor-pointer">
+              <div class="text-base mb-0.5">🚨</div>
+              <div class="font-black">Reprovados por Faltas</div>
+              <div class="text-[10px] text-slate-500 font-normal">Excederam limite (&gt;3 faltas)</div>
+            </button>
+
+            <button type="button" id="btn-rel-alunos-cat-documentacao" onclick="setRelAlunosCategory('documentacao')" class="rel-alunos-cat-btn p-3 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-amber-50/50 text-slate-800 font-bold text-left transition cursor-pointer">
+              <div class="text-base mb-0.5">📜</div>
+              <div class="font-black">Documentação Incompleta</div>
+              <div class="text-[10px] text-slate-500 font-normal">Certidões ou dados pendentes</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filtros Comuns (Etapa, Turma, Status) + Opções Específicas da Categoria -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-2">
+          <!-- Filtros de Etapa, Turma e Opções do Recorte -->
+          <div class="lg:col-span-7 space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200 text-xs">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Filtrar Etapa:</label>
+                <select id="rel-alunos-filter-etapa" onchange="onRelAlunosEtapaChange()" class="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-2 font-bold text-slate-800 outline-none">
+                  <option value="all">Todas as Etapas</option>
+                  <option value="Pré Eucaristia">Pré Eucaristia</option>
+                  <option value="Eucaristia I">Eucaristia I</option>
+                  <option value="Eucaristia II">Eucaristia II</option>
+                  <option value="Perseverança">Perseverança</option>
+                  <option value="Crisma Jovem">Crisma Jovem</option>
+                  <option value="Crisma Adultos">Crisma Adultos</option>
+                </select>
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Filtrar Turma:</label>
+                <select id="rel-alunos-filter-turma" onchange="renderRelAlunosIndividualChecklist(); renderRelatorioPreview();" class="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-2 font-bold text-slate-800 outline-none">
+                  <option value="all">Todas as Turmas</option>
+                </select>
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Status de Matrícula:</label>
+                <select id="rel-alunos-filter-status" onchange="renderRelAlunosIndividualChecklist(); renderRelatorioPreview();" class="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-2 font-bold text-slate-800 outline-none">
+                  <option value="ativo" selected>🟢 Apenas Ativos</option>
+                  <option value="all">Todos (Ativos + Desistentes)</option>
+                  <option value="desistente">🔴 Apenas Desistentes</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Sub-opções: Seleção Individual -->
+            <div id="rel-alunos-subbox-individual" class="hidden p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+              <div class="flex items-center gap-2">
+                <input type="text" id="rel-alunos-search-input" oninput="renderRelAlunosIndividualChecklist()" placeholder="Buscar catequizando por nome, CPF ou turma..." class="flex-1 bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs outline-none focus:border-indigo-500">
+                <button type="button" onclick="toggleAllRelAlunosIndividuais(true)" class="text-[11px] font-bold text-indigo-700 hover:underline">Marcar Visíveis</button>
+                <button type="button" onclick="toggleAllRelAlunosIndividuais(false)" class="text-[11px] text-slate-500 hover:underline">Limpar</button>
+              </div>
+              <div id="rel-alunos-individual-checklist" class="max-h-52 overflow-y-auto space-y-1 pr-1 text-xs divide-y divide-slate-200/60"></div>
+            </div>
+
+            <!-- Sub-opções: Reprovados por Faltas -->
+            <div id="rel-alunos-subbox-faltas" class="hidden p-4 rounded-2xl bg-rose-50/60 border border-rose-200 space-y-3 text-xs">
+              <div class="font-bold text-rose-950 flex items-center gap-1.5">
+                <span>🚨</span> <span>Critérios de Apuração de Faltas (Encontros Regulares)</span>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block font-bold text-rose-900 mb-1">Limite de Corte:</label>
+                  <select id="rel-alunos-faltas-threshold" onchange="renderRelatorioPreview()" class="w-full bg-white border border-rose-300 rounded-xl px-2.5 py-1.5 font-bold text-slate-800 outline-none">
+                    <option value="gt3" selected>Acima de 3 faltas (&gt; 3 • Reprovados / Alerta Crítico)</option>
+                    <option value="gte3">3 ou mais faltas (&ge; 3 • Inclui quem está no limite exato)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block font-bold text-rose-900 mb-1">Faltas Justificadas (J):</label>
+                  <select id="rel-alunos-faltas-justificadas" onchange="renderRelatorioPreview()" class="w-full bg-white border border-rose-300 rounded-xl px-2.5 py-1.5 font-bold text-slate-800 outline-none">
+                    <option value="include" selected>Contabilizar (F + J) conforme regra estatística</option>
+                    <option value="exclude">Desconsiderar J (Contar apenas faltas simples F)</option>
+                  </select>
+                </div>
+              </div>
+              <p class="text-[11px] text-rose-800">Nota: Encontros marcados como Extracurriculares (retiros, missas extras) nunca computam para reprovação.</p>
+            </div>
+
+            <!-- Sub-opções: Documentação Incompleta -->
+            <div id="rel-alunos-subbox-documentacao" class="hidden p-4 rounded-2xl bg-amber-50/60 border border-amber-200 space-y-2.5 text-xs">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-amber-950">Tipos de Pendência Documental / Cadastral a Verificar:</span>
+                <div class="space-x-2">
+                  <button type="button" onclick="toggleAllRelDocChecks(true)" class="text-amber-800 font-bold hover:underline">Todos</button>
+                  <button type="button" onclick="toggleAllRelDocChecks(false)" class="text-slate-500 hover:underline">Limpar</button>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <label class="flex items-center gap-2 bg-white p-2 rounded-lg border border-amber-200/80 cursor-pointer">
+                  <input type="checkbox" class="rel-doc-chk rounded text-amber-600" value="batismo" checked onchange="renderRelatorioPreview()">
+                  <span>💧 Certidão de Batismo pendente</span>
+                </label>
+                <label class="flex items-center gap-2 bg-white p-2 rounded-lg border border-amber-200/80 cursor-pointer">
+                  <input type="checkbox" class="rel-doc-chk rounded text-amber-600" value="eucaristia" checked onchange="renderRelatorioPreview()">
+                  <span>🍞 1ª Eucaristia pendente (Crisma/Persev.)</span>
+                </label>
+                <label class="flex items-center gap-2 bg-white p-2 rounded-lg border border-amber-200/80 cursor-pointer">
+                  <input type="checkbox" class="rel-doc-chk rounded text-amber-600" value="homologacao" checked onchange="renderRelatorioPreview()">
+                  <span>⏳ Homologação de Inscrição pendente</span>
+                </label>
+                <label class="flex items-center gap-2 bg-white p-2 rounded-lg border border-amber-200/80 cursor-pointer">
+                  <input type="checkbox" class="rel-doc-chk rounded text-amber-600" value="cpf" checked onchange="renderRelatorioPreview()">
+                  <span>🪪 CPF do catequizando não informado</span>
+                </label>
+                <label class="flex items-center gap-2 bg-white p-2 rounded-lg border border-amber-200/80 cursor-pointer">
+                  <input type="checkbox" class="rel-doc-chk rounded text-amber-600" value="nascimento" checked onchange="renderRelatorioPreview()">
+                  <span>🎂 Data de Nascimento não informada</span>
+                </label>
+                <label class="flex items-center gap-2 bg-white p-2 rounded-lg border border-amber-200/80 cursor-pointer">
+                  <input type="checkbox" class="rel-doc-chk rounded text-amber-600" value="contato" checked onchange="renderRelatorioPreview()">
+                  <span>📞 Telefone / Contato não informado</span>
+                </label>
+                <label class="flex items-center gap-2 bg-white p-2 rounded-lg border border-amber-200/80 cursor-pointer sm:col-span-2">
+                  <input type="checkbox" class="rel-doc-chk rounded text-amber-600" value="responsavel" checked onchange="renderRelatorioPreview()">
+                  <span>🛡️ Nome ou CPF do Responsável Legal ausente (para menores de 18 anos)</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Colunas da Tabela de Catequizandos -->
+          <div class="lg:col-span-5 space-y-3">
+            <label class="text-xs font-black uppercase tracking-wider text-slate-700 font-heading block">2. Colunas e Dados no Relatório</label>
+            <div id="rel-alunos-tabela-cols-box" class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5 text-xs">
+              <div class="text-slate-600">Além de <strong>Nome Completo</strong>, <strong>Etapa/Turma</strong> e da <strong>Coluna Especial do Filtro</strong> (Impedimento, Faltas ou Pendências), marque o que mais deseja incluir:</div>
+              <div class="grid grid-cols-2 gap-2">
+                <label class="flex items-center gap-1.5 bg-white p-2 rounded-lg border border-slate-200 cursor-pointer">
+                  <input type="checkbox" id="rel-aluno-col-contato" checked onchange="renderRelatorioPreview()" class="rounded text-indigo-600">
+                  <span>📞 Telefone/WhatsApp</span>
+                </label>
+                <label class="flex items-center gap-1.5 bg-white p-2 rounded-lg border border-slate-200 cursor-pointer">
+                  <input type="checkbox" id="rel-aluno-col-nasc" checked onchange="renderRelatorioPreview()" class="rounded text-indigo-600">
+                  <span>🎂 Data Nasc. / Idade</span>
+                </label>
+                <label class="flex items-center gap-1.5 bg-white p-2 rounded-lg border border-slate-200 cursor-pointer">
+                  <input type="checkbox" id="rel-aluno-col-cpf" onchange="renderRelatorioPreview()" class="rounded text-indigo-600">
+                  <span>🪪 CPF</span>
+                </label>
+                <label class="flex items-center gap-1.5 bg-white p-2 rounded-lg border border-slate-200 cursor-pointer">
+                  <input type="checkbox" id="rel-aluno-col-sacramentos" checked onchange="renderRelatorioPreview()" class="rounded text-indigo-600">
+                  <span>✝️ Batismo / Eucaristia</span>
+                </label>
+                <label class="flex items-center gap-1.5 bg-white p-2 rounded-lg border border-slate-200 cursor-pointer">
+                  <input type="checkbox" id="rel-aluno-col-responsavel" onchange="renderRelatorioPreview()" class="rounded text-indigo-600">
+                  <span>🛡️ Responsável Legal</span>
+                </label>
+                <label class="flex items-center gap-1.5 bg-white p-2 rounded-lg border border-slate-200 cursor-pointer">
+                  <input type="checkbox" id="rel-aluno-col-endereco" onchange="renderRelatorioPreview()" class="rounded text-indigo-600">
+                  <span>🏠 Endereço</span>
+                </label>
+              </div>
+            </div>
+            <div id="rel-alunos-fichas-info-note" class="hidden p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200 text-xs text-indigo-950 space-y-1">
+              <div class="font-bold">🪪 Modo Fichas Cadastrais Individuais Ativo</div>
+              <p>Cada catequizando filtrado será impresso em <strong>1 página A4 oficial</strong> completa usando o modelo de Ficha Cadastral do Santuário ICM.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- ÁREA DE PRÉ-VISUALIZAÇÃO AO VIVO DO DOCUMENTO OFICIAL A4          -->
+      <!-- ================================================================= -->
+      <div class="bg-slate-900 p-4 sm:p-6 rounded-3xl border-2 border-slate-800 shadow-xl space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+          <div class="flex items-center gap-3">
+            <span class="px-3 py-1 rounded-full bg-amber-500/20 text-[#d4a94f] border border-amber-500/40 text-xs font-black uppercase tracking-wider font-heading">Pré-Visualização Oficial A4</span>
+            <span id="rel-preview-summary-badge" class="text-xs text-slate-300 font-semibold">Carregando prévia...</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="renderRelatorioPreview()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition">
+              🔄 Atualizar Prévia
+            </button>
+            <button type="button" onclick="executePrintCurrentRelatorio()" class="px-4 py-1.5 rounded-xl bg-[#d4a94f] hover:bg-amber-400 text-slate-950 text-xs font-black transition shadow">
+              🖨️ Imprimir / Salvar PDF Agora
+            </button>
+          </div>
+        </div>
+
+        <!-- Papel A4 Simulado na Tela -->
+        <div class="overflow-x-auto bg-slate-950/60 p-3 sm:p-6 rounded-2xl border border-slate-800/80 flex justify-center">
+          <div id="rel-preview-canvas" class="bg-white text-slate-900 rounded-xl shadow-2xl p-6 sm:p-8 w-full max-w-[920px] transition-all duration-200">
+            <!-- Conteúdo HTML Oficial renderizado via JS -->
+          </div>
+        </div>
+      </div>
+
+    </section>
+
   </main>
 
   <!-- OFFICIAL PARISH FOOTER -->
@@ -7291,6 +7995,7 @@
       guia: 'Organograma & Turmas',
       alunos: 'Catequizandos & Chamadas',
       'cadastro-geral': 'Cadastro Geral de Catequizandos',
+      relatorios: 'Central de Relatórios & PDFs',
       eventos: 'Eventos & Retiros',
       papeis: 'Papéis & Atribuições',
       conhecimento: 'Base de Conhecimento',
@@ -7343,6 +8048,10 @@
       } else if (tabId === 'tarefas') {
         if (window.KanbanEngine && typeof window.KanbanEngine.onTabActivated === 'function') {
           setTimeout(() => window.KanbanEngine.onTabActivated(), 30);
+        }
+      } else if (tabId === 'relatorios') {
+        if (typeof initCentralRelatorios === 'function') {
+          setTimeout(initCentralRelatorios, 20);
         }
       }
 
@@ -8280,15 +8989,29 @@
         }
       }
 
-      // Aba de Cadastro Geral Consolidado (Master Admin e Coordenação Geral)
+      // Aba de Cadastro Geral Consolidado e Central de Relatórios (Master Admin, Coordenação Geral e Vice)
       const btnCadastroGeralTab = document.getElementById('sidebar-tab-cadastro-geral');
+      const btnRelatoriosTab = document.getElementById('sidebar-tab-relatorios');
+      const canAccessCoordGeral = (
+        role === window.ICM_CONFIG.ROLES.MASTER_ADMIN ||
+        role === window.ICM_CONFIG.ROLES.COORD_GERAL ||
+        role === window.ICM_CONFIG.ROLES.VICE_COORD_GERAL ||
+        role === 'master_admin' ||
+        role === 'coord_geral' ||
+        role === 'vice_coord_geral'
+      );
       if (btnCadastroGeralTab) {
-        if (role === window.ICM_CONFIG.ROLES.MASTER_ADMIN || role === window.ICM_CONFIG.ROLES.COORD_GERAL || role === window.ICM_CONFIG.ROLES.VICE_COORD_GERAL) {
-          btnCadastroGeralTab.classList.remove('hidden');
-        } else {
-          btnCadastroGeralTab.classList.add('hidden');
-        }
+        if (canAccessCoordGeral) btnCadastroGeralTab.classList.remove('hidden');
+        else btnCadastroGeralTab.classList.add('hidden');
       }
+      if (btnRelatoriosTab) {
+        if (canAccessCoordGeral) btnRelatoriosTab.classList.remove('hidden');
+        else btnRelatoriosTab.classList.add('hidden');
+      }
+      document.querySelectorAll('.btn-shortcut-central-relatorios').forEach(btn => {
+        if (canAccessCoordGeral) btn.classList.remove('hidden');
+        else btn.classList.add('hidden');
+      });
 
       // Cadastrar Catequista (Master Admin, Coordenação Geral e Vice-Coordenação)
       if (typeof updateCadastrarCatequistaVisibility === 'function') {
@@ -28482,7 +29205,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
     // Vincula evento global afterprint para restaurar o DOM
     window.addEventListener('afterprint', () => {
-      document.body.classList.remove('printing-chamada', 'printing-organograma-tree', 'printing-organograma-table', 'printing-fichas');
+      document.body.classList.remove('printing-chamada', 'printing-organograma-tree', 'printing-organograma-table', 'printing-fichas', 'print-mode-landscape', 'print-mode-portrait');
       const printableArea = document.getElementById('printable-chamada-area');
       if (printableArea) {
         printableArea.classList.add('hidden');
@@ -29631,6 +30354,1521 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       });
 
       alert(`🎉 Transposição concluída com sucesso!\n\n${totalTranspostos} catequizandos transpostos/mesclados para Eucaristia II (2027) em ${totalTurmasAfetadas} turma(s). Todas as informações e fichas foram integralmente preservadas.`);
+    }
+
+    // =========================================================================
+    // CENTRAL DE EMISSÃO DE RELATÓRIOS & PDFs OFICIAIS (COORDENAÇÃO & MASTER)
+    // Módulos: 1. Turmas (Modular) | 2. Catequistas | 3. Salas | 4. Catequizandos
+    // =========================================================================
+
+    const RELATORIOS_STATE = {
+      initialized: false,
+      activeModule: 'turmas', // 'turmas' | 'catequistas' | 'salas' | 'catequizandos'
+      orientation: 'portrait', // 'portrait' | 'landscape'
+      turmasScope: 'geral', // 'geral' | 'etapas' | 'individual'
+      selectedTurmasEtapas: new Set(['Pré Eucaristia', 'Eucaristia I', 'Eucaristia II', 'Perseverança', 'Crisma Jovem', 'Crisma Adultos']),
+      selectedTurmasKeys: new Set(),
+      catsScope: 'geral', // 'geral' | 'etapa' | 'turma' | 'individual'
+      selectedCatsEtapas: new Set(['Pré Eucaristia', 'Eucaristia I', 'Eucaristia II', 'Perseverança', 'Crisma Jovem', 'Crisma Adultos', 'Geral']),
+      selectedCatsTurmasKeys: new Set(),
+      selectedCatsIds: new Set(),
+      selectedSalasIds: new Set(),
+      alunosCategory: 'turma_etapa', // 'turma_etapa' | 'individual' | 'impedidos' | 'faltas' | 'documentacao'
+      selectedAlunosUids: new Set(),
+      lastGeneratedPrintHtml: '',
+      lastGeneratedAuditLabel: ''
+    };
+
+    const ETAPAS_OFICIAIS_LIST = [
+      'Pré Eucaristia',
+      'Eucaristia I',
+      'Eucaristia II',
+      'Perseverança',
+      'Crisma Jovem',
+      'Crisma Adultos'
+    ];
+
+    const TURNOS_PADRAO_SALAS = [
+      { id: 'sab-0830', label: 'Sábado • 08:30 às 10:00', match: (d, t) => d.includes('sáb') && t.includes('08:30') },
+      { id: 'sab-1030', label: 'Sábado • 10:30 às 12:00', match: (d, t) => d.includes('sáb') && t.includes('10:30') },
+      { id: 'sab-1500', label: 'Sábado • 15:00 às 16:30', match: (d, t) => d.includes('sáb') && t.includes('15:00') },
+      { id: 'seg-2000', label: 'Segunda-feira • 20:00 às 21:30', match: (d, t) => d.includes('seg') && t.includes('20:00') },
+      { id: 'qua-1600', label: 'Quarta-feira • 16:00 às 17:30', match: (d, t) => d.includes('qua') && t.includes('16:00') }
+    ];
+
+    function canAccessCentralRelatorios() {
+      const role = window.appAuthState ? window.appAuthState.role : '';
+      const email = window.appAuthState ? (window.appAuthState.email || '').toLowerCase() : '';
+      const roles = (window.ICM_CONFIG && window.ICM_CONFIG.ROLES) ? window.ICM_CONFIG.ROLES : {};
+      return (
+        role === roles.MASTER_ADMIN ||
+        role === roles.COORD_GERAL ||
+        role === roles.VICE_COORD_GERAL ||
+        role === 'master_admin' ||
+        role === 'coord_geral' ||
+        role === 'vice_coord_geral' ||
+        email === 'colletes@gmail.com' ||
+        email === 'lorenammoraes@gmail.com'
+      );
+    }
+
+    function openCentralRelatoriosTab(moduleName) {
+      if (!canAccessCentralRelatorios()) {
+        alert('⚠️ Acesso restrito: A Central de Emissão de Relatórios Gerais é exclusiva para a Coordenação Geral, Vice-Coordenação Geral e Master Admin.');
+        return;
+      }
+      switchTab('relatorios');
+      setTimeout(() => {
+        initCentralRelatorios();
+        if (moduleName) {
+          switchRelatorioModule(moduleName);
+        }
+      }, 30);
+    }
+
+    function initCentralRelatorios() {
+      if (!canAccessCentralRelatorios()) {
+        const preview = document.getElementById('rel-preview-canvas');
+        if (preview) {
+          preview.innerHTML = `<div class="p-12 text-center text-slate-500"><div class="text-3xl mb-2">🔒</div><div class="font-bold text-slate-800">Acesso Restrito à Coordenação Geral, Vice-Coordenação e Master Admin</div></div>`;
+        }
+        return;
+      }
+
+      if (typeof syncMasterScheduleList === 'function' && (!masterScheduleList || masterScheduleList.length === 0)) {
+        syncMasterScheduleList();
+      }
+
+      if (!RELATORIOS_STATE.initialized) {
+        // Inicializa todas as turmas marcadas por padrão
+        (masterScheduleList || []).forEach(t => {
+          const k = getTurmaKey(t.stage, t.turma);
+          RELATORIOS_STATE.selectedTurmasKeys.add(k);
+          RELATORIOS_STATE.selectedCatsTurmasKeys.add(k);
+        });
+
+        // Inicializa todos os catequistas ativos marcados por padrão
+        const allCats = (typeof getCatequistasRegistrationData === 'function') ? getCatequistasRegistrationData() : [];
+        allCats.forEach(c => RELATORIOS_STATE.selectedCatsIds.add(c.id));
+
+        // Inicializa salas de aula marcadas por padrão
+        Object.keys(roomsData || {}).forEach(rId => {
+          if (!['sala-secretaria', 'sala-costura', 'sala-cozinha', 'sala-banheiros', 'palco'].includes(rId)) {
+            RELATORIOS_STATE.selectedSalasIds.add(rId);
+          }
+        });
+
+        RELATORIOS_STATE.initialized = true;
+      }
+
+      renderRelTurmasChecklists();
+      renderRelCatsDynamicLists();
+      renderRelSalasChecklist();
+      onRelAlunosEtapaChange(true);
+      renderRelatorioPreview();
+    }
+
+    function switchRelatorioModule(mod) {
+      RELATORIOS_STATE.activeModule = mod;
+
+      const modules = ['turmas', 'catequistas', 'salas', 'catequizandos'];
+      modules.forEach(m => {
+        const panel = document.getElementById('rel-panel-' + m);
+        const btn = document.getElementById('tab-btn-rel-' + m);
+        const iconSpan = btn ? btn.querySelector('span') : null;
+        const subText = btn ? btn.querySelector('div > div:last-child') : null;
+
+        if (panel) {
+          if (m === mod) panel.classList.remove('hidden');
+          else panel.classList.add('hidden');
+        }
+        if (btn) {
+          if (m === mod) {
+            btn.className = 'rel-mod-tab-btn flex items-center gap-3 p-3.5 rounded-2xl border-2 border-[#d4a94f] bg-amber-950/60 text-left transition cursor-pointer shadow-md';
+            if (iconSpan) iconSpan.className = 'w-10 h-10 rounded-xl bg-[#d4a94f] text-slate-950 flex items-center justify-center text-lg font-black shrink-0';
+            if (subText) subText.className = 'text-[11px] text-amber-200/90 truncate';
+          } else {
+            btn.className = 'rel-mod-tab-btn flex items-center gap-3 p-3.5 rounded-2xl border border-white/15 bg-white/5 hover:bg-white/10 text-left transition cursor-pointer';
+            if (iconSpan) iconSpan.className = 'w-10 h-10 rounded-xl bg-slate-800 text-amber-300 border border-amber-500/30 flex items-center justify-center text-lg font-black shrink-0';
+            if (subText) subText.className = 'text-[11px] text-slate-400 truncate';
+          }
+        }
+      });
+
+      renderRelatorioPreview();
+    }
+
+    function setRelatorioOrientation(orient) {
+      RELATORIOS_STATE.orientation = orient === 'landscape' ? 'landscape' : 'portrait';
+      const btnP = document.getElementById('btn-rel-orient-portrait');
+      const btnL = document.getElementById('btn-rel-orient-landscape');
+      const canvas = document.getElementById('rel-preview-canvas');
+
+      if (RELATORIOS_STATE.orientation === 'landscape') {
+        if (btnL) btnL.className = 'px-3 py-1.5 rounded-lg font-bold bg-[#d4a94f] text-slate-950 transition flex items-center gap-1';
+        if (btnP) btnP.className = 'px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white transition flex items-center gap-1';
+        if (canvas) {
+          canvas.classList.remove('max-w-[920px]');
+          canvas.classList.add('max-w-[1180px]');
+        }
+      } else {
+        if (btnP) btnP.className = 'px-3 py-1.5 rounded-lg font-bold bg-[#d4a94f] text-slate-950 transition flex items-center gap-1';
+        if (btnL) btnL.className = 'px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white transition flex items-center gap-1';
+        if (canvas) {
+          canvas.classList.remove('max-w-[1180px]');
+          canvas.classList.add('max-w-[920px]');
+        }
+      }
+      renderRelatorioPreview();
+    }
+
+    // Cabeçalho e Rodapé Oficiais do Santuário ICM (mesmo padrão visual das Fichas Cadastrais)
+    function buildOfficialReportHeaderHtml(title, subtitle, rightBadgeText) {
+      const emitidoEm = new Date().toLocaleDateString('pt-BR') + ' às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      const emissor = (window.appAuthState && (window.appAuthState.displayName || window.appAuthState.email))
+        ? (window.appAuthState.displayName || window.appAuthState.email)
+        : 'Coordenação Geral';
+
+      return `
+        <div style="border-bottom: 2px solid #0f172a; padding-bottom: 8px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; font-family: 'Questrial', 'Nunito', -apple-system, sans-serif;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <img src="./brasao-icm.png" alt="Brasão Santuário ICM" style="height: 54px; width: auto; object-fit: contain; flex-shrink: 0;" />
+            <div>
+              <div style="font-size: 8.5px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: #475569;">Arquidiocese de Brasília • Santuário Imaculado Coração de Maria</div>
+              <div style="font-size: 15px; font-weight: 900; color: #0f172a; letter-spacing: -0.2px; text-transform: uppercase; margin-top: 1px;">${escapeHtml(title)}</div>
+              <div style="font-size: 9px; color: #475569; margin-top: 1px; font-weight: 600;">${escapeHtml(subtitle || 'Santuário Imaculado Coração de Maria • Park Way, Brasília-DF')}</div>
+            </div>
+          </div>
+          <div style="text-align: right; font-size: 8.5px; color: #64748b; line-height: 1.35; flex-shrink: 0;">
+            <div style="background: #f1f5f9; border: 1px solid #cbd5e1; padding: 2px 8px; border-radius: 4px; font-weight: 800; color: #0f172a; display: inline-block; text-transform: uppercase;">${escapeHtml(rightBadgeText || 'RELATÓRIO OFICIAL')}</div>
+            <div style="margin-top: 3px;">Emissão: <strong>${emitidoEm}</strong></div>
+            <div>Emitido por: ${escapeHtml(emissor)}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function buildOfficialReportFooterHtml() {
+      return `
+        <div style="border-top: 1px solid #cbd5e1; padding-top: 6px; margin-top: 14px; font-size: 8px; color: #64748b; text-align: center; line-height: 1.4; font-family: 'Questrial', 'Nunito', -apple-system, sans-serif;">
+          Santuário Imaculado Coração de Maria • SMPW Quadra 5, Conjunto 13, Lote 01 — Park Way, Brasília-DF<br>
+          Sistema Integrado da Pastoral da Catequese • Documento oficial gerado eletronicamente em conformidade com a LGPD (Lei nº 13.709/2018).
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // 1. MÓDULO DE TURMAS (RELATÓRIO MODULAR)
+    // =========================================================================
+
+    function setRelTurmasScope(scope) {
+      RELATORIOS_STATE.turmasScope = scope;
+      ['geral', 'etapas', 'individual'].forEach(s => {
+        const box = document.getElementById('rel-turmas-scope-box-' + s);
+        const btn = document.getElementById('btn-rel-turmas-scope-' + s);
+        if (box) {
+          if (s === scope) box.classList.remove('hidden');
+          else box.classList.add('hidden');
+        }
+        if (btn) {
+          btn.className = s === scope
+            ? 'px-2.5 py-1 rounded-lg font-bold bg-white text-slate-900 shadow-2xs'
+            : 'px-2.5 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900';
+        }
+      });
+      renderRelTurmasChecklists();
+      renderRelatorioPreview();
+    }
+
+    function renderRelTurmasChecklists() {
+      // Checklist de Etapas
+      const etapasBox = document.getElementById('rel-turmas-etapas-checklist');
+      if (etapasBox) {
+        etapasBox.innerHTML = ETAPAS_OFICIAIS_LIST.map(st => {
+          const count = (masterScheduleList || []).filter(t => t.stage === st).length;
+          const checked = RELATORIOS_STATE.selectedTurmasEtapas.has(st) ? 'checked' : '';
+          return `
+            <label class="flex items-center justify-between gap-1.5 bg-white p-2 rounded-xl border border-slate-200 cursor-pointer hover:border-amber-400">
+              <span class="flex items-center gap-1.5 font-semibold text-slate-800 truncate">
+                <input type="checkbox" ${checked} onchange="onToggleRelTurmasEtapa('${escapeHtml(st)}', this.checked)" class="rounded text-amber-600">
+                <span class="truncate">${escapeHtml(st)}</span>
+              </span>
+              <span class="text-[10px] font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-md">${count}</span>
+            </label>
+          `;
+        }).join('');
+      }
+      renderRelTurmasIndividualChecklist();
+    }
+
+    function onToggleRelTurmasEtapa(stage, isChecked) {
+      if (isChecked) RELATORIOS_STATE.selectedTurmasEtapas.add(stage);
+      else RELATORIOS_STATE.selectedTurmasEtapas.delete(stage);
+      renderRelatorioPreview();
+    }
+
+    function toggleAllRelTurmasEtapas(selectAll) {
+      if (selectAll) ETAPAS_OFICIAIS_LIST.forEach(s => RELATORIOS_STATE.selectedTurmasEtapas.add(s));
+      else RELATORIOS_STATE.selectedTurmasEtapas.clear();
+      renderRelTurmasChecklists();
+      renderRelatorioPreview();
+    }
+
+    function renderRelTurmasIndividualChecklist() {
+      const container = document.getElementById('rel-turmas-individual-checklist');
+      if (!container) return;
+      const q = (document.getElementById('rel-turmas-search-input')?.value || '').toLowerCase().trim();
+
+      const items = (masterScheduleList || []).filter(t => {
+        if (!q) return true;
+        return `${t.stage} ${t.turma} ${t.catechists} ${t.room} ${t.dayTime}`.toLowerCase().includes(q);
+      });
+
+      if (items.length === 0) {
+        container.innerHTML = `<div class="py-4 text-center text-slate-400">Nenhuma turma encontrada para "${escapeHtml(q)}".</div>`;
+        return;
+      }
+
+      container.innerHTML = items.map(t => {
+        const key = getTurmaKey(t.stage, t.turma);
+        const checked = RELATORIOS_STATE.selectedTurmasKeys.has(key) ? 'checked' : '';
+        return `
+          <label class="flex items-center justify-between gap-2 py-1.5 px-2 hover:bg-white rounded-lg cursor-pointer">
+            <span class="flex items-center gap-2 min-w-0">
+              <input type="checkbox" class="chk-rel-turma-indiv rounded text-amber-600" data-key="${escapeHtml(key)}" ${checked} onchange="onToggleRelTurmaIndivCheckbox('${escapeHtml(key)}', this.checked)">
+              <span class="truncate"><strong>${escapeHtml(t.stage)} — ${escapeHtml(t.turma)}</strong> <span class="text-slate-500">(${escapeHtml(t.catechists)})</span></span>
+            </span>
+            <span class="text-[10px] font-semibold text-slate-500 shrink-0">${escapeHtml(t.room)}</span>
+          </label>
+        `;
+      }).join('');
+    }
+
+    function onToggleRelTurmaIndivCheckbox(key, isChecked) {
+      if (isChecked) RELATORIOS_STATE.selectedTurmasKeys.add(key);
+      else RELATORIOS_STATE.selectedTurmasKeys.delete(key);
+      renderRelatorioPreview();
+    }
+
+    function toggleAllRelTurmasIndividuais(selectAll) {
+      const q = (document.getElementById('rel-turmas-search-input')?.value || '').toLowerCase().trim();
+      (masterScheduleList || []).forEach(t => {
+        if (!q || `${t.stage} ${t.turma} ${t.catechists} ${t.room} ${t.dayTime}`.toLowerCase().includes(q)) {
+          const k = getTurmaKey(t.stage, t.turma);
+          if (selectAll) RELATORIOS_STATE.selectedTurmasKeys.add(k);
+          else RELATORIOS_STATE.selectedTurmasKeys.delete(k);
+        }
+      });
+      renderRelTurmasIndividualChecklist();
+      renderRelatorioPreview();
+    }
+
+    function onToggleRelTurmaModAlunos() {
+      const checked = document.getElementById('rel-turma-mod-alunos')?.checked;
+      const box = document.getElementById('rel-turma-submods-alunos-box');
+      if (box) {
+        if (checked) box.classList.remove('hidden');
+        else box.classList.add('hidden');
+      }
+    }
+
+    function getFilteredTurmasForReport() {
+      const list = masterScheduleList || [];
+      if (RELATORIOS_STATE.turmasScope === 'geral') {
+        return list;
+      } else if (RELATORIOS_STATE.turmasScope === 'etapas') {
+        return list.filter(t => RELATORIOS_STATE.selectedTurmasEtapas.has(t.stage));
+      } else {
+        return list.filter(t => RELATORIOS_STATE.selectedTurmasKeys.has(getTurmaKey(t.stage, t.turma)));
+      }
+    }
+
+    function generateRelatorioTurmasHtml() {
+      const turmas = getFilteredTurmasForReport();
+      const layoutMode = document.getElementById('rel-turmas-layout-mode')?.value || 'blocos';
+      const pageBreakPerTurma = !!document.getElementById('rel-turmas-pagebreak')?.checked;
+
+      const wrapPb = document.getElementById('wrap-rel-turmas-pagebreak');
+      if (wrapPb) {
+        if (layoutMode === 'blocos') wrapPb.classList.remove('hidden');
+        else wrapPb.classList.add('hidden');
+      }
+
+      const modNome = document.getElementById('rel-turma-mod-nome')?.checked ?? true;
+      const modSala = document.getElementById('rel-turma-mod-sala')?.checked ?? true;
+      const modHorario = document.getElementById('rel-turma-mod-horario')?.checked ?? true;
+      const modCats = document.getElementById('rel-turma-mod-catequistas')?.checked ?? true;
+      const modAlunos = document.getElementById('rel-turma-mod-alunos')?.checked ?? true;
+
+      const subInativos = !!document.getElementById('rel-turma-sub-inativos')?.checked;
+      const subContato = !!document.getElementById('rel-turma-sub-contato')?.checked;
+      const subNasc = !!document.getElementById('rel-turma-sub-nasc')?.checked;
+      const subSacramentos = !!document.getElementById('rel-turma-sub-sacramentos')?.checked;
+      const subFaltas = !!document.getElementById('rel-turma-sub-faltas')?.checked;
+
+      const badgeEl = document.getElementById('rel-preview-summary-badge');
+      let totalAlunosCount = 0;
+      turmas.forEach(t => {
+        const rawAlunos = getTurmaAlunos(t.stage, t.turma) || [];
+        const list = subInativos ? rawAlunos : rawAlunos.filter(isAlunoAtivo);
+        totalAlunosCount += list.length;
+      });
+      if (badgeEl) {
+        badgeEl.textContent = `${turmas.length} turma(s) selecionada(s) • ${totalAlunosCount} catequizando(s)`;
+      }
+
+      if (turmas.length === 0) {
+        return `<div style="padding: 32px; text-align: center; color: #64748b; font-size: 13px;">Nenhuma turma selecionada para o relatório. Marque ao menos uma etapa ou turma nos filtros acima.</div>`;
+      }
+
+      const scopeDesc = RELATORIOS_STATE.turmasScope === 'geral'
+        ? 'Todas as Etapas e Turmas (Geral)'
+        : (RELATORIOS_STATE.turmasScope === 'etapas'
+          ? `Etapas: ${Array.from(RELATORIOS_STATE.selectedTurmasEtapas).join(', ')}`
+          : `Seleção Personalizada (${turmas.length} turmas)`);
+
+      // MODO 1: TABELA CONSOLIDADA DE TURMAS
+      if (layoutMode === 'tabela') {
+        const rowsHtml = turmas.map((t, idx) => {
+          const rawAlunos = getTurmaAlunos(t.stage, t.turma) || [];
+          const alunosList = (subInativos ? rawAlunos : rawAlunos.filter(isAlunoAtivo))
+            .slice()
+            .sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR'));
+
+          const auxStr = (t.auxiliares && t.auxiliares.length > 0) ? ` <span style="color:#64748b; font-size:8.5px;">(Aux: ${escapeHtml(t.auxiliares.join(', '))})</span>` : '';
+          const nomesAlunosHtml = alunosList.length > 0
+            ? `<div style="margin-top: 3px; font-size: 8.5px; color: #334155; line-height: 1.35;">${alunosList.map((a, i) => `${i + 1}. ${escapeHtml(a.nome)}${subContato && a.contato ? ` (${escapeHtml(a.contato)})` : ''}`).join(' • ')}</div>`
+            : `<span style="color: #94a3b8; font-size: 8.5px; font-style: italic;">Sem catequizandos cadastrados</span>`;
+
+          return `
+            <tr style="border-bottom: 1px solid #cbd5e1; background: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+              <td style="padding: 6px 8px; text-align: center; font-weight: 700; color: #64748b;">${idx + 1}</td>
+              ${modNome ? `<td style="padding: 6px 8px;"><div style="font-weight: 800; color: #0f172a;">${escapeHtml(t.stage)}</div><div style="font-size: 9.5px; color: #b45309; font-weight: 700;">${escapeHtml(t.turma)}</div></td>` : ''}
+              ${modSala ? `<td style="padding: 6px 8px;"><div style="font-weight: 700; color: #0f172a;">${escapeHtml(t.room)}</div><div style="font-size: 8.5px; color: #64748b;">${t.hall === 'paroquial' ? 'Salão Paroquial' : 'Centro Catequético'}</div></td>` : ''}
+              ${modHorario ? `<td style="padding: 6px 8px; color: #334155; font-weight: 600;">${escapeHtml(t.dayTime)}</td>` : ''}
+              ${modCats ? `<td style="padding: 6px 8px; color: #0f172a; font-weight: 700;">${escapeHtml(t.catechists)}${auxStr}</td>` : ''}
+              ${modAlunos ? `<td style="padding: 6px 8px;"><span style="background: #eef2ff; color: #3730a3; border: 1px solid #c7d2fe; padding: 1px 6px; border-radius: 999px; font-weight: 800; font-size: 8.5px;">${alunosList.length} aluno(s)</span>${nomesAlunosHtml}</td>` : ''}
+            </tr>
+          `;
+        }).join('');
+
+        return `
+          <div class="report-print-sheet" style="font-family: 'Questrial', 'Nunito', -apple-system, sans-serif; color: #0f172a;">
+            ${buildOfficialReportHeaderHtml(
+              'PASTORAL DA CATEQUESE — RELATÓRIO GERAL DE TURMAS',
+              `${scopeDesc} • Total: ${turmas.length} turma(s) e ${totalAlunosCount} catequizando(s)`,
+              'RELATÓRIO DE TURMAS'
+            )}
+            <table style="width: 100%; border-collapse: collapse; font-size: 10px; border: 1.5px solid #0f172a;">
+              <thead>
+                <tr style="background: #0f172a; color: #ffffff; text-align: left; font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px;">
+                  <th style="padding: 6px 8px; width: 32px; text-align: center;">#</th>
+                  ${modNome ? `<th style="padding: 6px 8px;">Etapa &amp; Turma</th>` : ''}
+                  ${modSala ? `<th style="padding: 6px 8px;">Sala &amp; Local</th>` : ''}
+                  ${modHorario ? `<th style="padding: 6px 8px;">Dia &amp; Horário</th>` : ''}
+                  ${modCats ? `<th style="padding: 6px 8px;">Catequistas Responsáveis</th>` : ''}
+                  ${modAlunos ? `<th style="padding: 6px 8px;">Catequizandos (${totalAlunosCount})</th>` : ''}
+                </tr>
+              </thead>
+              <tbody>
+                ${rowsHtml}
+              </tbody>
+            </table>
+            ${buildOfficialReportFooterHtml()}
+          </div>
+        `;
+      }
+
+      // MODO 2: BLOCOS POR TURMA (FICHA MODULAR DA TURMA + TABELA DE CATEQUIZANDOS)
+      const blocksHtml = turmas.map((t, tIdx) => {
+        const rawAlunos = getTurmaAlunos(t.stage, t.turma) || [];
+        const alunosList = (subInativos ? rawAlunos : rawAlunos.filter(isAlunoAtivo))
+          .slice()
+          .sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR'));
+
+        const auxText = (t.auxiliares && t.auxiliares.length > 0) ? ` • Auxiliares: ${t.auxiliares.join(', ')}` : '';
+        const hallLabel = t.hall === 'paroquial' ? 'Salão Paroquial (Subsolo)' : 'Centro Catequético';
+
+        // Constrói metadados modulares da turma
+        const metaPills = [];
+        if (modSala) metaPills.push(`<span>🚪 <strong>Sala:</strong> ${escapeHtml(t.room)} (${hallLabel})</span>`);
+        if (modHorario) metaPills.push(`<span>⏰ <strong>Horário:</strong> ${escapeHtml(t.dayTime)}</span>`);
+        if (modCats) metaPills.push(`<span>👥 <strong>Catequistas:</strong> ${escapeHtml(t.catechists + auxText)}</span>`);
+
+        let alunosSectionHtml = '';
+        if (modAlunos) {
+          if (alunosList.length === 0) {
+            alunosSectionHtml = `<div style="padding: 8px 12px; font-size: 9.5px; color: #64748b; font-style: italic; background: #f8fafc; border-top: 1px solid #cbd5e1;">Nenhum catequizando matriculado nesta turma para o filtro selecionado.</div>`;
+          } else {
+            const rowsAlunos = alunosList.map((a, aIdx) => {
+              const age = calculateAgeFromDob(a.dataNascimento);
+              const ageTxt = age !== null ? ` (${age}a)` : '';
+              const fStats = subFaltas ? computeAlunoFaltasStats(t.stage, t.turma, a.id, true) : null;
+              const ativo = isAlunoAtivo(a);
+              const impSim = (a.impedido || '').toLowerCase().startsWith('sim');
+
+              return `
+                <tr style="border-bottom: 1px solid #e2e8f0; background: ${aIdx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+                  <td style="padding: 4px 8px; text-align: center; font-weight: 700; color: #64748b; width: 28px;">${aIdx + 1}</td>
+                  <td style="padding: 4px 8px; font-weight: 700; color: #0f172a;">
+                    ${escapeHtml(a.nome)}
+                    ${!ativo ? `<span style="font-size: 8px; background: #fee2e2; color: #991b1b; padding: 1px 5px; border-radius: 4px; margin-left: 4px;">DESISTENTE</span>` : ''}
+                    ${impSim ? `<span style="font-size: 8px; background: #fef3c7; color: #92400e; padding: 1px 5px; border-radius: 4px; margin-left: 4px;">IMPEDIDO</span>` : ''}
+                  </td>
+                  ${subContato ? `<td style="padding: 4px 8px; color: #334155;">${escapeHtml(a.contato || '—')}</td>` : ''}
+                  ${subNasc ? `<td style="padding: 4px 8px; color: #334155;">${a.dataNascimento ? escapeHtml(a.dataNascimento) + ageTxt : '—'}</td>` : ''}
+                  ${subSacramentos ? `<td style="padding: 4px 8px; font-size: 8.5px; color: #334155;">Bat: <strong>${escapeHtml(a.batizado || '—')}</strong> • Euc: <strong>${escapeHtml(a.primeiraEucaristia || '—')}</strong></td>` : ''}
+                  ${subFaltas ? `<td style="padding: 4px 8px; text-align: center; font-weight: 700; color: ${fStats.totalFaltas > 3 ? '#be123c' : (fStats.totalFaltas === 3 ? '#b45309' : '#047857')};">${fStats.totalFaltas} falta(s) (${fStats.totalPresencas}P)</td>` : ''}
+                </tr>
+              `;
+            }).join('');
+
+            alunosSectionHtml = `
+              <table style="width: 100%; border-collapse: collapse; font-size: 9.5px;">
+                <thead>
+                  <tr style="background: #f1f5f9; border-top: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; color: #334155; text-align: left; font-size: 8.5px; text-transform: uppercase;">
+                    <th style="padding: 4px 8px; width: 28px; text-align: center;">Nº</th>
+                    <th style="padding: 4px 8px;">Nome Completo do Catequizando (${alunosList.length})</th>
+                    ${subContato ? `<th style="padding: 4px 8px;">Telefone / WhatsApp</th>` : ''}
+                    ${subNasc ? `<th style="padding: 4px 8px;">Nascimento / Idade</th>` : ''}
+                    ${subSacramentos ? `<th style="padding: 4px 8px;">Sacramentos</th>` : ''}
+                    ${subFaltas ? `<th style="padding: 4px 8px; text-align: center;">Frequência</th>` : ''}
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rowsAlunos}
+                </tbody>
+              </table>
+            `;
+          }
+        }
+
+        const blockHeaderTitle = modNome
+          ? `${escapeHtml(t.stage)} — ${escapeHtml(t.turma)}`
+          : `Turma #${tIdx + 1}`;
+
+        const blockCard = `
+          <div class="${pageBreakPerTurma ? '' : 'report-avoid-break'}" style="border: 1.5px solid #0f172a; border-radius: 8px; overflow: hidden; margin-bottom: 12px; background: #ffffff;">
+            <div style="background: #0f172a; color: #ffffff; padding: 6px 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+              <div style="font-size: 11.5px; font-weight: 900; letter-spacing: 0.3px; color: #f8fafc;">
+                <span style="color: #d4a94f;">■</span> ${blockHeaderTitle}
+              </div>
+              ${modAlunos ? `<span style="background: #d4a94f; color: #0f172a; font-size: 8.5px; font-weight: 900; padding: 2px 8px; border-radius: 999px; text-transform: uppercase;">${alunosList.length} Catequizando(s)</span>` : ''}
+            </div>
+            ${metaPills.length > 0 ? `
+              <div style="background: #f8fafc; padding: 6px 12px; font-size: 9.5px; color: #334155; display: flex; flex-wrap: wrap; gap: 6px 18px; border-bottom: ${modAlunos ? '1px solid #cbd5e1' : 'none'};">
+                ${metaPills.join('')}
+              </div>
+            ` : ''}
+            ${alunosSectionHtml}
+          </div>
+        `;
+
+        if (pageBreakPerTurma) {
+          return `
+            <div class="ficha-print-sheet" style="font-family: 'Questrial', 'Nunito', -apple-system, sans-serif; color: #0f172a;">
+              ${buildOfficialReportHeaderHtml(
+                `RELATÓRIO DE TURMA — ${t.stage.toUpperCase()} (${t.turma.toUpperCase()})`,
+                `Sala: ${t.room} • Horário: ${t.dayTime} • Catequistas: ${t.catechists}`,
+                `TURMA ${tIdx + 1} DE ${turmas.length}`
+              )}
+              ${blockCard}
+              ${buildOfficialReportFooterHtml()}
+            </div>
+          `;
+        }
+        return blockCard;
+      }).join('');
+
+      if (pageBreakPerTurma) {
+        return blocksHtml;
+      }
+
+      return `
+        <div class="report-print-sheet" style="font-family: 'Questrial', 'Nunito', -apple-system, sans-serif; color: #0f172a;">
+          ${buildOfficialReportHeaderHtml(
+            'PASTORAL DA CATEQUESE — RELATÓRIO MODULAR DE TURMAS',
+            `${scopeDesc} • Total: ${turmas.length} turma(s) e ${totalAlunosCount} catequizando(s)`,
+            'RELATÓRIO MODULAR'
+          )}
+          ${blocksHtml}
+          ${buildOfficialReportFooterHtml()}
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // 2. MÓDULO DE CATEQUISTAS (INDIVIDUAL / TURMA / ETAPA / GERAL)
+    // =========================================================================
+
+    function setRelCatsScope(scope) {
+      RELATORIOS_STATE.catsScope = scope;
+      ['geral', 'etapa', 'turma', 'individual'].forEach(s => {
+        const box = document.getElementById('rel-cats-scope-box-' + s);
+        const btn = document.getElementById('btn-rel-cats-scope-' + s);
+        if (box) {
+          if (s === scope) box.classList.remove('hidden');
+          else box.classList.add('hidden');
+        }
+        if (btn) {
+          btn.className = s === scope
+            ? 'px-2.5 py-1 rounded-lg font-bold bg-white text-slate-900 shadow-2xs'
+            : 'px-2.5 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900';
+        }
+      });
+      renderRelCatsDynamicLists();
+      renderRelatorioPreview();
+    }
+
+    function onChangeRelCatsFormatMode() {
+      const mode = document.getElementById('rel-cats-format-mode')?.value || 'fichas';
+      const note = document.getElementById('rel-cats-fichas-info-note');
+      const colsBox = document.getElementById('rel-cats-tabela-cols-box');
+      if (mode === 'fichas') {
+        if (note) note.classList.remove('hidden');
+        if (colsBox) colsBox.classList.add('hidden');
+      } else {
+        if (note) note.classList.add('hidden');
+        if (colsBox) colsBox.classList.remove('hidden');
+      }
+    }
+
+    function renderRelCatsDynamicLists() {
+      const etapasList = [...ETAPAS_OFICIAIS_LIST, 'Geral'];
+      const etBox = document.getElementById('rel-cats-etapas-checklist');
+      if (etBox) {
+        etBox.innerHTML = etapasList.map(st => {
+          const checked = RELATORIOS_STATE.selectedCatsEtapas.has(st) ? 'checked' : '';
+          const label = st === 'Geral' ? 'Coordenação Geral / Apoio' : st;
+          return `
+            <label class="flex items-center gap-1.5 bg-white p-2 rounded-xl border border-slate-200 cursor-pointer hover:border-amber-400">
+              <input type="checkbox" ${checked} onchange="onToggleRelCatsEtapa('${escapeHtml(st)}', this.checked)" class="rounded text-amber-600">
+              <span class="font-semibold text-slate-800 truncate">${escapeHtml(label)}</span>
+            </label>
+          `;
+        }).join('');
+      }
+
+      const turmasBox = document.getElementById('rel-cats-turmas-checklist');
+      if (turmasBox) {
+        turmasBox.innerHTML = (masterScheduleList || []).map(t => {
+          const k = getTurmaKey(t.stage, t.turma);
+          const checked = RELATORIOS_STATE.selectedCatsTurmasKeys.has(k) ? 'checked' : '';
+          return `
+            <label class="flex items-center justify-between gap-2 bg-white px-2.5 py-1.5 rounded-lg border border-slate-200 cursor-pointer">
+              <span class="flex items-center gap-2 truncate">
+                <input type="checkbox" ${checked} onchange="onToggleRelCatsTurma('${escapeHtml(k)}', this.checked)" class="rounded text-amber-600">
+                <span class="truncate"><strong>${escapeHtml(t.stage)} — ${escapeHtml(t.turma)}</strong></span>
+              </span>
+              <span class="text-[10px] text-slate-500 truncate max-w-[160px]">${escapeHtml(t.catechists)}</span>
+            </label>
+          `;
+        }).join('');
+      }
+
+      renderRelCatsIndividualChecklist();
+    }
+
+    function onToggleRelCatsEtapa(st, checked) {
+      if (checked) RELATORIOS_STATE.selectedCatsEtapas.add(st);
+      else RELATORIOS_STATE.selectedCatsEtapas.delete(st);
+      renderRelatorioPreview();
+    }
+
+    function toggleAllRelCatsEtapas(selectAll) {
+      const all = [...ETAPAS_OFICIAIS_LIST, 'Geral'];
+      if (selectAll) all.forEach(s => RELATORIOS_STATE.selectedCatsEtapas.add(s));
+      else RELATORIOS_STATE.selectedCatsEtapas.clear();
+      renderRelCatsDynamicLists();
+      renderRelatorioPreview();
+    }
+
+    function onToggleRelCatsTurma(key, checked) {
+      if (checked) RELATORIOS_STATE.selectedCatsTurmasKeys.add(key);
+      else RELATORIOS_STATE.selectedCatsTurmasKeys.delete(key);
+      renderRelatorioPreview();
+    }
+
+    function toggleAllRelCatsTurmas(selectAll) {
+      if (selectAll) {
+        (masterScheduleList || []).forEach(t => RELATORIOS_STATE.selectedCatsTurmasKeys.add(getTurmaKey(t.stage, t.turma)));
+      } else {
+        RELATORIOS_STATE.selectedCatsTurmasKeys.clear();
+      }
+      renderRelCatsDynamicLists();
+      renderRelatorioPreview();
+    }
+
+    function getBaseStatusFilteredCatequistas() {
+      const all = (typeof getCatequistasRegistrationData === 'function') ? getCatequistasRegistrationData() : [];
+      const statusFilter = document.getElementById('rel-cats-status-filter')?.value || 'ativo';
+      return all.filter(c => {
+        const isAfastado = c.status === 'afastado' || c.afastado === true;
+        if (statusFilter === 'ativo' && isAfastado) return false;
+        if (statusFilter === 'afastado' && !isAfastado) return false;
+        return true;
+      }).sort((a, b) => (a.nomeCompleto || '').localeCompare(b.nomeCompleto || '', 'pt-BR'));
+    }
+
+    function renderRelCatsIndividualChecklist() {
+      const box = document.getElementById('rel-cats-individual-checklist');
+      if (!box) return;
+      const q = (document.getElementById('rel-cats-search-input')?.value || '').toLowerCase().trim();
+      const list = getBaseStatusFilteredCatequistas().filter(c => {
+        if (!q) return true;
+        const turmasStr = (c.turmas || []).map(t => `${t.stage} ${t.turma}`).join(' ');
+        return `${c.nomeCompleto} ${c.apelido || ''} ${c.telefone || ''} ${c.etapaPrincipal || ''} ${turmasStr}`.toLowerCase().includes(q);
+      });
+
+      if (list.length === 0) {
+        box.innerHTML = `<div class="py-3 text-center text-slate-400">Nenhum catequista encontrado.</div>`;
+        return;
+      }
+
+      box.innerHTML = list.map(c => {
+        const checked = RELATORIOS_STATE.selectedCatsIds.has(c.id) ? 'checked' : '';
+        const tDesc = (c.turmas && c.turmas.length > 0)
+          ? c.turmas.map(t => `${t.stage} (${t.turma})`).join(', ')
+          : (c.funcaoPrincipal || 'Coordenação / Apoio');
+        return `
+          <label class="flex items-center justify-between gap-2 py-1.5 px-2 hover:bg-white rounded-lg cursor-pointer">
+            <span class="flex items-center gap-2 min-w-0">
+              <input type="checkbox" ${checked} onchange="onToggleRelCatIndivCheckbox('${escapeHtml(c.id)}', this.checked)" class="rounded text-amber-600">
+              <span class="truncate font-semibold text-slate-800">${escapeHtml(c.nomeCompleto)}</span>
+            </span>
+            <span class="text-[10px] text-slate-500 truncate max-w-[170px]">${escapeHtml(tDesc)}</span>
+          </label>
+        `;
+      }).join('');
+    }
+
+    function onToggleRelCatIndivCheckbox(id, checked) {
+      if (checked) RELATORIOS_STATE.selectedCatsIds.add(id);
+      else RELATORIOS_STATE.selectedCatsIds.delete(id);
+      renderRelatorioPreview();
+    }
+
+    function toggleAllRelCatsIndividuais(selectAll) {
+      const q = (document.getElementById('rel-cats-search-input')?.value || '').toLowerCase().trim();
+      getBaseStatusFilteredCatequistas().forEach(c => {
+        const turmasStr = (c.turmas || []).map(t => `${t.stage} ${t.turma}`).join(' ');
+        if (!q || `${c.nomeCompleto} ${c.apelido || ''} ${c.telefone || ''} ${c.etapaPrincipal || ''} ${turmasStr}`.toLowerCase().includes(q)) {
+          if (selectAll) RELATORIOS_STATE.selectedCatsIds.add(c.id);
+          else RELATORIOS_STATE.selectedCatsIds.delete(c.id);
+        }
+      });
+      renderRelCatsIndividualChecklist();
+      renderRelatorioPreview();
+    }
+
+    function getFilteredCatequistasForReport() {
+      const base = getBaseStatusFilteredCatequistas();
+      const scope = RELATORIOS_STATE.catsScope;
+
+      if (scope === 'geral') {
+        return base;
+      } else if (scope === 'etapa') {
+        return base.filter(c => {
+          for (const st of RELATORIOS_STATE.selectedCatsEtapas) {
+            if (st === 'Geral') {
+              const isCoordOrGeneral = (c.funcoes && c.funcoes.some(f => f.includes('Coord') || f.includes('Geral'))) ||
+                (c.funcaoPrincipal && (c.funcaoPrincipal.includes('Coord') || c.funcaoPrincipal.includes('Sem turma'))) ||
+                (!c.turmas || c.turmas.length === 0);
+              if (isCoordOrGeneral) return true;
+            } else {
+              const matchStage = (c.etapaPrincipal && c.etapaPrincipal.includes(st)) ||
+                (c.turmas && c.turmas.some(t => (t.stage || '').includes(st))) ||
+                (c.funcoes && c.funcoes.some(f => f.includes(st)));
+              if (matchStage) return true;
+            }
+          }
+          return false;
+        });
+      } else if (scope === 'turma') {
+        return base.filter(c => {
+          if (!Array.isArray(c.turmas) || c.turmas.length === 0) return false;
+          return c.turmas.some(t => RELATORIOS_STATE.selectedCatsTurmasKeys.has(getTurmaKey(t.stage, t.turma)));
+        });
+      } else {
+        return base.filter(c => RELATORIOS_STATE.selectedCatsIds.has(c.id));
+      }
+    }
+
+    function generateRelatorioCatequistasHtml() {
+      const cats = getFilteredCatequistasForReport();
+      const formatMode = document.getElementById('rel-cats-format-mode')?.value || 'fichas';
+      const badgeEl = document.getElementById('rel-preview-summary-badge');
+      if (badgeEl) {
+        badgeEl.textContent = `${cats.length} catequista(s) selecionado(s) • Formato: ${formatMode === 'fichas' ? 'Fichas Oficiais A4' : 'Tabela Consolidada'}`;
+      }
+
+      if (cats.length === 0) {
+        return `<div style="padding: 32px; text-align: center; color: #64748b; font-size: 13px;">Nenhum catequista encontrado para os filtros selecionados.</div>`;
+      }
+
+      // MODO 1: FICHAS CADASTRAIS COMPLETAS (Reutiliza o template oficial já existente!)
+      if (formatMode === 'fichas') {
+        return cats.map(c => generateFichaCatequistaHtml(c)).join('');
+      }
+
+      // MODO 2: TABELA CONSOLIDADA COM DADOS PESSOAIS DA FICHA
+      const colFoto = !!document.getElementById('rel-cat-col-foto')?.checked;
+      const colTurmas = !!document.getElementById('rel-cat-col-turmas')?.checked;
+      const colTel = !!document.getElementById('rel-cat-col-telefone')?.checked;
+      const colEmail = !!document.getElementById('rel-cat-col-email')?.checked;
+      const colNasc = !!document.getElementById('rel-cat-col-nasc')?.checked;
+      const colCivil = !!document.getElementById('rel-cat-col-civil')?.checked;
+      const colProf = !!document.getElementById('rel-cat-col-profissao')?.checked;
+      const colEnd = !!document.getElementById('rel-cat-col-endereco')?.checked;
+      const colParoquia = !!document.getElementById('rel-cat-col-paroquia')?.checked;
+
+      const rowsHtml = cats.map((c, idx) => {
+        const age = calculateAgeFromDob(c.dataNascimento);
+        const ageStr = age !== null ? ` (${age}a)` : '';
+        const turmasTxt = (Array.isArray(c.turmas) && c.turmas.length > 0)
+          ? c.turmas.map(t => `<div><strong>${escapeHtml(t.stage)}</strong> • ${escapeHtml(t.turma)} <span style="color:#64748b;">(${escapeHtml(t.room || '—')})</span></div>`).join('')
+          : `<span style="color:#64748b; font-style:italic;">${escapeHtml(c.funcaoPrincipal || 'Coordenação / Apoio')}</span>`;
+
+        const avatarCell = (c.foto && !c.fotoRemoved)
+          ? `<img src="${c.foto}" alt="" style="width: 30px; height: 38px; object-fit: cover; border-radius: 4px; border: 1px solid #cbd5e1; display: inline-block;" />`
+          : `<div style="width: 30px; height: 38px; border-radius: 4px; border: 1px dashed #cbd5e1; background: #f8fafc; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; color: #94a3b8;">👤</div>`;
+
+        return `
+          <tr style="border-bottom: 1px solid #cbd5e1; background: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+            <td style="padding: 5px 6px; text-align: center; font-weight: 700; color: #64748b;">${idx + 1}</td>
+            ${colFoto ? `<td style="padding: 4px 6px; text-align: center;">${avatarCell}</td>` : ''}
+            <td style="padding: 5px 8px;">
+              <div style="font-weight: 800; color: #0f172a;">${escapeHtml(c.nomeCompleto)}</div>
+              ${(c.apelido || c.nomeConhecido) ? `<div style="font-size: 8.5px; color: #b45309; font-weight: 700;">Conhecido(a): ${escapeHtml(c.apelido || c.nomeConhecido)}</div>` : ''}
+            </td>
+            ${colTurmas ? `<td style="padding: 5px 8px; font-size: 9px; line-height: 1.3;">${turmasTxt}</td>` : ''}
+            ${colTel ? `<td style="padding: 5px 8px; color: #0f172a; font-weight: 600; white-space: nowrap;">${escapeHtml(c.telefone || '—')}</td>` : ''}
+            ${colEmail ? `<td style="padding: 5px 8px; color: #334155; font-size: 8.5px;">${escapeHtml(c.email || '—')}</td>` : ''}
+            ${colNasc ? `<td style="padding: 5px 8px; color: #334155; white-space: nowrap;">${c.dataNascimento ? escapeHtml(c.dataNascimento) + ageStr : '—'}</td>` : ''}
+            ${colCivil ? `<td style="padding: 5px 8px; color: #334155;">${escapeHtml(c.estadoCivil || '—')}</td>` : ''}
+            ${colProf ? `<td style="padding: 5px 8px; color: #334155;">${escapeHtml(c.profissao || '—')}</td>` : ''}
+            ${colEnd ? `<td style="padding: 5px 8px; color: #334155; font-size: 8.5px;">${escapeHtml(c.endereco || '—')}</td>` : ''}
+            ${colParoquia ? `<td style="padding: 5px 8px; color: #334155; font-size: 8.5px;">${escapeHtml(c.paroquia || 'Santuário ICM')}</td>` : ''}
+          </tr>
+        `;
+      }).join('');
+
+      return `
+        <div class="report-print-sheet" style="font-family: 'Questrial', 'Nunito', -apple-system, sans-serif; color: #0f172a;">
+          ${buildOfficialReportHeaderHtml(
+            'PASTORAL DA CATEQUESE — QUADRO GERAL & DADOS DOS CATEQUISTAS',
+            `Total de Catequistas listados: ${cats.length} • Ano Pastoral 2026`,
+            'RELATÓRIO DE CATEQUISTAS'
+          )}
+          <table style="width: 100%; border-collapse: collapse; font-size: 9.5px; border: 1.5px solid #0f172a;">
+            <thead>
+              <tr style="background: #0f172a; color: #ffffff; text-align: left; font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.4px;">
+                <th style="padding: 6px; width: 28px; text-align: center;">#</th>
+                ${colFoto ? `<th style="padding: 6px; width: 40px; text-align: center;">Foto</th>` : ''}
+                <th style="padding: 6px 8px;">Nome Completo</th>
+                ${colTurmas ? `<th style="padding: 6px 8px;">Etapa &amp; Turma(s)</th>` : ''}
+                ${colTel ? `<th style="padding: 6px 8px;">WhatsApp / Tel.</th>` : ''}
+                ${colEmail ? `<th style="padding: 6px 8px;">E-mail</th>` : ''}
+                ${colNasc ? `<th style="padding: 6px 8px;">Nascimento</th>` : ''}
+                ${colCivil ? `<th style="padding: 6px 8px;">Est. Civil</th>` : ''}
+                ${colProf ? `<th style="padding: 6px 8px;">Profissão</th>` : ''}
+                ${colEnd ? `<th style="padding: 6px 8px;">Endereço Residencial</th>` : ''}
+                ${colParoquia ? `<th style="padding: 6px 8px;">Paróquia</th>` : ''}
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+          ${buildOfficialReportFooterHtml()}
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // 3. MÓDULO DE SALAS & OCUPAÇÃO (INDIVIDUAL / MÚLTIPLA / PLACA DE PORTA)
+    // =========================================================================
+
+    function renderRelSalasChecklist() {
+      const grid = document.getElementById('rel-salas-checklist-grid');
+      if (!grid) return;
+
+      const roomsList = Object.values(roomsData || {});
+      grid.innerHTML = roomsList.map(r => {
+        const checked = RELATORIOS_STATE.selectedSalasIds.has(r.id) ? 'checked' : '';
+        const badgeText = r.number.includes('SALA') || r.number.includes('Auditório') || r.number.includes('SECRETARIA') || r.number.includes('COSTURA')
+          ? r.number
+          : `SALA ${r.number}`;
+        const hallTag = r.hall === 'paroquial' ? 'Subsolo' : 'Catequético';
+        return `
+          <label class="flex items-center justify-between gap-2 bg-white p-2.5 rounded-xl border border-slate-200 hover:border-amber-400 cursor-pointer">
+            <span class="flex items-center gap-2 min-w-0">
+              <input type="checkbox" ${checked} onchange="onToggleRelSalaCheckbox('${escapeHtml(r.id)}', this.checked)" class="rounded text-amber-600">
+              <span class="truncate">
+                <strong class="text-slate-900">${escapeHtml(badgeText)}</strong>
+                <span class="text-slate-500 block text-[10px] truncate">${escapeHtml(r.name)}</span>
+              </span>
+            </span>
+            <span class="text-[9.5px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 shrink-0">${hallTag}</span>
+          </label>
+        `;
+      }).join('');
+    }
+
+    function onToggleRelSalaCheckbox(roomId, checked) {
+      if (checked) RELATORIOS_STATE.selectedSalasIds.add(roomId);
+      else RELATORIOS_STATE.selectedSalasIds.delete(roomId);
+      renderRelatorioPreview();
+    }
+
+    function selectRelSalasPreset(preset) {
+      RELATORIOS_STATE.selectedSalasIds.clear();
+      const nonClassIds = ['sala-secretaria', 'sala-costura', 'sala-cozinha', 'sala-banheiros', 'palco'];
+
+      Object.values(roomsData || {}).forEach(r => {
+        if (preset === 'all') {
+          RELATORIOS_STATE.selectedSalasIds.add(r.id);
+        } else if (preset === 'aulas') {
+          if (!nonClassIds.includes(r.id)) RELATORIOS_STATE.selectedSalasIds.add(r.id);
+        } else if (preset === 'catequetico') {
+          if (r.hall === 'catequetico') RELATORIOS_STATE.selectedSalasIds.add(r.id);
+        } else if (preset === 'paroquial') {
+          if (r.hall === 'paroquial') RELATORIOS_STATE.selectedSalasIds.add(r.id);
+        }
+      });
+
+      renderRelSalasChecklist();
+      renderRelatorioPreview();
+    }
+
+    function getRoomFreePeriods(schedules) {
+      return TURNOS_PADRAO_SALAS.filter(turno => {
+        const isOccupied = (schedules || []).some(s => {
+          const d = (s.day || '').toLowerCase();
+          const t = (s.time || '').toLowerCase();
+          return turno.match(d, t);
+        });
+        return !isOccupied;
+      });
+    }
+
+    function generateRelatorioSalasHtml() {
+      const selectedRooms = Object.values(roomsData || {}).filter(r => RELATORIOS_STATE.selectedSalasIds.has(r.id));
+      const layoutMode = document.getElementById('rel-salas-layout-mode')?.value || 'geral';
+      const showQtdAlunos = !!document.getElementById('rel-salas-opt-qtd-alunos')?.checked;
+      const showAuxiliares = !!document.getElementById('rel-salas-opt-auxiliares')?.checked;
+      const showLivres = !!document.getElementById('rel-salas-opt-livres')?.checked;
+      const showLocal = !!document.getElementById('rel-salas-opt-local')?.checked;
+
+      const badgeEl = document.getElementById('rel-preview-summary-badge');
+      let totalOcupacoes = 0;
+      selectedRooms.forEach(r => { totalOcupacoes += (r.schedules || []).length; });
+      if (badgeEl) {
+        badgeEl.textContent = `${selectedRooms.length} sala(s) selecionada(s) • ${totalOcupacoes} horário(s) ocupado(s)`;
+      }
+
+      if (selectedRooms.length === 0) {
+        return `<div style="padding: 32px; text-align: center; color: #64748b; font-size: 13px;">Nenhuma sala selecionada. Marque uma ou mais salas na lista acima.</div>`;
+      }
+
+      const isPlacaPorta = layoutMode === 'porta';
+
+      const roomsBlocksHtml = selectedRooms.map((room, rIdx) => {
+        const roomLabel = room.number.includes('SALA') || room.number.includes('Auditório') || room.number.includes('SECRETARIA') || room.number.includes('COSTURA')
+          ? room.number
+          : `SALA ${room.number}`;
+        const hallLabel = room.hall === 'paroquial' ? 'Salão Paroquial (Subsolo da Matriz)' : 'Centro Catequético';
+        const schedules = room.schedules || [];
+        const freeSlots = getRoomFreePeriods(schedules);
+
+        const schedRowsHtml = schedules.map((s, sIdx) => {
+          const alunosAtivos = (s.stage && s.turma) ? (getTurmaAlunos(s.stage, s.turma) || []).filter(isAlunoAtivo).length : 0;
+          const auxStr = (showAuxiliares && s.auxiliares && s.auxiliares.length > 0)
+            ? `<div style="font-size: ${isPlacaPorta ? '10.5px' : '8.5px'}; color: #475569; margin-top: 2px;">Auxiliares em formação: <strong>${escapeHtml(s.auxiliares.join(', '))}</strong></div>`
+            : '';
+
+          return `
+            <tr style="border-bottom: 1px solid #cbd5e1; background: ${sIdx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+              <td style="padding: ${isPlacaPorta ? '10px 12px' : '6px 10px'}; font-weight: 800; color: #0f172a; width: 28%;">
+                <div>📅 ${escapeHtml(s.day)}</div>
+                <div style="color: #b45309; font-size: ${isPlacaPorta ? '12px' : '9.5px'};">⏰ ${escapeHtml(s.time)}</div>
+              </td>
+              <td style="padding: ${isPlacaPorta ? '10px 12px' : '6px 10px'}; width: 28%;">
+                <div style="font-weight: 900; color: #1e1b4b; font-size: ${isPlacaPorta ? '13px' : '10.5px'};">${escapeHtml(s.stage)}</div>
+                <div style="font-weight: 700; color: #4338ca;">${escapeHtml(s.turma)}</div>
+              </td>
+              <td style="padding: ${isPlacaPorta ? '10px 12px' : '6px 10px'};">
+                <div style="font-weight: 800; color: #0f172a; font-size: ${isPlacaPorta ? '12.5px' : '10px'};">${escapeHtml(s.catechists)}</div>
+                ${auxStr}
+              </td>
+              ${showQtdAlunos ? `
+                <td style="padding: ${isPlacaPorta ? '10px 12px' : '6px 10px'}; text-align: center; width: 110px;">
+                  <span style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #0f172a; font-weight: 800; padding: 2px 8px; border-radius: 999px; font-size: ${isPlacaPorta ? '11px' : '9px'};">${alunosAtivos} aluno(s)</span>
+                </td>
+              ` : ''}
+            </tr>
+          `;
+        }).join('');
+
+        const freeSlotsHtml = showLivres ? `
+          <div style="background: #f0fdf4; border-top: 1px solid #bbf7d0; padding: ${isPlacaPorta ? '10px 14px' : '6px 12px'}; font-size: ${isPlacaPorta ? '11px' : '9px'}; color: #166534;">
+            <strong>🟢 Turnos Regulares Livres / Disponíveis nesta Sala:</strong>
+            ${freeSlots.length > 0
+              ? freeSlots.map(f => `<span style="display: inline-block; background: #dcfce7; border: 1px solid #86efac; padding: 1px 7px; border-radius: 999px; margin-left: 6px; font-weight: 700;">${escapeHtml(f.label)}</span>`).join(' ')
+              : '<span style="margin-left: 6px; font-style: italic;">Todos os turnos padrões preenchidos.</span>'}
+          </div>
+        ` : '';
+
+        const cardHtml = `
+          <div class="report-avoid-break" style="border: 2px solid #0f172a; border-radius: 10px; overflow: hidden; margin-bottom: 14px; background: #ffffff;">
+            <div style="background: #0f172a; color: #ffffff; padding: ${isPlacaPorta ? '12px 16px' : '8px 12px'}; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+              <div>
+                <div style="font-size: ${isPlacaPorta ? '11px' : '8.5px'}; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #d4a94f;">${escapeHtml(hallLabel)} • ${escapeHtml(room.wing || '')}</div>
+                <div style="font-size: ${isPlacaPorta ? '20px' : '13px'}; font-weight: 900; margin-top: 1px;">${escapeHtml(roomLabel)} — ${escapeHtml(room.name)}</div>
+              </div>
+              <div style="background: #d4a94f; color: #0f172a; font-weight: 900; font-size: ${isPlacaPorta ? '11px' : '9px'}; padding: 3px 10px; border-radius: 6px; text-transform: uppercase; flex-shrink: 0;">
+                ${schedules.length} Horário(s) Ocupado(s)
+              </div>
+            </div>
+            ${showLocal && room.location ? `
+              <div style="background: #fffbeb; border-bottom: 1px solid #fde68a; padding: ${isPlacaPorta ? '8px 16px' : '5px 12px'}; font-size: ${isPlacaPorta ? '10.5px' : '8.5px'}; color: #92400e;">
+                📍 <strong>Localização / Referência:</strong> ${escapeHtml(room.location)}
+              </div>
+            ` : ''}
+            <table style="width: 100%; border-collapse: collapse; font-size: ${isPlacaPorta ? '12px' : '9.5px'};">
+              <thead>
+                <tr style="background: #f1f5f9; border-bottom: 1.5px solid #cbd5e1; color: #334155; text-align: left; font-size: ${isPlacaPorta ? '10px' : '8.5px'}; text-transform: uppercase;">
+                  <th style="padding: ${isPlacaPorta ? '8px 12px' : '5px 10px'};">Dia &amp; Horário Ocupado</th>
+                  <th style="padding: ${isPlacaPorta ? '8px 12px' : '5px 10px'};">Etapa &amp; Turma</th>
+                  <th style="padding: ${isPlacaPorta ? '8px 12px' : '5px 10px'};">Catequistas Responsáveis</th>
+                  ${showQtdAlunos ? `<th style="padding: ${isPlacaPorta ? '8px 12px' : '5px 10px'}; text-align: center;">Catequizandos</th>` : ''}
+                </tr>
+              </thead>
+              <tbody>
+                ${schedRowsHtml}
+              </tbody>
+            </table>
+            ${freeSlotsHtml}
+          </div>
+        `;
+
+        if (isPlacaPorta) {
+          return `
+            <div class="ficha-print-sheet" style="font-family: 'Questrial', 'Nunito', -apple-system, sans-serif; color: #0f172a;">
+              ${buildOfficialReportHeaderHtml(
+                `MAPA DE OCUPAÇÃO DE SALA — ${roomLabel} (${room.name.toUpperCase()})`,
+                `${hallLabel} • Santuário Imaculado Coração de Maria • Ano Pastoral 2026`,
+                'IDENTIFICAÇÃO DE SALA'
+              )}
+              ${cardHtml}
+              ${buildOfficialReportFooterHtml()}
+            </div>
+          `;
+        }
+        return cardHtml;
+      }).join('');
+
+      if (isPlacaPorta) {
+        return roomsBlocksHtml;
+      }
+
+      return `
+        <div class="report-print-sheet" style="font-family: 'Questrial', 'Nunito', -apple-system, sans-serif; color: #0f172a;">
+          ${buildOfficialReportHeaderHtml(
+            'PASTORAL DA CATEQUESE — RELATÓRIO GERAL DE OCUPAÇÃO DE SALAS',
+            `Salas selecionadas: ${selectedRooms.length} • Total de alocações: ${totalOcupacoes} horário(s)`,
+            'OCUPAÇÃO DE SALAS'
+          )}
+          ${roomsBlocksHtml}
+          ${buildOfficialReportFooterHtml()}
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // 4. MÓDULO DE CATEQUIZANDOS (TURMA / ETAPA / IMPEDIDOS / FALTAS / DOCS)
+    // =========================================================================
+
+    function setRelAlunosCategory(cat) {
+      RELATORIOS_STATE.alunosCategory = cat;
+      const cats = ['turma_etapa', 'individual', 'impedidos', 'faltas', 'documentacao'];
+      cats.forEach(c => {
+        const btn = document.getElementById('btn-rel-alunos-cat-' + c);
+        if (!btn) return;
+        if (c === cat) {
+          btn.className = 'rel-alunos-cat-btn p-3 rounded-2xl border-2 border-indigo-600 bg-indigo-50/70 text-indigo-950 font-bold text-left transition cursor-pointer shadow-xs';
+        } else {
+          btn.className = 'rel-alunos-cat-btn p-3 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 font-bold text-left transition cursor-pointer';
+        }
+      });
+
+      const boxIndiv = document.getElementById('rel-alunos-subbox-individual');
+      const boxFaltas = document.getElementById('rel-alunos-subbox-faltas');
+      const boxDocs = document.getElementById('rel-alunos-subbox-documentacao');
+
+      if (boxIndiv) boxIndiv.classList.toggle('hidden', cat !== 'individual');
+      if (boxFaltas) boxFaltas.classList.toggle('hidden', cat !== 'faltas');
+      if (boxDocs) boxDocs.classList.toggle('hidden', cat !== 'documentacao');
+
+      if (cat === 'individual') {
+        renderRelAlunosIndividualChecklist();
+      }
+      renderRelatorioPreview();
+    }
+
+    function onChangeRelAlunosFormatMode() {
+      const mode = document.getElementById('rel-alunos-format-mode')?.value || 'tabela';
+      const colsBox = document.getElementById('rel-alunos-tabela-cols-box');
+      const noteBox = document.getElementById('rel-alunos-fichas-info-note');
+      if (mode === 'fichas') {
+        if (colsBox) colsBox.classList.add('hidden');
+        if (noteBox) noteBox.classList.remove('hidden');
+      } else {
+        if (colsBox) colsBox.classList.remove('hidden');
+        if (noteBox) noteBox.classList.add('hidden');
+      }
+    }
+
+    function onRelAlunosEtapaChange(skipPreview) {
+      const etapa = document.getElementById('rel-alunos-filter-etapa')?.value || 'all';
+      const turmaSel = document.getElementById('rel-alunos-filter-turma');
+      if (turmaSel) {
+        const turmas = (masterScheduleList || []).filter(t => etapa === 'all' || t.stage === etapa);
+        turmaSel.innerHTML = `<option value="all">Todas as Turmas (${turmas.length})</option>` +
+          turmas.map(t => `<option value="${escapeHtml(getTurmaKey(t.stage, t.turma))}">${escapeHtml(etapa === 'all' ? `${t.stage} — ${t.turma}` : `${t.turma} (${t.catechists})`)}</option>`).join('');
+      }
+      renderRelAlunosIndividualChecklist();
+      if (!skipPreview) renderRelatorioPreview();
+    }
+
+    function getBaseFilteredAlunosScope() {
+      const db = getAlunosDatabase();
+      const etapaFilter = document.getElementById('rel-alunos-filter-etapa')?.value || 'all';
+      const turmaKeyFilter = document.getElementById('rel-alunos-filter-turma')?.value || 'all';
+      const statusFilter = document.getElementById('rel-alunos-filter-status')?.value || 'ativo';
+
+      const results = [];
+      Object.entries(db).forEach(([turmaKey, alunos]) => {
+        if (!Array.isArray(alunos)) return;
+        const [etapa, turma] = turmaKey.split('__');
+        if (etapaFilter !== 'all' && etapa !== etapaFilter) return;
+        if (turmaKeyFilter !== 'all' && turmaKey !== turmaKeyFilter) return;
+
+        alunos.forEach(a => {
+          const ativo = isAlunoAtivo(a);
+          if (statusFilter === 'ativo' && !ativo) return;
+          if (statusFilter === 'desistente' && ativo) return;
+
+          const uid = `${turmaKey}::${a.id}`;
+          results.push({
+            uid,
+            turmaKey,
+            etapa: etapa || a.stage || '',
+            turma: turma || a.turma || '',
+            aluno: a,
+            isAtivo: ativo
+          });
+        });
+      });
+
+      results.sort((x, y) => (x.aluno.nome || '').localeCompare(y.aluno.nome || '', 'pt-BR'));
+      return results;
+    }
+
+    function renderRelAlunosIndividualChecklist() {
+      const box = document.getElementById('rel-alunos-individual-checklist');
+      if (!box) return;
+      const q = (document.getElementById('rel-alunos-search-input')?.value || '').toLowerCase().trim();
+      const list = getBaseFilteredAlunosScope().filter(item => {
+        if (!q) return true;
+        return `${item.aluno.nome || ''} ${item.aluno.cpf || ''} ${item.etapa} ${item.turma}`.toLowerCase().includes(q);
+      });
+
+      if (list.length === 0) {
+        box.innerHTML = `<div class="py-3 text-center text-slate-400">Nenhum catequizando encontrado neste filtro.</div>`;
+        return;
+      }
+
+      box.innerHTML = list.map(item => {
+        const checked = RELATORIOS_STATE.selectedAlunosUids.has(item.uid) ? 'checked' : '';
+        return `
+          <label class="flex items-center justify-between gap-2 py-1.5 px-2 hover:bg-white rounded-lg cursor-pointer">
+            <span class="flex items-center gap-2 min-w-0">
+              <input type="checkbox" ${checked} onchange="onToggleRelAlunoIndivCheckbox('${escapeHtml(item.uid)}', this.checked)" class="rounded text-indigo-600">
+              <span class="truncate font-semibold text-slate-800">${escapeHtml(item.aluno.nome)}</span>
+            </span>
+            <span class="text-[10px] text-slate-500 shrink-0">${escapeHtml(item.etapa)} • ${escapeHtml(item.turma)}</span>
+          </label>
+        `;
+      }).join('');
+    }
+
+    function onToggleRelAlunoIndivCheckbox(uid, checked) {
+      if (checked) RELATORIOS_STATE.selectedAlunosUids.add(uid);
+      else RELATORIOS_STATE.selectedAlunosUids.delete(uid);
+      renderRelatorioPreview();
+    }
+
+    function toggleAllRelAlunosIndividuais(selectAll) {
+      const q = (document.getElementById('rel-alunos-search-input')?.value || '').toLowerCase().trim();
+      getBaseFilteredAlunosScope().forEach(item => {
+        if (!q || `${item.aluno.nome || ''} ${item.aluno.cpf || ''} ${item.etapa} ${item.turma}`.toLowerCase().includes(q)) {
+          if (selectAll) RELATORIOS_STATE.selectedAlunosUids.add(item.uid);
+          else RELATORIOS_STATE.selectedAlunosUids.delete(item.uid);
+        }
+      });
+      renderRelAlunosIndividualChecklist();
+      renderRelatorioPreview();
+    }
+
+    function toggleAllRelDocChecks(selectAll) {
+      document.querySelectorAll('.rel-doc-chk').forEach(cb => { cb.checked = selectAll; });
+      renderRelatorioPreview();
+    }
+
+    function computeAlunoFaltasStats(etapa, turma, alunoId, includeJustified = true) {
+      const chDb = (typeof getChamadasDatabase === 'function') ? getChamadasDatabase() : {};
+      const key = getTurmaKey(etapa, turma);
+      const dataTurma = chDb[key] || { dates: [], records: {}, dateMeta: {} };
+      const dateMeta = dataTurma.dateMeta || dataTurma.meta || {};
+
+      let totalFaltas = 0;
+      let faltasSimples = 0;
+      let faltasJustificadas = 0;
+      let totalPresencas = 0;
+      const datasFaltas = [];
+
+      (dataTurma.dates || []).forEach(d => {
+        const isExtra = !!(dateMeta[d] && (dateMeta[d].isExtracurricular || dateMeta[d].extracurricular));
+        if (isExtra) return; // Encontros extracurriculares não contam para reprovação
+        const rec = dataTurma.records && dataTurma.records[d] && dataTurma.records[d][alunoId];
+        if (!rec) return;
+        if (rec.status === 'P') {
+          totalPresencas++;
+        } else if (rec.status === 'F') {
+          faltasSimples++;
+          totalFaltas++;
+          const [y, m, day] = d.split('-');
+          datasFaltas.push(day && m ? `${day}/${m}` : d);
+        } else if (rec.status === 'J') {
+          faltasJustificadas++;
+          if (includeJustified) {
+            totalFaltas++;
+            const [y, m, day] = d.split('-');
+            datasFaltas.push(day && m ? `${day}/${m} (J)` : `${d} (J)`);
+          }
+        }
+      });
+
+      return {
+        totalFaltas,
+        faltasSimples,
+        faltasJustificadas,
+        totalPresencas,
+        datasFaltas
+      };
+    }
+
+    function computeAlunoDocPendencias(aluno, etapa, activeChecks) {
+      const pendencias = [];
+      const bat = (aluno.batizado || '').toLowerCase().trim();
+      const euc = (aluno.primeiraEucaristia || '').toLowerCase().trim();
+      const age = calculateAgeFromDob(aluno.dataNascimento);
+      const isMinor = (age !== null && age < 18) || (!etapa.includes('Adulto') && age === null);
+
+      if (activeChecks.has('batismo')) {
+        if (!bat || bat.includes('não') || bat.includes('nao') || bat.includes('pendente')) {
+          pendencias.push('Certidão de Batismo');
+        }
+      }
+      if (activeChecks.has('eucaristia')) {
+        if ((etapa.includes('Crisma') || etapa.includes('Perseverança')) && (!euc || euc.includes('não') || euc.includes('nao') || euc.includes('pendente'))) {
+          pendencias.push('Comprovante 1ª Eucaristia');
+        }
+      }
+      if (activeChecks.has('homologacao')) {
+        if (aluno.statusAprovacao === 'pendente_coordenacao') {
+          pendencias.push('Homologação Secretaria');
+        }
+      }
+      if (activeChecks.has('cpf')) {
+        const cleanCpf = (aluno.cpf || '').replace(/\D/g, '');
+        if (cleanCpf.length < 11) {
+          pendencias.push('CPF ausente/incompleto');
+        }
+      }
+      if (activeChecks.has('nascimento')) {
+        if (!aluno.dataNascimento || !String(aluno.dataNascimento).trim() || String(aluno.dataNascimento).toLowerCase().includes('não')) {
+          pendencias.push('Data de Nascimento');
+        }
+      }
+      if (activeChecks.has('contato')) {
+        const cleanTel = (aluno.contato || '').replace(/\D/g, '');
+        if (cleanTel.length < 8) {
+          pendencias.push('Telefone/WhatsApp');
+        }
+      }
+      if (activeChecks.has('responsavel') && isMinor) {
+        const hasRespNome = !!(aluno.nomeResponsavel && String(aluno.nomeResponsavel).trim());
+        const hasRespCpf = !!((aluno.cpfResponsavel || '').replace(/\D/g, '').length >= 11);
+        if (!hasRespNome && !hasRespCpf) {
+          pendencias.push('Nome e CPF do Responsável (Menor)');
+        } else if (!hasRespNome) {
+          pendencias.push('Nome do Responsável (Menor)');
+        } else if (!hasRespCpf) {
+          pendencias.push('CPF do Responsável (Menor)');
+        }
+      }
+
+      return pendencias;
+    }
+
+    function generateRelatorioCatequizandosHtml() {
+      const baseList = getBaseFilteredAlunosScope();
+      const cat = RELATORIOS_STATE.alunosCategory;
+      const formatMode = document.getElementById('rel-alunos-format-mode')?.value || 'tabela';
+
+      const includeJustified = (document.getElementById('rel-alunos-faltas-justificadas')?.value || 'include') === 'include';
+      const faltasThreshold = document.getElementById('rel-alunos-faltas-threshold')?.value || 'gt3';
+      const activeDocChecks = new Set(Array.from(document.querySelectorAll('.rel-doc-chk:checked')).map(c => c.value));
+
+      const filteredItems = [];
+
+      baseList.forEach(item => {
+        const a = item.aluno;
+        if (cat === 'individual') {
+          if (!RELATORIOS_STATE.selectedAlunosUids.has(item.uid)) return;
+          filteredItems.push({ ...item, specialInfo: '' });
+        } else if (cat === 'impedidos') {
+          const imp = (a.impedido || '').toLowerCase().trim();
+          if (!imp.startsWith('sim')) return;
+          filteredItems.push({
+            ...item,
+            specialInfo: a.justificativa || a.observacoes || 'Impedimento canônico registrado (sem justificativa detalhada)'
+          });
+        } else if (cat === 'faltas') {
+          const stats = computeAlunoFaltasStats(item.etapa, item.turma, a.id, includeJustified);
+          const pass = faltasThreshold === 'gte3' ? stats.totalFaltas >= 3 : stats.totalFaltas > 3;
+          if (!pass) return;
+          filteredItems.push({
+            ...item,
+            faltasStats: stats
+          });
+        } else if (cat === 'documentacao') {
+          const pendencias = computeAlunoDocPendencias(a, item.etapa, activeDocChecks);
+          if (pendencias.length === 0) return;
+          filteredItems.push({
+            ...item,
+            pendencias
+          });
+        } else {
+          // 'turma_etapa'
+          filteredItems.push({ ...item });
+        }
+      });
+
+      const badgeEl = document.getElementById('rel-preview-summary-badge');
+      const catTitles = {
+        turma_etapa: ' Listagem por Turma / Etapa / Geral',
+        individual: 'Seleção Individual de Catequizandos',
+        impedidos: 'Catequizandos com Impedimento Canônico (Não Crismam)',
+        faltas: 'Catequizandos Reprovados / Alerta por Faltas',
+        documentacao: 'Catequizandos com Documentação / Cadastro Incompleto'
+      };
+      if (badgeEl) {
+        badgeEl.textContent = `${filteredItems.length} catequizando(s) encontrado(s) • ${catTitles[cat] || ''}`;
+      }
+
+      if (filteredItems.length === 0) {
+        return `<div style="padding: 32px; text-align: center; color: #64748b; font-size: 13px;">Nenhum catequizando encontrado para o filtro "<strong>${escapeHtml(catTitles[cat])}</strong>" na seleção atual.</div>`;
+      }
+
+      // MODO 1: FICHAS CADASTRAIS OFICIAIS (1 página A4 por aluno)
+      if (formatMode === 'fichas') {
+        return filteredItems.map(item => generateFichaCatequizandoHtml(item.aluno, item.etapa, item.turma)).join('');
+      }
+
+      // MODO 2: TABELA CONSOLIDADA ADAPTATIVA
+      const colContato = !!document.getElementById('rel-aluno-col-contato')?.checked;
+      const colNasc = !!document.getElementById('rel-aluno-col-nasc')?.checked;
+      const colCpf = !!document.getElementById('rel-aluno-col-cpf')?.checked;
+      const colSac = !!document.getElementById('rel-aluno-col-sacramentos')?.checked;
+      const colResp = !!document.getElementById('rel-aluno-col-responsavel')?.checked;
+      const colEnd = !!document.getElementById('rel-aluno-col-endereco')?.checked;
+
+      const rowsHtml = filteredItems.map((item, idx) => {
+        const a = item.aluno;
+        const age = calculateAgeFromDob(a.dataNascimento);
+        const ageStr = age !== null ? ` (${age}a)` : '';
+
+        let specialColTd = '';
+        if (cat === 'impedidos') {
+          specialColTd = `
+            <td style="padding: 5px 8px; background: #fff1f2; color: #881337;">
+              <div style="font-weight: 800; font-size: 8.5px; text-transform: uppercase; color: #be123c;">⚠️ Impedido (Estado Civil: ${escapeHtml(a.estadoCivil || 'Não inf.')})</div>
+              <div style="font-size: 9px; margin-top: 1px;">${escapeHtml(item.specialInfo)}</div>
+            </td>
+          `;
+        } else if (cat === 'faltas') {
+          const st = item.faltasStats;
+          const badgeColor = st.totalFaltas > 3 ? '#be123c' : '#b45309';
+          specialColTd = `
+            <td style="padding: 5px 8px; background: #fff1f2;">
+              <div style="font-weight: 900; color: ${badgeColor}; font-size: 10px;">
+                🚨 ${st.totalFaltas} Falta(s) Regular(es) <span style="font-weight: 600; color: #475569; font-size: 8.5px;">(${st.faltasSimples}F / ${st.faltasJustificadas}J • ${st.totalPresencas}P)</span>
+              </div>
+              ${st.datasFaltas.length > 0 ? `<div style="font-size: 8.5px; color: #475569; margin-top: 1px;">Datas: ${escapeHtml(st.datasFaltas.join(', '))}</div>` : ''}
+            </td>
+          `;
+        } else if (cat === 'documentacao') {
+          const tags = (item.pendencias || []).map(p => `<span style="display:inline-block; background:#fef3c7; color:#92400e; border:1px solid #fde68a; padding:1px 6px; border-radius:4px; font-weight:700; font-size:8px; margin:1px 2px 1px 0;">• ${escapeHtml(p)}</span>`).join('');
+          specialColTd = `<td style="padding: 5px 8px;">${tags}</td>`;
+        }
+
+        return `
+          <tr style="border-bottom: 1px solid #cbd5e1; background: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+            <td style="padding: 5px 6px; text-align: center; font-weight: 700; color: #64748b;">${idx + 1}</td>
+            <td style="padding: 5px 8px;">
+              <div style="font-weight: 800; color: #0f172a;">${escapeHtml(a.nome)}</div>
+              ${!item.isAtivo ? `<span style="font-size: 7.5px; background: #fee2e2; color: #991b1b; padding: 1px 5px; border-radius: 3px; font-weight: 800;">DESISTENTE</span>` : ''}
+            </td>
+            <td style="padding: 5px 8px;">
+              <div style="font-weight: 800; color: #1e1b4b; font-size: 9px;">${escapeHtml(item.etapa)}</div>
+              <div style="font-size: 8.5px; color: #4338ca; font-weight: 700;">${escapeHtml(item.turma)}</div>
+            </td>
+            ${specialColTd}
+            ${colContato ? `<td style="padding: 5px 8px; color: #0f172a; font-weight: 600; white-space: nowrap;">${escapeHtml(a.contato || '—')}</td>` : ''}
+            ${colNasc ? `<td style="padding: 5px 8px; color: #334155; white-space: nowrap;">${a.dataNascimento ? escapeHtml(a.dataNascimento) + ageStr : '—'}</td>` : ''}
+            ${colCpf ? `<td style="padding: 5px 8px; color: #334155; white-space: nowrap; font-size: 8.5px;">${escapeHtml(a.cpf || '—')}</td>` : ''}
+            ${colSac ? `<td style="padding: 5px 8px; font-size: 8.5px; color: #334155;">Bat: <strong>${escapeHtml(a.batizado || '—')}</strong><br>Euc: <strong>${escapeHtml(a.primeiraEucaristia || '—')}</strong></td>` : ''}
+            ${colResp ? `<td style="padding: 5px 8px; font-size: 8.5px; color: #334155;"><div>${escapeHtml(a.nomeResponsavel || '—')}</div>${a.cpfResponsavel ? `<div style="color:#64748b;">CPF: ${escapeHtml(a.cpfResponsavel)}</div>` : ''}</td>` : ''}
+            ${colEnd ? `<td style="padding: 5px 8px; font-size: 8.5px; color: #334155;">${escapeHtml(a.endereco || '—')}</td>` : ''}
+          </tr>
+        `;
+      }).join('');
+
+      let specialColTh = '';
+      if (cat === 'impedidos') {
+        specialColTh = `<th style="padding: 6px 8px;">Motivo / Justificativa do Impedimento</th>`;
+      } else if (cat === 'faltas') {
+        specialColTh = `<th style="padding: 6px 8px;">Apuração de Faltas &amp; Datas</th>`;
+      } else if (cat === 'documentacao') {
+        specialColTh = `<th style="padding: 6px 8px;">Documentos / Dados Pendentes</th>`;
+      }
+
+      return `
+        <div class="report-print-sheet" style="font-family: 'Questrial', 'Nunito', -apple-system, sans-serif; color: #0f172a;">
+          ${buildOfficialReportHeaderHtml(
+            `PASTORAL DA CATEQUESE — ${(catTitles[cat] || 'RELATÓRIO DE CATEQUIZANDOS').toUpperCase()}`,
+            `Total de registros apurados: ${filteredItems.length} catequizando(s) • Ano Pastoral 2026`,
+            'RELATÓRIO DE CATEQUIZANDOS'
+          )}
+          <table style="width: 100%; border-collapse: collapse; font-size: 9.5px; border: 1.5px solid #0f172a;">
+            <thead>
+              <tr style="background: #0f172a; color: #ffffff; text-align: left; font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.4px;">
+                <th style="padding: 6px; width: 28px; text-align: center;">#</th>
+                <th style="padding: 6px 8px;">Nome do Catequizando</th>
+                <th style="padding: 6px 8px;">Etapa &amp; Turma</th>
+                ${specialColTh}
+                ${colContato ? `<th style="padding: 6px 8px;">WhatsApp / Contato</th>` : ''}
+                ${colNasc ? `<th style="padding: 6px 8px;">Nascimento</th>` : ''}
+                ${colCpf ? `<th style="padding: 6px 8px;">CPF</th>` : ''}
+                ${colSac ? `<th style="padding: 6px 8px;">Sacramentos</th>` : ''}
+                ${colResp ? `<th style="padding: 6px 8px;">Responsável Legal</th>` : ''}
+                ${colEnd ? `<th style="padding: 6px 8px;">Endereço</th>` : ''}
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+          ${buildOfficialReportFooterHtml()}
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // MOTOR DE PRÉ-VISUALIZAÇÃO E IMPRESSÃO NATIVA A4
+    // =========================================================================
+
+    function renderRelatorioPreview() {
+      const canvas = document.getElementById('rel-preview-canvas');
+      if (!canvas) return;
+
+      if (!canAccessCentralRelatorios()) {
+        canvas.innerHTML = `<div class="p-10 text-center text-slate-500">🔒 Acesso exclusivo para Master Admin, Coordenador Geral e Vice-Coordenador Geral.</div>`;
+        return;
+      }
+
+      let html = '';
+      let auditLabel = '';
+      const mod = RELATORIOS_STATE.activeModule;
+
+      if (mod === 'turmas') {
+        html = generateRelatorioTurmasHtml();
+        auditLabel = 'Relatório Modular de Turmas';
+      } else if (mod === 'catequistas') {
+        html = generateRelatorioCatequistasHtml();
+        auditLabel = 'Relatório / Fichas de Catequistas';
+      } else if (mod === 'salas') {
+        html = generateRelatorioSalasHtml();
+        auditLabel = 'Relatório de Ocupação de Salas';
+      } else if (mod === 'catequizandos') {
+        html = generateRelatorioCatequizandosHtml();
+        auditLabel = `Relatório de Catequizandos (${RELATORIOS_STATE.alunosCategory})`;
+      }
+
+      RELATORIOS_STATE.lastGeneratedPrintHtml = html;
+      RELATORIOS_STATE.lastGeneratedAuditLabel = auditLabel;
+      canvas.innerHTML = html;
+    }
+
+    function executePrintCurrentRelatorio() {
+      if (!canAccessCentralRelatorios()) {
+        alert('⚠️ Operação restrita à Coordenação Geral, Vice-Coordenação Geral e Master Admin.');
+        return;
+      }
+
+      renderRelatorioPreview();
+      const html = RELATORIOS_STATE.lastGeneratedPrintHtml;
+      if (!html || html.includes('Nenhum')) {
+        if (!confirm('O relatório atual parece não conter registros selecionados. Deseja prosseguir com a impressão mesmo assim?')) {
+          return;
+        }
+      }
+
+      const printableArea = document.getElementById('printable-fichas-area');
+      if (!printableArea) {
+        window.print();
+        return;
+      }
+
+      printableArea.innerHTML = html;
+      printableArea.classList.remove('hidden');
+      document.body.classList.add('printing-fichas');
+      if (RELATORIOS_STATE.orientation === 'landscape') {
+        document.body.classList.add('print-mode-landscape');
+        document.body.classList.remove('print-mode-portrait');
+      } else {
+        document.body.classList.add('print-mode-portrait');
+        document.body.classList.remove('print-mode-landscape');
+      }
+
+      if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
+        window.ICM_CONFIG.logAuditEvent('PRINT_RELATORIO_GERAL', RELATORIOS_STATE.lastGeneratedAuditLabel || 'Relatório Geral', {
+          module: RELATORIOS_STATE.activeModule,
+          orientation: RELATORIOS_STATE.orientation
+        });
+      }
+
+      setTimeout(() => {
+        window.print();
+        setTimeout(() => {
+          document.body.classList.remove('printing-fichas', 'print-mode-landscape', 'print-mode-portrait');
+          printableArea.classList.add('hidden');
+          printableArea.innerHTML = '';
+        }, 1000);
+      }, 150);
     }
   </script>
 
