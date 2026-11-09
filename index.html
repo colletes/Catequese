@@ -5775,7 +5775,7 @@
 
             <!-- Box Geral -->
             <div id="rel-turmas-scope-box-geral" class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-700 space-y-1">
-              <div class="font-bold text-slate-900 flex items-center gap-1.5"><span>✅</span> <span>Todas as Turmas do Organograma Ativo</span></div>
+              <div class="font-bold text-slate-900 flex items-center gap-1.5"><span>✅</span> <span id="rel-active-org-label">Todas as Turmas do Organograma Ativo</span></div>
               <p class="text-slate-500">Inclui todas as etapas e turmas cadastradas no ano pastoral selecionado.</p>
             </div>
 
@@ -14367,499 +14367,480 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
     // Organograma oficial de 2027 atualizado conforme planilha base oficial
     SEED_ORGANOGRAMAS["org-2027"] = {
-      id: "org-2027",
-      name: "2027",
-      isDefault: false,
-      title: "Catequese Paroquial • 2027",
-      subtitle: "Organograma Geral das Etapas, Turmas e Salas de Encontro",
-      generalCoord: {
-        coord: "Lorena",
-        vice: "Andrés"
+      "id": "org-2027",
+      "name": "2027",
+      "isDefault": false,
+      "title": "Catequese Paroquial • 2027",
+      "subtitle": "Organograma Geral das Etapas, Turmas e Salas de Encontro",
+      "generalCoord": {
+            "coord": "Lorena",
+            "vice": "Andrés"
       },
-      stages: [
-        {
-                "id": "pre",
-                "name": "Pré Eucaristia",
-                "coord": "Patrícia Guimarães",
-                "vice": "Ana Luísa Chaves",
-                "criteria": "7 a 8 anos",
-                "colorTheme": "rose",
-                "turmas": [
+      "stages": [
+            {
+                  "id": "pre",
+                  "name": "Pré Eucaristia",
+                  "coord": "Sônia",
+                  "vice": "",
+                  "criteria": "7 a 8 anos",
+                  "colorTheme": "rose",
+                  "turmas": [
                         {
-                                "id": "t-pre-1",
-                                "turma": "Turma 01",
-                                "dayTime": "Sábado: 10:30 às 12:00",
-                                "catechists": "Beatris Baséggio e Marcella",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala Santa Teresa (Sala 16 - Salão Par.)",
-                                "hall": "Salão Paroquial"
+                              "id": "t-pre-1",
+                              "turma": "Turma 01",
+                              "dayTime": "Sábado: 10:30 às 12:00",
+                              "catechists": "Beatris Baséggio e Marcella",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala Santa Teresa (Sala 16 - Salão Par.)",
+                              "hall": "Salão Paroquial"
                         },
                         {
-                                "id": "t-pre-2",
-                                "turma": "Turma 02",
-                                "dayTime": "Sábado: 08:30 às 10:00",
-                                "catechists": "Sônia e Mariana Cavalcante",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala Santo André (Sala 15 - Salão Par.)",
-                                "hall": "Salão Paroquial"
+                              "id": "t-pre-2",
+                              "turma": "Turma 02",
+                              "dayTime": "Sábado: 08:30 às 10:00",
+                              "catechists": "Sônia e Mariana Cavalcante",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala Santo André (Sala 15 - Salão Par.)",
+                              "hall": "Salão Paroquial"
                         },
                         {
-                                "id": "t-pre-3",
-                                "turma": "Turma 03",
-                                "dayTime": "Sábado: 10:30 às 12:00",
-                                "catechists": "Jullia e Bruna Nogueira",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala Santo André (Sala 15 - Salão Par.)",
-                                "hall": "Salão Paroquial"
+                              "id": "t-pre-3",
+                              "turma": "Turma 03",
+                              "dayTime": "Sábado: 10:30 às 12:00",
+                              "catechists": "Jullia Sousa, Bruna Galvão e Ana Nascimento",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala Santo André (Sala 15 - Salão Par.)",
+                              "hall": "Salão Paroquial"
                         }
-                ]
-        },
-        {
-                "id": "euc1",
-                "name": "Eucaristia I",
-                "coord": "Priscila Ayres",
-                "vice": "Marilian (Coord. Geral da Eucaristia)",
-                "criteria": "09 a 10 anos",
-                "colorTheme": "emerald",
-                "turmas": [
+                  ]
+            },
+            {
+                  "id": "euc1",
+                  "name": "Eucaristia I",
+                  "coord": "Priscila Ayres",
+                  "vice": "Marilian (Coord. Geral da Eucaristia)",
+                  "criteria": "09 a 10 anos",
+                  "colorTheme": "emerald",
+                  "turmas": [
                         {
-                                "id": "t-euc1-1",
-                                "turma": "Turma 01",
-                                "dayTime": "Sábado: 08:30 às 10:00",
-                                "catechists": "Patrícia Guimarães e Eliane Bonasser",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala São Mateus (Sala 11 - Salão Par.)",
-                                "hall": "Salão Paroquial"
+                              "id": "t-euc1-1",
+                              "turma": "Turma 01",
+                              "dayTime": "Sábado: 08:30 às 10:00",
+                              "catechists": "Patrícia Guimarães e Eliane Bonasser",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala São Mateus (Sala 11 - Salão Par.)",
+                              "hall": "Salão Paroquial"
                         },
                         {
-                                "id": "t-euc1-2",
-                                "turma": "Turma 02",
-                                "dayTime": "Sábado: 08:30 às 10:00",
-                                "catechists": "Maria Laura",
-                                "auxiliares": [
-                                        "Anna Júlia"
-                                ],
-                                "semCatequista": false,
-                                "room": "Sala Santa Teresa (Sala 16 - Salão Par.)",
-                                "hall": "Salão Paroquial"
+                              "id": "t-euc1-2",
+                              "turma": "Turma 02",
+                              "dayTime": "Sábado: 08:30 às 10:00",
+                              "catechists": "Marilian Sales e Maria Guerra",
+                              "coordenadorTurma": "Marilian Sales",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala São Lucas (Sala 13 - Salão Par.)",
+                              "hall": "Salão Paroquial"
                         },
                         {
-                                "id": "t-euc1-3",
-                                "turma": "Turma 03",
-                                "dayTime": "Sábado: 08:30 às 10:00",
-                                "catechists": "Marilian",
-                                "coordenadorTurma": "Marilian",
-                                "auxiliares": [
-                                        "Maria Luisa Barbosa"
-                                ],
-                                "semCatequista": false,
-                                "room": "Sala São Lucas (Sala 13 - Salão Par.)",
-                                "hall": "Salão Paroquial"
+                              "id": "t-euc1-3",
+                              "turma": "Turma 03",
+                              "dayTime": "Sábado: 08:30 às 10:00",
+                              "catechists": "Anna Júlia e Maria Chaves",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala Santa Teresa (Sala 16 - Salão Par.)",
+                              "hall": "Salão Paroquial"
                         },
                         {
-                                "id": "t-euc1-4",
-                                "turma": "Turma 04",
-                                "dayTime": "Sábado: 10:30 às 12:00",
-                                "catechists": "Camilla e Nubia",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala São João (Sala 14 - Salão Par.)",
-                                "hall": "Salão Paroquial"
+                              "id": "t-euc1-4",
+                              "turma": "Turma 04",
+                              "dayTime": "Sábado: 10:30 às 12:00",
+                              "catechists": "Camilla e Nubia",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala São João (Sala 14 - Salão Par.)",
+                              "hall": "Salão Paroquial"
                         },
                         {
-                                "id": "t-euc1-5",
-                                "turma": "Turma 05",
-                                "dayTime": "Sábado: 10:30 às 12:00",
-                                "catechists": "Bruna Neto e Carlos",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala São Mateus (Sala 11 - Salão Par.)",
-                                "hall": "Salão Paroquial"
+                              "id": "t-euc1-5",
+                              "turma": "Turma 05",
+                              "dayTime": "Sábado: 10:30 às 12:00",
+                              "catechists": "Priscila Ayres e Bruna Neto",
+                              "coordenadorTurma": "Priscila Ayres",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala São Mateus (Sala 11 - Salão Par.)",
+                              "hall": "Salão Paroquial"
                         },
                         {
-                                "id": "t-euc1-6",
-                                "turma": "Turma 06",
-                                "dayTime": "Sábado: 10:30 às 12:00",
-                                "catechists": "Solange",
-                                "auxiliares": [
-                                        "Gabriella"
-                                ],
-                                "semCatequista": false,
-                                "room": "Sala São Marcos (Sala 12 - Salão Par.)",
-                                "hall": "Salão Paroquial"
-                        },
-                        {
-                                "id": "t-euc1-7",
-                                "turma": "Turma 07",
-                                "dayTime": "Sábado: 10:30 às 12:00",
-                                "catechists": "Priscila Ayres e João Paulo",
-                                "coordenadorTurma": "Priscila Ayres",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala São Lucas (Sala 13 - Salão Par.)",
-                                "hall": "Salão Paroquial"
+                              "id": "t-euc1-6",
+                              "turma": "Turma 06",
+                              "dayTime": "Sábado: 10:30 às 12:00",
+                              "catechists": "Solange",
+                              "auxiliares": [
+                                    "Gabriella"
+                              ],
+                              "semCatequista": false,
+                              "room": "Sala São Marcos (Sala 12 - Salão Par.)",
+                              "hall": "Salão Paroquial"
                         }
-                ]
-        },
-        {
-                "id": "euc2",
-                "name": "Eucaristia II",
-                "coord": "Lanuzia",
-                "vice": "Marilian (Coord. Geral da Eucaristia)",
-                "criteria": "Ter feito Eucaristia I",
-                "colorTheme": "sky",
-                "turmas": [
+                  ]
+            },
+            {
+                  "id": "euc2",
+                  "name": "Eucaristia II",
+                  "coord": "Lanuzia",
+                  "vice": "Marilian (Coord. Geral da Eucaristia)",
+                  "criteria": "Ter feito Eucaristia I",
+                  "colorTheme": "amber",
+                  "turmas": [
                         {
-                                "id": "t-euc2-1",
-                                "turma": "Turma 01",
-                                "dayTime": "Sábado: 08:30 às 10:00",
-                                "catechists": "Polyana e Ane",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala Protomártires (Sala 01 - Centro Cat.)",
-                                "hall": "Centro Catequético"
+                              "id": "t-euc2-1",
+                              "turma": "Turma 01",
+                              "dayTime": "Sábado: 08:30 às 10:00",
+                              "catechists": "Polyana e Ane",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala Protomártires (Sala 01 - Centro Cat.)",
+                              "hall": "Centro Catequético"
                         },
                         {
-                                "id": "t-euc2-2",
-                                "turma": "Turma 02",
-                                "dayTime": "Sábado: 08:30 às 10:00",
-                                "catechists": "Shirley e Tatyane",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala Anjo da Guarda (Sala 02 - Centro Cat.)",
-                                "hall": "Centro Catequético"
+                              "id": "t-euc2-2",
+                              "turma": "Turma 02",
+                              "dayTime": "Sábado: 08:30 às 10:00",
+                              "catechists": "Shirley e Tatyane",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala Anjo da Guarda (Sala 02 - Centro Cat.)",
+                              "hall": "Centro Catequético"
                         },
                         {
-                                "id": "t-euc2-3",
-                                "turma": "Turma 03",
-                                "dayTime": "Sábado: 08:30 às 10:00",
-                                "catechists": "Josy e Silene",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala São Francisco Marto (Sala 03 - Centro Cat.)",
-                                "hall": "Centro Catequético"
+                              "id": "t-euc2-3",
+                              "turma": "Turma 03",
+                              "dayTime": "Sábado: 08:30 às 10:00",
+                              "catechists": "Joseline e Silene",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala São Francisco Marto (Sala 03 - Centro Cat.)",
+                              "hall": "Centro Catequético"
                         },
                         {
-                                "id": "t-euc2-4",
-                                "turma": "Turma 04",
-                                "dayTime": "Sábado: 08:30 às 10:00",
-                                "catechists": "Brenda e Joyce",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala São Gabriel (Sala 04 - Centro Cat.)",
-                                "hall": "Centro Catequético"
+                              "id": "t-euc2-4",
+                              "turma": "Turma 04",
+                              "dayTime": "Sábado: 08:30 às 10:00",
+                              "catechists": "Brenda e Joyce",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala São Gabriel (Sala 04 - Centro Cat.)",
+                              "hall": "Centro Catequético"
                         },
                         {
-                                "id": "t-euc2-5",
-                                "turma": "Turma 05",
-                                "dayTime": "Sábado: 08:30 às 10:00",
-                                "catechists": "Valdir",
-                                "auxiliares": [
-                                        "Mariana Alvarenga"
-                                ],
-                                "semCatequista": false,
-                                "room": "Sala Santa Jacinta (Sala 05 - Centro Cat.)",
-                                "hall": "Centro Catequético"
+                              "id": "t-euc2-5",
+                              "turma": "Turma 05",
+                              "dayTime": "Sábado: 08:30 às 10:00",
+                              "catechists": "Valdir",
+                              "auxiliares": [
+                                    "Mariana Alvarenga"
+                              ],
+                              "semCatequista": false,
+                              "room": "Sala Santa Jacinta (Sala 05 - Centro Cat.)",
+                              "hall": "Centro Catequético"
                         },
                         {
-                                "id": "t-euc2-10",
-                                "turma": "Turma 10",
-                                "dayTime": "Sábado: 08:30 às 10:00",
-                                "catechists": "Mara e Lanuzia",
-                                "coordenadorTurma": "Lanuzia",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala São Miguel (Sala 06 - Centro Cat.)",
-                                "hall": "Centro Catequético"
+                              "id": "t-euc2-6",
+                              "turma": "Turma 06",
+                              "dayTime": "Sábado: 10:30 às 12:00",
+                              "catechists": "Andréia Soares e Fernanda Lima",
+                              "auxiliares": [
+                                    "Marina Ferreira"
+                              ],
+                              "semCatequista": false,
+                              "room": "Sala São Francisco Marto (Sala 03 - Centro Cat.)",
+                              "hall": "Centro Catequético"
                         },
                         {
-                                "id": "t-euc2-6",
-                                "turma": "Turma 06",
-                                "dayTime": "Sábado: 10:30 às 12:00",
-                                "catechists": "Andréia",
-                                "auxiliares": [
-                                        "Marina de Oliveira"
-                                ],
-                                "semCatequista": false,
-                                "room": "Sala Protomártires (Sala 01 - Centro Cat.)",
-                                "hall": "Centro Catequético"
+                              "id": "t-euc2-7",
+                              "turma": "Turma 07",
+                              "dayTime": "Sábado: 10:30 às 12:00",
+                              "catechists": "Andreia e Maria Rilda",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala São Gabriel (Sala 04 - Centro Cat.)",
+                              "hall": "Centro Catequético"
                         },
                         {
-                                "id": "t-euc2-7",
-                                "turma": "Turma 07",
-                                "dayTime": "Sábado: 10:30 às 12:00",
-                                "catechists": "Maria Rilda e Marina Neiva",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala São Gabriel (Sala 04 - Centro Cat.)",
-                                "hall": "Centro Catequético"
+                              "id": "t-euc2-8",
+                              "turma": "Turma 08",
+                              "dayTime": "Sábado: 10:30 às 12:00",
+                              "catechists": "Elza e Zairo",
+                              "auxiliares": [
+                                    "Lara"
+                              ],
+                              "semCatequista": false,
+                              "room": "Sala Santa Jacinta (Sala 05 - Centro Cat.)",
+                              "hall": "Centro Catequético"
                         },
                         {
-                                "id": "t-euc2-8",
-                                "turma": "Turma 08",
-                                "dayTime": "Sábado: 10:30 às 12:00",
-                                "catechists": "Elza",
-                                "auxiliares": [
-                                        "Lara",
-                                        "Zairo"
-                                ],
-                                "semCatequista": false,
-                                "room": "Sala Santa Jacinta (Sala 05 - Centro Cat.)",
-                                "hall": "Centro Catequético"
+                              "id": "t-euc2-9",
+                              "turma": "Turma 09",
+                              "dayTime": "Sábado: 10:30 às 12:00",
+                              "catechists": "Danusa Hipólito e Gllenda Venâncio",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala São Rafael (Sala 07 - Centro Cat.)",
+                              "hall": "Centro Catequético"
                         },
                         {
-                                "id": "t-euc2-9",
-                                "turma": "Turma 09",
-                                "dayTime": "Sábado: 10:30 às 12:00",
-                                "catechists": "Danusa e Gllenda",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala São Miguel (Sala 06 - Centro Cat.)",
-                                "hall": "Centro Catequético"
+                              "id": "t-euc2-10",
+                              "turma": "Turma 10",
+                              "dayTime": "Sábado: 08:30 às 10:00",
+                              "catechists": "Mara e Lanuzia",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala São Rafael (Sala 07 - Centro Cat.)",
+                              "hall": "Centro Catequético"
                         },
                         {
-                                "id": "t-euc2-11",
-                                "turma": "Turma 11",
-                                "dayTime": "Sábado: 10:30 às 12:00",
-                                "catechists": "Elisa e Maria Dulcineide",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Capela Nossa Senhora das Graças",
-                                "hall": "Capela Externa"
+                              "id": "t-euc2-11",
+                              "turma": "Turma 11",
+                              "dayTime": "Sábado: 10:30 às 12:00",
+                              "catechists": "Elisa e Maria Dulcineide",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Capela Nossa Senhora das Graças",
+                              "hall": "Capela Externa"
                         }
-                ]
-        },
-        {
-                "id": "perv",
-                "name": "Perseverança",
-                "coord": "Bruna Martins Vilarinho Neto",
-                "vice": "",
-                "criteria": "Menores de 13 anos",
-                "colorTheme": "amber",
-                "turmas": [
+                  ]
+            },
+            {
+                  "id": "persev",
+                  "name": "Perseverança",
+                  "coord": "Amanda",
+                  "vice": "",
+                  "criteria": "Menores de 13 anos",
+                  "colorTheme": "cyan",
+                  "turmas": [
                         {
-                                "id": "t-perv-1",
-                                "turma": "Turma 01",
-                                "dayTime": "Sábado: 10:30 às 12:00",
-                                "catechists": "Bruna Cruvinel e Mariana Garcia",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala São João Bosco (Sala 17 - Salão Par.)",
-                                "hall": "Salão Paroquial"
+                              "id": "t-per-1",
+                              "turma": "Turma 01",
+                              "dayTime": "Sábado: 10:30 às 12:00",
+                              "catechists": "Bruna Nascimento e Mariana Garcia",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala Carlo Acutis (Sala 08 - Centro Cat.)",
+                              "hall": "Centro Catequético"
                         },
                         {
-                                "id": "t-perv-2",
-                                "turma": "Turma 02",
-                                "dayTime": "Sábado: 08:30 às 10:00",
-                                "catechists": "Alda e Suelene",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala São João Bosco (Sala 17 - Salão Par.)",
-                                "hall": "Salão Paroquial"
+                              "id": "t-per-2",
+                              "turma": "Turma 02",
+                              "dayTime": "Sábado: 08:30 às 10:00",
+                              "catechists": "Aldaléia Abreu e Suelene Jochims",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala Carlo Acutis (Sala 08 - Centro Cat.)",
+                              "hall": "Centro Catequético"
                         }
-                ]
-        },
-        {
-                "id": "cj",
-                "name": "Crisma Jovem",
-                "coord": "",
-                "vice": "",
-                "criteria": "Mínimo: 14 anos",
-                "colorTheme": "purple",
-                "turmas": [
+                  ]
+            },
+            {
+                  "id": "cj",
+                  "name": "Crisma Jovem",
+                  "coord": "Tiago",
+                  "vice": "Vinícius Piante",
+                  "criteria": "Mínimo: 14 anos",
+                  "colorTheme": "violet",
+                  "turmas": [
                         {
-                                "id": "t-cj-3",
-                                "turma": "Turma 03",
-                                "dayTime": "Sábado: 08:30 às 10:00",
-                                "catechists": "Alessandra e Otávio",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala São Rafael (Sala 07 - Centro Cat.)",
-                                "hall": "Centro Catequético"
+                              "id": "t-cj-1",
+                              "turma": "Turma 01",
+                              "dayTime": "Segunda: 20:00 às 21:30",
+                              "catechists": "José Bernardo e Priscila Mesquita",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala São Marcos (Sala 12 - Salão Par.)",
+                              "hall": "Salão Paroquial"
                         },
                         {
-                                "id": "t-cj-4",
-                                "turma": "Turma 04",
-                                "dayTime": "Segunda: 20:00 às 21:30",
-                                "catechists": "Davi, Flávia e Tiago Artur",
-                                "coordenadorTurma": "Tiago Artur",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala São Rafael (Sala 07 - Centro Cat.)",
-                                "hall": "Centro Catequético"
+                              "id": "t-cj-2",
+                              "turma": "Turma 02",
+                              "dayTime": "Segunda: 20:00 às 21:30",
+                              "catechists": "Lanuzia e Nádia",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala São Lucas (Sala 13 - Salão Par.)",
+                              "hall": "Salão Paroquial"
                         },
                         {
-                                "id": "t-cj-5",
-                                "turma": "Turma 05",
-                                "dayTime": "Segunda: 20:00 às 21:30",
-                                "catechists": "Anderson e Monica",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala São Miguel (Sala 06 - Centro Cat.)",
-                                "hall": "Centro Catequético"
+                              "id": "t-cj-3",
+                              "turma": "Turma 03",
+                              "dayTime": "Sábado: 08:30 às 10:00",
+                              "catechists": "Alessandra e Otávio",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala São Rafael (Sala 07 - Centro Cat.)",
+                              "hall": "Centro Catequético"
                         },
                         {
-                                "id": "t-cj-6",
-                                "turma": "Turma 06",
-                                "dayTime": "Segunda: 20:00 às 21:30",
-                                "catechists": "Vinícius Piante, Jonatan e Fernanda",
-                                "coordenadorTurma": "Vinícius Piante",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala Protomártires (Sala 01 - Centro Cat.)",
-                                "hall": "Centro Catequético"
+                              "id": "t-cj-4",
+                              "turma": "Turma 04",
+                              "dayTime": "Segunda: 20:00 às 21:30",
+                              "catechists": "Davi, Flávia e Tiago Artur",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala São Rafael (Sala 07 - Centro Cat.)",
+                              "hall": "Centro Catequético"
                         },
                         {
-                                "id": "t-cj-7",
-                                "turma": "Turma 07",
-                                "dayTime": "Segunda: 20:00 às 21:30",
-                                "catechists": "Artur e Kéllibe",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala São Mateus (Sala 11 - Salão Par.)",
-                                "hall": "Salão Paroquial"
+                              "id": "t-cj-5",
+                              "turma": "Turma 05",
+                              "dayTime": "Segunda: 20:00 às 21:30",
+                              "catechists": "Anderson e Monica",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala São Miguel (Sala 06 - Centro Cat.)",
+                              "hall": "Centro Catequético"
                         },
                         {
-                                "id": "t-cj-10",
-                                "turma": "Turma 10",
-                                "dayTime": "Segunda: 20:00 às 21:30",
-                                "catechists": "Klebson, Beatriz Torres e Heitor",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala São João (Sala 14 - Salão Par.)",
-                                "hall": "Salão Paroquial"
+                              "id": "t-cj-6",
+                              "turma": "Turma 06",
+                              "dayTime": "Segunda: 20:00 às 21:30",
+                              "catechists": "Vinícius Piante, Jonatan e Fernanda",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala Protomártires (Sala 01 - Centro Cat.)",
+                              "hall": "Centro Catequético"
                         },
                         {
-                                "id": "t-cj-11",
-                                "turma": "Turma 11",
-                                "dayTime": "Segunda: 20:00 às 21:30",
-                                "catechists": "Rosi e Pierre",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala São João Bosco (Sala 17 - Salão Par.)",
-                                "hall": "Salão Paroquial"
+                              "id": "t-cj-7",
+                              "turma": "Turma 07",
+                              "dayTime": "Segunda: 20:00 às 21:30",
+                              "catechists": "Artur e Kéllibe",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala São Mateus (Sala 11 - Salão Par.)",
+                              "hall": "Salão Paroquial"
                         },
                         {
-                                "id": "t-cj-1",
-                                "turma": "Turma 01",
-                                "dayTime": "Segunda: 20:00 às 21:30",
-                                "catechists": "José Bernardo e Priscila Mesquita",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala São Marcos (Sala 12 - Salão Par.)",
-                                "hall": "Salão Paroquial"
+                              "id": "t-cj-10",
+                              "turma": "Turma 10",
+                              "dayTime": "Segunda: 20:00 às 21:30",
+                              "catechists": "Klebson, Beatriz Torres e Heitor",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala São João (Sala 14 - Salão Par.)",
+                              "hall": "Salão Paroquial"
                         },
                         {
-                                "id": "t-cj-2",
-                                "turma": "Turma 02",
-                                "dayTime": "Segunda: 20:00 às 21:30",
-                                "catechists": "Lanuzia e Nádia",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala São Lucas (Sala 13 - Salão Par.)",
-                                "hall": "Salão Paroquial"
+                              "id": "t-cj-11",
+                              "turma": "Turma 11",
+                              "dayTime": "Segunda: 20:00 às 21:30",
+                              "catechists": "Rosi e Pierre",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala São João Bosco (Sala 17 - Salão Par.)",
+                              "hall": "Salão Paroquial"
                         }
-                ]
-        },
-        {
-                "id": "ca",
-                "name": "Crisma Adultos",
-                "coord": "Patrícia Gomes",
-                "vice": "",
-                "criteria": "+18 anos",
-                "colorTheme": "indigo",
-                "turmas": [
+                  ]
+            },
+            {
+                  "id": "ca",
+                  "name": "Crisma Adultos",
+                  "coord": "Patrícia Gomes",
+                  "vice": "",
+                  "criteria": "+18 anos",
+                  "colorTheme": "indigo",
+                  "turmas": [
                         {
-                                "id": "t-ca-1",
-                                "turma": "Turma 01",
-                                "dayTime": "Sábado: 08:30 às 10:15",
-                                "catechists": "Leticia, Cauã e Eduardo",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Auditório (Centro Catequético)",
-                                "hall": "Centro Catequético"
+                              "id": "t-ca-1",
+                              "turma": "Turma 01",
+                              "dayTime": "Sábado: 08:30 às 10:15",
+                              "catechists": "Leticia, Cauã e Eduardo",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Auditório (Centro Catequético)",
+                              "hall": "Centro Catequético"
                         },
                         {
-                                "id": "t-ca-2",
-                                "turma": "Turma 02",
-                                "dayTime": "Sábado: 10:30 às 12:00",
-                                "catechists": "Marcelo, Patrícia Gomes, Fabio e Ronaldo",
-                                "coordenadorTurma": "Patrícia Gomes",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Auditório (Centro Catequético)",
-                                "hall": "Centro Catequético"
+                              "id": "t-ca-2",
+                              "turma": "Turma 02",
+                              "dayTime": "Sábado: 10:30 às 12:00",
+                              "catechists": "Marcelo, Patrícia Gomes, Fabio e Ronaldo",
+                              "coordenadorTurma": "Patrícia Gomes",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Auditório (Centro Catequético)",
+                              "hall": "Centro Catequético"
                         },
                         {
-                                "id": "t-ca-3",
-                                "turma": "Turma 03",
-                                "dayTime": "Segunda: 20:00 às 22:00",
-                                "catechists": "Natanai e Lorena",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Auditório (Centro Catequético)",
-                                "hall": "Centro Catequético"
+                              "id": "t-ca-3",
+                              "turma": "Turma 03",
+                              "dayTime": "Segunda: 20:00 às 22:00",
+                              "catechists": "Natanai e Lorena",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Auditório (Centro Catequético)",
+                              "hall": "Centro Catequético"
                         },
                         {
-                                "id": "t-ca-4",
-                                "turma": "Turma 04",
-                                "dayTime": "Segunda: 20:00 às 22:00",
-                                "catechists": "Lourival e Thiago Malaquias",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala Carlo Acutis (Sala 08 - Centro Cat.)",
-                                "hall": "Centro Catequético"
+                              "id": "t-ca-4",
+                              "turma": "Turma 04",
+                              "dayTime": "Segunda: 20:00 às 22:00",
+                              "catechists": "Lourival e Thiago Malaquias",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala Carlo Acutis (Sala 08 - Centro Cat.)",
+                              "hall": "Centro Catequético"
                         },
                         {
-                                "id": "t-ca-5",
-                                "turma": "Turma 05",
-                                "dayTime": "Segunda: 20:00 às 22:00",
-                                "catechists": "Alexandre e Carla",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala Anjo da Guarda (Sala 02 - Centro Cat.)",
-                                "hall": "Centro Catequético"
+                              "id": "t-ca-5",
+                              "turma": "Turma 05",
+                              "dayTime": "Segunda: 20:00 às 22:00",
+                              "catechists": "Alexandre e Carla",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala Anjo da Guarda (Sala 02 - Centro Cat.)",
+                              "hall": "Centro Catequético"
                         },
                         {
-                                "id": "t-ca-6",
-                                "turma": "Turma 06",
-                                "dayTime": "Segunda: 20:00 às 22:00",
-                                "catechists": "Guilherme e Thais",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala São Francisco Marto (Sala 03 - Centro Cat.)",
-                                "hall": "Centro Catequético"
+                              "id": "t-ca-6",
+                              "turma": "Turma 06",
+                              "dayTime": "Segunda: 20:00 às 22:00",
+                              "catechists": "Guilherme e Thais",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala São Francisco Marto (Sala 03 - Centro Cat.)",
+                              "hall": "Centro Catequético"
                         },
                         {
-                                "id": "t-ca-7",
-                                "turma": "Turma 07",
-                                "dayTime": "Segunda: 20:00 às 22:00",
-                                "catechists": "Juliana e Hermes",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala São Gabriel (Sala 04 - Centro Cat.)",
-                                "hall": "Centro Catequético"
+                              "id": "t-ca-7",
+                              "turma": "Turma 07",
+                              "dayTime": "Segunda: 20:00 às 22:00",
+                              "catechists": "Juliana e Hermes",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala São Gabriel (Sala 04 - Centro Cat.)",
+                              "hall": "Centro Catequético"
                         },
                         {
-                                "id": "t-ca-8",
-                                "turma": "Turma 08",
-                                "dayTime": "Segunda: 20:00 às 22:00",
-                                "catechists": "Victor e Klebson",
-                                "auxiliares": [],
-                                "semCatequista": false,
-                                "room": "Sala Santa Jacinta (Sala 05 - Centro Cat.)",
-                                "hall": "Centro Catequético"
+                              "id": "t-ca-8",
+                              "turma": "Turma 08",
+                              "dayTime": "Segunda: 20:00 às 22:00",
+                              "catechists": "Victor e Klebson",
+                              "auxiliares": [],
+                              "semCatequista": false,
+                              "room": "Sala Santa Jacinta (Sala 05 - Centro Cat.)",
+                              "hall": "Centro Catequético"
                         }
-                ]
-        }
-]
-    };
+                  ]
+            }
+      ]
+};
 
-    // Gera o organograma oficial de 2028 com a nova alternância bienal (Eucaristia I ⇄ Eucaristia II)
     SEED_ORGANOGRAMAS['org-2028'] = JSON.parse(JSON.stringify(SEED_ORGANOGRAMAS['org-2027']));
     SEED_ORGANOGRAMAS['org-2028'].id = 'org-2028';
     SEED_ORGANOGRAMAS['org-2028'].name = '2028';
@@ -14970,6 +14951,91 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
               }
             }
 
+            // Higienização / Migração Oficial 2027 (Edições da Coordenadora Geral Lorena - 39 turmas)
+            if (parsed['org-2027'] && Array.isArray(parsed['org-2027'].stages)) {
+              // 1. Pré Eucaristia: Coord Sônia, T3 Jullia Sousa, Bruna Galvão e Ana Nascimento
+              const preStage = parsed['org-2027'].stages.find(s => s.id === 'pre');
+              if (preStage) {
+                preStage.coord = 'Sônia';
+                preStage.vice = '';
+                const t3 = (preStage.turmas || []).find(t => t.id === 't-pre-3' || t.turma === 'Turma 03');
+                if (t3) t3.catechists = 'Jullia Sousa, Bruna Galvão e Ana Nascimento';
+              }
+
+              // 2. Eucaristia I: Remoção da Turma 07 e ajuste da Turma 05 (Priscila Ayres e Bruna Neto)
+              const euc1Stage = parsed['org-2027'].stages.find(s => s.id === 'euc1');
+              if (euc1Stage && Array.isArray(euc1Stage.turmas)) {
+                euc1Stage.turmas = euc1Stage.turmas.filter(t => t.id !== 't-euc1-7' && t.turma !== 'Turma 07');
+                const t2 = euc1Stage.turmas.find(t => t.id === 't-euc1-2' || t.turma === 'Turma 02');
+                if (t2) {
+                  t2.catechists = 'Marilian Sales e Maria Guerra';
+                  t2.coordenadorTurma = 'Marilian Sales';
+                }
+                const t3 = euc1Stage.turmas.find(t => t.id === 't-euc1-3' || t.turma === 'Turma 03');
+                if (t3) {
+                  t3.catechists = 'Anna Júlia e Maria Chaves';
+                  t3.auxiliares = [];
+                }
+                const t5 = euc1Stage.turmas.find(t => t.id === 't-euc1-5' || t.turma === 'Turma 05');
+                if (t5) {
+                  t5.catechists = 'Priscila Ayres e Bruna Neto';
+                  t5.coordenadorTurma = 'Priscila Ayres';
+                  t5.room = 'Sala São Mateus (Sala 11 - Salão Par.)';
+                  t5.hall = 'Salão Paroquial';
+                }
+              }
+
+              // 3. Eucaristia II: T6, T7, T8, T9, T10
+              const euc2Stage = parsed['org-2027'].stages.find(s => s.id === 'euc2');
+              if (euc2Stage && Array.isArray(euc2Stage.turmas)) {
+                const t6 = euc2Stage.turmas.find(t => t.id === 't-euc2-6' || t.turma === 'Turma 06');
+                if (t6) {
+                  t6.catechists = 'Andréia Soares e Fernanda Lima';
+                  t6.auxiliares = ['Marina Ferreira'];
+                  t6.room = 'Sala São Francisco Marto (Sala 03 - Centro Cat.)';
+                  t6.hall = 'Centro Catequético';
+                }
+                const t7 = euc2Stage.turmas.find(t => t.id === 't-euc2-7' || t.turma === 'Turma 07');
+                if (t7) {
+                  t7.catechists = 'Andreia e Maria Rilda';
+                  t7.auxiliares = [];
+                }
+                const t8 = euc2Stage.turmas.find(t => t.id === 't-euc2-8' || t.turma === 'Turma 08');
+                if (t8) {
+                  t8.catechists = 'Elza e Zairo';
+                  t8.auxiliares = ['Lara'];
+                }
+                const t9 = euc2Stage.turmas.find(t => t.id === 't-euc2-9' || t.turma === 'Turma 09');
+                if (t9) {
+                  t9.catechists = 'Danusa Hipólito e Gllenda Venâncio';
+                  t9.room = 'Sala São Rafael (Sala 07 - Centro Cat.)';
+                  t9.hall = 'Centro Catequético';
+                }
+                const t10 = euc2Stage.turmas.find(t => t.id === 't-euc2-10' || t.turma === 'Turma 10');
+                if (t10) {
+                  t10.room = 'Sala São Rafael (Sala 07 - Centro Cat.)';
+                  t10.hall = 'Centro Catequético';
+                }
+              }
+
+              // 4. Perseverança: T1 e T2 na Sala Carlo Acutis
+              const persevStage = parsed['org-2027'].stages.find(s => s.id === 'persev');
+              if (persevStage && Array.isArray(persevStage.turmas)) {
+                const pt1 = persevStage.turmas.find(t => t.id === 't-per-1' || t.turma === 'Turma 01');
+                if (pt1) {
+                  pt1.catechists = 'Bruna Nascimento e Mariana Garcia';
+                  pt1.room = 'Sala Carlo Acutis (Sala 08 - Centro Cat.)';
+                  pt1.hall = 'Centro Catequético';
+                }
+                const pt2 = persevStage.turmas.find(t => t.id === 't-per-2' || t.turma === 'Turma 02');
+                if (pt2) {
+                  pt2.catechists = 'Aldaléia Abreu e Suelene Jochims';
+                  pt2.room = 'Sala Carlo Acutis (Sala 08 - Centro Cat.)';
+                  pt2.hall = 'Centro Catequético';
+                }
+              }
+            }
+
             // Garante ordenação consistente das turmas pelo nome em cada etapa
             Object.values(parsed).forEach(orgItem => {
               if (orgItem && Array.isArray(orgItem.stages)) {
@@ -15020,6 +15086,20 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       renderOrganogramaAll();
       if (typeof subscribeOrganogramaRealtime === 'function') {
         subscribeOrganogramaRealtime(id);
+      }
+      if (typeof syncMasterScheduleList === 'function') {
+        syncMasterScheduleList();
+      }
+      if (typeof RELATORIOS_STATE !== 'undefined' && RELATORIOS_STATE.initialized) {
+        RELATORIOS_STATE.selectedTurmasKeys.clear();
+        RELATORIOS_STATE.selectedCatsTurmasKeys.clear();
+        (masterScheduleList || []).forEach(t => {
+          const k = getTurmaKey(t.stage, t.turma);
+          RELATORIOS_STATE.selectedTurmasKeys.add(k);
+          RELATORIOS_STATE.selectedCatsTurmasKeys.add(k);
+        });
+        if (typeof renderRelTurmasChecklists === 'function') renderRelTurmasChecklists();
+        if (typeof renderRelatorioPreview === 'function') renderRelatorioPreview();
       }
     }
 
@@ -15851,12 +15931,18 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           cloudOrg.stages.forEach(cloudSt => {
             const localSt = localOrg.stages.find(s => s.id === cloudSt.id || s.name === cloudSt.name);
             if (localSt && Array.isArray(cloudSt.turmas)) {
+              // Sincroniza exclusões ocorridas na nuvem
+              const cloudTurmaIds = new Set(cloudSt.turmas.map(t => t.id));
+              const prevLen = (localSt.turmas || []).length;
+              localSt.turmas = (localSt.turmas || []).filter(t => cloudTurmaIds.has(t.id));
+              if (localSt.turmas.length !== prevLen) hasChanges = true;
+
               cloudSt.turmas.forEach(cloudT => {
                 const localT = (localSt.turmas || []).find(t => t.id === cloudT.id);
                 if (localT) {
                   const cloudTTime = cloudT.updatedAt ? new Date(cloudT.updatedAt).getTime() : 0;
                   const localTTime = localT.updatedAt ? new Date(localT.updatedAt).getTime() : 0;
-                  if (cloudTTime > localTTime) {
+                  if (cloudTTime >= localTTime || !localT.updatedAt) {
                     Object.assign(localT, cloudT);
                     hasChanges = true;
                   }
@@ -15867,6 +15953,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
               });
               if (cloudSt.coord !== localSt.coord) { localSt.coord = cloudSt.coord; hasChanges = true; }
               if (cloudSt.vice !== localSt.vice) { localSt.vice = cloudSt.vice; hasChanges = true; }
+              if (cloudSt.criteria !== localSt.criteria) { localSt.criteria = cloudSt.criteria; hasChanges = true; }
             }
           });
           if (hasChanges) {
@@ -30733,9 +30820,14 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         return;
       }
 
-      if (typeof syncMasterScheduleList === 'function' && (!masterScheduleList || masterScheduleList.length === 0)) {
+      if (typeof syncMasterScheduleList === 'function') {
         syncMasterScheduleList();
       }
+
+      const activeOrg = (typeof getActiveOrganograma === 'function') ? getActiveOrganograma() : null;
+      const orgDesc = activeOrg ? (activeOrg.title || activeOrg.name) + ' (' + (masterScheduleList || []).length + ' turmas)' : 'Organograma Ativo';
+      const labelEl = document.getElementById('rel-active-org-label');
+      if (labelEl) labelEl.textContent = 'Todas as Turmas do ' + orgDesc;
 
       if (!RELATORIOS_STATE.initialized) {
         // Inicializa todas as turmas marcadas por padrão
