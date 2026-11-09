@@ -5731,6 +5731,14 @@
               <option value="blocos">📑 Blocos por Turma (Ficha da Turma + Alunos)</option>
               <option value="tabela">📊 Resumo em Tabela Consolidada</option>
             </select>
+            <label class="text-xs font-bold text-slate-700 ml-1">Ordenar Turmas por:</label>
+            <select id="rel-turmas-sort-mode" onchange="renderRelatorioPreview()" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 outline-none focus:ring-2 focus:ring-amber-400">
+              <option value="nome_etapa_turma" selected>🏷️ Nome da Turma (Etapa &amp; Turma 01, 02...)</option>
+              <option value="nome_alfabetico">🔤 Nome Alfabético Completo (A-Z)</option>
+              <option value="nome_turma_num">🔢 Número da Turma (Turma 01, 02...)</option>
+              <option value="sala">🚪 Sala Oficial</option>
+              <option value="horario">⏰ Dia &amp; Horário</option>
+            </select>
             <label id="wrap-rel-turmas-pagebreak" class="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-2 rounded-xl text-xs font-bold text-amber-950 cursor-pointer">
               <input type="checkbox" id="rel-turmas-pagebreak" onchange="renderRelatorioPreview()" class="rounded text-amber-600 focus:ring-amber-500">
               <span>1 Turma por Página A4</span>
@@ -14019,12 +14027,12 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
               { id: 't-euc1-3', turma: 'Turma 03', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Joseline e Silene', auxiliares: [], semCatequista: false, room: 'Sala São Francisco Marto (Sala 03 - Centro Cat.)', hall: 'Centro Catequético' },
               { id: 't-euc1-4', turma: 'Turma 04', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Brenda e Joyce', auxiliares: ['Brenda', 'Joyce'], semCatequista: true, room: 'Sala São Gabriel (Sala 04 - Centro Cat.)', hall: 'Centro Catequético' },
               { id: 't-euc1-5', turma: 'Turma 05', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Valdir', auxiliares: ['Mariana Alvarenga'], semCatequista: false, room: 'Sala Santa Jacinta (Sala 05 - Centro Cat.)', hall: 'Centro Catequético' },
-              { id: 't-euc1-10', turma: 'Turma 10', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Lanuzia e Mara Rúbia', auxiliares: ['Mariana Garcia'], semCatequista: false, room: 'Sala São Miguel (Sala 06 - Centro Cat.)', hall: 'Centro Catequético' },
-              { id: 't-euc1-11', turma: 'Turma 11', dayTime: 'Sábado: 10:00 às 11:30', catechists: 'Maria Dulcineide e Elisa', auxiliares: [], semCatequista: false, room: 'Capela Nossa Senhora das Graças', hall: 'Capela Externa' },
               { id: 't-euc1-6', turma: 'Turma 06', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Andréia e Fernanda', auxiliares: ['Marina de Oliveira'], semCatequista: false, room: 'Sala Protomártires (Sala 01 - Centro Cat.)', hall: 'Centro Catequético' },
               { id: 't-euc1-7', turma: 'Turma 07', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Maria Rodrigues Silva, Nádia e Marina Neiva', auxiliares: [], semCatequista: false, room: 'Sala São Gabriel (Sala 04 - Centro Cat.)', hall: 'Centro Catequético' },
               { id: 't-euc1-8', turma: 'Turma 08', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Elza e Lara', auxiliares: ['Zairo'], semCatequista: false, room: 'Sala Santa Jacinta (Sala 05 - Centro Cat.)', hall: 'Centro Catequético' },
-              { id: 't-euc1-9', turma: 'Turma 09', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Danusa e Gllenda', auxiliares: [], semCatequista: false, room: 'Sala São Miguel (Sala 06 - Centro Cat.)', hall: 'Centro Catequético' }
+              { id: 't-euc1-9', turma: 'Turma 09', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Danusa e Gllenda', auxiliares: [], semCatequista: false, room: 'Sala São Miguel (Sala 06 - Centro Cat.)', hall: 'Centro Catequético' },
+              { id: 't-euc1-10', turma: 'Turma 10', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Lanuzia e Mara Rúbia', auxiliares: ['Mariana Garcia'], semCatequista: false, room: 'Sala São Miguel (Sala 06 - Centro Cat.)', hall: 'Centro Catequético' },
+              { id: 't-euc1-11', turma: 'Turma 11', dayTime: 'Sábado: 10:00 às 11:30', catechists: 'Maria Dulcineide e Elisa', auxiliares: [], semCatequista: false, room: 'Capela Nossa Senhora das Graças', hall: 'Capela Externa' }
             ]
           },
           {
@@ -14039,11 +14047,11 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
               { id: 't-euc2-2', turma: 'Turma 02', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Eliane Bonasser e Carla', auxiliares: [], semCatequista: false, room: 'Sala Carlo Acutis (Sala 08 - Centro Cat.)', hall: 'Centro Catequético' },
               { id: 't-euc2-3', turma: 'Turma 03', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Marilian, Maria Luísa e Anna Júlia', auxiliares: [], semCatequista: false, room: 'Sala São Lucas (Sala 13 - Salão Par.)', hall: 'Salão Paroquial' },
               { id: 't-euc2-4', turma: 'Turma 04', dayTime: 'Sábado: 08:30 às 10:00', catechists: 'Maria Laura e Suelene', auxiliares: ['Matheus'], semCatequista: false, room: 'Sala São Marcos (Sala 12 - Salão Par.)', hall: 'Salão Paroquial' },
-              { id: 't-euc2-9', turma: 'Turma 09', dayTime: 'Sábado: 10:00 às 11:30', catechists: 'Carlos', auxiliares: [], semCatequista: false, room: 'Capela Nossa Senhora das Graças', hall: 'Capela Externa' },
               { id: 't-euc2-5', turma: 'Turma 05', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Bruna Martins Vilarinho Neto, José Henrique e Heitor', auxiliares: [], semCatequista: false, room: 'Sala São Mateus (Sala 11 - Salão Par.)', hall: 'Salão Paroquial' },
               { id: 't-euc2-6', turma: 'Turma 06', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Solange, Núbia e Gabriella', auxiliares: [], semCatequista: false, room: 'Sala São Marcos (Sala 12 - Salão Par.)', hall: 'Salão Paroquial' },
               { id: 't-euc2-7', turma: 'Turma 07', dayTime: 'Sábado: 10:30 às 12:00', catechists: 'Priscila Ayres e Camila', auxiliares: ['Ana Luiza Yung'], semCatequista: false, room: 'Sala São Lucas (Sala 13 - Salão Par.)', hall: 'Salão Paroquial' },
-              { id: 't-euc2-8', turma: 'Turma 08', dayTime: 'Quarta: 16:00 às 17:30', catechists: 'Eliane Pinheiro e Carlos', auxiliares: [], semCatequista: false, room: 'Sala Santa Jacinta (Sala 05 - Centro Cat.)', hall: 'Centro Catequético' }
+              { id: 't-euc2-8', turma: 'Turma 08', dayTime: 'Quarta: 16:00 às 17:30', catechists: 'Eliane Pinheiro e Carlos', auxiliares: [], semCatequista: false, room: 'Sala Santa Jacinta (Sala 05 - Centro Cat.)', hall: 'Centro Catequético' },
+              { id: 't-euc2-9', turma: 'Turma 09', dayTime: 'Sábado: 10:00 às 11:30', catechists: 'Carlos', auxiliares: [], semCatequista: false, room: 'Capela Nossa Senhora das Graças', hall: 'Capela Externa' }
             ]
           },
           {
@@ -14705,6 +14713,18 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
                 });
               }
             }
+
+            // Garante ordenação consistente das turmas pelo nome em cada etapa
+            Object.values(parsed).forEach(orgItem => {
+              if (orgItem && Array.isArray(orgItem.stages)) {
+                orgItem.stages.forEach(st => {
+                  if (Array.isArray(st.turmas)) {
+                    st.turmas.sort((a, b) => (a.turma || '').localeCompare(b.turma || '', 'pt-BR', { numeric: true, sensitivity: 'base' }));
+                  }
+                });
+              }
+            });
+
             return parsed;
           }
         }
@@ -14760,15 +14780,33 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         return;
       }
       masterScheduleList = [];
+      const stageOrder = {
+        'Pré Eucaristia': 1,
+        'Eucaristia I': 2,
+        'Eucaristia II': 3,
+        'Perseverança': 4,
+        'Crisma Jovem': 5,
+        'Crisma Adultos': 6
+      };
       org.stages.forEach(st => {
         if (Array.isArray(st.turmas)) {
-          st.turmas.forEach(t => {
+          // Ordena as turmas dentro de cada etapa pelo nome da turma (Turma 01, 02, ...)
+          const sortedTurmas = st.turmas.slice().sort((a, b) => {
+            return (a.turma || '').localeCompare(b.turma || '', 'pt-BR', { numeric: true, sensitivity: 'base' });
+          });
+          sortedTurmas.forEach(t => {
             masterScheduleList.push({
               ...t,
               stage: st.name
             });
           });
         }
+      });
+      masterScheduleList.sort((a, b) => {
+        const ordA = stageOrder[a.stage] || 99;
+        const ordB = stageOrder[b.stage] || 99;
+        if (ordA !== ordB) return ordA - ordB;
+        return (a.turma || '').localeCompare(b.turma || '', 'pt-BR', { numeric: true, sensitivity: 'base' });
       });
       if (typeof syncRoomsDataWithOrganograma === 'function') syncRoomsDataWithOrganograma();
       if (typeof renderDynamicSvgRooms === 'function') renderDynamicSvgRooms();
@@ -25214,6 +25252,9 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         });
       }
 
+      // Garante ordenação das turmas pelo nome da turma (Turma 01, Turma 02...)
+      turmasDaEtapa.sort((a, b) => (a.turma || '').localeCompare(b.turma || '', 'pt-BR', { numeric: true, sensitivity: 'base' }));
+
       selTurma.innerHTML = turmasDaEtapa.map(item => {
         return `<option value="${item.turma}">${item.turma} (${item.catechists || 'Catequistas'})</option>`;
       }).join('');
@@ -29981,6 +30022,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       const turmaSel = document.getElementById('upload-target-turma');
       if (!turmaSel) return;
       const turmas = masterScheduleList.filter(item => item.stage === etapa);
+      turmas.sort((a, b) => (a.turma || '').localeCompare(b.turma || '', 'pt-BR', { numeric: true, sensitivity: 'base' }));
       turmaSel.innerHTML = turmas.map(t => `<option value="${t.turma}">${t.turma} (${t.catechists})</option>`).join('');
     }
 
@@ -30619,9 +30661,23 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       if (!container) return;
       const q = (document.getElementById('rel-turmas-search-input')?.value || '').toLowerCase().trim();
 
+      const stageOrder = {
+        'Pré Eucaristia': 1,
+        'Eucaristia I': 2,
+        'Eucaristia II': 3,
+        'Perseverança': 4,
+        'Crisma Jovem': 5,
+        'Crisma Adultos': 6
+      };
+
       const items = (masterScheduleList || []).filter(t => {
         if (!q) return true;
         return `${t.stage} ${t.turma} ${t.catechists} ${t.room} ${t.dayTime}`.toLowerCase().includes(q);
+      }).sort((a, b) => {
+        const ordA = stageOrder[a.stage] || 99;
+        const ordB = stageOrder[b.stage] || 99;
+        if (ordA !== ordB) return ordA - ordB;
+        return (a.turma || '').localeCompare(b.turma || '', 'pt-BR', { numeric: true, sensitivity: 'base' });
       });
 
       if (items.length === 0) {
@@ -30674,13 +30730,52 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
     function getFilteredTurmasForReport() {
       const list = masterScheduleList || [];
+      let filtered = [];
       if (RELATORIOS_STATE.turmasScope === 'geral') {
-        return list;
+        filtered = list.slice();
       } else if (RELATORIOS_STATE.turmasScope === 'etapas') {
-        return list.filter(t => RELATORIOS_STATE.selectedTurmasEtapas.has(t.stage));
+        filtered = list.filter(t => RELATORIOS_STATE.selectedTurmasEtapas.has(t.stage));
       } else {
-        return list.filter(t => RELATORIOS_STATE.selectedTurmasKeys.has(getTurmaKey(t.stage, t.turma)));
+        filtered = list.filter(t => RELATORIOS_STATE.selectedTurmasKeys.has(getTurmaKey(t.stage, t.turma)));
       }
+
+      const sortMode = document.getElementById('rel-turmas-sort-mode')?.value || 'nome_etapa_turma';
+      const stageOrder = {
+        'Pré Eucaristia': 1,
+        'Eucaristia I': 2,
+        'Eucaristia II': 3,
+        'Perseverança': 4,
+        'Crisma Jovem': 5,
+        'Crisma Adultos': 6
+      };
+
+      filtered.sort((a, b) => {
+        if (sortMode === 'nome_turma_num') {
+          const cmpT = (a.turma || '').localeCompare(b.turma || '', 'pt-BR', { numeric: true, sensitivity: 'base' });
+          if (cmpT !== 0) return cmpT;
+          const ordA = stageOrder[a.stage] || 99;
+          const ordB = stageOrder[b.stage] || 99;
+          return ordA - ordB;
+        } else if (sortMode === 'nome_alfabetico') {
+          const nameA = `${a.stage} — ${a.turma}`;
+          const nameB = `${b.stage} — ${b.turma}`;
+          return nameA.localeCompare(nameB, 'pt-BR', { numeric: true, sensitivity: 'base' });
+        } else if (sortMode === 'sala') {
+          const cmpRoom = (a.room || '').localeCompare(b.room || '', 'pt-BR', { numeric: true, sensitivity: 'base' });
+          if (cmpRoom !== 0) return cmpRoom;
+        } else if (sortMode === 'horario') {
+          const cmpDay = (a.dayTime || '').localeCompare(b.dayTime || '', 'pt-BR', { sensitivity: 'base' });
+          if (cmpDay !== 0) return cmpDay;
+        }
+
+        // Padrão: nome_etapa_turma (Etapa e turma ordenada pelo nome Turma 01, Turma 02...)
+        const ordA = stageOrder[a.stage] || 99;
+        const ordB = stageOrder[b.stage] || 99;
+        if (ordA !== ordB) return ordA - ordB;
+        return (a.turma || '').localeCompare(b.turma || '', 'pt-BR', { numeric: true, sensitivity: 'base' });
+      });
+
+      return filtered;
     }
 
     function generateRelatorioTurmasHtml() {
@@ -31434,6 +31529,20 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       const turmaSel = document.getElementById('rel-alunos-filter-turma');
       if (turmaSel) {
         const turmas = (masterScheduleList || []).filter(t => etapa === 'all' || t.stage === etapa);
+        const stageOrder = {
+          'Pré Eucaristia': 1,
+          'Eucaristia I': 2,
+          'Eucaristia II': 3,
+          'Perseverança': 4,
+          'Crisma Jovem': 5,
+          'Crisma Adultos': 6
+        };
+        turmas.sort((a, b) => {
+          const ordA = stageOrder[a.stage] || 99;
+          const ordB = stageOrder[b.stage] || 99;
+          if (ordA !== ordB) return ordA - ordB;
+          return (a.turma || '').localeCompare(b.turma || '', 'pt-BR', { numeric: true, sensitivity: 'base' });
+        });
         turmaSel.innerHTML = `<option value="all">Todas as Turmas (${turmas.length})</option>` +
           turmas.map(t => `<option value="${escapeHtml(getTurmaKey(t.stage, t.turma))}">${escapeHtml(etapa === 'all' ? `${t.stage} — ${t.turma}` : `${t.turma} (${t.catechists})`)}</option>`).join('');
       }
