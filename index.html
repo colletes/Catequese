@@ -5225,6 +5225,21 @@
         </button>
       </div>
 
+      <!-- Abas Principais: Eventos Ativos vs Eventos Ocultos -->
+      <div id="eventos-nav-tabs" class="max-w-2xl mx-auto w-full flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="switchEventosView('ativos')" id="tab-btn-ev-ativos" class="px-4 py-2 rounded-xl font-bold text-xs sm:text-sm bg-rose-900 text-white shadow-xs transition flex items-center gap-2 cursor-pointer">
+            <span>📅 Eventos Ativos</span>
+            <span id="badge-count-ev-ativos" class="bg-rose-800 text-rose-100 text-[11px] px-2 py-0.5 rounded-full font-black">0</span>
+          </button>
+          <button type="button" onclick="switchEventosView('ocultos')" id="tab-btn-ev-ocultos" class="hidden px-4 py-2 rounded-xl font-bold text-xs sm:text-sm text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition flex items-center gap-2 cursor-pointer" title="Visualizar eventos arquivados ou concluídos há mais de 30 dias (Acesso restrito à Coordenação)">
+            <span>📦 Eventos Ocultos</span>
+            <span id="badge-count-ev-ocultos" class="bg-slate-100 text-slate-700 text-[11px] px-2 py-0.5 rounded-full font-black">0</span>
+          </button>
+        </div>
+        <span id="eventos-view-subtitle" class="text-xs text-slate-500 font-medium">Mural de celebrações ativas e programadas</span>
+      </div>
+
       <!-- Formulário de adição (visível apenas no modo edição) -->
       <div id="form-add-evento" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-5 space-y-3">
         <h3 class="font-bold text-amber-900 font-heading">➕ Adicionar Novo Evento</h3>
@@ -8042,6 +8057,10 @@
         if (typeof renderDynamicSvgRooms === 'function') {
           setTimeout(renderDynamicSvgRooms, 40);
         }
+      } else if (tabId === 'eventos') {
+        if (typeof renderEventosTimeline === 'function') {
+          setTimeout(renderEventosTimeline, 20);
+        }
       } else if (tabId === 'conhecimento') {
         if (window.WikiKB && typeof window.WikiKB.init === 'function') {
           setTimeout(() => window.WikiKB.init(), 30);
@@ -9035,6 +9054,11 @@
       // Inicializa Chat Pastoral Assíncrono com Presença e Listas
       if (window.ChatEngine && typeof window.ChatEngine.init === 'function') {
         window.ChatEngine.init(userData);
+      }
+
+      // Atualiza permissões e visualização da timeline de Eventos & Retiros
+      if (typeof renderEventosTimeline === 'function') {
+        renderEventosTimeline();
       }
 
       // Registra login na trilha de auditoria
@@ -11085,12 +11109,12 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     function saveEventosData(list) {
       try {
         localStorage.setItem(STORAGE_KEY_EVENTOS, JSON.stringify(list));
-        // Sincroniza em nuvem no Firestore se disponível
+        // Sincroniza em nuvem no Firestore se disponível com merge construtivo
         if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
           window.firebaseDb.collection('configuracoes').doc('eventos_cronograma').set({
             eventos: list,
             updatedAt: new Date().toISOString()
-          }).catch(err => console.warn('Sync Firestore eventos:', err));
+          }, { merge: true }).catch(err => console.warn('Sync Firestore eventos:', err));
         }
       } catch (e) {
         console.error('Erro ao salvar eventos no localStorage:', e);
@@ -11099,6 +11123,66 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     }
 
     let currentEventosFilter = 'all'; // 'all' | 'sacramentos' | 'batismo' | 'eucaristia' | 'crisma' | 'matrimonio'
+    let currentEventosView = 'ativos'; // 'ativos' | 'ocultos'
+
+    function isEventoPassado30Dias(dataISO) {
+      if (!dataISO) return false;
+      const parts = dataISO.split('-').map(Number);
+      if (parts.length < 3 || isNaN(parts[0]) || isNaN(parts[1]) || isNaN(parts[2])) return false;
+      // Define o fim do dia do evento (23:59:59) no fuso local
+      const evDate = new Date(parts[0], parts[1] - 1, parts[2], 23, 59, 59, 999);
+      const now = new Date();
+      const diffMs = now.getTime() - evDate.getTime();
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      return diffDays > 30;
+    }
+
+    function isEventoOculto(ev) {
+      if (!ev) return false;
+      if (ev.ocultoManual === true) return true;
+      if (isEventoPassado30Dias(ev.data) && !ev.fixarVisivel) return true;
+      return false;
+    }
+
+    function switchEventosView(view) {
+      if (view === 'ocultos' && !canManageEvents()) {
+        alert('⚠️ Operação restrita: A aba de eventos ocultos é acessível apenas para Master Admin, Coordenação Geral, Vice-Coordenação e Secretaria.');
+        return;
+      }
+      currentEventosView = (view === 'ocultos') ? 'ocultos' : 'ativos';
+      updateEventosTabStyles();
+      renderEventosTimeline();
+    }
+
+    function updateEventosTabStyles() {
+      const btnAtivos = document.getElementById('tab-btn-ev-ativos');
+      const btnOcultos = document.getElementById('tab-btn-ev-ocultos');
+      const subtitle = document.getElementById('eventos-view-subtitle');
+
+      if (btnAtivos) {
+        if (currentEventosView === 'ativos') {
+          btnAtivos.className = 'px-4 py-2 rounded-xl font-bold text-xs sm:text-sm bg-rose-900 text-white shadow-xs transition flex items-center gap-2 cursor-pointer';
+        } else {
+          btnAtivos.className = 'px-4 py-2 rounded-xl font-bold text-xs sm:text-sm text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition flex items-center gap-2 cursor-pointer';
+        }
+      }
+
+      if (btnOcultos) {
+        if (currentEventosView === 'ocultos') {
+          btnOcultos.className = 'px-4 py-2 rounded-xl font-bold text-xs sm:text-sm bg-rose-900 text-white shadow-xs transition flex items-center gap-2 cursor-pointer';
+        } else {
+          btnOcultos.className = 'px-4 py-2 rounded-xl font-bold text-xs sm:text-sm text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition flex items-center gap-2 cursor-pointer';
+        }
+      }
+
+      if (subtitle) {
+        if (currentEventosView === 'ocultos') {
+          subtitle.textContent = 'Eventos arquivados ou concluídos há mais de 30 dias';
+        } else {
+          subtitle.textContent = 'Mural de celebrações ativas e programadas';
+        }
+      }
+    }
 
     function setEventosFilter(filter) {
       currentEventosFilter = filter;
@@ -11115,19 +11199,96 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       renderEventosTimeline();
     }
 
+    function ocultarEvento(id) {
+      if (!canManageEvents()) {
+        alert('⚠️ Operação não permitida: Apenas o Master Admin, a Coordenação Geral, o Vice-Coordenador e a Secretaria têm permissão para ocultar eventos.');
+        return;
+      }
+      const eventos = getEventosData();
+      const ev = eventos.find(e => e.id === id);
+      if (!ev) return;
+      if (!confirm(`Deseja ocultar o evento "${ev.nome}" do mural principal? Ele será movido para a aba de Eventos Ocultos.`)) return;
+
+      ev.ocultoManual = true;
+      ev.fixarVisivel = false;
+      ev.ocultadoEm = new Date().toISOString();
+      if (window.appAuthState && (window.appAuthState.email || (window.appAuthState.user && window.appAuthState.user.email))) {
+        ev.ocultadoPor = window.appAuthState.email || window.appAuthState.user.email;
+      }
+
+      saveEventosData(eventos);
+
+      if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
+        window.ICM_CONFIG.logAuditEvent('OCULTAR_EVENTO', ev.nome, {
+          eventoId: id,
+          dataEvento: ev.data
+        });
+      }
+    }
+
+    function reexibirEvento(id) {
+      if (!canManageEvents()) {
+        alert('⚠️ Operação não permitida: Apenas o Master Admin, a Coordenação Geral, o Vice-Coordenador e a Secretaria têm permissão para reexibir eventos.');
+        return;
+      }
+      const eventos = getEventosData();
+      const ev = eventos.find(e => e.id === id);
+      if (!ev) return;
+
+      const isPassado = isEventoPassado30Dias(ev.data);
+      const confirmMsg = isPassado
+        ? `Este evento ocorreu há mais de 30 dias. Deseja reexibi-lo e fixá-lo no mural principal de eventos ativos?`
+        : `Deseja reexibir o evento "${ev.nome}" no mural principal de eventos ativos?`;
+      if (!confirm(confirmMsg)) return;
+
+      ev.ocultoManual = false;
+      ev.fixarVisivel = true;
+      ev.reexibidoEm = new Date().toISOString();
+      if (window.appAuthState && (window.appAuthState.email || (window.appAuthState.user && window.appAuthState.user.email))) {
+        ev.reexibidoPor = window.appAuthState.email || window.appAuthState.user.email;
+      }
+
+      saveEventosData(eventos);
+
+      if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
+        window.ICM_CONFIG.logAuditEvent('REEXIBIR_EVENTO', ev.nome, {
+          eventoId: id,
+          dataEvento: ev.data,
+          fixarVisivel: true
+        });
+      }
+    }
+
     function renderEventosTimeline() {
       const container = document.getElementById('eventos-timeline');
       if (!container) return;
 
-      // Atualiza visibilidade do botão de editar conforme permissão (Master Admin, Coord Geral, Vice Coord, Secretaria)
+      const canManage = canManageEvents();
+
+      // Atualiza visibilidade do botão de editar conforme permissão
       const btnEdit = document.getElementById('btn-edit-mode');
       if (btnEdit) {
-        if (canManageEvents()) {
+        if (canManage) {
           btnEdit.classList.remove('hidden');
         } else {
           btnEdit.classList.add('hidden');
         }
       }
+
+      // Aba de eventos ocultos: visível exclusivamente para gestores (Master, Coord, Vice, Secretaria)
+      const btnOcultosTab = document.getElementById('tab-btn-ev-ocultos');
+      if (btnOcultosTab) {
+        if (canManage) {
+          btnOcultosTab.classList.remove('hidden');
+        } else {
+          btnOcultosTab.classList.add('hidden');
+          if (currentEventosView === 'ocultos') {
+            currentEventosView = 'ativos';
+          }
+        }
+      }
+
+      updateEventosTabStyles();
 
       const eventos = getEventosData();
 
@@ -11136,7 +11297,44 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         return;
       }
 
-      let filtered = [...eventos];
+      // Atualiza os contadores numéricos das abas
+      const totalAtivos = eventos.filter(e => !isEventoOculto(e)).length;
+      const totalOcultos = eventos.filter(e => isEventoOculto(e)).length;
+
+      const badgeAtivos = document.getElementById('badge-count-ev-ativos');
+      const badgeOcultos = document.getElementById('badge-count-ev-ocultos');
+      if (badgeAtivos) badgeAtivos.textContent = totalAtivos;
+      if (badgeOcultos) badgeOcultos.textContent = totalOcultos;
+
+      // Filtra por aba selecionada (Ativos vs Ocultos)
+      let tabFiltered = eventos.filter(e => {
+        const oculto = isEventoOculto(e);
+        return currentEventosView === 'ocultos' ? oculto : !oculto;
+      });
+
+      if (!tabFiltered || tabFiltered.length === 0) {
+        if (currentEventosView === 'ocultos') {
+          container.innerHTML = `
+            <div class="text-center py-12 bg-white rounded-2xl border border-dashed border-slate-300 p-6">
+              <div class="text-3xl mb-2">📦</div>
+              <h4 class="font-bold text-slate-800 text-sm">Nenhum evento oculto</h4>
+              <p class="text-slate-500 text-xs mt-1">Eventos arquivados manualmente ou ocorridos há mais de 30 dias aparecerão listados aqui.</p>
+            </div>
+          `;
+        } else {
+          container.innerHTML = `
+            <div class="text-center py-12 bg-white rounded-2xl border border-dashed border-slate-300 p-6">
+              <div class="text-3xl mb-2">📅</div>
+              <h4 class="font-bold text-slate-800 text-sm">Nenhum evento ativo no mural</h4>
+              <p class="text-slate-500 text-xs mt-1">Todos os eventos já foram concluídos há mais de 30 dias ou foram arquivados.</p>
+            </div>
+          `;
+        }
+        return;
+      }
+
+      // Aplica filtro de sacramentos/categorias
+      let filtered = [...tabFiltered];
       if (currentEventosFilter === 'sacramentos') {
         filtered = filtered.filter(ev => !!ev.sacramento || (ev.nome && /sacramento|batismo|eucaristia|crisma|matrim[ôo]nio/i.test(ev.nome)));
       } else if (currentEventosFilter !== 'all') {
@@ -11148,7 +11346,13 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         return;
       }
 
-      const sorted = filtered.sort((a, b) => (a.data || '').localeCompare(b.data || ''));
+      // Ordenação: nos ativos, ordem cronológica crescente. Nos ocultos, eventos mais recentes primeiro.
+      const sorted = filtered.sort((a, b) => {
+        if (currentEventosView === 'ocultos') {
+          return (b.data || '').localeCompare(a.data || '');
+        }
+        return (a.data || '').localeCompare(b.data || '');
+      });
 
       container.innerHTML = sorted.map(ev => {
         const dataFmt = _dataFmt(ev.data);
@@ -11174,8 +11378,56 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
         const isSacramento = !!sacramentoBadge;
 
+        // Badge de Motivo de Ocultação ou Fixação
+        let motivoBadge = '';
+        if (currentEventosView === 'ocultos') {
+          if (ev.ocultoManual) {
+            motivoBadge = '<span class="text-[10px] font-bold uppercase bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-full border border-amber-300 flex items-center gap-1"><span>🔒</span> <span>Ocultado manualmente</span></span>';
+          } else if (isEventoPassado30Dias(ev.data)) {
+            motivoBadge = '<span class="text-[10px] font-bold uppercase bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-full border border-slate-300 flex items-center gap-1"><span>⏳</span> <span>Concluído há mais de 30 dias</span></span>';
+          }
+        } else if (ev.fixarVisivel && isEventoPassado30Dias(ev.data)) {
+          motivoBadge = '<span class="text-[10px] font-bold uppercase bg-sky-100 text-sky-800 px-2.5 py-0.5 rounded-full border border-sky-300 flex items-center gap-1"><span>📌</span> <span>Fixado no Mural</span></span>';
+        }
+
+        // Botões de ação contextual
+        let actionButtons = '';
+        if (canManage) {
+          if (editModeActive) {
+            if (currentEventosView === 'ocultos') {
+              actionButtons = `
+                <button onclick="reexibirEvento('${ev.id}')" class="text-xs text-emerald-700 hover:text-emerald-900 font-bold shrink-0 border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-xl transition flex items-center gap-1 shadow-xs cursor-pointer" title="Restaurar e exibir no mural principal">
+                  <span>👁️</span> <span>Reexibir</span>
+                </button>
+                <button onclick="editarEvento('${ev.id}')" class="text-xs text-indigo-700 hover:text-indigo-900 font-bold shrink-0 border border-indigo-200 hover:bg-indigo-50 px-2.5 py-1 rounded-xl transition shadow-xs cursor-pointer">✏️ Editar</button>
+                <button onclick="removerEvento('${ev.id}')" class="text-xs text-rose-600 hover:text-rose-800 font-bold shrink-0 border border-rose-200 hover:bg-rose-50 px-2.5 py-1 rounded-xl transition flex items-center gap-1 shadow-xs cursor-pointer">
+                  <span>🗑</span> <span>Excluir</span>
+                </button>
+              `;
+            } else {
+              actionButtons = `
+                <button onclick="ocultarEvento('${ev.id}')" class="text-xs text-slate-700 hover:text-slate-900 font-bold shrink-0 border border-slate-300 bg-slate-50 hover:bg-slate-100 px-2.5 py-1 rounded-xl transition flex items-center gap-1 shadow-xs cursor-pointer" title="Ocultar do mural principal">
+                  <span>👁️</span> <span>Ocultar</span>
+                </button>
+                <button onclick="editarEvento('${ev.id}')" class="text-xs text-indigo-700 hover:text-indigo-900 font-bold shrink-0 border border-indigo-200 hover:bg-indigo-50 px-2.5 py-1 rounded-xl transition shadow-xs cursor-pointer">✏️ Editar</button>
+                <button onclick="removerEvento('${ev.id}')" class="text-xs text-rose-600 hover:text-rose-800 font-bold shrink-0 border border-rose-200 hover:bg-rose-50 px-2.5 py-1 rounded-xl transition flex items-center gap-1 shadow-xs cursor-pointer">
+                  <span>🗑</span> <span>Excluir</span>
+                </button>
+              `;
+            }
+          } else if (currentEventosView === 'ocultos') {
+            actionButtons = `
+              <button onclick="reexibirEvento('${ev.id}')" class="text-xs text-emerald-700 hover:text-emerald-900 font-bold shrink-0 border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-xl transition flex items-center gap-1 shadow-xs cursor-pointer" title="Restaurar e exibir no mural principal">
+                <span>👁️</span> <span>Reexibir</span>
+              </button>
+            `;
+          }
+        }
+
+        const opacityClass = (currentEventosView === 'ocultos') ? 'opacity-90 hover:opacity-100' : '';
+
         return `
-          <div class="flex gap-4 items-start" data-evento-id="${ev.id}">
+          <div class="flex gap-4 items-start ${opacityClass}" data-evento-id="${ev.id}">
             <div class="flex flex-col items-center">
               <div class="w-12 h-12 rounded-2xl ${isSacramento ? 'bg-gradient-to-br from-amber-600 via-amber-500 to-[#d4a94f] ring-2 ring-amber-300' : 'bg-gradient-to-br from-slate-800 to-slate-900'} text-white flex flex-col items-center justify-center shadow-md shrink-0 border border-amber-300/40">
                 <span class="text-[11px] font-black leading-none">${diaMes}</span>
@@ -11189,6 +11441,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
                   <div class="flex items-center gap-2 flex-wrap mb-1">
                     <h3 class="font-bold text-slate-900 font-heading text-base">${ev.nome}</h3>
                     ${sacramentoBadge}
+                    ${motivoBadge}
                     ${ev.externo ? '<span class="text-[10px] font-extrabold uppercase bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-300">🌍 Externo</span>' : '<span class="text-[10px] font-extrabold uppercase bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full border border-slate-200">⛪ Santuário</span>'}
                   </div>
                   <p class="text-xs text-slate-600 font-medium">
@@ -11196,12 +11449,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
                   </p>
                   ${ev.turmas ? `<p class="text-xs text-slate-500 mt-1">👥 <strong>Turmas:</strong> ${ev.turmas}</p>` : ''}
                 </div>
-                ${editModeActive ? `
-                  <button onclick="editarEvento('${ev.id}')" class="text-xs text-indigo-700 hover:text-indigo-900 font-bold shrink-0 border border-indigo-200 hover:bg-indigo-50 px-2.5 py-1 rounded-xl transition shadow-xs">✏️ Editar</button>
-                  <button onclick="removerEvento('${ev.id}')" class="text-xs text-rose-600 hover:text-rose-800 font-bold shrink-0 border border-rose-200 hover:bg-rose-50 px-2.5 py-1 rounded-xl transition flex items-center gap-1 shadow-xs">
-                    <span>🗑</span> <span>Excluir</span>
-                  </button>
-                ` : ''}
+                ${actionButtons ? `<div class="flex items-center gap-1.5 flex-wrap justify-end shrink-0">${actionButtons}</div>` : ''}
               </div>
             </div>
           </div>
@@ -11212,7 +11460,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     function canManageEvents() {
       if (!window.appAuthState) return false;
       const role = window.appAuthState.role;
-      const email = (window.appAuthState.email || '').toLowerCase();
+      const email = (window.appAuthState.email || (window.appAuthState.user && window.appAuthState.user.email) || '').toLowerCase();
       const roles = (window.ICM_CONFIG && window.ICM_CONFIG.ROLES) ? window.ICM_CONFIG.ROLES : {};
 
       const isMaster = role === roles.MASTER_ADMIN || role === 'master_admin' || (window.ICM_CONFIG && email === (window.ICM_CONFIG.MASTER_ADMIN_EMAIL || '').toLowerCase());
@@ -11227,12 +11475,20 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     function removerEvento(id) {
       if (!editModeActive) return;
       if (!canManageEvents()) {
-        alert('⚠️ Operação não permitida: Apenas o Master Admin, a Coordenação Geral e o Vice-Coordenador têm permissão para excluir eventos.');
+        alert('⚠️ Operação não permitida: Apenas o Master Admin, a Coordenação Geral, o Vice-Coordenador e a Secretaria têm permissão para excluir eventos.');
         return;
       }
-      if (!confirm('Deseja realmente remover este evento?')) return;
+      if (!confirm('Deseja realmente remover este evento permanentemente?')) return;
+      const ev = getEventosData().find(e => e.id === id);
       const eventos = getEventosData().filter(e => e.id !== id);
       saveEventosData(eventos);
+
+      if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function' && ev) {
+        window.ICM_CONFIG.logAuditEvent('DELETE_EVENTO', ev.nome, {
+          eventoId: id,
+          dataEvento: ev.data
+        });
+      }
     }
 
     function toggleEditMode() {
