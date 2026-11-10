@@ -3680,6 +3680,9 @@
             <button id="btn-print-aluno-modal" type="button" onclick="imprimirFichaAlunoModal()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-[#d4a94f] border border-[#d4a94f]/50 font-bold rounded-xl text-xs sm:text-sm shadow-xs transition inline-flex items-center gap-1.5" title="Imprimir Ficha Cadastral em PDF">
               <span>🖨️</span> <span>Imprimir Ficha</span>
             </button>
+            <button id="btn-transfer-aluno-modal" type="button" onclick="transferirAlunoDoModal()" class="px-3.5 py-2 bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-300 font-bold rounded-xl text-xs sm:text-sm shadow-xs transition inline-flex items-center gap-1.5" title="Transferir de Turma / Solicitar Transferência">
+              <span>🔄</span> <span>Transferir Turma</span>
+            </button>
             <div class="flex items-center gap-2 ml-auto">
               <button type="button" onclick="closeAlunoModal()" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-100 transition">
                 Cancelar
@@ -3690,6 +3693,71 @@
             </div>
           </div>
 
+        </form>
+
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL: TRANSFERÊNCIA DE CATEQUIZANDO       -->
+    <!-- ========================================== -->
+    <div id="modal-transferir-aluno" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+      <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-8">
+        
+        <div class="bg-gradient-to-r from-slate-900 to-sky-950 text-white p-5 sm:p-6 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">🔄</span>
+            <div>
+              <h3 class="text-lg sm:text-xl font-bold font-heading">Transferência de Catequizando</h3>
+              <p class="text-xs text-sky-200">Mudança de turma ou etapa catequética</p>
+            </div>
+          </div>
+          <button type="button" onclick="fecharModalTransferirAluno()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
+        </div>
+
+        <form id="form-transferir-aluno" onsubmit="executarTransferenciaAluno(event)" class="p-5 sm:p-6 space-y-4">
+          <input type="hidden" id="transf-aluno-id" />
+          <input type="hidden" id="transf-from-etapa" />
+          <input type="hidden" id="transf-from-turma" />
+
+          <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-1">
+            <div class="text-[10px] font-black uppercase tracking-wider text-slate-400">Catequizando</div>
+            <div id="transf-aluno-nome" class="text-sm sm:text-base font-bold text-slate-900">Nome do Aluno</div>
+            <div class="flex items-center gap-2 pt-1 text-xs text-slate-600">
+              <span class="font-bold">Turma Atual:</span>
+              <span id="transf-turma-atual-badge" class="px-2 py-0.5 rounded-full bg-slate-200 font-bold text-slate-800">Eucaristia I — Turma 01</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Etapa de Destino *</label>
+              <select id="transf-dest-etapa" onchange="popularTurmasDestinoTransferencia(this.value)" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs sm:text-sm bg-slate-50 font-bold text-slate-800 outline-none focus:ring-2 focus:ring-sky-400" required>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Turma de Destino *</label>
+              <select id="transf-dest-turma" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs sm:text-sm bg-slate-50 font-bold text-slate-800 outline-none focus:ring-2 focus:ring-sky-400" required>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Motivo / Justificativa Pastoral *</label>
+            <textarea id="transf-motivo" rows="2" placeholder="Ex: Mudança de horário, compromissos familiares, recomendação pastoral..." class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs sm:text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-sky-400 outline-none" required></textarea>
+          </div>
+
+          <div id="transf-modo-info" class="text-xs">
+          </div>
+
+          <div class="pt-3 border-t border-slate-200 flex items-center justify-end gap-2">
+            <button type="button" onclick="fecharModalTransferirAluno()" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-100 transition">
+              Cancelar
+            </button>
+            <button id="btn-submit-transferencia" type="submit" class="bg-sky-600 hover:bg-sky-700 text-white px-5 py-2 rounded-xl text-xs sm:text-sm font-bold shadow transition">
+              Confirmar Transferência
+            </button>
+          </div>
         </form>
 
       </div>
@@ -10682,6 +10750,9 @@
           if (a.statusAprovacao === 'pendente_coordenacao') {
             faltas.push('Homologação de Inscrição (Secretaria)');
           }
+          if (a.transferenciaPendente) {
+            faltas.push(`Transferência Solicitada (${a.transferenciaPendente.toEtapa} — ${a.transferenciaPendente.toTurma})`);
+          }
           if (!batizadoStatus || batizadoStatus.includes('não')) {
             faltas.push('Certidão de Batismo');
           }
@@ -10798,6 +10869,21 @@
                   title="Homologar e aprovar inscrição realizada pela secretaria"
                 >
                   <span>✓</span> <span>Aprovar Inscrição</span>
+                </button>` : ''}
+                ${(isCoord && p.aluno.transferenciaPendente) ? `
+                <button
+                  onclick="aprovarTransferenciaPendente('${p.aluno.id}', '${p.turmaKey}')"
+                  class="p-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white transition text-[11px] font-black inline-flex items-center gap-1 shadow-2xs"
+                  title="Homologar e efetivar transferência de turma"
+                >
+                  <span>✓</span> <span>Aprovar Transferência</span>
+                </button>
+                <button
+                  onclick="recusarTransferenciaPendente('${p.aluno.id}', '${p.turmaKey}')"
+                  class="p-1.5 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 transition text-[11px] font-bold inline-flex items-center gap-1"
+                  title="Recusar solicitação de transferência"
+                >
+                  <span>✕</span> <span>Recusar</span>
                 </button>` : ''}
                 <button
                   onclick="quickNotifyWhatsApp('${p.aluno.contato}', '${p.aluno.nome.replace(/'/g, "\\'")}', '${p.turma}', '${p.pendencias.join(', ')}')"
@@ -26113,6 +26199,326 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       alert(`📋 Catequizando "${aluno.nome}" movido para o Histórico de Desistentes.`);
     }
 
+
+    // =========================================================================
+    // MÓDULO DE GESTÃO DE TRANSFERÊNCIAS DE CATEQUIZANDOS ENTRE TURMAS
+    // =========================================================================
+    function canExecuteTransferDirectly() {
+      const role = (window.appAuthState && window.appAuthState.role) || '';
+      const email = (window.appAuthState && window.appAuthState.user && window.appAuthState.user.email) ? window.appAuthState.user.email.toLowerCase() : '';
+      const ROLES = (window.ICM_CONFIG && window.ICM_CONFIG.ROLES) || {};
+
+      return (
+        role === ROLES.MASTER_ADMIN ||
+        role === ROLES.COORD_GERAL ||
+        role === ROLES.VICE_COORD_GERAL ||
+        role === ROLES.SECRETARIA ||
+        role === 'master_admin' ||
+        role === 'coord_geral' ||
+        role === 'vice_coord_geral' ||
+        role === 'secretaria' ||
+        email === 'colletes@gmail.com' ||
+        email === 'lorenammoraes@gmail.com' ||
+        email === 'andresprojetos@gmail.com' ||
+        email === 'secretaria@imaculadocoracaodf.com.br' ||
+        email === 'michelmaiso@gmail.com'
+      );
+    }
+
+    function transferirAlunoDoModal() {
+      const alunoId = document.getElementById('aluno-id')?.value;
+      if (!alunoId) return;
+      closeAlunoModal();
+      abrirModalTransferirAluno(alunoId, currentAlunosEtapa, currentAlunosTurma);
+    }
+
+    function abrirModalTransferirAluno(alunoId, fromEtapa, fromTurma) {
+      const db = getAlunosDatabase();
+      const fromKey = getTurmaKey(fromEtapa, fromTurma);
+      const aluno = (db[fromKey] || []).find(a => a.id === alunoId);
+      if (!aluno) {
+        alert('Catequizando não localizado para transferência.');
+        return;
+      }
+
+      document.getElementById('transf-aluno-id').value = alunoId;
+      document.getElementById('transf-from-etapa').value = fromEtapa;
+      document.getElementById('transf-from-turma').value = fromTurma;
+      document.getElementById('transf-aluno-nome').textContent = aluno.nome;
+      document.getElementById('transf-turma-atual-badge').textContent = `${fromEtapa} — ${fromTurma}`;
+      document.getElementById('transf-motivo').value = '';
+
+      // Popula etapas de destino
+      const etapas = ['Pré Eucaristia', 'Eucaristia I', 'Eucaristia II', 'Perseverança', 'Crisma Jovem', 'Crisma Adultos'];
+      const selEtapa = document.getElementById('transf-dest-etapa');
+      selEtapa.innerHTML = etapas.map(e => `<option value="${escapeHtml(e)}" ${e === fromEtapa ? 'selected' : ''}>${escapeHtml(e)}</option>`).join('');
+
+      popularTurmasDestinoTransferencia(fromEtapa, fromTurma);
+
+      // Informação do modo de execução (Direto vs Solicitação)
+      const isDirect = canExecuteTransferDirectly();
+      const modoInfo = document.getElementById('transf-modo-info');
+      const submitBtn = document.getElementById('btn-submit-transferencia');
+
+      if (isDirect) {
+        modoInfo.innerHTML = `<div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 font-bold flex items-center gap-2"><span>⚡</span> <span>Efetivação Imediata: Você possui permissão para transferir este catequizando diretamente.</span></div>`;
+        if (submitBtn) {
+          submitBtn.textContent = 'Efetivar Transferência Imediata';
+          submitBtn.className = 'bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-xs sm:text-sm font-bold shadow transition';
+        }
+      } else {
+        modoInfo.innerHTML = `<div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 font-bold flex items-center gap-2"><span>⏳</span> <span>Homologação Necessária: Sua solicitação será registrada e enviada para aprovação da Coordenação Geral / Secretaria.</span></div>`;
+        if (submitBtn) {
+          submitBtn.textContent = 'Enviar Solicitação de Transferência';
+          submitBtn.className = 'bg-amber-600 hover:bg-amber-700 text-white px-5 py-2 rounded-xl text-xs sm:text-sm font-bold shadow transition';
+        }
+      }
+
+      const modal = document.getElementById('modal-transferir-aluno');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function fecharModalTransferirAluno() {
+      const modal = document.getElementById('modal-transferir-aluno');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function popularTurmasDestinoTransferencia(targetEtapa, currentTurma = null) {
+      const selTurma = document.getElementById('transf-dest-turma');
+      if (!selTurma) return;
+
+      const schedule = (typeof masterScheduleList !== 'undefined' && Array.isArray(masterScheduleList)) ? masterScheduleList : [];
+      let turmas = schedule.filter(t => t.stage === targetEtapa).map(t => t.turma);
+
+      if (turmas.length === 0) {
+        // Fallback para SEED caso masterScheduleList não esteja populado
+        const seedOrg = (typeof getActiveOrganograma === 'function') ? getActiveOrganograma() : null;
+        if (seedOrg && Array.isArray(seedOrg.stages)) {
+          const st = seedOrg.stages.find(s => s.name === targetEtapa);
+          if (st && Array.isArray(st.turmas)) {
+            turmas = st.turmas.map(t => t.turma);
+          }
+        }
+      }
+
+      // Ordena numericamente (Turma 01, Turma 02...)
+      turmas.sort((a, b) => (a || '').localeCompare(b || '', 'pt-BR', { numeric: true, sensitivity: 'base' }));
+
+      selTurma.innerHTML = turmas.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+    }
+
+    function executarTransferenciaAluno(event) {
+      event.preventDefault();
+
+      const alunoId = document.getElementById('transf-aluno-id').value;
+      const fromEtapa = document.getElementById('transf-from-etapa').value;
+      const fromTurma = document.getElementById('transf-from-turma').value;
+      const toEtapa = document.getElementById('transf-dest-etapa').value;
+      const toTurma = document.getElementById('transf-dest-turma').value;
+      const motivo = (document.getElementById('transf-motivo').value || '').trim();
+
+      if (!motivo) {
+        alert('⚠️ Por favor, informe o motivo ou justificativa pastoral da transferência.');
+        return;
+      }
+
+      if (fromEtapa === toEtapa && fromTurma === toTurma) {
+        alert('⚠️ A turma de destino selecionada é a mesma turma atual do catequizando. Selecione uma turma diferente.');
+        return;
+      }
+
+      const isDirect = canExecuteTransferDirectly();
+      if (isDirect) {
+        efetivarTransferenciaDireta(alunoId, fromEtapa, fromTurma, toEtapa, toTurma, motivo);
+      } else {
+        solicitarTransferenciaAluno(alunoId, fromEtapa, fromTurma, toEtapa, toTurma, motivo);
+      }
+    }
+
+    function efetivarTransferenciaDireta(alunoId, fromEtapa, fromTurma, toEtapa, toTurma, motivo) {
+      const db = getAlunosDatabase();
+      const fromKey = getTurmaKey(fromEtapa, fromTurma);
+      const toKey = getTurmaKey(toEtapa, toTurma);
+
+      if (!db[fromKey]) db[fromKey] = [];
+      if (!db[toKey]) db[toKey] = [];
+
+      const idx = db[fromKey].findIndex(a => a.id === alunoId);
+      if (idx === -1) {
+        alert('Erro: Catequizando não localizado na turma de origem.');
+        return;
+      }
+
+      const [aluno] = db[fromKey].splice(idx, 1);
+      const userEmail = (window.appAuthState && window.appAuthState.user && (window.appAuthState.user.displayName || window.appAuthState.user.email)) || 'Coordenação';
+
+      aluno.stage = toEtapa;
+      aluno.turma = toTurma;
+      delete aluno.transferenciaPendente;
+
+      aluno.historicoTransferencias = aluno.historicoTransferencias || [];
+      aluno.historicoTransferencias.push({
+        de: `${fromEtapa} — ${fromTurma}`,
+        para: `${toEtapa} — ${toTurma}`,
+        motivo: motivo,
+        data: new Date().toISOString(),
+        responsavel: userEmail
+      });
+
+      db[toKey].push(aluno);
+      saveAlunosDatabase(db);
+
+      // Sincroniza em nuvem ambas as turmas no Firestore com merge construtivo
+      if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
+        window.firebaseDb.collection('turma_alunos').doc(fromKey).set({
+          etapa: fromEtapa,
+          turma: fromTurma,
+          alunos: db[fromKey],
+          updatedAt: new Date().toISOString()
+        }, { merge: true }).catch(err => console.warn('Sync turma_alunos origem:', err));
+
+        window.firebaseDb.collection('turma_alunos').doc(toKey).set({
+          etapa: toEtapa,
+          turma: toTurma,
+          alunos: db[toKey],
+          updatedAt: new Date().toISOString()
+        }, { merge: true }).catch(err => console.warn('Sync turma_alunos destino:', err));
+      }
+
+      // Registro perene em trilha de auditoria LGPD
+      if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
+        window.ICM_CONFIG.logAuditEvent('TRANSFER_ALUNO_CONCLUIDA', aluno.nome, {
+          alunoId: aluno.id,
+          de: `${fromEtapa} — ${fromTurma}`,
+          para: `${toEtapa} — ${toTurma}`,
+          motivo: motivo,
+          executor: userEmail
+        });
+      }
+
+      fecharModalTransferirAluno();
+      renderAlunosTable();
+      if (typeof renderCadastroGeralTable === 'function') renderCadastroGeralTable();
+      if (typeof renderPainelPendencias === 'function') renderPainelPendencias();
+
+      // Monta mensagem de WhatsApp pronta
+      const zapMsg = encodeURIComponent(
+        `🔄 *Transferência Pastoral de Catequizando*\n\n` +
+        `• *Catequizando:* ${aluno.nome}\n` +
+        `• *De:* ${fromEtapa} — ${fromTurma}\n` +
+        `• *Para:* ${toEtapa} — ${toTurma}\n` +
+        `• *Motivo:* ${motivo}\n` +
+        `• *Data:* ${new Date().toLocaleDateString('pt-BR')}\n\n` +
+        `_Informamos aos catequistas e responsáveis que a transferência foi concluída com sucesso no sistema da Catequese._`
+      );
+
+      const zapUrl = `https://wa.me/?text=${zapMsg}`;
+      const proceedZap = confirm(
+        `🎉 Transferência de "${aluno.nome}" realizada com sucesso!\n\n` +
+        `De: ${fromEtapa} — ${fromTurma}\n` +
+        `Para: ${toEtapa} — ${toTurma}\n\n` +
+        `Deseja abrir o WhatsApp para enviar o comunicado oficial aos catequistas e responsáveis?`
+      );
+
+      if (proceedZap) {
+        window.open(zapUrl, '_blank', 'noopener,noreferrer');
+      }
+    }
+
+    function solicitarTransferenciaAluno(alunoId, fromEtapa, fromTurma, toEtapa, toTurma, motivo) {
+      const db = getAlunosDatabase();
+      const fromKey = getTurmaKey(fromEtapa, fromTurma);
+      const aluno = (db[fromKey] || []).find(a => a.id === alunoId);
+      if (!aluno) return;
+
+      const userEmail = (window.appAuthState && window.appAuthState.user && (window.appAuthState.user.displayName || window.appAuthState.user.email)) || 'Catequista';
+
+      aluno.transferenciaPendente = {
+        toEtapa,
+        toTurma,
+        motivo,
+        solicitadoPor: userEmail,
+        data: new Date().toISOString()
+      };
+
+      saveAlunosDatabase(db);
+
+      if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
+        window.firebaseDb.collection('turma_alunos').doc(fromKey).set({
+          etapa: fromEtapa,
+          turma: fromTurma,
+          alunos: db[fromKey],
+          updatedAt: new Date().toISOString()
+        }, { merge: true }).catch(err => console.warn('Sync Firestore transferencia pendente:', err));
+      }
+
+      if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
+        window.ICM_CONFIG.logAuditEvent('REQUEST_TRANSFER_ALUNO', aluno.nome, {
+          alunoId: aluno.id,
+          de: `${fromEtapa} — ${fromTurma}`,
+          para: `${toEtapa} — ${toTurma}`,
+          motivo,
+          solicitante: userEmail
+        });
+      }
+
+      fecharModalTransferirAluno();
+      renderAlunosTable();
+      if (typeof renderPainelPendencias === 'function') renderPainelPendencias();
+
+      alert(`📋 Solicitação de transferência de "${aluno.nome}" enviada com sucesso!\n\nA Coordenação Geral e Secretaria foram notificadas no Painel de Pendências para homologação.`);
+    }
+
+    function aprovarTransferenciaPendente(alunoId, turmaKey) {
+      const db = getAlunosDatabase();
+      const aluno = (db[turmaKey] || []).find(a => a.id === alunoId);
+      if (!aluno || !aluno.transferenciaPendente) {
+        alert('Solicitação de transferência não encontrada.');
+        return;
+      }
+
+      const [fromEtapa, fromTurma] = turmaKey.split('__');
+      const { toEtapa, toTurma, motivo } = aluno.transferenciaPendente;
+
+      efetivarTransferenciaDireta(alunoId, fromEtapa, fromTurma, toEtapa, toTurma, motivo || 'Homologação pela Coordenação');
+    }
+
+    function recusarTransferenciaPendente(alunoId, turmaKey) {
+      const db = getAlunosDatabase();
+      const aluno = (db[turmaKey] || []).find(a => a.id === alunoId);
+      if (!aluno || !aluno.transferenciaPendente) return;
+
+      const justificativa = prompt('Informe a justificativa da recusa da transferência:');
+      if (justificativa === null) return;
+
+      const userEmail = (window.appAuthState && window.appAuthState.user && (window.appAuthState.user.displayName || window.appAuthState.user.email)) || 'Coordenação';
+
+      if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
+        window.ICM_CONFIG.logAuditEvent('REJECT_TRANSFER_ALUNO', aluno.nome, {
+          alunoId: aluno.id,
+          justificativa: justificativa.trim() || 'Sem justificativa informada',
+          recusadoPor: userEmail
+        });
+      }
+
+      delete aluno.transferenciaPendente;
+      saveAlunosDatabase(db);
+
+      if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
+        const [fromEtapa, fromTurma] = turmaKey.split('__');
+        window.firebaseDb.collection('turma_alunos').doc(turmaKey).set({
+          etapa: fromEtapa,
+          turma: fromTurma,
+          alunos: db[turmaKey],
+          updatedAt: new Date().toISOString()
+        }, { merge: true }).catch(err => console.warn('Sync Firestore recusa transferencia:', err));
+      }
+
+      renderAlunosTable();
+      if (typeof renderPainelPendencias === 'function') renderPainelPendencias();
+      alert(`❌ Solicitação de transferência de "${aluno.nome}" recusada.`);
+    }
+
     function renderAlunosTable() {
       const tbody = document.getElementById('alunos-table-body');
       if (!tbody) return;
@@ -26424,6 +26830,9 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
                 <button onclick="imprimirFichaAlunoIndividual('${a.id}')" class="p-1 rounded text-slate-500 hover:text-[#b88d36] hover:bg-amber-50 transition" title="Imprimir Ficha Cadastral em PDF">
                   🖨️
                 </button>
+                <button onclick="abrirModalTransferirAluno('${a.id}', '${escapeHtml(currentAlunosEtapa)}', '${escapeHtml(currentAlunosTurma)}')" class="p-1 rounded text-slate-500 hover:text-sky-600 hover:bg-sky-50 transition" title="Transferir de Turma / Solicitar Transferência">
+                  🔄
+                </button>
                 <button onclick="editAluno('${a.id}')" class="p-1 rounded text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition" title="Editar Catequizando">
                   ✏️
                 </button>
@@ -26549,11 +26958,13 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       const sub = document.getElementById('modal-aluno-subtitle');
       const form = document.getElementById('form-aluno');
       const btnPrint = document.getElementById('btn-print-aluno-modal');
+      const btnTransfer = document.getElementById('btn-transfer-aluno-modal');
 
       if (!modal || !form) return;
 
       if (alunoData) {
         if (btnPrint) btnPrint.classList.remove('hidden');
+        if (btnTransfer) btnTransfer.classList.remove('hidden');
         if (title) title.textContent = 'Editar Catequizando';
         if (sub) sub.textContent = `${currentAlunosTurma} • ${currentAlunosEtapa}`;
         document.getElementById('aluno-id').value = alunoData.id || '';
@@ -26585,6 +26996,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         if (typeof toggleAlunoDesistenciaFields === 'function') toggleAlunoDesistenciaFields(statusVal);
       } else {
         if (btnPrint) btnPrint.classList.add('hidden');
+        if (btnTransfer) btnTransfer.classList.add('hidden');
         if (title) title.textContent = 'Cadastrar Novo Catequizando';
         if (sub) sub.textContent = `${currentAlunosTurma} • ${currentAlunosEtapa}`;
         form.reset();
@@ -27323,6 +27735,9 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             </td>
             <td class="py-2.5 px-2.5 text-center whitespace-nowrap no-print">
               <div class="inline-flex items-center gap-1 justify-center">
+                <button type="button" onclick="abrirModalTransferirAluno('${a.id}', '${a.stage}', '${a.turma}')" class="p-1.5 bg-sky-50 hover:bg-sky-600 hover:text-white text-sky-700 rounded-lg transition text-xs font-bold" title="Transferir de Turma">
+                  🔄
+                </button>
                 <button type="button" onclick="openAlunoModalFromGeral('${a.stage}', '${a.turma}', '${a.id}')" class="p-1.5 bg-slate-100 hover:bg-amber-100 hover:text-amber-900 text-slate-700 rounded-lg transition text-xs font-bold" title="Editar dados cadastrais">
                   ✏️
                 </button>
