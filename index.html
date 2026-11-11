@@ -30,8 +30,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-storage-compat.js"></script>
-  <!-- Diagnóstico opcional (só ativa com ?diag=1 na URL; somente leitura) -->
-  <script src="diag.js?v=1"></script>
 
   <!-- Configuração do Firebase & Governança LGPD -->
   <script src="firebase-config.js?v=20261111-v1"></script>
@@ -11950,9 +11948,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         if (mudou) {
           turmasAfetadas.push(key);
           if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
-            const [etapa, turma] = key.split('__');
-            window.firebaseDb.collection('turma_alunos').doc(key).set({ etapa, turma, alunos, updatedAt: new Date().toISOString() }, { merge: true })
-              .catch(err => console.warn('Sync Firestore turma_alunos (evento):', key, err));
+            const ids = alunos.filter(a => (a[campos.data] || '').trim() === dataBR).map(a => a.id);
+            saveTurmaAlunosAtomic(key, alunos, ids);
           }
         }
       });
@@ -26032,13 +26029,18 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     // Migração: Crismandos Sábado 10h30 (CSV) -> Crisma Adultos / Turma 02 (merge construtivo, sem apagar dados)
     const CRISMANDOS_T2_NOMES = ["Adriana De Cássia Dos Reis Luz Da Silva", "Adson Azevedo Costa", "Alberth Da Costa Benevides", "Alice Lima Ferreira", "Brenda Shelida Medeiros Oliveira Souza", "Bruna Maciel Da Silva De Freitas", "Daniela Morgane Castro Silva", "Emanuel Oliveira Da Paixão", "João Lucas Simões Cintra", "João Marcelo Nogueira Dantas de Figueiredo", "José Gabriel Braga de Souza", "Juliana Barros Vianna De Oliveira", "Jussara Soares De Oliveira", "Karen Luiza Amorim Cruz", "Karine Silva Biliu", "Louise Helena Gomes Rocha", "Luana Paula Santos Cardoso Ferreira", "Lucas Freitas De Siqueira", "Luiz Antônio Werneck Tavares", "Marcela Meireles Cardoso Haidar", "Marcela Nogueira Dantas de Figueiredo", "Maria Eduarda Loureiro Soares", "Maria Manuela Vieira De Sousa Nepomuceno", "Maria Meireles Cardoso Haidar", "Marianna Souza Fagundes Tonhá Alves", "Murilo Borges Do Nascimento", "Natália De Souza Torres", "Nayara Alves Da Conceição", "Pablo Castro Cavalcanti", "Paulo Maiano Cardoso Silva", "Rani Fernandes Dos Reis Luz", "Rodrigo Augusto De Faria", "Waleska Oliveira De Freitas"];
     function migrarCrismandosT2(db) {
+      const FLAG = 'catequese_mig_crismandos_t2_v2';
+      // Migração única: depois de gravada na nuvem, não refaz (não desfaz movimentações manuais entre T02/T04/T07)
+      try { if (localStorage.getItem(FLAG)) return; } catch (e) {}
       const KEY = 'Crisma Adultos__Turma 02';
       const norm = x => String(x || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
       const alvo = db[KEY] = Array.isArray(db[KEY]) ? db[KEY] : [];
       const jaNaT2 = new Set(alvo.map(a => norm(a.nome)));
       const tocadas = new Set();
+      const idsModificados = [];
+      const removidosPorTurma = {};
       // Limpeza: remove a observação automática 'Importado do CSV' já gravada em registros anteriores
-      alvo.forEach(a => { if (a.observacoes === 'Importado do CSV Crismandos Sábado 10h30') { a.observacoes = ''; tocadas.add(KEY); } });
+      alvo.forEach(a => { if (a.observacoes === 'Importado do CSV Crismandos Sábado 10h30') { a.observacoes = ''; tocadas.add(KEY); idsModificados.push(a.id); } });
       CRISMANDOS_T2_NOMES.forEach((nome, i) => {
         const n = norm(nome);
         if (jaNaT2.has(n)) return;
@@ -26046,22 +26048,29 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         ['Crisma Adultos__Turma 04', 'Crisma Adultos__Turma 07'].forEach(k => {
           if (!Array.isArray(db[k])) return;
           const idx = db[k].findIndex(a => norm(a.nome) === n);
-          if (idx >= 0) { movido = db[k].splice(idx, 1)[0]; tocadas.add(k); }
+          if (idx >= 0) {
+            movido = db[k].splice(idx, 1)[0];
+            tocadas.add(k);
+            (removidosPorTurma[k] = removidosPorTurma[k] || []).push(movido.id);
+          }
         });
-        alvo.push(movido || {
+        const novo = movido || {
           id: 'ca2-' + (i + 1), nome, cpf: '', dataNascimento: '', contato: '', email: '', endereco: '', estadoCivil: '',
           batizado: '', primeiraEucaristia: '', observacoes: '',
           statusAprovacao: 'aprovado', aprovadoPor: 'Importação CSV (Coordenação)', aprovadoEm: new Date().toISOString()
-        });
+        };
+        alvo.push(novo);
+        idsModificados.push(novo.id);
         jaNaT2.add(n);
         tocadas.add(KEY);
       });
       if (tocadas.size && window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
-        tocadas.forEach(k => {
-          const [etapa, turma] = k.split('__');
-          window.firebaseDb.collection('turma_alunos').doc(k).set({ etapa, turma, alunos: db[k], updatedAt: new Date().toISOString() }, { merge: true })
-            .catch(err => console.warn('Sync Firestore migração T2:', k, err));
-        });
+        // Transação por turma (merge por catequizando): não sobrescreve a nuvem com cópia local desatualizada; a flag só é gravada após sucesso
+        Promise.all([...tocadas].map(k => saveTurmaAlunosAtomic(k, db[k], k === KEY ? idsModificados : null, removidosPorTurma[k])))
+          .then(res => { if (res.every(Boolean)) { try { localStorage.setItem(FLAG, '1'); } catch (e) {} } })
+          .catch(err => console.warn('Sync Firestore migração T2:', err));
+      } else if (!tocadas.size) {
+        try { localStorage.setItem(FLAG, '1'); } catch (e) {}
       }
     }
 
@@ -26116,13 +26125,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
       if (changed && window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
         turmasModificadas.forEach(key => {
-          const [etapa, turma] = key.split('__');
-          window.firebaseDb.collection('turma_alunos').doc(key).set({
-            etapa,
-            turma,
-            alunos: db[key],
-            updatedAt: new Date().toISOString()
-          }, { merge: true }).catch(err => console.warn('Sync Firestore retroativo Eucaristia 24/10:', key, err));
+          const ids = (db[key] || []).filter(a => (a.primeiraEucaristiaData || '') === dataBR).map(a => a.id);
+          saveTurmaAlunosAtomic(key, db[key], ids);
         });
       }
 
@@ -26174,22 +26178,20 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     function syncAllTurmasToFirestore(data) {
       if (!window.firebaseDb || typeof window.firebaseDb.collection !== 'function') return;
       if (!data || typeof data !== 'object') return;
+      // Merge por catequizando via transação: o dado local vence nos ids presentes, mas ninguém que exista só na nuvem é apagado
       Object.entries(data).forEach(([key, alunos]) => {
-        const [etapa, turma] = key.split('__');
-        window.firebaseDb.collection('turma_alunos').doc(key).set({
-          etapa: etapa || currentAlunosEtapa,
-          turma: turma || currentAlunosTurma,
-          alunos: alunos,
-          updatedAt: new Date().toISOString()
-        }, { merge: true }).catch(err => console.warn('Sync Firestore turma_alunos error:', key, err));
+        if (!Array.isArray(alunos)) return;
+        saveTurmaAlunosAtomic(key, alunos, alunos.map(a => a && a.id).filter(Boolean));
       });
     }
 
     // FASE 3: Transações Atômicas com Locks Otimistas para Turma e Catequizandos
     // removedIds: catequizandos removidos/transferidos de propósito; sem isso o merge "preserva quem só existe na nuvem" os ressuscitaria
     async function saveTurmaAlunosAtomic(key, localAlunos, modifiedAlunoId, removedIds) {
-      if (!window.firebaseDb) return;
+      if (!window.firebaseDb) return false;
       const removed = new Set(Array.isArray(removedIds) ? removedIds : []);
+      // modifiedAlunoId aceita um id ou uma lista de ids: nesses, o dado local vence o da nuvem
+      const modifiedIds = new Set(Array.isArray(modifiedAlunoId) ? modifiedAlunoId : (modifiedAlunoId ? [modifiedAlunoId] : []));
       const [etapa, turma] = key.split('__');
       const docRef = window.firebaseDb.collection('turma_alunos').doc(key);
 
@@ -26222,7 +26224,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
               const cloudA = cloudAlunos.find(c => c.id === localA.id);
               if (!cloudA) {
                 mergedAlunos.push(localA);
-              } else if (modifiedAlunoId && localA.id === modifiedAlunoId) {
+              } else if (modifiedIds.has(localA.id)) {
                 mergedAlunos.push({ ...cloudA, ...localA });
               } else {
                 mergedAlunos.push({ ...localA, ...cloudA });
@@ -26247,9 +26249,14 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           if (typeof window.updateFirestoreSyncStatus === 'function') {
             window.updateFirestoreSyncStatus('synced', 'Nuvem Sincronizada');
           }
-          return;
+          return true;
         } catch (err) {
-          console.warn('Transação atômica turma_alunos falhou, aplicando fallback:', key, err);
+          // Não sobrescreve a nuvem com a cópia local (pode estar desatualizada): mantém local e tenta de novo na próxima gravação
+          console.warn('Transação atômica turma_alunos falhou; cópia local mantida:', key, err);
+          if (typeof window.updateFirestoreSyncStatus === 'function') {
+            window.updateFirestoreSyncStatus('offline', 'Modo Local (Offline)');
+          }
+          return false;
         }
       }
 
@@ -27141,15 +27148,9 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         data: new Date().toISOString()
       };
 
-      saveAlunosDatabase(db);
-
+      try { localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(db)); } catch (e) {}
       if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
-        window.firebaseDb.collection('turma_alunos').doc(fromKey).set({
-          etapa: fromEtapa,
-          turma: fromTurma,
-          alunos: db[fromKey],
-          updatedAt: new Date().toISOString()
-        }, { merge: true }).catch(err => console.warn('Sync Firestore transferencia pendente:', err));
+        saveTurmaAlunosAtomic(fromKey, db[fromKey], alunoId);
       }
 
       if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function') {
@@ -27201,17 +27202,11 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         });
       }
 
-      delete aluno.transferenciaPendente;
-      saveAlunosDatabase(db);
-
+      // null (e não delete) para o merge com a nuvem não trazer a solicitação de volta
+      aluno.transferenciaPendente = null;
+      try { localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(db)); } catch (e) {}
       if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
-        const [fromEtapa, fromTurma] = turmaKey.split('__');
-        window.firebaseDb.collection('turma_alunos').doc(turmaKey).set({
-          etapa: fromEtapa,
-          turma: fromTurma,
-          alunos: db[turmaKey],
-          updatedAt: new Date().toISOString()
-        }, { merge: true }).catch(err => console.warn('Sync Firestore recusa transferencia:', err));
+        saveTurmaAlunosAtomic(turmaKey, db[turmaKey], alunoId);
       }
 
       renderAlunosTable();
