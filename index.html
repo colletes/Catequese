@@ -11246,10 +11246,14 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     }
 
     let _eventosFirestoreListener = null;
+    let _eventosMigrationRan = false;
 
     // FASE 2: Migração Suave e Idempotente de Eventos para Coleção Individual eventos/{id}
     async function migrateEventosToIndividualDocs() {
+      if (_eventosMigrationRan) return;
+      _eventosMigrationRan = true;
       if (!window.firebaseDb || typeof window.firebaseDb.collection !== 'function') return;
+
       try {
         const snap = await window.firebaseDb.collection('eventos').limit(3).get();
         if (snap && !snap.empty) {
@@ -11266,7 +11270,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         } catch (e) {}
 
         if (!sourceList.length) {
-          sourceList = getEventosData();
+          sourceList = [...SEED_EVENTOS];
         }
 
         const batch = window.firebaseDb.batch();
@@ -11380,7 +11384,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         _eventosFirestoreListener = window.firebaseDb.collection('eventos')
           .onSnapshot(snapshot => {
             if (!snapshot || snapshot.empty) {
-              migrateEventosToIndividualDocs().then(() => syncEventosFromFirestore());
+              // Se a coleção individual estiver vazia, apenas sincroniza legado sem loop
+              syncEventosFromFirestore();
               return;
             }
 
@@ -11401,7 +11406,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
                 renderEventosTimeline();
               }
               if (typeof window.updateFirestoreSyncStatus === 'function') {
-                window.updateFirestoreSyncStatus('synced', 'Nuvem Sincronizada');
+                window.updateFirestoreSyncStatus('synced', 'Nuvem Conectada');
               }
             }
           }, err => {
@@ -11447,14 +11452,14 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       } catch (e) {
         console.error('Erro ao ler localStorage de eventos:', e);
       }
-      saveEventosData(SEED_EVENTOS);
-      return SEED_EVENTOS;
+      // Retorna cópia limpa do seed sem disparar gravação/re-render em loop
+      return [...SEED_EVENTOS];
     }
 
     function saveEventosData(list, singleEvent) {
       try {
         localStorage.setItem(STORAGE_KEY_EVENTOS, JSON.stringify(list));
-        if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
+        if (window.firebaseDb && typeof window.firebaseDb.collection === 'function' && singleEvent) {
           if (typeof window.updateFirestoreSyncStatus === 'function') {
             window.updateFirestoreSyncStatus('saving', 'Salvando Evento...');
           }
@@ -11464,7 +11469,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             window.firebaseDb.collection('eventos').doc(singleEvent.id).set(singleEvent, { merge: true })
               .then(() => {
                 if (typeof window.updateFirestoreSyncStatus === 'function') {
-                  window.updateFirestoreSyncStatus('synced', 'Evento Salvo na Nuvem');
+                  window.updateFirestoreSyncStatus('synced', 'Nuvem Conectada');
                 }
               })
               .catch(err => {
