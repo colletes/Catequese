@@ -25,30 +25,6 @@
   <!-- Cloudflare Turnstile (Anti-Bot) -->
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
-  <!-- Higienização Segura e Síncrona de Cache Local (Elimina Estados Residuais Sem Tocar no IndexedDB) -->
-  <script>
-    (function() {
-      var HEAL_KEY = 'icm_clean_state_v20261111_b';
-      try {
-        if (localStorage.getItem(HEAL_KEY) !== 'done') {
-          var stalePrefixes = ['catequese_', 'firestore', 'firebase'];
-          var toRemove = [];
-          for (var i = 0; i < localStorage.length; i++) {
-            var k = localStorage.key(i);
-            if (k && stalePrefixes.some(function(p) { return k.indexOf(p) === 0; })) {
-              toRemove.push(k);
-            }
-          }
-          toRemove.forEach(function(k) {
-            try { localStorage.removeItem(k); } catch(e) {}
-          });
-          try { sessionStorage.clear(); } catch(e) {}
-          localStorage.setItem(HEAL_KEY, 'done');
-        }
-      } catch(e) {}
-    })();
-  </script>
-
   <!-- Firebase SDK v10 (Compat para vanilla JS) -->
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
