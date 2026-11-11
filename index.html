@@ -12187,12 +12187,15 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
                 const found = parsed.find(p => p.id === seedCat.id || (p.nomeCompleto && normCatString(p.nomeCompleto) === normCatString(seedCat.nomeCompleto)));
                 if (found) {
                   // Autocura de apelido e nomeConhecido: se estiverem ausentes ou iguais ao nome completo, recupera do seed mesmo com updatedAt
-                  if ((!found.apelido || !found.apelido.trim() || found.apelido === found.nomeCompleto) && seedCat.apelido) {
-                    found.apelido = seedCat.apelido;
+                  // Só marca alteração se o valor do seed for de fato diferente (evita loop get -> save -> get quando seed.apelido == nomeCompleto)
+                  const seedApelido = (seedCat.apelido || '').trim();
+                  if ((!found.apelido || !found.apelido.trim() || found.apelido === found.nomeCompleto) && seedApelido && seedApelido !== found.apelido) {
+                    found.apelido = seedApelido;
                     changed = true;
                   }
-                  if ((!found.nomeConhecido || !found.nomeConhecido.trim()) && seedCat.nomeConhecido) {
-                    found.nomeConhecido = seedCat.nomeConhecido;
+                  const seedNomeConhecido = (seedCat.nomeConhecido || '').trim();
+                  if ((!found.nomeConhecido || !found.nomeConhecido.trim()) && seedNomeConhecido && seedNomeConhecido !== found.nomeConhecido) {
+                    found.nomeConhecido = seedNomeConhecido;
                     changed = true;
                   }
 
@@ -12412,11 +12415,14 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           if (!c.apelido || !c.apelido.trim() || c.apelido === c.nomeCompleto) {
             const s = seedList.find(seed => seed.id === c.id || (seed.nomeCompleto && c.nomeCompleto && normCatString(seed.nomeCompleto) === normCatString(c.nomeCompleto)));
             if (s && s.apelido && s.apelido.trim()) {
-              c.apelido = s.apelido.trim();
-              if (s.nomeConhecido && (!c.nomeConhecido || !c.nomeConhecido.trim())) {
-                c.nomeConhecido = s.nomeConhecido.trim();
+              if (c.apelido !== s.apelido.trim()) {
+                c.apelido = s.apelido.trim();
+                changed = true;
               }
-              changed = true;
+              if (s.nomeConhecido && s.nomeConhecido.trim() && (!c.nomeConhecido || !c.nomeConhecido.trim())) {
+                c.nomeConhecido = s.nomeConhecido.trim();
+                changed = true;
+              }
             }
           }
         });
@@ -12446,8 +12452,14 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       } catch (e) {
         console.warn('Erro ao salvar dados de catequistas no storage:', e);
       }
-      if (typeof updateCatequistasCounters === 'function') {
-        updateCatequistasCounters();
+      // Guarda de reentrada: updateCatequistasCounters lê os dados e pode disparar novo save (evita recursão infinita)
+      if (typeof updateCatequistasCounters === 'function' && !window._savingCatequistasCounters) {
+        window._savingCatequistasCounters = true;
+        try {
+          updateCatequistasCounters();
+        } finally {
+          window._savingCatequistasCounters = false;
+        }
       }
     }
 
@@ -26174,8 +26186,10 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     }
 
     // FASE 3: Transações Atômicas com Locks Otimistas para Turma e Catequizandos
-    async function saveTurmaAlunosAtomic(key, localAlunos, modifiedAlunoId) {
+    // removedIds: catequizandos removidos/transferidos de propósito; sem isso o merge "preserva quem só existe na nuvem" os ressuscitaria
+    async function saveTurmaAlunosAtomic(key, localAlunos, modifiedAlunoId, removedIds) {
       if (!window.firebaseDb) return;
+      const removed = new Set(Array.isArray(removedIds) ? removedIds : []);
       const [etapa, turma] = key.split('__');
       const docRef = window.firebaseDb.collection('turma_alunos').doc(key);
 
@@ -26217,7 +26231,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
             // Preserva construtivamente alunos que existam apenas na nuvem
             cloudAlunos.forEach(cloudA => {
-              if (cloudA && cloudA.id && !handledIds.has(cloudA.id)) {
+              if (cloudA && cloudA.id && !handledIds.has(cloudA.id) && !removed.has(cloudA.id)) {
                 mergedAlunos.push(cloudA);
               }
             });
@@ -26257,13 +26271,13 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       });
     }
 
-    function saveAlunosDatabase(data, modifiedAlunoId) {
+    function saveAlunosDatabase(data, modifiedAlunoId, removedIds) {
       try {
         localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(data));
         if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
           const key = getTurmaKey(currentAlunosEtapa, currentAlunosTurma);
           if (data && data[key]) {
-            saveTurmaAlunosAtomic(key, data[key], modifiedAlunoId);
+            saveTurmaAlunosAtomic(key, data[key], modifiedAlunoId, removedIds);
           }
         }
       } catch (e) {
@@ -27063,23 +27077,12 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       });
 
       db[toKey].push(aluno);
-      saveAlunosDatabase(db);
+      try { localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(db)); } catch (e) { console.error('Erro ao salvar banco de catequizandos:', e); }
 
-      // Sincroniza em nuvem ambas as turmas no Firestore com merge construtivo
+      // Sincroniza em nuvem ambas as turmas via transação; a origem informa o id removido para o merge não ressuscitar o catequizando
       if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
-        window.firebaseDb.collection('turma_alunos').doc(fromKey).set({
-          etapa: fromEtapa,
-          turma: fromTurma,
-          alunos: db[fromKey],
-          updatedAt: new Date().toISOString()
-        }, { merge: true }).catch(err => console.warn('Sync turma_alunos origem:', err));
-
-        window.firebaseDb.collection('turma_alunos').doc(toKey).set({
-          etapa: toEtapa,
-          turma: toTurma,
-          alunos: db[toKey],
-          updatedAt: new Date().toISOString()
-        }, { merge: true }).catch(err => console.warn('Sync turma_alunos destino:', err));
+        saveTurmaAlunosAtomic(fromKey, db[fromKey], null, [alunoId]);
+        saveTurmaAlunosAtomic(toKey, db[toKey], alunoId);
       }
 
       // Registro perene em trilha de auditoria LGPD
@@ -27743,7 +27746,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       }
 
       db[key] = (db[key] || []).filter(a => a.id !== id);
-      saveAlunosDatabase(db);
+      saveAlunosDatabase(db, null, [id]);
 
       // Registra evento de exclusão
       window.ICM_CONFIG.logAuditEvent('DELETE_ALUNO', `${currentAlunosEtapa} - ${currentAlunosTurma}`, {
