@@ -917,7 +917,19 @@
       </div>
 
       <!-- Action Buttons & User Status Bar Consolidated into Profile Menu -->
-      <div class="relative no-print flex-shrink-0" id="header-profile-menu-container">
+      <div class="flex items-center gap-2 sm:gap-3 no-print flex-shrink-0">
+        
+        <!-- Badge de Sincronização em Nuvem (Firestore em Tempo Real) -->
+        <div
+          id="firestore-sync-badge"
+          class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-500/30 shadow-xs transition select-none cursor-default"
+          title="Status de Sincronização em Nuvem (Firestore em Tempo Real)"
+        >
+          <span id="firestore-sync-dot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span id="firestore-sync-text" class="hidden sm:inline">Nuvem Conectada</span>
+        </div>
+
+        <div class="relative" id="header-profile-menu-container">
         
         <!-- Profile Button with Initials and Bottom-Right Notification Badge -->
         <button
@@ -1048,6 +1060,8 @@
           </div>
         </div>
 
+      </div>
+      <!-- Fechamento do wrapper flex-items com o badge de sync -->
       </div>
 
     </div>
@@ -5331,7 +5345,7 @@
           <input type="hidden" id="ev-edit-id" value="">
           <div id="ev-turmas-sacramento-wrap" class="sm:col-span-2 hidden">
             <label class="block text-xs font-bold text-amber-950 uppercase tracking-wider mb-1">Turmas que receberão o sacramento neste dia:</label>
-            <p class="text-[11px] text-amber-800 mb-2">Ao salvar, a data do evento é gravada como <strong>data prevista</strong> dos catequizandos dessas turmas que ainda não receberam o sacramento e estão com a data vazia.</p>
+            <p class="text-[11px] text-amber-800 mb-2">Ao salvar, os catequizandos dessas turmas são marcados com o <strong>sacramento recebido</strong> nesta data (exceto aqueles que já possuem data preenchida ou impedimento cadastrado).</p>
             <div id="ev-turmas-checklist" class="max-h-56 overflow-y-auto bg-white border border-amber-300 rounded-xl p-3 space-y-2 text-xs"></div>
           </div>
         </div>
@@ -8126,6 +8140,12 @@
           setTimeout(renderDynamicSvgRooms, 40);
         }
       } else if (tabId === 'eventos') {
+        if (typeof syncEventosFromFirestore === 'function') {
+          syncEventosFromFirestore();
+        }
+        if (typeof listenEventosFromFirestore === 'function') {
+          listenEventosFromFirestore();
+        }
         if (typeof renderEventosTimeline === 'function') {
           setTimeout(renderEventosTimeline, 20);
         }
@@ -8626,12 +8646,53 @@
         firebaseDb = firebase.firestore();
         window.firebaseDb = firebaseDb;
 
+        // FASE 1: Persistência Offline Nativa e Concorrência Multi-Aba (IndexedDB)
+        if (typeof firebaseDb.enablePersistence === 'function') {
+          firebaseDb.enablePersistence({ synchronizeTabs: true }).catch((err) => {
+            if (err.code === 'failed-precondition') {
+              console.warn('⚠️ Firestore: Múltiplas abas abertas simultaneamente (persistência ativa na aba líder).');
+            } else if (err.code === 'unimplemented') {
+              console.warn('⚠️ Firestore: O navegador atual não suporta persistência IndexedDB.');
+            } else {
+              console.warn('⚠️ Firestore: Erro ao configurar persistência:', err);
+            }
+          });
+        }
+
+        // Funções globais de status de sincronização em tempo real
+        window.updateFirestoreSyncStatus = function(status, detail) {
+          const badge = document.getElementById('firestore-sync-badge');
+          const dot = document.getElementById('firestore-sync-dot');
+          const text = document.getElementById('firestore-sync-text');
+          if (!badge || !dot || !text) return;
+
+          if (status === 'saving') {
+            badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-amber-950/80 text-amber-300 border border-amber-500/40 shadow-xs transition select-none cursor-default';
+            dot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-ping';
+            text.textContent = detail || 'Salvando na Nuvem...';
+          } else if (status === 'offline') {
+            badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-rose-950/80 text-rose-300 border border-rose-500/40 shadow-xs transition select-none cursor-default';
+            dot.className = 'w-2 h-2 rounded-full bg-rose-400';
+            text.textContent = detail || 'Offline (Modo Local)';
+          } else {
+            badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-500/30 shadow-xs transition select-none cursor-default';
+            dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+            text.textContent = detail || 'Nuvem Conectada';
+          }
+        };
+
+        window.addEventListener('online', () => { if (typeof window.updateFirestoreSyncStatus === 'function') window.updateFirestoreSyncStatus('synced', 'Nuvem Conectada'); });
+        window.addEventListener('offline', () => { if (typeof window.updateFirestoreSyncStatus === 'function') window.updateFirestoreSyncStatus('offline', 'Sem Internet (Offline)'); });
+
         // Inicia sincronização em nuvem de usuários autorizados e pendentes
         if (typeof window.ICM_CONFIG.syncUsersFromFirestore === 'function') {
           window.ICM_CONFIG.syncUsersFromFirestore();
         }
         if (typeof window.ICM_CONFIG.listenUsersFromFirestore === 'function') {
           window.ICM_CONFIG.listenUsersFromFirestore();
+        }
+        if (typeof syncEventosFromFirestore === 'function') {
+          syncEventosFromFirestore();
         }
 
         // Observa sessão do Firebase Auth para sincronizar dados em tempo real
@@ -8644,6 +8705,15 @@
             }
             if (window.ICM_CONFIG && typeof window.ICM_CONFIG.listenUsersFromFirestore === 'function') {
               window.ICM_CONFIG.listenUsersFromFirestore();
+            }
+            if (typeof migrateEventosToIndividualDocs === 'function') {
+              migrateEventosToIndividualDocs();
+            }
+            if (typeof syncEventosFromFirestore === 'function') {
+              syncEventosFromFirestore();
+            }
+            if (typeof listenEventosFromFirestore === 'function') {
+              listenEventosFromFirestore();
             }
             if (typeof syncCatequistasFromFirestore === 'function') {
               syncCatequistasFromFirestore();
@@ -11131,12 +11201,25 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       }
     ];
 
+    // Evento da Celebração do Sacramento da 1ª Eucaristia cadastrado pela Coordenação (Lorena)
+    const EVENTO_LORENA_EUCARISTIA_24OUT = {
+      id: 'ev-sacr-eucaristia-2026-10-24',
+      nome: 'Recepção do Sacramento da 1ª Eucaristia (Turmas 01, 02, 05 e 06)',
+      data: '2026-10-24',
+      hora: '10:00',
+      turmas: 'Turma 01 • Eucaristia II, Turma 02 • Eucaristia II, Turma 05 • Eucaristia II, Turma 06 • Eucaristia II',
+      externo: false,
+      sacramento: 'eucaristia',
+      turmasIds: ['Eucaristia II__Turma 01', 'Eucaristia II__Turma 02', 'Eucaristia II__Turma 05', 'Eucaristia II__Turma 06']
+    };
+
     // Dados iniciais padrão com Recepção de Sacramentos (Cronograma da Catequese 2026/2027 • KAN-13)
     const SEED_EVENTOS = [
       { id: 'seed-sacr-batismo', nome: 'Recepção do Sacramento do Batismo no Santuário', data: '2026-08-23', hora: '11:00', turmas: 'Catequizandos e Famílias', externo: false, sacramento: 'batismo' },
       { id: 'seed-1', nome: 'Retiro Eucaristia I', data: '2026-09-12', hora: 'Manhã e Tarde', turmas: 'Turmas 01, 02, 05 e 06', externo: false, sacramento: '' },
       { id: 'seed-2', nome: 'Retiro Eucaristia I', data: '2026-09-13', hora: 'Manhã e Tarde', turmas: 'Turmas 03, 04, 07 e 08', externo: false, sacramento: '' },
       { id: 'seed-3', nome: 'Retiro Crisma Jovem',  data: '2026-10-24', hora: 'Dia Todo',       turmas: 'Todas as Turmas de Crisma Jovem', externo: true, sacramento: '' },
+      EVENTO_LORENA_EUCARISTIA_24OUT,
       { id: 'seed-sacr-crisma-jovem', nome: 'Recepção do Sacramento da Crisma (Jovens)', data: '2026-11-21', hora: '19:00', turmas: 'Todas as Turmas de Crisma Jovem', externo: false, sacramento: 'crisma' },
       { id: 'seed-sacr-eucaristia', nome: 'Recepção do Sacramento da 1ª Eucaristia no Santuário', data: '2026-11-28', hora: '10:00', turmas: 'Todas as Turmas de Eucaristia II', externo: false, sacramento: 'eucaristia' },
       { id: 'seed-4', nome: 'Crisma dos Adultos (Recepção do Sacramento)', data: '2026-12-03', hora: '19:30', turmas: 'Todas as Turmas de Crisma Adultos (T1 a T8)', externo: false, sacramento: 'crisma' },
@@ -11162,6 +11245,175 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       return dias[d.getDay()] || '';
     }
 
+    let _eventosFirestoreListener = null;
+
+    // FASE 2: Migração Suave e Idempotente de Eventos para Coleção Individual eventos/{id}
+    async function migrateEventosToIndividualDocs() {
+      if (!window.firebaseDb || typeof window.firebaseDb.collection !== 'function') return;
+      try {
+        const snap = await window.firebaseDb.collection('eventos').limit(3).get();
+        if (snap && !snap.empty) {
+          return; // Coleção individual já populada
+        }
+
+        console.log('🔄 Executando migração idempotente para coleção individual eventos/{id}...');
+        let sourceList = [];
+        try {
+          const docLegado = await window.firebaseDb.collection('configuracoes').doc('eventos_cronograma').get();
+          if (docLegado && docLegado.exists && Array.isArray(docLegado.data().eventos)) {
+            sourceList = docLegado.data().eventos;
+          }
+        } catch (e) {}
+
+        if (!sourceList.length) {
+          sourceList = getEventosData();
+        }
+
+        const batch = window.firebaseDb.batch();
+        let count = 0;
+        sourceList.forEach(ev => {
+          if (!ev || !ev.id || !ev.nome || !ev.data) return;
+          const docRef = window.firebaseDb.collection('eventos').doc(ev.id);
+          batch.set(docRef, {
+            ...ev,
+            updatedAt: ev.updatedAt || new Date().toISOString()
+          }, { merge: true });
+          count++;
+        });
+
+        if (count > 0) {
+          await batch.commit();
+          console.log(`✅ Migração concluída: ${count} eventos salvos na coleção individual eventos/{id}.`);
+        }
+      } catch (err) {
+        console.warn('Migração de eventos preservada localmente:', err);
+      }
+    }
+
+    function mergeAndApplyEventosFromCloud(cloudEventos) {
+      if (!Array.isArray(cloudEventos) || cloudEventos.length === 0) return;
+      let locais = [];
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY_EVENTOS);
+        locais = stored ? JSON.parse(stored) : [];
+      } catch (e) {
+        locais = [];
+      }
+      if (!Array.isArray(locais) || locais.length === 0) {
+        locais = [...SEED_EVENTOS];
+      }
+
+      let modified = false;
+      cloudEventos.forEach(remoteEv => {
+        if (!remoteEv || !remoteEv.nome || !remoteEv.data) return;
+        const idx = locais.findIndex(l => l.id === remoteEv.id || (l.data === remoteEv.data && l.nome === remoteEv.nome));
+        if (idx >= 0) {
+          locais[idx] = Object.assign({}, locais[idx], remoteEv);
+          modified = true;
+        } else {
+          locais.push(remoteEv);
+          modified = true;
+        }
+      });
+
+      // Garante eventos litúrgicos e celebrações da coordenação
+      LORENA_EVENTOS_LITURGICOS.forEach(lev => {
+        if (!locais.some(ev => ev.id === lev.id || (ev.data === lev.data && ev.nome === lev.nome))) {
+          locais.push(lev);
+          modified = true;
+        }
+      });
+      const jaTem24Out = locais.some(ev =>
+        ev.id === EVENTO_LORENA_EUCARISTIA_24OUT.id ||
+        (ev.data === '2026-10-24' && (ev.sacramento === 'eucaristia' || (ev.nome && ev.nome.toLowerCase().includes('eucaristia'))))
+      );
+      if (!jaTem24Out) {
+        locais.push(EVENTO_LORENA_EUCARISTIA_24OUT);
+        modified = true;
+      }
+
+      if (modified) {
+        locais.sort((a, b) => (a.data || '').localeCompare(b.data || ''));
+        try {
+          localStorage.setItem(STORAGE_KEY_EVENTOS, JSON.stringify(locais));
+        } catch (e) {}
+        renderEventosTimeline();
+      }
+    }
+
+    async function syncEventosFromFirestore() {
+      if (!window.firebaseDb || typeof window.firebaseDb.collection !== 'function') return;
+      try {
+        const snap = await window.firebaseDb.collection('eventos').get();
+        if (snap && !snap.empty) {
+          const list = [];
+          snap.forEach(docSnap => {
+            const data = docSnap.data();
+            if (data && data.nome && data.data && !data.deleted) {
+              list.push({ id: docSnap.id, ...data });
+            }
+          });
+          if (list.length > 0) {
+            mergeAndApplyEventosFromCloud(list);
+            return;
+          }
+        }
+        // Fallback para documento legado configuracoes/eventos_cronograma
+        const doc = await window.firebaseDb.collection('configuracoes').doc('eventos_cronograma').get();
+        if (doc && doc.exists) {
+          const cloudData = doc.data();
+          if (cloudData && Array.isArray(cloudData.eventos) && cloudData.eventos.length > 0) {
+            mergeAndApplyEventosFromCloud(cloudData.eventos);
+          }
+        }
+      } catch (err) {
+        console.warn('Sync Firestore eventos:', err);
+      }
+    }
+
+    function listenEventosFromFirestore() {
+      if (!window.firebaseDb || typeof window.firebaseDb.collection !== 'function') return;
+      if (_eventosFirestoreListener) return;
+
+      try {
+        // FASE 2: Listener Realtime direto na coleção individual eventos/{id}
+        _eventosFirestoreListener = window.firebaseDb.collection('eventos')
+          .onSnapshot(snapshot => {
+            if (!snapshot || snapshot.empty) {
+              migrateEventosToIndividualDocs().then(() => syncEventosFromFirestore());
+              return;
+            }
+
+            const cloudEventos = [];
+            snapshot.forEach(docSnap => {
+              const data = docSnap.data();
+              if (data && data.nome && data.data && !data.deleted) {
+                cloudEventos.push({ id: docSnap.id, ...data });
+              }
+            });
+
+            if (cloudEventos.length > 0) {
+              cloudEventos.sort((a, b) => (a.data || '').localeCompare(b.data || ''));
+              try {
+                localStorage.setItem(STORAGE_KEY_EVENTOS, JSON.stringify(cloudEventos));
+              } catch (e) {}
+              if (typeof renderEventosTimeline === 'function') {
+                renderEventosTimeline();
+              }
+              if (typeof window.updateFirestoreSyncStatus === 'function') {
+                window.updateFirestoreSyncStatus('synced', 'Nuvem Sincronizada');
+              }
+            }
+          }, err => {
+            console.warn('Listener Firestore eventos (coleção individual):', err);
+            // Fallback para documento consolidado
+            syncEventosFromFirestore();
+          });
+      } catch (err) {
+        console.warn('Erro ao configurar listener de eventos:', err);
+      }
+    }
+
     function getEventosData() {
       try {
         const stored = localStorage.getItem(STORAGE_KEY_EVENTOS);
@@ -11175,6 +11427,14 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
                 modified = true;
               }
             });
+            const jaTem24Out = parsed.some(ev =>
+              ev.id === EVENTO_LORENA_EUCARISTIA_24OUT.id ||
+              (ev.data === '2026-10-24' && (ev.sacramento === 'eucaristia' || (ev.nome && ev.nome.toLowerCase().includes('eucaristia'))))
+            );
+            if (!jaTem24Out) {
+              parsed.push(EVENTO_LORENA_EUCARISTIA_24OUT);
+              modified = true;
+            }
             if (modified) {
               parsed.sort((a, b) => (a.data || '').localeCompare(b.data || ''));
               try {
@@ -11187,20 +11447,39 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       } catch (e) {
         console.error('Erro ao ler localStorage de eventos:', e);
       }
-      // Se não existir, salva e retorna os dados seed
       saveEventosData(SEED_EVENTOS);
       return SEED_EVENTOS;
     }
 
-    function saveEventosData(list) {
+    function saveEventosData(list, singleEvent) {
       try {
         localStorage.setItem(STORAGE_KEY_EVENTOS, JSON.stringify(list));
-        // Sincroniza em nuvem no Firestore se disponível com merge construtivo
         if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
+          if (typeof window.updateFirestoreSyncStatus === 'function') {
+            window.updateFirestoreSyncStatus('saving', 'Salvando Evento...');
+          }
+
+          // Gravação atômica na coleção individual eventos/{id}
+          if (singleEvent && singleEvent.id) {
+            window.firebaseDb.collection('eventos').doc(singleEvent.id).set(singleEvent, { merge: true })
+              .then(() => {
+                if (typeof window.updateFirestoreSyncStatus === 'function') {
+                  window.updateFirestoreSyncStatus('synced', 'Evento Salvo na Nuvem');
+                }
+              })
+              .catch(err => {
+                console.warn('Erro ao salvar doc individual em eventos/{id}:', err);
+                if (typeof window.updateFirestoreSyncStatus === 'function') {
+                  window.updateFirestoreSyncStatus('offline', 'Modo Local (Offline)');
+                }
+              });
+          }
+
+          // Mantém documento consolidado configuracoes/eventos_cronograma em background para compatibilidade retroativa
           window.firebaseDb.collection('configuracoes').doc('eventos_cronograma').set({
             eventos: list,
             updatedAt: new Date().toISOString()
-          }, { merge: true }).catch(err => console.warn('Sync Firestore eventos:', err));
+          }, { merge: true }).catch(err => console.warn('Sync Firestore eventos legado:', err));
         }
       } catch (e) {
         console.error('Erro ao salvar eventos no localStorage:', e);
@@ -11569,6 +11848,20 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       const eventos = getEventosData().filter(e => e.id !== id);
       saveEventosData(eventos);
 
+      if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
+        if (typeof window.updateFirestoreSyncStatus === 'function') {
+          window.updateFirestoreSyncStatus('saving', 'Removendo evento...');
+        }
+        window.firebaseDb.collection('eventos').doc(id).set({
+          deleted: true,
+          updatedAt: new Date().toISOString()
+        }, { merge: true }).then(() => {
+          if (typeof window.updateFirestoreSyncStatus === 'function') {
+            window.updateFirestoreSyncStatus('synced', 'Nuvem Sincronizada');
+          }
+        }).catch(err => console.warn('Erro ao marcar evento como deletado:', err));
+      }
+
       if (window.ICM_CONFIG && typeof window.ICM_CONFIG.logAuditEvent === 'function' && ev) {
         window.ICM_CONFIG.logAuditEvent('DELETE_EVENTO', ev.nome, {
           eventoId: id,
@@ -11636,26 +11929,48 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     }
     function aplicarDataSacramentoNasTurmas(sacramento, dataIso, turmasIds) {
       const campos = SACRAMENTO_CAMPOS[sacramento];
-      if (!campos || !turmasIds.length || !dataIso) return 0;
+      if (!campos || !turmasIds || !turmasIds.length || !dataIso) return 0;
       const [y, m, d] = dataIso.split('-');
       const dataBR = `${d}/${m}/${y}`;
       const db = getAlunosDatabase();
       let total = 0;
+      const turmasAfetadas = [];
       turmasIds.forEach(key => {
         const alunos = db[key];
         if (!Array.isArray(alunos)) return;
         let mudou = false;
         alunos.forEach(a => {
-          const recebeu = String(a[campos.status] || '').toLowerCase().startsWith('sim');
-          if (!recebeu && !(a[campos.data] || '').trim()) { a[campos.data] = dataBR; mudou = true; total++; }
+          // 1. Não altera se já tiver data preenchida
+          const dataExistente = (a[campos.data] || '').trim();
+          if (dataExistente) return;
+
+          // 2. Não altera se possuir impedimento canônico cadastrado
+          const impStr = (a.impedido || '').toLowerCase().trim();
+          const justStr = (a.justificativa || '').trim();
+          const temImpedimento = impStr === 'sim' || impStr.startsWith('sim') || (justStr !== '' && impStr !== 'não' && impStr !== 'nao');
+          if (temImpedimento) return;
+
+          // 3. Marca como recebido naquele dia (troca de previsto para recebido)
+          a[campos.status] = 'Sim';
+          a[campos.data] = dataBR;
+          mudou = true;
+          total++;
         });
-        if (mudou && window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
-          const [etapa, turma] = key.split('__');
-          window.firebaseDb.collection('turma_alunos').doc(key).set({ etapa, turma, alunos, updatedAt: new Date().toISOString() }, { merge: true })
-            .catch(err => console.warn('Sync Firestore turma_alunos (evento):', key, err));
+        if (mudou) {
+          turmasAfetadas.push(key);
+          if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
+            const [etapa, turma] = key.split('__');
+            window.firebaseDb.collection('turma_alunos').doc(key).set({ etapa, turma, alunos, updatedAt: new Date().toISOString() }, { merge: true })
+              .catch(err => console.warn('Sync Firestore turma_alunos (evento):', key, err));
+          }
         }
       });
-      try { localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(db)); } catch (e) {}
+      if (turmasAfetadas.length > 0) {
+        try { localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(db)); } catch (e) {}
+        if (typeof renderAlunosTable === 'function') renderAlunosTable();
+        if (typeof renderCadastroGeralTable === 'function') renderCadastroGeralTable();
+        if (typeof renderPainelPendencias === 'function') renderPainelPendencias();
+      }
       return total;
     }
     function editarEvento(id) {
@@ -11713,15 +12028,24 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       const turmasTxt = turmas || turmasIds.map(k => k.split('__').reverse().join(' • ')).join(', ');
       const editId = (document.getElementById('ev-edit-id') || {}).value || '';
       const eventos = getEventosData();
+      let eventoParaSalvar = null;
       if (editId) {
         const ev = eventos.find(e => e.id === editId);
-        if (ev) Object.assign(ev, { nome, data, hora, turmas: turmasTxt, externo, sacramento, turmasIds });
+        if (ev) {
+          Object.assign(ev, { nome, data, hora, turmas: turmasTxt, externo, sacramento, turmasIds, updatedAt: new Date().toISOString() });
+          eventoParaSalvar = ev;
+        }
       } else {
-        eventos.push({ id: 'ev-' + Date.now(), nome, data, hora, turmas: turmasTxt, externo, sacramento, turmasIds });
+        eventoParaSalvar = { id: 'ev-' + Date.now(), nome, data, hora, turmas: turmasTxt, externo, sacramento, turmasIds, updatedAt: new Date().toISOString() };
+        eventos.push(eventoParaSalvar);
       }
-      saveEventosData(eventos);
+      saveEventosData(eventos, eventoParaSalvar);
       const preenchidos = aplicarDataSacramentoNasTurmas(sacramento, data, turmasIds);
-      if (turmasIds.length) alert(`✅ Evento salvo. Data prevista aplicada a ${preenchidos} catequizando(s) com campo vazio.`);
+      if (turmasIds.length) {
+        const [y, m, d] = (data || '').split('-');
+        const dataBR = (d && m && y) ? `${d}/${m}/${y}` : data;
+        alert(`✅ Evento salvo. Sacramento marcado como RECEBIDO em ${dataBR} para ${preenchidos} catequizando(s) das turmas vinculadas (sem impedimentos e sem data anterior).`);
+      }
       cancelarEdicaoEvento();
 
       // Limpar campos
@@ -11871,6 +12195,16 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
                 if (deletedIds.has(seedCat.id) || seedCat.deleted) return;
                 const found = parsed.find(p => p.id === seedCat.id || (p.nomeCompleto && normCatString(p.nomeCompleto) === normCatString(seedCat.nomeCompleto)));
                 if (found) {
+                  // Autocura de apelido e nomeConhecido: se estiverem ausentes ou iguais ao nome completo, recupera do seed mesmo com updatedAt
+                  if ((!found.apelido || !found.apelido.trim() || found.apelido === found.nomeCompleto) && seedCat.apelido) {
+                    found.apelido = seedCat.apelido;
+                    changed = true;
+                  }
+                  if ((!found.nomeConhecido || !found.nomeConhecido.trim()) && seedCat.nomeConhecido) {
+                    found.nomeConhecido = seedCat.nomeConhecido;
+                    changed = true;
+                  }
+
                   // Se o registro local já foi editado pelo usuário (tem updatedAt), não sobrescreva dados do seed para preservar alterações
                   if (found.updatedAt) return;
 
@@ -11945,6 +12279,9 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             const localTime = cat.updatedAt ? new Date(cat.updatedAt).getTime() : 0;
             const cloudTime = cloudCat.updatedAt ? new Date(cloudCat.updatedAt).getTime() : 0;
             if (localTime > cloudTime) {
+              shouldWrite = true;
+            } else if ((cat.apelido || cat.nomeConhecido) && (!cloudCat.apelido || !cloudCat.apelido.trim())) {
+              // Construtivo: nuvem não possui apelido/nomeConhecido preenchido, mas o registro local possui
               shouldWrite = true;
             }
           }
@@ -12042,6 +12379,10 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
                 'foto', 'fotoFaceDetected', 'fotoRemoved', 'updatedAt'
               ];
               fields.forEach(f => {
+                // Não permitir que string vazia da nuvem apague apelido ou nomeConhecido local já existente
+                if ((f === 'apelido' || f === 'nomeConhecido') && (!cloudData[f] || !cloudData[f].trim()) && (localCat[f] && localCat[f].trim())) {
+                  return;
+                }
                 if (cloudData[f] !== undefined && cloudData[f] !== localCat[f]) {
                   localCat[f] = cloudData[f];
                   changed = true;
@@ -12071,6 +12412,21 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           } else {
             list.push(cloudData);
             changed = true;
+          }
+        });
+
+        // Autocura complementar: se algum catequista local ficou sem apelido após o merge, resgata de SEED_CATEQUISTAS_2026
+        const seedList = (typeof window !== 'undefined' && Array.isArray(window.SEED_CATEQUISTAS_2026)) ? window.SEED_CATEQUISTAS_2026 : [];
+        list.forEach(c => {
+          if (!c.apelido || !c.apelido.trim() || c.apelido === c.nomeCompleto) {
+            const s = seedList.find(seed => seed.id === c.id || (seed.nomeCompleto && c.nomeCompleto && normCatString(seed.nomeCompleto) === normCatString(c.nomeCompleto)));
+            if (s && s.apelido && s.apelido.trim()) {
+              c.apelido = s.apelido.trim();
+              if (s.nomeConhecido && (!c.nomeConhecido || !c.nomeConhecido.trim())) {
+                c.nomeConhecido = s.nomeConhecido.trim();
+              }
+              changed = true;
+            }
           }
         });
 
@@ -12358,7 +12714,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       return parts.map(n => {
         const cat = findCatequistaByName(n, stageName);
         if (cat) {
-          return `<button onclick="openCatequistaModal('${cat.id}')" class="inline-flex items-center gap-1 font-semibold text-slate-900 hover:text-emerald-700 bg-slate-100 hover:bg-emerald-50 px-2 py-0.5 rounded-md text-xs border border-slate-200 transition mr-1 mb-1" title="Ver dados pessoais e WhatsApp de ${cat.nomeCompleto}"><span>👤</span><span>${n}</span><span class="text-emerald-600 text-[10px]">💬</span></button>`;
+          const displayName = getCatequistaDisplayName(cat) || n;
+          return `<button onclick="openCatequistaModal('${cat.id}')" class="inline-flex items-center gap-1 font-semibold text-slate-900 hover:text-emerald-700 bg-slate-100 hover:bg-emerald-50 px-2 py-0.5 rounded-md text-xs border border-slate-200 transition mr-1 mb-1" title="Ver dados pessoais e WhatsApp de ${cat.nomeCompleto}"><span>👤</span><span>${displayName}</span><span class="text-emerald-600 text-[10px]">💬</span></button>`;
         }
         return `<span class="font-medium text-slate-800 mr-1">${n}</span>`;
       }).join(' ');
@@ -12372,6 +12729,19 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       if (!cat) return '';
       if (cat.apelido && cat.apelido.trim()) return cat.apelido.trim();
       if (cat.nomeConhecido && cat.nomeConhecido.trim()) return cat.nomeConhecido.trim();
+
+      // Fallback robusto para SEED_CATEQUISTAS_2026 caso o objeto local ou da nuvem não possua apelido preenchido
+      try {
+        const seedList = (typeof window !== 'undefined' && Array.isArray(window.SEED_CATEQUISTAS_2026)) ? window.SEED_CATEQUISTAS_2026 : [];
+        const fromSeed = seedList.find(s => s.id === cat.id || (s.nomeCompleto && cat.nomeCompleto && normCatString(s.nomeCompleto) === normCatString(cat.nomeCompleto)));
+        if (fromSeed) {
+          if (fromSeed.apelido && fromSeed.apelido.trim()) return fromSeed.apelido.trim();
+          if (fromSeed.nomeConhecido && fromSeed.nomeConhecido.trim()) return fromSeed.nomeConhecido.trim();
+        }
+      } catch (e) {
+        // ignora se falhar
+      }
+
       const parts = (cat.nomeCompleto || '').trim().split(/\s+/).filter(Boolean);
       if (parts.length <= 2) return cat.nomeCompleto.trim();
       return `${parts[0]} ${parts[parts.length - 1]}`;
@@ -22003,806 +22373,844 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     ],
     "Eucaristia II__Turma 01": [
         {
-            "id": "euc2-t1-1",
-            "nome": "Ana Carolina Gomes de Moraes Guerreiro",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t1-1",
+                "nome": "Ana Carolina Gomes de Moraes Guerreiro",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t1-2",
-            "nome": "Ana Isabel Vasconcelos de Oliveira",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t1-2",
+                "nome": "Ana Isabel Vasconcelos de Oliveira",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t1-3",
-            "nome": "Ana Luisa Paris Pereira",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t1-3",
+                "nome": "Ana Luisa Paris Pereira",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t1-4",
-            "nome": "Arthur Baião Cardoso",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t1-4",
+                "nome": "Arthur Baião Cardoso",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t1-5",
-            "nome": "Beatriz de Faria Franco",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t1-5",
+                "nome": "Beatriz de Faria Franco",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t1-6",
-            "nome": "Bento Martins Modesto",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t1-6",
+                "nome": "Bento Martins Modesto",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t1-7",
-            "nome": "Bernardo Sampaio Vitorino",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t1-7",
+                "nome": "Bernardo Sampaio Vitorino",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t1-8",
-            "nome": "Camila de Souza Faria",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t1-8",
+                "nome": "Camila de Souza Faria",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t1-9",
-            "nome": "Davi Fleury Bento",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t1-9",
+                "nome": "Davi Fleury Bento",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t1-10",
-            "nome": "Elisa Goulart Lima de Araújo",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t1-10",
+                "nome": "Elisa Goulart Lima de Araújo",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t1-11",
-            "nome": "João Antônio de Oliveira Justino",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t1-11",
+                "nome": "João Antônio de Oliveira Justino",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t1-12",
-            "nome": "Júlia Farias Martins",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t1-12",
+                "nome": "Júlia Farias Martins",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t1-13",
-            "nome": "Laura Fernandes Fachini",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t1-13",
+                "nome": "Laura Fernandes Fachini",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t1-14",
-            "nome": "Lucas Medaglia Carvalho",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t1-14",
+                "nome": "Lucas Medaglia Carvalho",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t1-15",
-            "nome": "Luiza Freitas Gomes de Melo",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t1-15",
+                "nome": "Luiza Freitas Gomes de Melo",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t1-16",
-            "nome": "Manuela Reis Bessa",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t1-16",
+                "nome": "Manuela Reis Bessa",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t1-17",
-            "nome": "Maria Cecília Inácio Arantes Lessa",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t1-17",
+                "nome": "Maria Cecília Inácio Arantes Lessa",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t1-18",
-            "nome": "Maria Eduarda Lourenço Paixão",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t1-18",
+                "nome": "Maria Eduarda Lourenço Paixão",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t1-19",
-            "nome": "Mel de Oliveira Lourenço Alves",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t1-19",
+                "nome": "Mel de Oliveira Lourenço Alves",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t1-20",
-            "nome": "Natália Lima de Andrade Oliveira",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t1-20",
+                "nome": "Natália Lima de Andrade Oliveira",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t1-21",
-            "nome": "Pedro Ivo Baião Cardoso",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t1-21",
+                "nome": "Pedro Ivo Baião Cardoso",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         }
-    ],
+],
     "Eucaristia II__Turma 02": [
         {
-            "id": "euc2-t2-1",
-            "nome": "Enzo Dionízio Dantas",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t2-1",
+                "nome": "Enzo Dionízio Dantas",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t2-2",
-            "nome": "Giovanna Queiroz Palma",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t2-2",
+                "nome": "Giovanna Queiroz Palma",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t2-3",
-            "nome": "Henrique Rohr Camara",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t2-3",
+                "nome": "Henrique Rohr Camara",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t2-4",
-            "nome": "Júlia Marques Lopes",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t2-4",
+                "nome": "Júlia Marques Lopes",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t2-5",
-            "nome": "Lavínia de Almeida Sousa",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t2-5",
+                "nome": "Lavínia de Almeida Sousa",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t2-6",
-            "nome": "Lucas Lima Santos",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t2-6",
+                "nome": "Lucas Lima Santos",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t2-7",
-            "nome": "Marco Antônio Cavalero Silva",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t2-7",
+                "nome": "Marco Antônio Cavalero Silva",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t2-8",
-            "nome": "Maria Clara Souza Silvano",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t2-8",
+                "nome": "Maria Clara Souza Silvano",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t2-9",
-            "nome": "Maria Fernanda Oliveira Pimenta",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t2-9",
+                "nome": "Maria Fernanda Oliveira Pimenta",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t2-10",
-            "nome": "Mariana Borges Alves Fernandes",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t2-10",
+                "nome": "Mariana Borges Alves Fernandes",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t2-11",
-            "nome": "Pedro Balchiunas",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t2-11",
+                "nome": "Pedro Balchiunas",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t2-12",
-            "nome": "Pedro Rosa Gondim",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t2-12",
+                "nome": "Pedro Rosa Gondim",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t2-13",
-            "nome": "Sarah de Araújo Palmenzone",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t2-13",
+                "nome": "Sarah de Araújo Palmenzone",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t2-14",
-            "nome": "Sarah Hellen Castro Faria",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t2-14",
+                "nome": "Sarah Hellen Castro Faria",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t2-15",
-            "nome": "Sarah Rodrigues Zaccarini Paschoal",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t2-15",
+                "nome": "Sarah Rodrigues Zaccarini Paschoal",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t2-16",
-            "nome": "Sophia Gomes Cruz",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t2-16",
+                "nome": "Sophia Gomes Cruz",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t2-17",
-            "nome": "Vítor Costa Jochims",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t2-17",
+                "nome": "Vítor Costa Jochims",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         }
-    ],
+],
     "Eucaristia II__Turma 03": [
         {
             "id": "euc2-t3-1",
@@ -23754,953 +24162,998 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     ],
     "Eucaristia II__Turma 05": [
         {
-            "id": "euc2-t5-1",
-            "nome": "Alexandre Passos Novaes",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t5-1",
+                "nome": "Alexandre Passos Novaes",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t5-2",
-            "nome": "Ana Laura de Oliveira Moraes dos Santos",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t5-2",
+                "nome": "Ana Laura de Oliveira Moraes dos Santos",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t5-3",
-            "nome": "Ana Luiza Ferraz de Sousa",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t5-3",
+                "nome": "Ana Luiza Ferraz de Sousa",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t5-4",
-            "nome": "Anelise Novaes Pereira Machado",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t5-4",
+                "nome": "Anelise Novaes Pereira Machado",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t5-5",
-            "nome": "Arthur Cunha Vieira",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t5-5",
+                "nome": "Arthur Cunha Vieira",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t5-6",
-            "nome": "Davi Dutra Capella",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t5-6",
+                "nome": "Davi Dutra Capella",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t5-7",
-            "nome": "Emanuel Oliveira de Lima",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t5-7",
+                "nome": "Emanuel Oliveira de Lima",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t5-8",
-            "nome": "Giovanna Venzi de Oliveira Silva",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t5-8",
+                "nome": "Giovanna Venzi de Oliveira Silva",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t5-9",
-            "nome": "Henrique Lucca Campos Rotilli Kerpel",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t5-9",
+                "nome": "Henrique Lucca Campos Rotilli Kerpel",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t5-10",
-            "nome": "Isadora Brasil Barreto",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t5-10",
+                "nome": "Isadora Brasil Barreto",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t5-11",
-            "nome": "João Mateus Santos Mendes",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t5-11",
+                "nome": "João Mateus Santos Mendes",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t5-12",
-            "nome": "Júlia de Abreu Oliveira",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t5-12",
+                "nome": "Júlia de Abreu Oliveira",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t5-13",
-            "nome": "Lara de Oliveira Ribeiro Aleluia",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t5-13",
+                "nome": "Lara de Oliveira Ribeiro Aleluia",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t5-14",
-            "nome": "Lucas Andrade Pereira",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t5-14",
+                "nome": "Lucas Andrade Pereira",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t5-15",
-            "nome": "Manuela Nunes Prado Mamede",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t5-15",
+                "nome": "Manuela Nunes Prado Mamede",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t5-16",
-            "nome": "Maria Cecília de Araújo Maranhão",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t5-16",
+                "nome": "Maria Cecília de Araújo Maranhão",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t5-17",
-            "nome": "Matheus Filipe Souza de Sena",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t5-17",
+                "nome": "Matheus Filipe Souza de Sena",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t5-18",
-            "nome": "Miguel Ramos Morais",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t5-18",
+                "nome": "Miguel Ramos Morais",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t5-19",
-            "nome": "Nicole Landim Barroso Gomes",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t5-19",
+                "nome": "Nicole Landim Barroso Gomes",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t5-20",
-            "nome": "Olívia Cardoso de Carvalho",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t5-20",
+                "nome": "Olívia Cardoso de Carvalho",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t5-21",
-            "nome": "Pedro Okubo",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t5-21",
+                "nome": "Pedro Okubo",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t5-22",
-            "nome": "Sofia Oliveira Ismael da Silva",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t5-22",
+                "nome": "Sofia Oliveira Ismael da Silva",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t5-23",
-            "nome": "Sophia Queiroz Colucci",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t5-23",
+                "nome": "Sophia Queiroz Colucci",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         }
-    ],
+],
     "Eucaristia II__Turma 06": [
         {
-            "id": "euc2-t6-1",
-            "nome": "Alice de Aguiar Bastos Miranda Pereira",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t6-1",
+                "nome": "Alice de Aguiar Bastos Miranda Pereira",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t6-2",
-            "nome": "Ártur Faria Leal",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t6-2",
+                "nome": "Ártur Faria Leal",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t6-3",
-            "nome": "Cauã Rocha Gaspar",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t6-3",
+                "nome": "Cauã Rocha Gaspar",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t6-4",
-            "nome": "Eduardo Rocha Moreira Silva",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t6-4",
+                "nome": "Eduardo Rocha Moreira Silva",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t6-5",
-            "nome": "Enzo Cauã Rodrigues Nascimento",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t6-5",
+                "nome": "Enzo Cauã Rodrigues Nascimento",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t6-6",
-            "nome": "Felipe França de Santana Botelho",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t6-6",
+                "nome": "Felipe França de Santana Botelho",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t6-7",
-            "nome": "Heloísa Aragão Sousa Sandin",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t6-7",
+                "nome": "Heloísa Aragão Sousa Sandin",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t6-8",
-            "nome": "Isabella Oliveira Piva",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t6-8",
+                "nome": "Isabella Oliveira Piva",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t6-9",
-            "nome": "João Gabriel Horstmann Gonçalves",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t6-9",
+                "nome": "João Gabriel Horstmann Gonçalves",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t6-10",
-            "nome": "Julio Cesar Rodrigues Ferreira",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t6-10",
+                "nome": "Julio Cesar Rodrigues Ferreira",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t6-11",
-            "nome": "Laís Carvalho Marques Moreira",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t6-11",
+                "nome": "Laís Carvalho Marques Moreira",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t6-12",
-            "nome": "Laís Fabiana Alcântara de M. Araújo",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t6-12",
+                "nome": "Laís Fabiana Alcântara de M. Araújo",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t6-13",
-            "nome": "Lívia Vieira Brauwers",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t6-13",
+                "nome": "Lívia Vieira Brauwers",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t6-14",
-            "nome": "Lucas da Silva Matos de Souza",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t6-14",
+                "nome": "Lucas da Silva Matos de Souza",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t6-15",
-            "nome": "Maitê Scheidt Bundt",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t6-15",
+                "nome": "Maitê Scheidt Bundt",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t6-16",
-            "nome": "Manuela Viana Tavares",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t6-16",
+                "nome": "Manuela Viana Tavares",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t6-17",
-            "nome": "Maria Lis Bastos Rodrigues",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t6-17",
+                "nome": "Maria Lis Bastos Rodrigues",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t6-18",
-            "nome": "Maria Luísa de Oliveira Silva",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t6-18",
+                "nome": "Maria Luísa de Oliveira Silva",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t6-19",
-            "nome": "Pedro Gumieiro Vander Velden",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t6-19",
+                "nome": "Pedro Gumieiro Vander Velden",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t6-20",
-            "nome": "Rafaella do Prado Galvão",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t6-20",
+                "nome": "Rafaella do Prado Galvão",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t6-21",
-            "nome": "Sofia Sanglard de Castro",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t6-21",
+                "nome": "Sofia Sanglard de Castro",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         },
         {
-            "id": "euc2-t6-22",
-            "nome": "Sofie Gonçalves Reis",
-            "cpf": "",
-            "dataNascimento": "",
-            "contato": "",
-            "email": "",
-            "endereco": "",
-            "estadoCivil": "Solteiro(a)",
-            "batizado": "",
-            "primeiraEucaristia": "",
-            "comprovanteBatismo": "",
-            "comprovanteEucaristia": "",
-            "comprovanteMatrimonio": "",
-            "docIdentificacao": "",
-            "comprovantePagamento": "",
-            "observacoes": "",
-            "impedido": "Não",
-            "justificativa": "",
-            "statusAprovacao": "aprovado"
+                "id": "euc2-t6-22",
+                "nome": "Sofie Gonçalves Reis",
+                "cpf": "",
+                "dataNascimento": "",
+                "contato": "",
+                "email": "",
+                "endereco": "",
+                "estadoCivil": "Solteiro(a)",
+                "batizado": "",
+                "primeiraEucaristia": "Sim",
+                "comprovanteBatismo": "",
+                "comprovanteEucaristia": "",
+                "comprovanteMatrimonio": "",
+                "docIdentificacao": "",
+                "comprovantePagamento": "",
+                "observacoes": "",
+                "impedido": "Não",
+                "justificativa": "",
+                "statusAprovacao": "aprovado",
+                "primeiraEucaristiaData": "24/10/2026"
         }
-    ],
+],
     "Eucaristia II__Turma 07": [
         {
             "id": "euc2-t7-1",
@@ -25609,6 +26062,70 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       }
     }
 
+    // Ajuste retroativo das turmas T1, T2, T5 e T6 da 1ª Eucaristia que celebraram em 24/10/2026
+    function aplicarAjusteRetroativoEucaristia24Outubro(db) {
+      if (!db || typeof db !== 'object') return { count: 0, changed: false };
+      const turmasAlvo = [
+        'Eucaristia II__Turma 01',
+        'Eucaristia II__Turma 02',
+        'Eucaristia II__Turma 05',
+        'Eucaristia II__Turma 06'
+      ];
+      const dataBR = '24/10/2026';
+      let count = 0;
+      let changed = false;
+      const turmasModificadas = [];
+
+      turmasAlvo.forEach(key => {
+        const alunos = db[key];
+        if (!Array.isArray(alunos)) return;
+        let turmaMudou = false;
+
+        alunos.forEach(a => {
+          // 1. Preserva caso o catequizando já tenha data preenchida
+          const dtExistente = (a.primeiraEucaristiaData || '').trim();
+          if (dtExistente && dtExistente !== dataBR) return;
+
+          // 2. Preserva caso possua impedimento canônico cadastrado
+          const impStr = (a.impedido || '').toLowerCase().trim();
+          const justStr = (a.justificativa || '').trim();
+          const temImp = impStr === 'sim' || impStr.startsWith('sim') || (justStr !== '' && impStr !== 'não' && impStr !== 'nao');
+          if (temImp) return;
+
+          // 3. Se já estiver Sim e com a data do evento, nada a fazer
+          const statusAtual = String(a.primeiraEucaristia || '').trim().toLowerCase();
+          if (statusAtual.startsWith('sim') && a.primeiraEucaristiaData === dataBR) {
+            return;
+          }
+
+          // 4. Marca como recebido e grava a data
+          a.primeiraEucaristia = 'Sim';
+          a.primeiraEucaristiaData = dataBR;
+          turmaMudou = true;
+          changed = true;
+          count++;
+        });
+
+        if (turmaMudou) {
+          turmasModificadas.push(key);
+        }
+      });
+
+      if (changed && window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
+        turmasModificadas.forEach(key => {
+          const [etapa, turma] = key.split('__');
+          window.firebaseDb.collection('turma_alunos').doc(key).set({
+            etapa,
+            turma,
+            alunos: db[key],
+            updatedAt: new Date().toISOString()
+          }, { merge: true }).catch(err => console.warn('Sync Firestore retroativo Eucaristia 24/10:', key, err));
+        });
+      }
+
+      return { count, changed };
+    }
+
     function getAlunosDatabase() {
       // 1. Inicia sempre com o SEED_ALUNOS_DATABASE completo (todas as etapas e turmas paroquiais)
       const db = JSON.parse(JSON.stringify(SEED_ALUNOS_DATABASE || {}));
@@ -25635,8 +26152,13 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         console.error('Erro ao ler banco de catequizandos do localStorage:', e);
       }
 
-      migrarCrismandosT2(db);
-      aprovarAlunosLorenaDirect(db);
+      // FASE 4: Executa autocuras históricas apenas UMA vez por sessão, evitando mutações repetitivas em loop
+      if (!window._alunosMigrationsApplied) {
+        migrarCrismandosT2(db);
+        aprovarAlunosLorenaDirect(db);
+        aplicarAjusteRetroativoEucaristia24Outubro(db);
+        window._alunosMigrationsApplied = true;
+      }
 
       // 3. Atualiza o storage local para garantir integridade permanente e autocura
       try {
@@ -25660,19 +26182,97 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       });
     }
 
-    function saveAlunosDatabase(data) {
+    // FASE 3: Transações Atômicas com Locks Otimistas para Turma e Catequizandos
+    async function saveTurmaAlunosAtomic(key, localAlunos, modifiedAlunoId) {
+      if (!window.firebaseDb) return;
+      const [etapa, turma] = key.split('__');
+      const docRef = window.firebaseDb.collection('turma_alunos').doc(key);
+
+      if (typeof window.updateFirestoreSyncStatus === 'function') {
+        window.updateFirestoreSyncStatus('saving', 'Salvando catequizando...');
+      }
+
+      if (typeof window.firebaseDb.runTransaction === 'function') {
+        try {
+          await window.firebaseDb.runTransaction(async (transaction) => {
+            const doc = await transaction.get(docRef);
+            if (!doc.exists) {
+              transaction.set(docRef, {
+                etapa: etapa || currentAlunosEtapa,
+                turma: turma || currentAlunosTurma,
+                alunos: localAlunos,
+                updatedAt: new Date().toISOString()
+              });
+              return;
+            }
+
+            const cloudData = doc.data() || {};
+            const cloudAlunos = Array.isArray(cloudData.alunos) ? [...cloudData.alunos] : [];
+            const mergedAlunos = [];
+            const handledIds = new Set();
+
+            localAlunos.forEach(localA => {
+              if (!localA || !localA.id) return;
+              handledIds.add(localA.id);
+              const cloudA = cloudAlunos.find(c => c.id === localA.id);
+              if (!cloudA) {
+                mergedAlunos.push(localA);
+              } else if (modifiedAlunoId && localA.id === modifiedAlunoId) {
+                mergedAlunos.push({ ...cloudA, ...localA });
+              } else {
+                mergedAlunos.push({ ...localA, ...cloudA });
+              }
+            });
+
+            // Preserva construtivamente alunos que existam apenas na nuvem
+            cloudAlunos.forEach(cloudA => {
+              if (cloudA && cloudA.id && !handledIds.has(cloudA.id)) {
+                mergedAlunos.push(cloudA);
+              }
+            });
+
+            transaction.set(docRef, {
+              etapa: etapa || currentAlunosEtapa,
+              turma: turma || currentAlunosTurma,
+              alunos: mergedAlunos,
+              updatedAt: new Date().toISOString()
+            }, { merge: true });
+          });
+
+          if (typeof window.updateFirestoreSyncStatus === 'function') {
+            window.updateFirestoreSyncStatus('synced', 'Nuvem Sincronizada');
+          }
+          return;
+        } catch (err) {
+          console.warn('Transação atômica turma_alunos falhou, aplicando fallback:', key, err);
+        }
+      }
+
+      // Fallback padrão se transações estiverem indisponíveis
+      docRef.set({
+        etapa: etapa || currentAlunosEtapa,
+        turma: turma || currentAlunosTurma,
+        alunos: localAlunos,
+        updatedAt: new Date().toISOString()
+      }, { merge: true }).then(() => {
+        if (typeof window.updateFirestoreSyncStatus === 'function') {
+          window.updateFirestoreSyncStatus('synced', 'Nuvem Sincronizada');
+        }
+      }).catch(err => {
+        console.warn('Erro ao salvar turma_alunos:', key, err);
+        if (typeof window.updateFirestoreSyncStatus === 'function') {
+          window.updateFirestoreSyncStatus('offline', 'Modo Local (Offline)');
+        }
+      });
+    }
+
+    function saveAlunosDatabase(data, modifiedAlunoId) {
       try {
         localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(data));
-        // Sincroniza em nuvem no Firestore se disponível com merge construtivo
         if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
           const key = getTurmaKey(currentAlunosEtapa, currentAlunosTurma);
           if (data && data[key]) {
-            window.firebaseDb.collection('turma_alunos').doc(key).set({
-              etapa: currentAlunosEtapa,
-              turma: currentAlunosTurma,
-              alunos: data[key],
-              updatedAt: new Date().toISOString()
-            }, { merge: true }).catch(err => console.warn('Sync Firestore turma_alunos:', err));
+            saveTurmaAlunosAtomic(key, data[key], modifiedAlunoId);
           }
         }
       } catch (e) {
@@ -25680,28 +26280,54 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       }
     }
 
-    async function syncTurmaAlunosFromFirestore(etapa, turma) {
+    // FASE 3: Listener Realtime da Turma Ativa com Proteção de Foco na Digitação
+    let _activeTurmaAlunosListener = null;
+
+    function listenTurmaAlunosFromFirestore(etapa, turma) {
       if (!window.firebaseDb || typeof window.firebaseDb.collection !== 'function') return;
       const key = getTurmaKey(etapa, turma);
-      try {
-        const doc = await window.firebaseDb.collection('turma_alunos').doc(key).get();
-        if (doc && doc.exists) {
-          const cloudData = doc.data();
-          if (cloudData && Array.isArray(cloudData.alunos)) {
-            const db = getAlunosDatabase();
-            db[key] = cloudData.alunos;
-            const { changed } = aprovarAlunosLorenaDirect(db);
-            localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(db));
-            if (changed) {
-              syncAllTurmasToFirestore(db);
-            }
-            renderAlunosTable();
-            renderPainelPendencias();
-          }
-        }
-      } catch (e) {
-        console.warn('Sync cloud alunos error:', e);
+      if (!key) return;
+
+      if (_activeTurmaAlunosListener) {
+        _activeTurmaAlunosListener();
+        _activeTurmaAlunosListener = null;
       }
+
+      try {
+        _activeTurmaAlunosListener = window.firebaseDb.collection('turma_alunos').doc(key)
+          .onSnapshot(doc => {
+            if (!doc || !doc.exists) return;
+            const cloudData = doc.data();
+            if (cloudData && Array.isArray(cloudData.alunos)) {
+              const db = getAlunosDatabase();
+
+              // Detecção de foco para não interromper digitação ativa
+              const activeEl = document.activeElement;
+              const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'SELECT');
+
+              db[key] = cloudData.alunos;
+              try {
+                localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(db));
+              } catch (e) {}
+
+              if (!isTyping) {
+                renderAlunosTable();
+                renderPainelPendencias();
+              }
+              if (typeof window.updateFirestoreSyncStatus === 'function') {
+                window.updateFirestoreSyncStatus('synced', 'Nuvem Sincronizada');
+              }
+            }
+          }, err => {
+            console.warn('Listener turma_alunos:', key, err);
+          });
+      } catch (e) {
+        console.warn('Erro ao configurar listener turma_alunos:', e);
+      }
+    }
+
+    async function syncTurmaAlunosFromFirestore(etapa, turma) {
+      listenTurmaAlunosFromFirestore(etapa, turma);
     }
 
     async function syncAllTurmasFromFirestore() {
@@ -25720,6 +26346,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           });
           if (modified) {
             aprovarAlunosLorenaDirect(db);
+            aplicarAjusteRetroativoEucaristia24Outubro(db);
             try {
               localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(db));
             } catch (e) {}
