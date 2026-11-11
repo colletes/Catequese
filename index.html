@@ -22,19 +22,6 @@
   <!-- Cloudflare Turnstile (Anti-Bot) -->
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
-  <!-- Autocura de IndexedDB para eliminar locks órfãos de persistência (Prevenção do Erro 5 no Chrome) -->
-  <script>
-    try {
-      if (typeof window !== 'undefined' && window.indexedDB) {
-        const cleanupKey = 'icm_idb_cleaned_v20261110_b';
-        if (!localStorage.getItem(cleanupKey)) {
-          window.indexedDB.deleteDatabase('firestore/[DEFAULT]/catequese-icm/main');
-          localStorage.setItem(cleanupKey, 'true');
-        }
-      }
-    } catch(e) {}
-  </script>
-
   <!-- Firebase SDK v10 (Compat para vanilla JS) -->
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
@@ -8691,9 +8678,6 @@
         if (typeof window.ICM_CONFIG.listenUsersFromFirestore === 'function') {
           window.ICM_CONFIG.listenUsersFromFirestore();
         }
-        if (typeof syncEventosFromFirestore === 'function') {
-          syncEventosFromFirestore();
-        }
 
         // Observa sessão do Firebase Auth para sincronizar dados em tempo real
         firebaseAuth.onAuthStateChanged((user) => {
@@ -11253,6 +11237,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       if (_eventosMigrationRan) return;
       _eventosMigrationRan = true;
       if (!window.firebaseDb || typeof window.firebaseDb.collection !== 'function') return;
+      if (!firebaseAuth || !firebaseAuth.currentUser) return;
 
       try {
         const snap = await window.firebaseDb.collection('eventos').limit(3).get();
@@ -11384,8 +11369,6 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         _eventosFirestoreListener = window.firebaseDb.collection('eventos')
           .onSnapshot(snapshot => {
             if (!snapshot || snapshot.empty) {
-              // Se a coleção individual estiver vazia, apenas sincroniza legado sem loop
-              syncEventosFromFirestore();
               return;
             }
 
@@ -11411,8 +11394,6 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             }
           }, err => {
             console.warn('Listener Firestore eventos (coleção individual):', err);
-            // Fallback para documento consolidado
-            syncEventosFromFirestore();
           });
       } catch (err) {
         console.warn('Erro ao configurar listener de eventos:', err);
@@ -11459,7 +11440,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     function saveEventosData(list, singleEvent) {
       try {
         localStorage.setItem(STORAGE_KEY_EVENTOS, JSON.stringify(list));
-        if (window.firebaseDb && typeof window.firebaseDb.collection === 'function' && singleEvent) {
+        if (window.firebaseDb && typeof window.firebaseDb.collection === 'function' && singleEvent && singleEvent.id) {
           if (typeof window.updateFirestoreSyncStatus === 'function') {
             window.updateFirestoreSyncStatus('saving', 'Salvando Evento...');
           }
@@ -31665,15 +31646,6 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     // =============================================
     document.addEventListener('DOMContentLoaded', () => {
       checkSiteAuth();
-      if (typeof aprovarTodosAlunosDaLorena === 'function') {
-        aprovarTodosAlunosDaLorena(true);
-      }
-      if (typeof syncAllChamadasToFirestore === 'function') {
-        syncAllChamadasToFirestore(getChamadasDatabase());
-      }
-      if (typeof saveEventosData === 'function') {
-        saveEventosData(getEventosData());
-      }
       renderOrganogramaAll();
       if (typeof subscribeOrganogramaRealtime === 'function' && typeof getActiveOrganogramaId === 'function') {
         subscribeOrganogramaRealtime(getActiveOrganogramaId());
