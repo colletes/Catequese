@@ -22,6 +22,63 @@
   <!-- Cloudflare Turnstile (Anti-Bot) -->
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
+  <!-- Auto-Cura de Armazenamento e Eliminação Automática de Locks Legados (Prevenção do Erro 5 para Todos os Usuários) -->
+  <script>
+    (function() {
+      const HEAL_VERSION = 'v20261111_heal_v1';
+      try {
+        if (window.location.search && window.location.search.includes('autoheal=')) {
+          return;
+        }
+        if (localStorage.getItem('icm_heal_active') !== HEAL_VERSION) {
+          // 1. Limpa todas as chaves de cache local anteriores para evitar conflitos de lock
+          const keysToClear = [];
+          for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && (k.startsWith('catequese_') || k.startsWith('firestore') || k.startsWith('firebase') || k.startsWith('icm_'))) {
+              keysToClear.push(k);
+            }
+          }
+          keysToClear.forEach(k => {
+            try { localStorage.removeItem(k); } catch(e) {}
+          });
+
+          // 2. Limpa sessionStorage
+          try { sessionStorage.clear(); } catch(e) {}
+
+          // 3. Marca como higienizado para NUNCA mais executar este ciclo
+          localStorage.setItem('icm_heal_active', HEAL_VERSION);
+          if (localStorage.getItem('icm_heal_active') !== HEAL_VERSION) {
+            return;
+          }
+
+          // 4. Deleta banco IndexedDB de persistência antiga que retinha locks de abas
+          if (typeof window !== 'undefined' && window.indexedDB) {
+            try {
+              if (typeof window.indexedDB.databases === 'function') {
+                window.indexedDB.databases().then(dbs => {
+                  if (Array.isArray(dbs)) {
+                    dbs.forEach(db => {
+                      if (db && db.name && (db.name.includes('firestore') || db.name.includes('catequese'))) {
+                        try { window.indexedDB.deleteDatabase(db.name); } catch(e) {}
+                      }
+                    });
+                  }
+                }).catch(() => {});
+              }
+              window.indexedDB.deleteDatabase('firestore/[DEFAULT]/catequese-icm/main');
+            } catch(e) {}
+          }
+
+          // 5. Recarrega uma única vez para iniciar com contexto de memória totalmente novo e limpo
+          window.location.replace(window.location.pathname + '?autoheal=' + Date.now() + window.location.hash);
+        }
+      } catch(e) {
+        console.warn('Autoheal skipped:', e);
+      }
+    })();
+  </script>
+
   <!-- Firebase SDK v10 (Compat para vanilla JS) -->
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
@@ -29,9 +86,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-storage-compat.js"></script>
 
   <!-- Configuração do Firebase & Governança LGPD -->
-  <script src="firebase-config.js?v=20261027-v4"></script>
+  <script src="firebase-config.js?v=20261111-v1"></script>
   <!-- Base Oficial de Catequistas com Fotos 3x4 Protegidas por LGPD -->
-  <script src="catequistas-data.js"></script>
+  <script src="catequistas-data.js?v=20261111-v1"></script>
 
   <!-- Marked.js, Turndown.js, Mammoth.js & PDF.js (Processamento de Conteúdo e Conversão) -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
