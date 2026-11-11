@@ -8646,19 +8646,6 @@
         firebaseDb = firebase.firestore();
         window.firebaseDb = firebaseDb;
 
-        // FASE 1: Persistência Offline Nativa e Concorrência Multi-Aba (IndexedDB)
-        if (typeof firebaseDb.enablePersistence === 'function') {
-          firebaseDb.enablePersistence({ synchronizeTabs: true }).catch((err) => {
-            if (err.code === 'failed-precondition') {
-              console.warn('⚠️ Firestore: Múltiplas abas abertas simultaneamente (persistência ativa na aba líder).');
-            } else if (err.code === 'unimplemented') {
-              console.warn('⚠️ Firestore: O navegador atual não suporta persistência IndexedDB.');
-            } else {
-              console.warn('⚠️ Firestore: Erro ao configurar persistência:', err);
-            }
-          });
-        }
-
         // Funções globais de status de sincronização em tempo real
         window.updateFirestoreSyncStatus = function(status, detail) {
           const badge = document.getElementById('firestore-sync-badge');
