@@ -72,6 +72,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Nunito:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,400;1,600&family=Outfit:wght@300;400;500;600;700;800;900&family=Questrial&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
   
   <style>
+    /* Modais centralizados com rolagem: com items-center o topo de um conteúdo mais alto que a tela fica inalcançável.
+       Alinha ao topo e centraliza o painel via margin auto, o que mantém o centro quando cabe e rola desde o topo quando não cabe. */
+    .fixed.inset-0.flex.items-center.overflow-y-auto { align-items: flex-start; }
+    .fixed.inset-0.flex.items-center.overflow-y-auto > * { margin-top: auto; margin-bottom: auto; }
+
     :root {
       --color-gold: #d4a94f;
       --color-gold-hover: #facf75;
