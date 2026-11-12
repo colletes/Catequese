@@ -28005,7 +28005,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         db[key].push(alunoObj);
       }
 
-      saveAlunosDatabase(db);
+      // Informa o id editado para que, no merge com a nuvem, a edição vença o dado antigo do Firestore
+      saveAlunosDatabase(db, alunoObj.id);
 
       // Trilha de auditoria silenciosa e perene (Art. 37 LGPD)
       window.ICM_CONFIG.logAuditEvent(isEdit ? 'UPDATE_ALUNO' : 'CREATE_ALUNO', `${currentAlunosEtapa} - ${currentAlunosTurma}`, {
