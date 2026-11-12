@@ -3968,6 +3968,32 @@
                 </div>
               </div>
 
+              <!-- 4. Período a imprimir (não altera as datas cadastradas da turma) -->
+              <div class="md:col-span-2 border-t border-slate-200 pt-3">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                  <span>🗓️</span> <span>4. Período a Imprimir:</span>
+                  <span id="print-range-count-badge" class="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded-full">0 encontros</span>
+                </label>
+                <div class="flex flex-wrap items-center gap-2 text-xs">
+                  <label class="flex items-center gap-1.5 p-2 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-indigo-400 transition">
+                    <input type="radio" name="print-range-mode" value="all" checked onchange="updatePrintChamadaPreview()" class="text-indigo-600 focus:ring-indigo-500">
+                    <span class="font-semibold text-slate-800">Todas as datas</span>
+                  </label>
+                  <label class="flex items-center gap-1.5 p-2 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-indigo-400 transition">
+                    <input type="radio" name="print-range-mode" value="single" onchange="updatePrintChamadaPreview()" class="text-indigo-600 focus:ring-indigo-500">
+                    <span class="font-semibold text-slate-800">Uma data</span>
+                  </label>
+                  <label class="flex items-center gap-1.5 p-2 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-indigo-400 transition">
+                    <input type="radio" name="print-range-mode" value="range" onchange="updatePrintChamadaPreview()" class="text-indigo-600 focus:ring-indigo-500">
+                    <span class="font-semibold text-slate-800">Intervalo de datas</span>
+                  </label>
+                  <select id="print-range-from" onchange="updatePrintChamadaPreview()" class="hidden border border-slate-300 rounded-lg px-2 py-1.5 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400"></select>
+                  <span id="print-range-sep" class="hidden text-slate-500 font-semibold">até</span>
+                  <select id="print-range-to" onchange="updatePrintChamadaPreview()" class="hidden border border-slate-300 rounded-lg px-2 py-1.5 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400"></select>
+                </div>
+                <p class="text-[10px] text-slate-500 mt-1.5">Só afeta a impressão: as datas cadastradas da turma não mudam. Nas colunas P / J / F, no % e na situação pastoral do Diário Preenchido, as faltas continuam somando todos os encontros do semestre.</p>
+              </div>
+
             </div>
           </div>
 
@@ -30244,6 +30270,66 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       if (modal) modal.classList.add('hidden');
     }
 
+    // Período escolhido no modal (todas / uma data / intervalo) aplicado à lista de datas da turma
+    function getPrintRangeSelection() {
+      const modeEl = document.querySelector('input[name="print-range-mode"]:checked');
+      const fromEl = document.getElementById('print-range-from');
+      const toEl = document.getElementById('print-range-to');
+      return {
+        mode: modeEl ? modeEl.value : 'all',
+        from: fromEl ? fromEl.value : '',
+        to: toEl ? toEl.value : ''
+      };
+    }
+
+    function applyPrintDateRange(sortedDates) {
+      const { mode, from, to } = getPrintRangeSelection();
+      if (mode === 'single' && from && sortedDates.includes(from)) return [from];
+      if (mode === 'range' && from && to && sortedDates.includes(from) && sortedDates.includes(to)) {
+        const lo = from <= to ? from : to;
+        const hi = from <= to ? to : from;
+        return sortedDates.filter(d => d >= lo && d <= hi);
+      }
+      return sortedDates;
+    }
+
+    // Preenche os seletores de período com as datas da turma, preservando a escolha atual quando as datas não mudam
+    function syncPrintRangeControls() {
+      const fromEl = document.getElementById('print-range-from');
+      const toEl = document.getElementById('print-range-to');
+      if (!fromEl || !toEl) return;
+
+      const dataTurma = getTurmaChamadasData(currentAlunosEtapa, currentAlunosTurma);
+      const all = ((dataTurma && Array.isArray(dataTurma.dates) && dataTurma.dates.length > 0)
+        ? [...dataTurma.dates]
+        : generateDefaultTurmaDates(currentAlunosEtapa, currentAlunosTurma)).sort();
+
+      const signature = `${currentAlunosEtapa}__${currentAlunosTurma}|${all.join(',')}`;
+      if (fromEl.dataset.signature !== signature) {
+        const opts = all.map(d => {
+          const parts = d.split('-');
+          return `<option value="${d}">${parts[2]}/${parts[1]}/${parts[0]} (${_diaSemana(d).slice(0, 3)})</option>`;
+        }).join('');
+        fromEl.innerHTML = opts;
+        toEl.innerHTML = opts;
+        fromEl.dataset.signature = signature;
+        fromEl.value = all[0] || '';
+        toEl.value = all[all.length - 1] || '';
+      }
+
+      const { mode } = getPrintRangeSelection();
+      fromEl.classList.toggle('hidden', mode === 'all');
+      toEl.classList.toggle('hidden', mode !== 'range');
+      const sep = document.getElementById('print-range-sep');
+      if (sep) sep.classList.toggle('hidden', mode !== 'range');
+
+      const badge = document.getElementById('print-range-count-badge');
+      if (badge) {
+        const n = applyPrintDateRange(all).length;
+        badge.textContent = `${n} encontro${n === 1 ? '' : 's'}`;
+      }
+    }
+
     // Gera o HTML do documento impresso conforme o modelo escolhido
     function generatePrintDocumentHtml() {
       const modelRadio = document.querySelector('input[name="print-doc-model"]:checked');
@@ -30257,9 +30343,13 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
       const alunos = getTurmaAlunos(currentAlunosEtapa, currentAlunosTurma).filter(isAlunoAtivo);
       const dataTurma = getTurmaChamadasData(currentAlunosEtapa, currentAlunosTurma);
-      let dates = (dataTurma && Array.isArray(dataTurma.dates) && dataTurma.dates.length > 0)
+      // allDates: todos os encontros (totais e alertas); dates: apenas o período escolhido para imprimir (colunas/linhas)
+      const allDates = ((dataTurma && Array.isArray(dataTurma.dates) && dataTurma.dates.length > 0)
         ? [...dataTurma.dates]
-        : generateDefaultTurmaDates(currentAlunosEtapa, currentAlunosTurma);
+        : generateDefaultTurmaDates(currentAlunosEtapa, currentAlunosTurma)).sort();
+      const dates = applyPrintDateRange(allDates);
+      const printSet = new Set(dates);
+      const periodoParcial = dates.length !== allDates.length;
 
       const info = masterScheduleList.find(t => t.stage === currentAlunosEtapa && t.turma === currentAlunosTurma);
 
@@ -30395,6 +30485,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             </div>
             <div style="font-size: 9.5px; color: #64748b;">
               Diretriz Paroquial: Limite de 3 faltas no semestre. Acima de 3 (&gt;3), notificar coordenação.
+              ${periodoParcial ? '<br><strong>Período impresso: ' + _dataFmt(dates[0]) + (dates.length > 1 ? ' a ' + _dataFmt(dates[dates.length - 1]) : '') + '. P / J / F, % e situação consideram todos os encontros do semestre.</strong>' : ''}
             </div>
           </div>
 
@@ -30435,20 +30526,21 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           let fCount = 0;
 
           let cellVals = '';
-          dates.forEach(d => {
+          allDates.forEach(d => {
             const r = dataTurma.records && dataTurma.records[d] && dataTurma.records[d][a.id];
             const st = r ? r.status : '';
+            const show = printSet.has(d);
             if (st === 'P') {
               pCount++;
-              cellVals += `<td style="border: 1px solid #cbd5e1; padding: 3px 1px; text-align: center; font-weight: bold; color: #15803d; background: #f0fdf4; font-size: 8.5px;">P</td>`;
+              if (show) cellVals += `<td style="border: 1px solid #cbd5e1; padding: 3px 1px; text-align: center; font-weight: bold; color: #15803d; background: #f0fdf4; font-size: 8.5px;">P</td>`;
             } else if (st === 'J') {
               jCount++;
               fCount++; // ausência justificada conta como falta normalmente
-              cellVals += `<td style="border: 1px solid #cbd5e1; padding: 3px 1px; text-align: center; font-weight: bold; color: #b45309; background: #fefce8; font-size: 8.5px;" title="${r.justificativa || 'Justificada'}">J</td>`;
+              if (show) cellVals += `<td style="border: 1px solid #cbd5e1; padding: 3px 1px; text-align: center; font-weight: bold; color: #b45309; background: #fefce8; font-size: 8.5px;" title="${r.justificativa || 'Justificada'}">J</td>`;
             } else if (st === 'F') {
               fCount++;
-              cellVals += `<td style="border: 1px solid #cbd5e1; padding: 3px 1px; text-align: center; font-weight: bold; color: #b91c1c; background: #fef2f2; font-size: 8.5px;">F</td>`;
-            } else {
+              if (show) cellVals += `<td style="border: 1px solid #cbd5e1; padding: 3px 1px; text-align: center; font-weight: bold; color: #b91c1c; background: #fef2f2; font-size: 8.5px;">F</td>`;
+            } else if (show) {
               cellVals += `<td style="border: 1px solid #cbd5e1; padding: 3px 1px; text-align: center; color: #cbd5e1; font-size: 8px;">—</td>`;
             }
           });
@@ -30496,7 +30588,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       // MODELO 3: FOLHA DO DIA (Com campo de assinatura de presença)
       // -------------------------------------------------------------
       else if (model === 'dia') {
-        const dStr = currentChamadaSelectedDate || (dates[0] || '2026-03-07');
+        const rangeSel = getPrintRangeSelection();
+        const dStr = (rangeSel.mode !== 'all' && dates[0]) ? dates[0] : (currentChamadaSelectedDate || (dates[0] || '2026-03-07'));
         const sem = _diaSemana(dStr);
         const fmt = _dataFmt(dStr);
 
@@ -30554,7 +30647,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         let totalAcimaLimite = 0;
         alunos.forEach(a => {
           let fa = 0;
-          dates.forEach(d => {
+          allDates.forEach(d => {
             const r = dataTurma.records && dataTurma.records[d] && dataTurma.records[d][a.id];
             if (r && (r.status === 'F' || r.status === 'J')) fa++;
           });
@@ -30565,7 +30658,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         html += `
           <div style="margin-top: 12px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 9.5px; color: #334155;">
             <div>Total de Catequizandos: <strong>${alunos.length}</strong></div>
-            <div>Encontros Agendados: <strong>${dates.length}</strong></div>
+            <div>Encontros Agendados: <strong>${allDates.length}</strong>${periodoParcial ? ' (impressos: ' + dates.length + ')' : ''}</div>
             <div>No Limite de Tolerância (3 faltas): <strong style="color: #b45309;">${totalFaltosos}</strong></div>
             <div>Em Alerta Crítico (&gt;3 faltas): <strong style="color: #b91c1c;">${totalAcimaLimite}</strong></div>
           </div>
@@ -30616,6 +30709,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         previewPaper.style.maxWidth = '980px';
       }
 
+      syncPrintRangeControls();
       previewPaper.innerHTML = generatePrintDocumentHtml();
 
       // Renderiza os chips de gerenciamento de datas no modal de impressão
@@ -30671,7 +30765,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       // Trilha de auditoria
       window.ICM_CONFIG.logAuditEvent('PRINT_CHAMADA', `${currentAlunosEtapa} - ${currentAlunosTurma}`, {
         model: (document.querySelector('input[name="print-doc-model"]:checked') || {}).value,
-        orientation: (document.querySelector('input[name="print-doc-orientation"]:checked') || {}).value
+        orientation: (document.querySelector('input[name="print-doc-orientation"]:checked') || {}).value,
+        periodo: getPrintRangeSelection()
       });
 
       // Dispara a impressão nativa
