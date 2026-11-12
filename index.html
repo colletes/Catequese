@@ -13947,7 +13947,11 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       syncCatequistaCoordinationToOrganograma(list[idx]);
 
       // 3. Sincroniza com Firestore sob proteção RBAC com merge construtivo
-      if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
+      // Sem sessão Firebase a gravação seria negada em silêncio e a alteração ficaria só neste navegador
+      const firebaseSignedIn = !!(window.firebase && typeof window.firebase.auth === 'function' && window.firebase.auth().currentUser);
+      if (!window.firebaseDb || typeof window.firebaseDb.collection !== 'function' || !firebaseSignedIn) {
+        alert('⚠️ Alteração salva apenas neste navegador: não há sessão ativa na nuvem. Entre com sua conta Google (Coordenação) na versão publicada do sistema para que as outras pessoas vejam a mudança.');
+      } else {
         const userEmail = (window.appAuthState && window.appAuthState.user && window.appAuthState.user.email) || '';
         const userName = (window.appAuthState && window.appAuthState.user && (window.appAuthState.user.displayName || window.appAuthState.user.email)) || 'Coordenação';
 
@@ -13955,6 +13959,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           id: catId,
           nomeCompleto: list[idx].nomeCompleto,
           apelido: list[idx].apelido || '',
+          nomeConhecido: list[idx].nomeConhecido || '',
           dataNascimento: list[idx].dataNascimento,
           telefone: list[idx].telefone,
           telefoneRaw: list[idx].telefoneRaw,
@@ -13981,6 +13986,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           console.log('✅ Dados cadastrais do catequista persistidos no Firestore:', catId);
         }).catch(err => {
           console.warn('Erro ao salvar catequista no Firestore:', err);
+          alert('⚠️ Alteração salva apenas neste navegador: a nuvem recusou a gravação (' + ((err && (err.code || err.message)) || 'erro desconhecido') + '). Outras pessoas não verão a mudança até que isso seja resolvido.');
         });
       }
 
