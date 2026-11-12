@@ -15627,7 +15627,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         localStorage.setItem(STORAGE_KEY_ORGANOGRAMAS, JSON.stringify(data));
         const activeId = getActiveOrganogramaId();
         if (data && data[activeId] && typeof syncOrganogramaToFirestore === 'function') {
-          syncOrganogramaToFirestore(activeId, data[activeId]);
+          syncOrganogramaToFirestore(activeId, data[activeId], true);
         }
       } catch (e) {
         console.error('Erro ao salvar organogramas:', e);
@@ -16465,7 +16465,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     // =========================================================================
     let _unsubscribeOrgRealtime = null;
 
-    function syncOrganogramaToFirestore(orgId, orgData) {
+    let _ultimoAlertaOrgSync = 0;
+    function syncOrganogramaToFirestore(orgId, orgData, avisarFalha) {
       if (!window.firebaseDb || typeof window.firebaseDb.collection !== 'function') return;
       if (!orgData) return;
       window.firebaseDb.collection('organograma').doc(orgId).set({
@@ -16475,6 +16476,11 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         console.log(`Organograma ${orgId} sincronizado no Firestore com sucesso.`);
       }).catch(err => {
         console.warn(`Erro ao sincronizar organograma ${orgId} no Firestore:`, err);
+        // Avisa no máximo uma vez a cada 15s: salvar uma turma dispara mais de uma sincronização
+        if (avisarFalha && Date.now() - _ultimoAlertaOrgSync > 15000) {
+          _ultimoAlertaOrgSync = Date.now();
+          alert('⚠️ A alteração do organograma ficou só neste navegador: a nuvem recusou a gravação (' + ((err && (err.code || err.message)) || 'erro desconhecido') + '). Outras pessoas não verão a mudança e ela pode ser desfeita ao recarregar.');
+        }
       });
     }
 
@@ -16771,7 +16777,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       renderOrganogramaAll();
 
       // Sincroniza em nuvem no Firestore (KAN-01)
-      syncOrganogramaToFirestore(activeId, org);
+      syncOrganogramaToFirestore(activeId, org, true);
 
       // Sincroniza fichas dos catequistas com os nomes vinculados a esta turma
       if (typeof syncOrganogramaTurmaToCatequistas === 'function') {
