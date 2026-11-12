@@ -3471,6 +3471,11 @@
     <!-- ========================================== -->
     <!-- MODAL: CADASTRAR / EDITAR CATEQUIZANDO     -->
     <!-- ========================================== -->
+    <div id="cloud-session-banner" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-[90] w-[calc(100%-2rem)] max-w-xl bg-rose-950 text-rose-50 border border-rose-400/60 rounded-2xl shadow-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 no-print">
+      <p class="text-xs sm:text-sm flex-1"><strong>⚠️ Sem sessão na nuvem.</strong> Suas alterações ficam só neste navegador e outras pessoas não as verão. Entre com sua conta Google para que sejam salvas.</p>
+      <button type="button" onclick="reconnectCloudSessionWithGoogle()" class="shrink-0 bg-white text-rose-900 font-bold px-4 py-2 rounded-xl text-xs sm:text-sm hover:bg-rose-100 transition">Entrar com Google</button>
+    </div>
+
     <div id="modal-aluno" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
       <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-8">
         
@@ -8717,6 +8722,7 @@
         firebaseAuth.onAuthStateChanged((user) => {
           if (user) {
             console.log('🔥 Sessão Firebase Auth ativa:', user.email);
+            if (typeof checkCloudSessionBanner === 'function') checkCloudSessionBanner();
             // Sincroniza e ouve usuários agora que o token do Firebase está autenticado
             if (window.ICM_CONFIG && typeof window.ICM_CONFIG.syncUsersFromFirestore === 'function') {
               window.ICM_CONFIG.syncUsersFromFirestore();
@@ -8751,6 +8757,31 @@
       }
     } catch (err) {
       console.warn('Firebase SDK não pôde conectar em modo live. Operando com autenticação institucional protegida:', err);
+    }
+
+    // Login por e-mail/senha e sessões restauradas do localStorage não criam sessão no Firebase Auth:
+    // sem ela o Firestore recusa toda gravação, e as edições ficam só neste navegador.
+    function checkCloudSessionBanner() {
+      const banner = document.getElementById('cloud-session-banner');
+      if (!banner) return;
+      const semSessaoNuvem = !!firebaseAuth && !firebaseAuth.currentUser && !!(window.appAuthState && window.appAuthState.user);
+      banner.classList.toggle('hidden', !semSessaoNuvem);
+    }
+
+    async function reconnectCloudSessionWithGoogle() {
+      if (!firebaseAuth) return;
+      try {
+        const result = await firebaseAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+        const expected = ((window.appAuthState.user && window.appAuthState.user.email) || '').toLowerCase();
+        if (result.user && result.user.email && result.user.email.toLowerCase() !== expected) {
+          await firebaseAuth.signOut();
+          alert('⚠️ Você entrou com ' + result.user.email + ', mas o sistema está aberto como ' + expected + '. Entre com a mesma conta.');
+          return;
+        }
+        location.reload();
+      } catch (err) {
+        alert('Não foi possível entrar com Google: ' + ((err && (err.code || err.message)) || 'erro desconhecido'));
+      }
     }
 
     // Callback oficial do Cloudflare Turnstile
@@ -9102,6 +9133,8 @@
 
     // Desbloqueio do sistema após autenticação e aceite
     function unlockSystem(userData, role) {
+      // O Firebase restaura a sessão de forma assíncrona: confere depois se há sessão na nuvem
+      setTimeout(() => { if (typeof checkCloudSessionBanner === 'function') checkCloudSessionBanner(); }, 4000);
       const gate = document.getElementById('auth-gate');
       if (gate) {
         gate.style.opacity = '0';
