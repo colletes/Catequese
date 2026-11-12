@@ -26285,6 +26285,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         } catch (err) {
           // Não sobrescreve a nuvem com a cópia local (pode estar desatualizada): mantém local e tenta de novo na próxima gravação
           console.warn('Transação atômica turma_alunos falhou; cópia local mantida:', key, err);
+          window._ultimoErroSalvarTurma = (err && (err.code || err.message)) || 'erro desconhecido';
           if (typeof window.updateFirestoreSyncStatus === 'function') {
             window.updateFirestoreSyncStatus('offline', 'Modo Local (Offline)');
           }
@@ -26316,7 +26317,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
           const key = getTurmaKey(currentAlunosEtapa, currentAlunosTurma);
           if (data && data[key]) {
-            saveTurmaAlunosAtomic(key, data[key], modifiedAlunoId, removedIds);
+            return saveTurmaAlunosAtomic(key, data[key], modifiedAlunoId, removedIds);
           }
         }
       } catch (e) {
@@ -28012,7 +28013,14 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       }
 
       // Informa o id editado para que, no merge com a nuvem, a edição vença o dado antigo do Firestore
-      saveAlunosDatabase(db, alunoObj.id);
+      const salvoNaNuvem = saveAlunosDatabase(db, alunoObj.id);
+      if (salvoNaNuvem && typeof salvoNaNuvem.then === 'function') {
+        salvoNaNuvem.then(ok => {
+          if (ok === false) {
+            alert('⚠️ A alteração de "' + alunoObj.nome + '" ficou só neste navegador: a nuvem não aceitou a gravação (' + (window._ultimoErroSalvarTurma || 'erro desconhecido') + '). Ela pode ser desfeita ao recarregar.');
+          }
+        });
+      }
 
       // Trilha de auditoria silenciosa e perene (Art. 37 LGPD)
       window.ICM_CONFIG.logAuditEvent(isEdit ? 'UPDATE_ALUNO' : 'CREATE_ALUNO', `${currentAlunosEtapa} - ${currentAlunosTurma}`, {
