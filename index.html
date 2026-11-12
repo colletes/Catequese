@@ -16688,6 +16688,63 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       if (d && i && f) document.getElementById('turma-form-daytime').value = `${d}: ${i} às ${f}${window._turmaDayTimeSuffix || ''}`;
     }
 
+    // Alunos e chamadas são gravados pelo NOME da turma (Etapa__Turma NN). Ao renomear/trocar turmas no organograma,
+    // os dados trocam de chave junto, no navegador e na nuvem (transação: o dado da nuvem é o que vale).
+    async function trocarDadosEntreTurmas(keyA, keyB) {
+      if (!keyA || !keyB || keyA === keyB) return true;
+
+      const alunosDb = getAlunosDatabase();
+      const alunosA = alunosDb[keyA] || [];
+      const alunosB = alunosDb[keyB] || [];
+      alunosDb[keyA] = alunosB;
+      alunosDb[keyB] = alunosA;
+      try { localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(alunosDb)); } catch (e) {}
+
+      const chamadasDb = getChamadasDatabase();
+      const chamadaA = chamadasDb[keyA];
+      const chamadaB = chamadasDb[keyB];
+      if (chamadaB) chamadasDb[keyA] = chamadaB; else delete chamadasDb[keyA];
+      if (chamadaA) chamadasDb[keyB] = chamadaA; else delete chamadasDb[keyB];
+      try { localStorage.setItem(STORAGE_KEY_CHAMADAS, JSON.stringify(chamadasDb)); } catch (e) {}
+
+      let ok = true;
+      if (window.firebaseDb && typeof window.firebaseDb.runTransaction === 'function') {
+        for (const coll of ['turma_alunos', 'turma_chamadas']) {
+          try {
+            await window.firebaseDb.runTransaction(async (tx) => {
+              const refA = window.firebaseDb.collection(coll).doc(keyA);
+              const refB = window.firebaseDb.collection(coll).doc(keyB);
+              const snapA = await tx.get(refA);
+              const snapB = await tx.get(refB);
+              const dataA = snapA.exists ? snapA.data() : null;
+              const dataB = snapB.exists ? snapB.data() : null;
+              const [etapaA, turmaA] = keyA.split('__');
+              const [etapaB, turmaB] = keyB.split('__');
+              if (dataB) tx.set(refA, { ...dataB, etapa: etapaA, turma: turmaA, updatedAt: new Date().toISOString() });
+              else if (snapA.exists) tx.delete(refA);
+              if (dataA) tx.set(refB, { ...dataA, etapa: etapaB, turma: turmaB, updatedAt: new Date().toISOString() });
+              else if (snapB.exists) tx.delete(refB);
+            });
+          } catch (err) {
+            ok = false;
+            console.warn('Troca de dados de turma falhou na nuvem:', coll, keyA, keyB, err);
+            alert('⚠️ Os alunos/chamadas de ' + keyA.replace('__', ' - ') + ' e ' + keyB.replace('__', ' - ') + ' foram movidos só neste navegador: a nuvem recusou (' + ((err && (err.code || err.message)) || 'erro desconhecido') + ').');
+            break;
+          }
+        }
+      }
+
+      if (typeof renderAlunosTable === 'function') renderAlunosTable();
+      if (typeof renderCadastroGeralTable === 'function') renderCadastroGeralTable();
+      if (typeof renderPainelPendencias === 'function') renderPainelPendencias();
+      return ok;
+    }
+
+    // Conserta uma troca de nomes já feita no organograma: window.trocarAlunosEntreTurmas('Eucaristia II', 'Turma 04', 'Turma 06')
+    window.trocarAlunosEntreTurmas = function (etapa, turmaA, turmaB) {
+      return trocarDadosEntreTurmas(getTurmaKey(etapa, turmaA), getTurmaKey(etapa, turmaB));
+    };
+
     async function handleSaveTurmaModal(event) {
       if (event) event.preventDefault();
 
@@ -16765,6 +16822,37 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       const nowIso = new Date().toISOString();
       const authorEmail = (window.appAuthState && window.appAuthState.user && window.appAuthState.user.email) ? window.appAuthState.user.email : 'admin';
 
+      // Renomeação: alunos e chamadas são gravados pelo nome da turma e precisam acompanhá-la
+      let chaveAntiga = null;
+      let trocaComOutraTurma = false;
+      if (turmaId) {
+        let anterior = null;
+        let etapaAnterior = null;
+        (org.stages || []).forEach(st => (st.turmas || []).forEach(t => {
+          if (t.id === turmaId) { anterior = t; etapaAnterior = st.name; }
+        }));
+        if (anterior && (anterior.turma !== turmaName || etapaAnterior !== etapaName)) {
+          chaveAntiga = getTurmaKey(etapaAnterior, anterior.turma);
+          const outra = (stage.turmas || []).find(t => t.id !== turmaId && (t.turma || '').trim() === turmaName);
+          if (outra) {
+            if (etapaAnterior !== etapaName) {
+              alert('⚠️ Já existe "' + turmaName + '" em ' + etapaName + '. Escolha outro nome para mover esta turma de etapa.');
+              return;
+            }
+            const confirmaTroca = confirm(
+              'Já existe "' + turmaName + '" em ' + etapaName + '.\n\n' +
+              'Clique em [OK] para TROCAR os nomes: esta turma vira "' + turmaName + '" e a outra vira "' + anterior.turma + '", ' +
+              'e os alunos e as chamadas de cada uma acompanham a sua sala.\n\n[Cancelar] não salva nada.'
+            );
+            if (!confirmaTroca) return;
+            outra.turma = anterior.turma;
+            outra.updatedAt = nowIso;
+            outra.updatedBy = authorEmail;
+            trocaComOutraTurma = true;
+          }
+        }
+      }
+
       if (turmaId) {
         // Edit existing: Remove from wherever it was and insert into target stage
         (org.stages || []).forEach(st => {
@@ -16815,6 +16903,18 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       // Sincroniza fichas dos catequistas com os nomes vinculados a esta turma
       if (typeof syncOrganogramaTurmaToCatequistas === 'function') {
         syncOrganogramaTurmaToCatequistas(etapaName, turmaName, catechists, auxiliares);
+      }
+
+      // Move alunos e chamadas junto com a turma renomeada
+      if (chaveAntiga) {
+        const chaveNova = getTurmaKey(etapaName, turmaName);
+        const semSeedNaAntiga = !(typeof SEED_ALUNOS_DATABASE !== 'undefined' && SEED_ALUNOS_DATABASE[chaveAntiga]);
+        // Sem troca, a chave antiga fica vazia e o seed a repovoaria: nesses casos só a troca é segura
+        if (trocaComOutraTurma || semSeedNaAntiga) {
+          await trocarDadosEntreTurmas(chaveAntiga, chaveNova);
+        } else {
+          alert('ℹ️ Turma renomeada, mas os alunos de "' + chaveAntiga.replace('__', ' - ') + '" fazem parte da base inicial e permanecem nessa turma. Para levá-los, troque os nomes com outra turma da etapa.');
+        }
       }
     }
 
