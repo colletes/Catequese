@@ -28298,7 +28298,9 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
       // Filtros rápidos
       const searchInput = document.getElementById('search-cadastro-geral');
-      const q = (searchInput ? searchInput.value : '').toLowerCase().trim();
+      const q = (searchInput ? searchInput.value : '').trim();
+      const qTerms = normCatString(q).split(/\s+/).filter(Boolean);
+      const qDigits = q.replace(/\D/g, '');
 
       const stageSelect = document.getElementById('sel-filter-cg-etapa');
       const stageVal = stageSelect ? stageSelect.value : 'all';
@@ -28316,8 +28318,11 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         }
 
         if (q) {
-          const fullStr = `${a.nome} ${a.cpf} ${a.contato} ${a.email} ${a.stage} ${a.turma} ${a.endereco} ${a.observacoes} ${a.nomeResponsavel}`.toLowerCase();
-          if (!fullStr.includes(q)) return false;
+          // Busca sem acento/maiúscula, com todas as palavras em qualquer ordem; CPF e telefone também casam só pelos dígitos
+          const fullStr = normCatString(`${a.nome} ${a.cpf} ${a.contato} ${a.email} ${a.stage} ${a.turma} ${a.endereco} ${a.observacoes} ${a.nomeResponsavel}`);
+          const matchTexto = qTerms.every(t => fullStr.includes(t));
+          const matchDigitos = qDigits.length >= 4 && `${a.cpf || ''}${a.contato || ''}`.replace(/\D/g, '').includes(qDigits);
+          if (!matchTexto && !matchDigitos) return false;
         }
         return true;
       });
