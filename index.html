@@ -16744,8 +16744,8 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
     // Repara duas turmas que ficaram com alunos duplicados após uma troca de nomes.
     // O id dos alunos da base inicial traz a turma de origem (euc2-t4-1 = Turma 04); como as salas trocaram de nome, o destino é a outra turma.
-    // Sem aplicar=true só mostra o plano. Alunos sem esse padrão ficam onde já estão e são listados para conferência.
-    window.repararTurmasDuplicadas = async function (etapa, turmaA, turmaB, aplicar) {
+    // Sem aplicar=true só mostra o plano. Alunos sem esse padrão ficam onde já estão e são listados para conferência, salvo se origemSemPadrao (nome da turma de origem deles) for informado.
+    window.repararTurmasDuplicadas = async function (etapa, turmaA, turmaB, aplicar, origemSemPadrao) {
       const keyA = getTurmaKey(etapa, turmaA), keyB = getTurmaKey(etapa, turmaB);
       const numA = parseInt((turmaA.match(/\d+/) || [])[0], 10), numB = parseInt((turmaB.match(/\d+/) || [])[0], 10);
       const fontes = [];
@@ -16772,6 +16772,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         const n = m ? parseInt(m[1], 10) : NaN;
         let k;
         if (n === numA) k = keyB; else if (n === numB) k = keyA;
+        else if (origemSemPadrao === turmaA || origemSemPadrao === turmaB) k = origemSemPadrao === turmaA ? keyB : keyA;
         else { k = origem.has(keyA) ? keyA : keyB; conferir.push(aluno.nome + ' → ' + k.split('__')[1] + (origem.size > 1 ? ' (estava nas duas)' : '')); }
         destino[k].push(aluno);
       });
