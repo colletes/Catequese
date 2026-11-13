@@ -3296,6 +3296,9 @@
             <button onclick="exportCadastroGeralCSV()" class="inline-flex items-center gap-1.5 bg-[#d4a94f] hover:bg-amber-600 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs sm:text-sm transition shadow" title="Exportar toda a base consolidada para planilha CSV/Excel">
               <span>📥</span> <span>Exportar Base Completa</span>
             </button>
+            <button onclick="conferirAlunosComNuvem()" class="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 px-3.5 py-2 rounded-xl text-xs sm:text-sm transition font-semibold" title="Compara as fichas deste navegador com a nuvem e envia as diferenças">
+              <span>☁️</span> <span>Conferir com a nuvem</span>
+            </button>
             <button onclick="clearAllCadastroGeralFilters()" class="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 px-3.5 py-2 rounded-xl text-xs sm:text-sm transition font-medium" title="Limpar todos os filtros por coluna aplicados">
               <span>🔄</span> <span>Limpar Filtros</span>
             </button>
@@ -3471,6 +3474,11 @@
     <!-- ========================================== -->
     <!-- MODAL: CADASTRAR / EDITAR CATEQUIZANDO     -->
     <!-- ========================================== -->
+    <div id="nova-versao-banner" class="hidden fixed bottom-4 right-4 z-[90] max-w-sm bg-slate-900 text-white border border-amber-400/60 rounded-2xl shadow-2xl p-4 flex items-center gap-3 no-print">
+      <p class="text-xs sm:text-sm flex-1"><strong>🔄 Nova versão disponível.</strong> Atualize para ver as últimas mudanças.</p>
+      <button type="button" onclick="location.reload()" class="shrink-0 bg-amber-400 text-slate-950 font-bold px-3 py-2 rounded-xl text-xs sm:text-sm hover:bg-amber-300 transition">Atualizar</button>
+    </div>
+
     <div id="cloud-session-banner" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-[90] w-[calc(100%-2rem)] max-w-xl bg-rose-950 text-rose-50 border border-rose-400/60 rounded-2xl shadow-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 no-print">
       <p class="text-xs sm:text-sm flex-1"><strong>⚠️ Sem sessão na nuvem.</strong> Suas alterações ficam só neste navegador e outras pessoas não as verão. Entre com sua conta Google para que sejam salvas.</p>
       <button type="button" onclick="reconnectCloudSessionWithGoogle()" class="shrink-0 bg-white text-rose-900 font-bold px-4 py-2 rounded-xl text-xs sm:text-sm hover:bg-rose-100 transition">Entrar com Google</button>
@@ -8742,6 +8750,9 @@
             if (typeof syncCatequistasFromFirestore === 'function') {
               syncCatequistasFromFirestore();
             }
+            if (typeof syncAllTurmasFromFirestore === 'function') {
+              syncAllTurmasFromFirestore();
+            }
             if (window.WikiKB && typeof window.WikiKB.setupCloudSync === 'function') {
               window.WikiKB.setupCloudSync(true);
             }
@@ -8758,6 +8769,41 @@
     } catch (err) {
       console.warn('Firebase SDK não pôde conectar em modo live. Operando com autenticação institucional protegida:', err);
     }
+
+    // Atualização de versão: usuários não precisam limpar cache. Compara o ETag/Last-Modified do index.html publicado com o do carregamento.
+    (function iniciarVerificadorDeVersao() {
+      if (!/^https?:/.test(location.protocol)) return;
+      const assinatura = async () => {
+        try {
+          const r = await fetch(location.pathname, { method: 'HEAD', cache: 'no-store' });
+          return r.headers.get('etag') || r.headers.get('last-modified') || null;
+        } catch (e) { return null; }
+      };
+      let base = null, novaVersao = false;
+      const mostrar = () => {
+        novaVersao = true;
+        const el = document.getElementById('nova-versao-banner');
+        if (el) el.classList.remove('hidden');
+      };
+      const checar = async () => {
+        if (novaVersao) return;
+        const atual = await assinatura();
+        if (!atual) return;
+        if (base === null) { base = atual; return; }
+        if (atual !== base) mostrar();
+      };
+      assinatura().then(v => { base = v; });
+      setInterval(checar, 5 * 60 * 1000);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState !== 'visible') return;
+        const antes = novaVersao;
+        checar().then(() => {
+          // Ao voltar para a aba com versão nova e nada aberto sendo editado, atualiza sozinho
+          const editando = document.querySelector('[id^="modal-"]:not(.hidden)') || (document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName));
+          if ((antes || novaVersao) && !editando) location.reload();
+        });
+      });
+    })();
 
     // Login por e-mail/senha e sessões restauradas do localStorage não criam sessão no Firebase Auth:
     // sem ela o Firestore recusa toda gravação, e as edições ficam só neste navegador.
@@ -16751,6 +16797,77 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       if (typeof renderCadastroGeralTable === 'function') renderCadastroGeralTable();
       if (typeof renderPainelPendencias === 'function') renderPainelPendencias();
       return ok;
+    }
+
+    // Compara as fichas deste navegador com a nuvem e, se aplicar=true, envia só as diferenças em que este navegador tem valor preenchido.
+    // Ignora campos que aqui estão vazios e na nuvem não (provável cópia local defasada) e alunos que existem só aqui (podem ter sido excluídos por outro usuário).
+    window.conciliarAlunosComNuvem = async function (aplicar) {
+      const auth = window.firebase && firebase.auth && firebase.auth();
+      if (!window.firebaseDb || !auth || !auth.currentUser) {
+        alert('⚠️ Entre com sua conta Google para conferir com a nuvem.');
+        return null;
+      }
+      const vazio = v => v === undefined || v === null || v === '';
+      const local = getAlunosDatabase();
+      const snap = await window.firebaseDb.collection('turma_alunos').get();
+      const diffs = [];
+      const porTurma = {};
+      let soAqui = 0, ignoradosVazios = 0;
+      snap.forEach(doc => {
+        const key = doc.id;
+        const data = doc.data() || {};
+        const nuvem = Array.isArray(data.alunos) ? data.alunos : [];
+        const nuvemPorId = new Map(nuvem.filter(a => a && a.id).map(a => [a.id, a]));
+        (local[key] || []).forEach(la => {
+          if (!la || !la.id) return;
+          const ca = nuvemPorId.get(la.id);
+          if (!ca) { soAqui++; return; }
+          const campos = {};
+          new Set([...Object.keys(la), ...Object.keys(ca)]).forEach(f => {
+            if (f.startsWith('_')) return;
+            const lv = la[f], cv = ca[f];
+            if (JSON.stringify(vazio(lv) ? '' : lv) === JSON.stringify(vazio(cv) ? '' : cv)) return;
+            if (vazio(lv)) { ignoradosVazios++; return; }
+            campos[f] = lv;
+            diffs.push({ turma: key.replace('__', ' - '), aluno: la.nome, campo: f, nuvem: vazio(cv) ? '(vazio)' : cv, aqui: lv });
+          });
+          if (Object.keys(campos).length) {
+            const t = porTurma[key] || (porTurma[key] = { epoch: data.swapEpoch, nuvem, patches: new Map() });
+            t.patches.set(la.id, campos);
+          }
+        });
+      });
+      const resumo = { diferencas: diffs.length, alunosAfetados: Object.values(porTurma).reduce((n, t) => n + t.patches.size, 0), soNesteNavegador: soAqui, ignoradosCampoVazioAqui: ignoradosVazios };
+      if (!aplicar) return { ...resumo, diffs };
+
+      let falhas = 0;
+      for (const [key, t] of Object.entries(porTurma)) {
+        setTurmaEpoch(key, t.epoch);
+        const lista = t.nuvem.map(a => (a && t.patches.has(a.id)) ? { ...a, ...t.patches.get(a.id) } : a);
+        const ok = await saveTurmaAlunosAtomic(key, lista, Array.from(t.patches.keys()));
+        if (ok === false) falhas++;
+      }
+      renderAlunosTable();
+      if (typeof renderCadastroGeralTable === 'function') renderCadastroGeralTable();
+      return { ...resumo, aplicado: true, turmasComFalha: falhas };
+    };
+
+    async function conferirAlunosComNuvem() {
+      try {
+        const r = await conciliarAlunosComNuvem(false);
+        if (!r) return;
+        if (r.diferencas === 0) {
+          alert('✅ As fichas deste navegador estão iguais às da nuvem.' + (r.soNesteNavegador ? '\n\n(' + r.soNesteNavegador + ' aluno(s) existem só aqui e não foram considerados.)' : ''));
+          return;
+        }
+        const linhas = r.diffs.slice(0, 20).map(d => '• ' + d.turma + ' — ' + d.aluno + ' — ' + d.campo + ': nuvem "' + d.nuvem + '" → aqui "' + d.aqui + '"').join('\n');
+        const mais = r.diferencas > 20 ? '\n… e mais ' + (r.diferencas - 20) + ' diferença(s).' : '';
+        if (!confirm('Encontrei ' + r.diferencas + ' diferença(s) em ' + r.alunosAfetados + ' ficha(s) entre este navegador e a nuvem:\n\n' + linhas + mais + '\n\nEnviar os valores DESTE navegador para a nuvem, para todos os usuários verem?')) return;
+        const fim = await conciliarAlunosComNuvem(true);
+        alert(fim.turmasComFalha ? '⚠️ Algumas turmas não foram gravadas (' + fim.turmasComFalha + '). Veja o aviso de erro e tente de novo.' : '✅ ' + fim.diferencas + ' diferença(s) enviada(s) para a nuvem.');
+      } catch (err) {
+        alert('Não foi possível conferir com a nuvem: ' + ((err && (err.code || err.message)) || 'erro desconhecido'));
+      }
     }
 
     // Move todos os alunos de uma turma para outra (a origem fica vazia e assim permanece), no navegador e na nuvem.
