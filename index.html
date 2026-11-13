@@ -12018,7 +12018,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         }
       });
       if (turmasAfetadas.length > 0) {
-        try { localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(db)); } catch (e) {}
+        try { gravarAlunosLocal(db); } catch (e) {}
         if (typeof renderAlunosTable === 'function') renderAlunosTable();
         if (typeof renderCadastroGeralTable === 'function') renderCadastroGeralTable();
         if (typeof renderPainelPendencias === 'function') renderPainelPendencias();
@@ -16698,7 +16698,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       const alunosB = alunosDb[keyB] || [];
       alunosDb[keyA] = alunosB;
       alunosDb[keyB] = alunosA;
-      try { localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(alunosDb)); } catch (e) {}
+      try { gravarAlunosLocal(alunosDb); } catch (e) {}
 
       const chamadasDb = getChamadasDatabase();
       const chamadaA = chamadasDb[keyA];
@@ -16742,6 +16742,41 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       return ok;
     }
 
+    // Move todos os alunos de uma turma para outra (a origem fica vazia e assim permanece), no navegador e na nuvem.
+    // Em ids repetidos vale a cópia que já está no destino. Sem aplicar=true só mostra o plano.
+    window.moverTodosAlunos = async function (etapa, turmaDe, turmaPara, aplicar) {
+      const keyDe = getTurmaKey(etapa, turmaDe), keyPara = getTurmaKey(etapa, turmaPara);
+      const coletar = async (k) => {
+        const lista = [];
+        if (window.firebaseDb) {
+          const snap = await window.firebaseDb.collection('turma_alunos').doc(k).get();
+          if (snap.exists) lista.push(...(snap.data().alunos || []));
+        }
+        lista.push(...(getAlunosDatabase()[k] || []));
+        return lista;
+      };
+      const mapa = new Map();
+      (await coletar(keyDe)).forEach(a => { if (a && a.id && !mapa.has(a.id)) mapa.set(a.id, a); });
+      (await coletar(keyPara)).forEach(a => { if (a && a.id && !mapa.has(a.id)) mapa.set(a.id, a); });
+      const destino = [...mapa.values()];
+      console.log('Plano:', { [turmaPara]: destino.length, [turmaDe]: 0 });
+      if (!aplicar) return { aplicado: false, [turmaPara]: destino.length, [turmaDe]: 0 };
+
+      const db = getAlunosDatabase();
+      db[keyDe] = []; db[keyPara] = destino;
+      gravarAlunosLocal(db);
+      if (window.firebaseDb) {
+        const epoch = new Date().toISOString();
+        await window.firebaseDb.runTransaction(async (tx) => {
+          tx.set(window.firebaseDb.collection('turma_alunos').doc(keyDe), { etapa, turma: turmaDe, alunos: [], swapEpoch: epoch, updatedAt: epoch });
+          tx.set(window.firebaseDb.collection('turma_alunos').doc(keyPara), { etapa, turma: turmaPara, alunos: destino, swapEpoch: epoch, updatedAt: epoch });
+        });
+        setTurmaEpoch(keyDe, epoch); setTurmaEpoch(keyPara, epoch);
+      }
+      renderAlunosTable(); if (typeof renderCadastroGeralTable === 'function') renderCadastroGeralTable();
+      return { aplicado: true, [turmaPara]: destino.length, [turmaDe]: 0 };
+    };
+
     // Repara duas turmas que ficaram com alunos duplicados após uma troca de nomes.
     // O id dos alunos da base inicial traz a turma de origem (euc2-t4-1 = Turma 04); como as salas trocaram de nome, o destino é a outra turma.
     // Sem aplicar=true só mostra o plano. Alunos sem esse padrão ficam onde já estão e são listados para conferência, salvo se origemSemPadrao (nome da turma de origem deles) for informado.
@@ -16781,7 +16816,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       if (!aplicar) return { aplicado: false, [turmaA]: destino[keyA].length, [turmaB]: destino[keyB].length, conferir };
 
       localDb[keyA] = destino[keyA]; localDb[keyB] = destino[keyB];
-      localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(localDb));
+      gravarAlunosLocal(localDb);
       if (window.firebaseDb) {
         const epoch = new Date().toISOString();
         await window.firebaseDb.runTransaction(async (tx) => {
@@ -26363,6 +26398,24 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       return { count, changed };
     }
 
+    // Turma da base inicial que ficou vazia de propósito (alunos transferidos/movidos) não pode ser repovoada pelo seed
+    const STORAGE_KEY_TURMAS_VAZIAS = 'catequese_turmas_vazias_v1';
+    function getTurmasVazias() {
+      try { return new Set(JSON.parse(localStorage.getItem(STORAGE_KEY_TURMAS_VAZIAS) || '[]')); } catch (e) { return new Set(); }
+    }
+    function gravarAlunosLocal(db) {
+      const vazias = getTurmasVazias();
+      let mudou = false;
+      Object.keys(db || {}).forEach(k => {
+        if (!Array.isArray(db[k])) return;
+        const temSeed = !!(SEED_ALUNOS_DATABASE[k] && SEED_ALUNOS_DATABASE[k].length > 0);
+        if (db[k].length === 0 && temSeed && !vazias.has(k)) { vazias.add(k); mudou = true; }
+        else if (db[k].length > 0 && vazias.has(k)) { vazias.delete(k); mudou = true; }
+      });
+      if (mudou) { try { localStorage.setItem(STORAGE_KEY_TURMAS_VAZIAS, JSON.stringify([...vazias])); } catch (e) {} }
+      localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(db));
+    }
+
     function getAlunosDatabase() {
       // 1. Inicia sempre com o SEED_ALUNOS_DATABASE completo (todas as etapas e turmas paroquiais)
       const db = JSON.parse(JSON.stringify(SEED_ALUNOS_DATABASE || {}));
@@ -26378,8 +26431,9 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           const parsed = JSON.parse(stored);
           if (parsed && typeof parsed === 'object') {
             // Mescla construtivamente cada turma com alunos gravados no storage sobre o SEED
+            const turmasVazias = getTurmasVazias();
             Object.keys(parsed).forEach(k => {
-              if (Array.isArray(parsed[k]) && parsed[k].length > 0) {
+              if (Array.isArray(parsed[k]) && (parsed[k].length > 0 || turmasVazias.has(k))) {
                 db[k] = parsed[k];
               }
             });
@@ -26399,7 +26453,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
       // 3. Atualiza o storage local para garantir integridade permanente e autocura
       try {
-        localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(db));
+        gravarAlunosLocal(db);
       } catch (e) {}
 
       return db;
@@ -26530,7 +26584,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
     function saveAlunosDatabase(data, modifiedAlunoId, removedIds) {
       try {
-        localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(data));
+        gravarAlunosLocal(data);
         if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
           const key = getTurmaKey(currentAlunosEtapa, currentAlunosTurma);
           if (data && data[key]) {
@@ -26570,7 +26624,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
               db[key] = cloudData.alunos;
               setTurmaEpoch(key, cloudData.swapEpoch);
               try {
-                localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(db));
+                gravarAlunosLocal(db);
               } catch (e) {}
 
               if (!isTyping) {
@@ -26602,7 +26656,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
           let modified = false;
           snap.forEach(doc => {
             const data = doc.data();
-            if (data && Array.isArray(data.alunos) && data.alunos.length > 0) {
+            if (data && Array.isArray(data.alunos) && (data.alunos.length > 0 || (SEED_ALUNOS_DATABASE[doc.id] || []).length > 0)) {
               db[doc.id] = data.alunos;
               setTurmaEpoch(doc.id, data.swapEpoch);
               modified = true;
@@ -26612,7 +26666,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             aprovarAlunosLorenaDirect(db);
             aplicarAjusteRetroativoEucaristia24Outubro(db);
             try {
-              localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(db));
+              gravarAlunosLocal(db);
             } catch (e) {}
             if (typeof renderCadastroGeralTable === 'function') renderCadastroGeralTable();
             if (typeof renderAlunosTable === 'function') renderAlunosTable();
@@ -27336,7 +27390,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       });
 
       db[toKey].push(aluno);
-      try { localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(db)); } catch (e) { console.error('Erro ao salvar banco de catequizandos:', e); }
+      try { gravarAlunosLocal(db); } catch (e) { console.error('Erro ao salvar banco de catequizandos:', e); }
 
       // Sincroniza em nuvem ambas as turmas via transação; a origem informa o id removido para o merge não ressuscitar o catequizando
       if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
@@ -27400,7 +27454,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         data: new Date().toISOString()
       };
 
-      try { localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(db)); } catch (e) {}
+      try { gravarAlunosLocal(db); } catch (e) {}
       if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
         saveTurmaAlunosAtomic(fromKey, db[fromKey], alunoId);
       }
@@ -27456,7 +27510,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
 
       // null (e não delete) para o merge com a nuvem não trazer a solicitação de volta
       aluno.transferenciaPendente = null;
-      try { localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(db)); } catch (e) {}
+      try { gravarAlunosLocal(db); } catch (e) {}
       if (window.firebaseDb && typeof window.firebaseDb.collection === 'function') {
         saveTurmaAlunosAtomic(turmaKey, db[turmaKey], alunoId);
       }
