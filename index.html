@@ -16708,6 +16708,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       try { localStorage.setItem(STORAGE_KEY_CHAMADAS, JSON.stringify(chamadasDb)); } catch (e) {}
 
       let ok = true;
+      const swapEpoch = new Date().toISOString();
       if (window.firebaseDb && typeof window.firebaseDb.runTransaction === 'function') {
         for (const coll of ['turma_alunos', 'turma_chamadas']) {
           try {
@@ -16720,9 +16721,9 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
               const dataB = snapB.exists ? snapB.data() : null;
               const [etapaA, turmaA] = keyA.split('__');
               const [etapaB, turmaB] = keyB.split('__');
-              if (dataB) tx.set(refA, { ...dataB, etapa: etapaA, turma: turmaA, updatedAt: new Date().toISOString() });
+              if (dataB) tx.set(refA, { ...dataB, etapa: etapaA, turma: turmaA, swapEpoch, updatedAt: swapEpoch });
               else if (snapA.exists) tx.delete(refA);
-              if (dataA) tx.set(refB, { ...dataA, etapa: etapaB, turma: turmaB, updatedAt: new Date().toISOString() });
+              if (dataA) tx.set(refB, { ...dataA, etapa: etapaB, turma: turmaB, swapEpoch, updatedAt: swapEpoch });
               else if (snapB.exists) tx.delete(refB);
             });
           } catch (err) {
@@ -16734,11 +16735,63 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
         }
       }
 
+      if (ok && window.firebaseDb) { setTurmaEpoch(keyA, swapEpoch); setTurmaEpoch(keyB, swapEpoch); }
       if (typeof renderAlunosTable === 'function') renderAlunosTable();
       if (typeof renderCadastroGeralTable === 'function') renderCadastroGeralTable();
       if (typeof renderPainelPendencias === 'function') renderPainelPendencias();
       return ok;
     }
+
+    // Repara duas turmas que ficaram com alunos duplicados após uma troca de nomes.
+    // O id dos alunos da base inicial traz a turma de origem (euc2-t4-1 = Turma 04); como as salas trocaram de nome, o destino é a outra turma.
+    // Sem aplicar=true só mostra o plano. Alunos sem esse padrão ficam onde já estão e são listados para conferência.
+    window.repararTurmasDuplicadas = async function (etapa, turmaA, turmaB, aplicar) {
+      const keyA = getTurmaKey(etapa, turmaA), keyB = getTurmaKey(etapa, turmaB);
+      const numA = parseInt((turmaA.match(/\d+/) || [])[0], 10), numB = parseInt((turmaB.match(/\d+/) || [])[0], 10);
+      const fontes = [];
+      if (window.firebaseDb) {
+        for (const k of [keyA, keyB]) {
+          const snap = await window.firebaseDb.collection('turma_alunos').doc(k).get();
+          fontes.push({ k, lista: snap.exists ? (snap.data().alunos || []) : [] });
+        }
+      }
+      const localDb = getAlunosDatabase();
+      [keyA, keyB].forEach(k => fontes.push({ k, lista: localDb[k] || [] }));
+
+      const porId = new Map();
+      fontes.forEach(f => f.lista.forEach(a => {
+        if (!a || !a.id) return;
+        if (!porId.has(a.id)) porId.set(a.id, { aluno: a, origem: new Set() });
+        porId.get(a.id).origem.add(f.k);
+      }));
+
+      const destino = { [keyA]: [], [keyB]: [] };
+      const conferir = [];
+      porId.forEach(({ aluno, origem }, id) => {
+        const m = /-t(\d+)-\d+$/.exec(id);
+        const n = m ? parseInt(m[1], 10) : NaN;
+        let k;
+        if (n === numA) k = keyB; else if (n === numB) k = keyA;
+        else { k = origem.has(keyA) ? keyA : keyB; conferir.push(aluno.nome + ' → ' + k.split('__')[1] + (origem.size > 1 ? ' (estava nas duas)' : '')); }
+        destino[k].push(aluno);
+      });
+
+      console.log('Plano:', { [turmaA]: destino[keyA].length, [turmaB]: destino[keyB].length, aConferir: conferir });
+      if (!aplicar) return { aplicado: false, [turmaA]: destino[keyA].length, [turmaB]: destino[keyB].length, conferir };
+
+      localDb[keyA] = destino[keyA]; localDb[keyB] = destino[keyB];
+      localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(localDb));
+      if (window.firebaseDb) {
+        const epoch = new Date().toISOString();
+        await window.firebaseDb.runTransaction(async (tx) => {
+          [keyA, keyB].forEach(k => tx.set(window.firebaseDb.collection('turma_alunos').doc(k),
+            { etapa, turma: k.split('__')[1], alunos: destino[k], swapEpoch: epoch, updatedAt: epoch }));
+        });
+        setTurmaEpoch(keyA, epoch); setTurmaEpoch(keyB, epoch);
+      }
+      renderAlunosTable(); if (typeof renderCadastroGeralTable === 'function') renderCadastroGeralTable();
+      return { aplicado: true, [turmaA]: destino[keyA].length, [turmaB]: destino[keyB].length, conferir };
+    };
 
     // Conserta uma troca de nomes já feita no organograma: window.trocarAlunosEntreTurmas('Eucaristia II', 'Turma 04', 'Turma 06')
     window.trocarAlunosEntreTurmas = function (etapa, turmaA, turmaB) {
@@ -26361,6 +26414,20 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
       });
     }
 
+    // Época de troca de turmas: quando duas turmas trocam de alunos, a nuvem recebe um swapEpoch novo.
+    // Navegadores que ainda não viram essa época estão defasados e não podem regravar a lista antiga (que se somaria à nova).
+    const STORAGE_KEY_TURMA_EPOCH = 'catequese_turma_epoch_v1';
+    function getTurmaEpochs() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY_TURMA_EPOCH) || '{}') || {}; } catch (e) { return {}; }
+    }
+    function setTurmaEpoch(key, epoch) {
+      if (!epoch) return;
+      const m = getTurmaEpochs();
+      if (m[key] === epoch) return;
+      m[key] = epoch;
+      try { localStorage.setItem(STORAGE_KEY_TURMA_EPOCH, JSON.stringify(m)); } catch (e) {}
+    }
+
     // FASE 3: Transações Atômicas com Locks Otimistas para Turma e Catequizandos
     // removedIds: catequizandos removidos/transferidos de propósito; sem isso o merge "preserva quem só existe na nuvem" os ressuscitaria
     async function saveTurmaAlunosAtomic(key, localAlunos, modifiedAlunoId, removedIds) {
@@ -26390,6 +26457,11 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             }
 
             const cloudData = doc.data() || {};
+            if (cloudData.swapEpoch && getTurmaEpochs()[key] !== cloudData.swapEpoch) {
+              const e = new Error('dados desta turma estão desatualizados; recarregue a página');
+              e.code = 'turma-defasada';
+              throw e;
+            }
             const cloudAlunos = Array.isArray(cloudData.alunos) ? [...cloudData.alunos] : [];
             const mergedAlunos = [];
             const handledIds = new Set();
@@ -26495,6 +26567,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
               const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'SELECT');
 
               db[key] = cloudData.alunos;
+              setTurmaEpoch(key, cloudData.swapEpoch);
               try {
                 localStorage.setItem(STORAGE_KEY_ALUNOS, JSON.stringify(db));
               } catch (e) {}
@@ -26530,6 +26603,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
             const data = doc.data();
             if (data && Array.isArray(data.alunos) && data.alunos.length > 0) {
               db[doc.id] = data.alunos;
+              setTurmaEpoch(doc.id, data.swapEpoch);
               modified = true;
             }
           });
