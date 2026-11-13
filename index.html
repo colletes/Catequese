@@ -16182,6 +16182,17 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     }
 
     // Renderizar Tudo do Organograma Ativo
+    // O organograma mostra "Ver Alunos (N)" calculado ao desenhar: qualquer mudança nas listas de alunos
+    // (transferência, troca de turmas, dados vindos da nuvem) precisa redesenhá-lo se ele estiver visível.
+    let _timerAtualizaOrganograma = null;
+    function agendarAtualizacaoOrganograma() {
+      clearTimeout(_timerAtualizaOrganograma);
+      _timerAtualizaOrganograma = setTimeout(() => {
+        const marcador = document.getElementById('org-tree-header-title');
+        if (marcador && marcador.offsetParent !== null && typeof renderOrganogramaTree === 'function') renderOrganogramaTree();
+      }, 200);
+    }
+
     function renderOrganogramaAll() {
       syncMasterScheduleList();
       renderOrganogramaPills();
@@ -27521,6 +27532,7 @@ Santuário Imaculado Coração de Maria — Brasília/DF`;
     }
 
     function renderAlunosTable() {
+      agendarAtualizacaoOrganograma();
       const tbody = document.getElementById('alunos-table-body');
       if (!tbody) return;
 
